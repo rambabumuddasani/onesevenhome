@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import com.salesmanager.core.model.services.CompanyService;
 import com.salesmanager.core.model.services.WorkerRating;
 
-public interface WorkerServiceRepository extends JpaRepository<CompanyService,Integer> {
+public interface CompanyServiceRepository extends JpaRepository<CompanyService,Integer> {
 	
 	//@Query("select sw from ServicesWorker as sw inner join fetch sw.services s inner join fetch s.serviceWorkers swk where s.id = ?1")
 	@Query("select sw from Services s inner join s.serviceWorkers sw where s.id = ?1")

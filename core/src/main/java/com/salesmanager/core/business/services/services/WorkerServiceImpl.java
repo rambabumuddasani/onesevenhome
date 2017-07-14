@@ -16,7 +16,7 @@ import com.salesmanager.core.business.modules.services.WorkerRatingResponse;
 import com.salesmanager.core.business.modules.services.WorkerRatingVO;
 import com.salesmanager.core.business.modules.services.WorkerServiceResponse;
 import com.salesmanager.core.business.repositories.services.WorkerRatingRepository;
-import com.salesmanager.core.business.repositories.services.WorkerServiceRepository;
+import com.salesmanager.core.business.repositories.services.CompanyServiceRepository;
 import com.salesmanager.core.business.services.common.generic.SalesManagerEntityServiceImpl;
 import com.salesmanager.core.model.services.CompanyService;
 import com.salesmanager.core.model.services.WorkerRating;
@@ -25,13 +25,13 @@ import com.salesmanager.core.model.services.WorkerRating;
 public class WorkerServiceImpl extends SalesManagerEntityServiceImpl<Integer, CompanyService> implements WorkerService  {
 
 	@Inject
-	WorkerServiceRepository serviceWorkerRepository;
+	CompanyServiceRepository serviceWorkerRepository;
 	
 	@Inject
 	WorkerRatingRepository workerRatingRepository;
 
 	@Inject
-	public WorkerServiceImpl(WorkerServiceRepository repository) {
+	public WorkerServiceImpl(CompanyServiceRepository repository) {
 		super(repository);	
 		serviceWorkerRepository = repository;
 	}
