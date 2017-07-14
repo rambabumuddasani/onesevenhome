@@ -9,7 +9,7 @@ import com.salesmanager.core.model.services.WorkerRating;
 
 public interface WorkerRatingRepository extends JpaRepository<WorkerRating, Integer>  {
    
-	@Query("select workerRating from ServicesWorker servicesWorker inner join servicesWorker.workerRating workerRating where servicesWorker.id = ?1")
+	@Query("select workerRating from CompanyService companyService inner join companyService.workerRating workerRating where companyService.id = ?1")
 	List<WorkerRating> findByWorker(Integer workerId);
 
 
