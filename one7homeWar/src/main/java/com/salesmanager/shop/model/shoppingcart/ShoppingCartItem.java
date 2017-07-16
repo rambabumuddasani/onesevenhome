@@ -26,7 +26,11 @@ public class ShoppingCartItem extends ShopEntity implements Serializable {
 	private String subTotal;
 	
 	private List<ShoppingCartAttribute> shoppingCartAttributes;
+	private String customerId;	
 	
+	public void setCustomerId(String customerId) {
+		this.customerId = customerId;
+	}
 	public String getName() {
 		return name;
 	}
@@ -94,6 +98,10 @@ public class ShoppingCartItem extends ShopEntity implements Serializable {
 	}
 	public void setProductVirtual(boolean productVirtual) {
 		this.productVirtual = productVirtual;
+	}
+	public String getCustomerId() {
+		// TODO Auto-generated method stub
+		return customerId;
 	}
 
 

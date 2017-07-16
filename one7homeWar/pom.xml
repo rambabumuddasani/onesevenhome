@@ -38,13 +38,13 @@
 		</dependency>
 
 
-		<!-- sm-search -->
+		<!-- sm-search 
 		<dependency>
 			<groupId>com.rainiersoft</groupId>
 			<artifactId>search</artifactId>
 			<version>${e-construct.search.version}</version>
 		</dependency>
-
+		-->
     	<!--  Spring boot  -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

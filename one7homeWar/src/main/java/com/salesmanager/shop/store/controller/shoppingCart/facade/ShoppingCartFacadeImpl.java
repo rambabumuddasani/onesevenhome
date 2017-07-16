@@ -3,10 +3,32 @@
  */
 package com.salesmanager.shop.store.controller.shoppingCart.facade;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.inject.Inject;
+import javax.persistence.NoResultException;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
 import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.services.catalog.product.PricingService;
 import com.salesmanager.core.business.services.catalog.product.ProductService;
 import com.salesmanager.core.business.services.catalog.product.attribute.ProductAttributeService;
+import com.salesmanager.core.business.services.customer.CustomerService;
+import com.salesmanager.core.business.services.merchant.MerchantStoreService;
+import com.salesmanager.core.business.services.reference.language.LanguageService;
 import com.salesmanager.core.business.services.shoppingcart.ShoppingCartCalculationService;
 import com.salesmanager.core.business.services.shoppingcart.ShoppingCartService;
 import com.salesmanager.core.business.utils.ProductPriceUtils;
@@ -24,19 +46,6 @@ import com.salesmanager.shop.model.shoppingcart.ShoppingCartData;
 import com.salesmanager.shop.model.shoppingcart.ShoppingCartItem;
 import com.salesmanager.shop.populator.shoppingCart.ShoppingCartDataPopulator;
 import com.salesmanager.shop.utils.ImageFilePath;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import java.util.*;
 
 /**
  * @author Umesh Awasthi
@@ -95,15 +104,10 @@ public class ShoppingCartFacadeImpl
     {
 
         ShoppingCart cartModel = null;
-        if ( !StringUtils.isBlank( item.getCode() ) )
-        {
+        if ( customer != null && store != null ) {
             // get it from the db
-            cartModel = getShoppingCartModel( item.getCode(), store );
-            if ( cartModel == null )
-            {
-                cartModel = createCartModel( shoppingCartData.getCode(), store,customer );
-            }
-
+            //cartModel = getShoppingCartModel( item.getCode(), store ); // instead of code, get cart using customerId
+        	cartModel = getShoppingCartModel( customer,store);
         }
 
         if ( cartModel == null )
@@ -338,7 +342,8 @@ public class ShoppingCartFacadeImpl
         shoppingCartDataPopulator.setPricingService( pricingService );
         shoppingCartDataPopulator.setimageUtils(imageUtils);
         Language language = (Language) getKeyValue( Constants.LANGUAGE );
-        MerchantStore merchantStore = (MerchantStore) getKeyValue( Constants.MERCHANT_STORE );
+        MerchantStore merchantStore = (MerchantStore) getKeyValue( Constants.MERCHANT_STORE );        
+
         return shoppingCartDataPopulator.populate( shoppingCartModel, merchantStore, language );
     }
 
@@ -541,6 +546,32 @@ public class ShoppingCartFacadeImpl
 		shoppingCartService.saveOrUpdate(cart);
 		
 	}
+    // RAM PLEASE REMOVE THIS ONE ADD IT TO fILTER
+	
+	@Inject
+	private MerchantStoreService merchantService;
+	
+	@Inject
+	private LanguageService languageService;
+	
+	@Inject
+	private CustomerService customerService;
 
+	
+/*    public  MerchantStore getMerchantStore(){
+    	return    merchantService.getById(1);
+    }
+    public Language getLanguage(){
+    	Language lan = null;
+        try {
+			lan = languageService.getByCode("en");
+		} catch (ServiceException e) {
+			// TODO Auto-generated catch block
+			System.out.println("ServiceExceptin "+e);
+			e.printStackTrace();
+		}
+		return lan;    	
+    }
+*/
 
 }

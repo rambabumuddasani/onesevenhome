@@ -58,10 +58,8 @@ public class MiniCartController extends AbstractController{
 			
 		} catch(Exception e) {
 			LOG.error("Error while getting the shopping cart",e);
-		}
-		
+		}		
 		return null;
-
 	}
 
 	
