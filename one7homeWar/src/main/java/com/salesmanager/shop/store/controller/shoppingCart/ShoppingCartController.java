@@ -4,11 +4,13 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -370,8 +372,7 @@ public class ShoppingCartController extends AbstractController {
 	 * @return
 	 * @throws Exception
 	 */
-/*	@RequestMapping(value={"/removeShoppingCartItem.html"},   method = { RequestMethod.GET, RequestMethod.POST })
-
+	@RequestMapping(value={"removeShoppingCartItem"},   method = { RequestMethod.GET, RequestMethod.POST })
 	String removeShoppingCartItem(final Long lineItemId, final HttpServletRequest request, final HttpServletResponse response) throws Exception {
 
 
@@ -396,7 +397,7 @@ public class ShoppingCartController extends AbstractController {
 	    Language language = (Language)request.getAttribute(Constants.LANGUAGE);
 	    Customer customer = getSessionAttribute(  Constants.CUSTOMER, request );
         
-        *//** there must be a cart in the session **//*
+        /** there must be a cart in the session **/
         String cartCode = (String)request.getSession().getAttribute(Constants.SHOPPING_CART);
         
         if(StringUtils.isBlank(cartCode)) {
@@ -421,7 +422,7 @@ public class ShoppingCartController extends AbstractController {
 
 
 	}
-*/
+
 	/**
 	 * Update the quantity of an item in the Shopping Cart (AJAX exposed method)
 	 * @param request

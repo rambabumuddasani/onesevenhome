@@ -12,7 +12,7 @@
 	<artifactId>onesevenhome</artifactId>
 	<packaging>war</packaging>
 
-	<name>onesevenhome</name>
+	<name>one7homeWar</name>
 	<url>http://rainiersoft.com</url>
 
 	<properties>

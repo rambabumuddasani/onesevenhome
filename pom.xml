@@ -143,8 +143,8 @@
 	  	<module>core-modules</module>
 	  	<module>core</module>
 		<module>search</module>
-	  	<module>onesevenhome</module>
-		<module>canadapost</module>
+	  	<module>one7homeWar</module>
+		<!-- <module>canadapost</module> -->
 		<module>shipping-distance-module</module>
 	</modules>
 
