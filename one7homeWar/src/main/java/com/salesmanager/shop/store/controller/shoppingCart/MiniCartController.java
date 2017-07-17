@@ -37,10 +37,8 @@ public class MiniCartController extends AbstractController{
 	@Inject
 	private ShoppingCartFacade shoppingCartFacade;
 	
-	
-
-	
-	@RequestMapping(value={"/displayMiniCartByCode"},  method = { RequestMethod.GET, RequestMethod.POST })
+		
+	@RequestMapping(value={"/displayMiniCartByCode"},  method = { RequestMethod.GET})
 	public @ResponseBody ShoppingCartData displayMiniCart(final String shoppingCartCode, HttpServletRequest request, Model model){
 		
 		try {
@@ -62,7 +60,7 @@ public class MiniCartController extends AbstractController{
 	}
 
 	
-	@RequestMapping(value={"/removeMiniShoppingCartItem/shoppingCartCode/lineItemId"},   method = { RequestMethod.GET, RequestMethod.POST })
+	@RequestMapping(value={"/removeMiniShoppingCartItem/{shoppingCartCode}/{lineItemId}"},   method = { RequestMethod.GET})
 	public @ResponseBody ShoppingCartData removeShoppingCartItem(@PathParam("lineItemId") Long lineItemId, @PathParam("shoppingCartCode")final String shoppingCartCode, HttpServletRequest request) throws Exception {
 		Language language = (Language)request.getAttribute(Constants.LANGUAGE);
 		MerchantStore merchantStore = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
