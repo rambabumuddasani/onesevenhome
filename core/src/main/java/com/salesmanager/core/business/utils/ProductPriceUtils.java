@@ -233,23 +233,17 @@ public class ProductPriceUtils {
 		} catch (Exception e) {
 			LOGGER.error("Cannot create currency or locale instance for store " + store.getCode());
 		}
-
+		NumberFormat currencyInstance = NumberFormat.getCurrencyInstance(new Locale("en", "IN"));;
 		
-		NumberFormat currencyInstance = null;
-		
-		
-		if(store.isCurrencyFormatNational()) {
+/*		if(store.isCurrencyFormatNational()) {
 			currencyInstance = NumberFormat.getCurrencyInstance(locale);//national
 		} else {
 			currencyInstance = NumberFormat.getCurrencyInstance();//international
 		}
 	    currencyInstance.setCurrency(currency);
 		
-	    
-	    return currencyInstance.format(amount.doubleValue());
-		
-
-    }
+*/	    return currencyInstance.format(amount.doubleValue());
+	}
 	
 	
 	public String getFormatedAmountWithCurrency(Locale locale, com.salesmanager.core.model.reference.currency.Currency currency, BigDecimal amount) throws Exception {

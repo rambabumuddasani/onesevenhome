@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -115,7 +116,15 @@ public class ShoppingCartController extends AbstractController {
 	@Inject
 	private LanguageUtils languageUtils;
 	
+	@Inject
+	private MerchantStoreService merchantService;
 	
+	@Inject
+	private LanguageService languageService;
+	
+	@Inject
+	private CustomerService customerService;
+
 
 	/**
 	 * Add an item to the ShoppingCart (AJAX exposed method)
@@ -124,21 +133,18 @@ public class ShoppingCartController extends AbstractController {
 	 * @return
 	 * @throws Exception
 	 */
-    @RequestMapping(value={"/addShoppingCartItem"}, method=RequestMethod.POST)
-	public @ResponseBody
-	//ShoppingCartData addShoppingCartItem(@RequestBody final ShoppingCartItem item, final HttpServletRequest request) throws Exception {
-    		String addShoppingCartItem(@RequestBody final ShoppingCartItem item, final HttpServletRequest request) throws Exception {
-
+     @RequestMapping(value={"/addShoppingCartItem"}, method=RequestMethod.POST,produces = {MediaType.APPLICATION_JSON_VALUE})
+	 @ResponseBody
+	 public String addShoppingCartItem(@RequestBody final ShoppingCartItem item, final HttpServletRequest request) throws Exception {
+    	 
 		ShoppingCartData shoppingCart=null;
 
-
-
 		//Look in the HttpSession to see if a customer is logged in
-/*	    MerchantStore store = getSessionAttribute(Constants.MERCHANT_STORE, request);
+	    MerchantStore store = getSessionAttribute(Constants.MERCHANT_STORE, request);
 	    Language language = (Language)request.getAttribute(Constants.LANGUAGE);
 	    Customer customer = getSessionAttribute(  Constants.CUSTOMER, request );
-*/
-		MerchantStore store = getMerchantStore();
+
+/*		MerchantStore store = getMerchantStore();
 	    Language language = (Language)getLanguage();	    
 	    String customerId = item.getCustomerId(); // customer id
 	    Long customerIdLong = Long.parseLong(customerId);
@@ -147,7 +153,7 @@ public class ShoppingCartController extends AbstractController {
 	    request.setAttribute(Constants.LANGUAGE,language);
 	    request.setAttribute(Constants.MERCHANT_STORE,store);
 	    setSessionAttribute(  Constants.CUSTOMER,customer, request );
-
+*/
 	    
 		if(customer != null) {
 			com.salesmanager.core.model.shoppingcart.ShoppingCart customerCart = shoppingCartService.getByCustomer(customer);
@@ -207,22 +213,13 @@ public class ShoppingCartController extends AbstractController {
 		//from FinalPrice get final price which is the calculated price given attributes and discounts
 		//set each item price in ShoppingCartItem.price
 		int cartQtry = shoppingCart.getShoppingCartItems().size();
-		String response = "{'miniCartData':{'itemQty':"+cartQtry+"}}";
+		String response = "{'miniCartData':{'cartQuantity':"+cartQtry+"}}";
 		System.out.println("Response "+response);
 		System.out.println("shoppingCart "+shoppingCart.getShoppingCartItems());
-		//return shoppingCart;
 		return response;
 	}
 
-	@Inject
-	private MerchantStoreService merchantService;
 	
-	@Inject
-	private LanguageService languageService;
-	
-	@Inject
-	private CustomerService customerService;
-
     // RAM PLEASE REMOVE THIS ONE ADD IT TO fILTER
     public  MerchantStore getMerchantStore(){
     	return    merchantService.getById(1);

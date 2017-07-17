@@ -5,6 +5,7 @@ package com.salesmanager.shop.store.controller.shoppingCart;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.PathParam;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -28,7 +29,7 @@ import com.salesmanager.shop.store.controller.shoppingCart.facade.ShoppingCartFa
  *
  */
 @Controller
-@RequestMapping("/shop/cart")
+@RequestMapping("/cart")
 public class MiniCartController extends AbstractController{
 
 	private static final Logger LOG = LoggerFactory.getLogger(MiniCartController.class);
@@ -54,8 +55,6 @@ public class MiniCartController extends AbstractController{
 				cart = new ShoppingCartData();//create an empty cart
 			}
 			return cart;
-			
-			
 		} catch(Exception e) {
 			LOG.error("Error while getting the shopping cart",e);
 		}		
@@ -63,8 +62,8 @@ public class MiniCartController extends AbstractController{
 	}
 
 	
-	@RequestMapping(value={"/removeMiniShoppingCartItem"},   method = { RequestMethod.GET, RequestMethod.POST })
-	public @ResponseBody ShoppingCartData removeShoppingCartItem(Long lineItemId, final String shoppingCartCode, HttpServletRequest request, Model model) throws Exception {
+	@RequestMapping(value={"/removeMiniShoppingCartItem/shoppingCartCode/lineItemId"},   method = { RequestMethod.GET, RequestMethod.POST })
+	public @ResponseBody ShoppingCartData removeShoppingCartItem(@PathParam("lineItemId") Long lineItemId, @PathParam("shoppingCartCode")final String shoppingCartCode, HttpServletRequest request) throws Exception {
 		Language language = (Language)request.getAttribute(Constants.LANGUAGE);
 		MerchantStore merchantStore = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
 		ShoppingCartData cart =  shoppingCartFacade.getShoppingCartData(null, merchantStore, shoppingCartCode);

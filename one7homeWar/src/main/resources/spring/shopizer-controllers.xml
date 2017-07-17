@@ -59,13 +59,12 @@
 		<!-- Changes the locale when a 'locale' request parameter is sent; e.g. /?locale=de -->    
 		<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"/>
 		
-<!-- 		 <mvc:interceptor>
-  			<mvc:mapping path="/shop/**"/>
+ 		 <mvc:interceptor>
+  			<mvc:mapping path="/**"/>
   			<bean class="com.salesmanager.shop.filter.StoreFilter"/>
  		</mvc:interceptor>
  		
- 		
- 		<mvc:interceptor>
+<!-- 		<mvc:interceptor>
   			<mvc:mapping path="/customer/**"/>
   			<bean class="com.salesmanager.shop.filter.StoreFilter"/>
  		</mvc:interceptor>

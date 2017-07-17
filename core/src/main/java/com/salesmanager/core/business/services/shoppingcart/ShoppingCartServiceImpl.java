@@ -281,25 +281,6 @@ public class ShoppingCartServiceImpl extends SalesManagerEntityServiceImpl<Long,
 		Validate.notNull(product.getMerchantStore(), "Product.merchantStore should not be null");
 
 		ShoppingCartItem item = new ShoppingCartItem(product);
-
-		// Set<ProductAttribute> productAttributes = product.getAttributes();
-		// Set<ShoppingCartAttributeItem> attributesList = new
-		// HashSet<ShoppingCartAttributeItem>();
-		// if(!CollectionUtils.isEmpty(productAttributes)) {
-
-		// for(ProductAttribute productAttribute : productAttributes) {
-		// ShoppingCartAttributeItem attributeItem = new
-		// ShoppingCartAttributeItem();
-		// attributeItem.setShoppingCartItem(item);
-		// attributeItem.setProductAttribute(productAttribute);
-		// attributeItem.setProductAttributeId(productAttribute.getId());
-		// attributesList.add(attributeItem);
-
-		// }
-
-		// item.setAttributes(attributesList);
-		// }
-
 		item.setProductVirtual(product.isProductVirtual());
 
 		// set item price
