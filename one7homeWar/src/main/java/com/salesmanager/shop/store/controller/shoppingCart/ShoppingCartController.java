@@ -4,30 +4,21 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.salesmanager.core.business.exception.ServiceException;
-import com.salesmanager.core.business.services.catalog.product.PricingService;
-import com.salesmanager.core.business.services.catalog.product.ProductService;
-import com.salesmanager.core.business.services.catalog.product.attribute.ProductAttributeService;
-import com.salesmanager.core.business.services.customer.CustomerService;
-import com.salesmanager.core.business.services.merchant.MerchantStoreService;
-import com.salesmanager.core.business.services.order.OrderService;
-import com.salesmanager.core.business.services.reference.language.LanguageService;
 import com.salesmanager.core.business.services.shoppingcart.ShoppingCartService;
-import com.salesmanager.core.business.utils.ProductPriceUtils;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
@@ -36,8 +27,6 @@ import com.salesmanager.shop.controller.AbstractController;
 import com.salesmanager.shop.model.shoppingcart.ShoppingCartData;
 import com.salesmanager.shop.model.shoppingcart.ShoppingCartItem;
 import com.salesmanager.shop.store.controller.shoppingCart.facade.ShoppingCartFacade;
-import com.salesmanager.shop.utils.LabelUtils;
-import com.salesmanager.shop.utils.LanguageUtils;
 
 
 /**
@@ -89,41 +78,14 @@ import com.salesmanager.shop.utils.LanguageUtils;
 public class ShoppingCartController extends AbstractController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ShoppingCartController.class);
-	@Inject
-	private ProductService productService;
-
-	@Inject
-	private ProductAttributeService productAttributeService;
-
-	@Inject
-	private PricingService pricingService;
-
-	@Inject
-	private OrderService orderService;
 
 	@Inject
 	private ShoppingCartService shoppingCartService;
 
-	@Inject
-	private ProductPriceUtils productPriceUtils;
 
 	@Inject
 	private ShoppingCartFacade shoppingCartFacade;
-	
-	@Inject
-	private LabelUtils messages;
-	
-	@Inject
-	private LanguageUtils languageUtils;
-	
-	@Inject
-	private MerchantStoreService merchantService;
-	
-	@Inject
-	private LanguageService languageService;
-	
-	@Inject
-	private CustomerService customerService;
+
 
 
 	/**
@@ -133,43 +95,23 @@ public class ShoppingCartController extends AbstractController {
 	 * @return
 	 * @throws Exception
 	 */
-     @RequestMapping(value={"/addShoppingCartItem"}, method=RequestMethod.POST,produces = {MediaType.APPLICATION_JSON_VALUE})
-	 @ResponseBody
-	 public String addShoppingCartItem(@RequestBody final ShoppingCartItem item, final HttpServletRequest request) throws Exception {
-    	 
+	@RequestMapping(value={"/addShoppingCartItem"}, method=RequestMethod.POST,produces = {MediaType.APPLICATION_JSON_VALUE})
+	@ResponseBody
+	public String addShoppingCartItem(@RequestBody final ShoppingCartItem item, final HttpServletRequest request) throws Exception {
+
 		ShoppingCartData shoppingCart=null;
 
 		//Look in the HttpSession to see if a customer is logged in
-	    MerchantStore store = getSessionAttribute(Constants.MERCHANT_STORE, request);
-	    Language language = (Language)request.getAttribute(Constants.LANGUAGE);
-	    Customer customer = getSessionAttribute(  Constants.CUSTOMER, request );
+		MerchantStore store = getSessionAttribute(Constants.MERCHANT_STORE, request);
+		Language language = (Language)request.getAttribute(Constants.LANGUAGE);
+		Customer customer = getSessionAttribute(  Constants.CUSTOMER, request );
 
-/*		MerchantStore store = getMerchantStore();
-	    Language language = (Language)getLanguage();	    
-	    String customerId = item.getCustomerId(); // customer id
-	    Long customerIdLong = Long.parseLong(customerId);
-	    Customer customer = customerService.getById(customerIdLong);
-	    
-	    request.setAttribute(Constants.LANGUAGE,language);
-	    request.setAttribute(Constants.MERCHANT_STORE,store);
-	    setSessionAttribute(  Constants.CUSTOMER,customer, request );
-*/
-	    
 		if(customer != null) {
 			com.salesmanager.core.model.shoppingcart.ShoppingCart customerCart = shoppingCartService.getByCustomer(customer);
 			if(customerCart!=null) {
 				shoppingCart = shoppingCartFacade.getShoppingCartData( customerCart);
-				//TODO if shoppingCart != null ?? merge
-				//TODO maybe they have the same code
-				//TODO what if codes are different (-- merge carts, keep the latest one, delete the oldest, switch codes --)
 			}
 		}
-
-		
-/*		if(shoppingCart==null && !StringUtils.isBlank(item.getCode())) {
-			shoppingCart = shoppingCartFacade.getShoppingCartData(item.getCode(), store);
-		}
-*/
 
 		//if shoppingCart is null create a new one
 		if(shoppingCart==null) {
@@ -180,38 +122,7 @@ public class ShoppingCartController extends AbstractController {
 
 		shoppingCart = shoppingCartFacade.addItemsToShoppingCart( shoppingCart, item, store,language,customer );
 		request.getSession().setAttribute(Constants.SHOPPING_CART, shoppingCart.getCode());
-
-
-		/******************************************************/
-		//TODO validate all of this
-
-		//if a customer exists in http session
-			//if a cart does not exist in httpsession
-				//get cart from database
-					//if a cart exist in the database add the item to the cart and put cart in httpsession and save to the database
-					//else a cart does not exist in the database, create a new one, set the customer id, set the cart in the httpsession
-			//else a cart exist in the httpsession, add item to httpsession cart and save to the database
-		//else no customer in httpsession
-			//if a cart does not exist in httpsession
-				//create a new one, set the cart in the httpsession
-			//else a cart exist in the httpsession, add item to httpsession cart and save to the database
-
-
-		/**
-		 *  Tested with the following :
-		 * 	what if you add item in the shopping cart as an anonymous user
-		 *  later on you log in to process with checkout but the system retrieves a previous shopping cart saved in the database for that customer
-		 *  in that case we need to synchronize both carts and the original one (the one with the customer id) supercedes the current cart in session
-		 *  the system will have to deal with the original one and remove the latest
-		 */
-
-
-		//**more implementation details
-		//calculate the price of each item by using ProductPriceUtils in sm-core
-		//for each product in the shopping cart get the product
-		//invoke productPriceUtils.getFinalProductPrice
-		//from FinalPrice get final price which is the calculated price given attributes and discounts
-		//set each item price in ShoppingCartItem.price
+		
 		int cartQtry = shoppingCart.getShoppingCartItems().size();
 		String response = "{'miniCartData':{'cartQuantity':"+cartQtry+"}}";
 		System.out.println("Response "+response);
@@ -219,245 +130,50 @@ public class ShoppingCartController extends AbstractController {
 		return response;
 	}
 
-	
-    // RAM PLEASE REMOVE THIS ONE ADD IT TO fILTER
-    public  MerchantStore getMerchantStore(){
-    	return    merchantService.getById(1);
-    }
-    public Language getLanguage(){
-    	Language lan = null;
-        try {
-			lan = languageService.getByCode("en");
-		} catch (ServiceException e) {
-			// TODO Auto-generated catch block
-			System.out.println("ServiceExceptin "+e);
-			e.printStackTrace();
-		}
-		return lan;    	
-    }
+	@RequestMapping(value={"/displayMiniCartByCode"},  method = { RequestMethod.GET, RequestMethod.POST })
+	public @ResponseBody ShoppingCartData displayMiniCart(final String shoppingCartCode, HttpServletRequest request, Model model){
 
-    
-	/**
-	 * Retrieves a Shopping cart from the database (regular shopping cart)
-	 * @param model
-	 * @param request
-	 * @param response
-	 * @return
-	 * @throws Exception
-	 */
-/*    @RequestMapping( value = { "/shoppingCart.html" }, method = RequestMethod.GET )
-    public String displayShoppingCart( final Model model, final HttpServletRequest request, final HttpServletResponse response, final Locale locale )
-        throws Exception
-    {
-
-        LOG.debug( "Starting to calculate shopping cart..." );
-        
-        
-		//meta information
-		PageInformation pageInformation = new PageInformation();
-		pageInformation.setPageTitle(messages.getMessage("label.cart.placeorder", locale));
-		request.setAttribute(Constants.REQUEST_PAGE_INFORMATION, pageInformation);
-        
-        
-	    MerchantStore store = (MerchantStore) request.getAttribute(Constants.MERCHANT_STORE);
-	    Customer customer = getSessionAttribute(  Constants.CUSTOMER, request );
-
-        *//** there must be a cart in the session **//*
-        String cartCode = (String)request.getSession().getAttribute(Constants.SHOPPING_CART);
-        
-        if(StringUtils.isBlank(cartCode)) {
-        	//display empty cart
-            StringBuilder template =
-                    new StringBuilder().append( ControllerConstants.Tiles.ShoppingCart.shoppingCart ).append( "." ).append( store.getStoreTemplate() );
-                return template.toString();
-        }
-                
-        ShoppingCartData shoppingCart = shoppingCartFacade.getShoppingCartData(customer, store, cartCode);
-        
-        Language lang = languageUtils.getRequestLanguage(request, response);
-        //Filter unavailables
-        List<ShoppingCartItem> unavailables = new ArrayList<ShoppingCartItem>();
-        List<ShoppingCartItem> availables = new ArrayList<ShoppingCartItem>();
-        //Take out items no more available
-        List<ShoppingCartItem> items = shoppingCart.getShoppingCartItems();
-        for(ShoppingCartItem item : items) {
-        	String code = item.getProductCode();
-        	Product p =productService.getByCode(code, lang);
-        	if(!p.isAvailable()) {
-        		unavailables.add(item);
-        	} else {
-        		availables.add(item);
-        	}
-        	
-        }
-        shoppingCart.setShoppingCartItems(availables);
-        shoppingCart.setUnavailables(unavailables);
-        
-
-
-        model.addAttribute( "cart", shoppingCart );
-        
-        
-        
-        
-
-        *//** template **//*
-        StringBuilder template =
-            new StringBuilder().append( ControllerConstants.Tiles.ShoppingCart.shoppingCart ).append( "." ).append( store.getStoreTemplate() );
-        return template.toString();
-
-    }
-*/    
-    
-/*	@RequestMapping(value={"/shoppingCartByCode"},  method = { RequestMethod.GET })
-	public String displayShoppingCart(@ModelAttribute String shoppingCartCode, final Model model, HttpServletRequest request, HttpServletResponse response, final Locale locale) throws Exception{
-
+		try {
 			MerchantStore merchantStore = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
 			Customer customer = getSessionAttribute(  Constants.CUSTOMER, request );
-			
-			if(StringUtils.isBlank(shoppingCartCode)) {
-				return "redirect:/shop";
-			}
-			
 			ShoppingCartData cart =  shoppingCartFacade.getShoppingCartData(customer,merchantStore,shoppingCartCode);
-			if(cart==null) {
-				return "redirect:/shop";
+			if(cart!=null) {
+				request.getSession().setAttribute(Constants.SHOPPING_CART, cart.getCode());
 			}
-			
-			
-	        Language lang = languageUtils.getRequestLanguage(request, response);
-	        //Filter unavailables
-	        List<ShoppingCartItem> unavailables = new ArrayList<ShoppingCartItem>();
-	        List<ShoppingCartItem> availables = new ArrayList<ShoppingCartItem>();
-	        //Take out items no more available
-	        List<ShoppingCartItem> items = cart.getShoppingCartItems();
-	        for(ShoppingCartItem item : items) {
-	        	String code = item.getProductCode();
-	        	Product p =productService.getByCode(code, lang);
-	        	if(!p.isAvailable()) {
-	        		unavailables.add(item);
-	        	} else {
-	        		availables.add(item);
-	        	}
-	        	
-	        }
-	        cart.setShoppingCartItems(availables);
-	        cart.setUnavailables(unavailables);
-			
-			
-			//meta information
-			PageInformation pageInformation = new PageInformation();
-			pageInformation.setPageTitle(messages.getMessage("label.cart.placeorder", locale));
-			request.setAttribute(Constants.REQUEST_PAGE_INFORMATION, pageInformation);
-			request.getSession().setAttribute(Constants.SHOPPING_CART, cart.getCode());
-	        model.addAttribute("cart", cart);
-
-	        *//** template **//*
-	        StringBuilder template =
-	            new StringBuilder().append( ControllerConstants.Tiles.ShoppingCart.shoppingCart ).append( "." ).append( merchantStore.getStoreTemplate() );
-	        return template.toString();
-			
-
-
+			if(cart==null) {
+				request.getSession().removeAttribute(Constants.SHOPPING_CART);//make sure there is no cart here
+				cart = new ShoppingCartData();//create an empty cart
+			}
+			return cart;
+		} catch(Exception e) {
+			LOG.error("Error while getting the shopping cart",e);
+		}		
+		return null;
 	}
-*/
 
-	/**
-	 * Removes an item from the Shopping Cart (AJAX exposed method)
-	 * @param request
-	 * @param response
-	 * @return
-	 * @throws Exception
-	 */
-	@RequestMapping(value={"removeShoppingCartItem"},   method = { RequestMethod.GET, RequestMethod.POST })
-	String removeShoppingCartItem(final Long lineItemId, final HttpServletRequest request, final HttpServletResponse response) throws Exception {
+	//http://localhost:8080/cart/removeMiniShoppingCartItem/3c9cb185cc4c42818790ec73e3e45693/359?userId=1
+	@RequestMapping(value={"/removeMiniShoppingCartItem/{shoppingCartCode}/{lineItemId}"},   method = { RequestMethod.GET})
+	public @ResponseBody ShoppingCartData removeShoppingCartItem(@PathVariable String shoppingCartCode,
+			@PathVariable Long lineItemId, HttpServletRequest request) throws Exception {
+		Language language = (Language)request.getAttribute(Constants.LANGUAGE);
+		MerchantStore merchantStore = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
+		ShoppingCartData cart =  shoppingCartFacade.getShoppingCartData(null, merchantStore, shoppingCartCode);
+		if(cart==null) {
+			return null;
+		}
+		ShoppingCartData shoppingCartData=shoppingCartFacade.removeCartItem(lineItemId, cart.getCode(), merchantStore,language);
 
 
-
-		//Looks in the HttpSession to see if a customer is logged in
-
-		//get any shopping cart for this user
-
-		//** need to check if the item has property, similar items may exist but with different properties
-		//String attributes = request.getParameter("attribute");//attributes id are sent as 1|2|5|
-		//this will help with hte removal of the appropriate item
-
-		//remove the item shoppingCartService.create
-
-		//create JSON representation of the shopping cart
-
-		//return the JSON structure in AjaxResponse
-
-		//store the shopping cart in the http session
-
-	    MerchantStore store = getSessionAttribute(Constants.MERCHANT_STORE, request);
-	    Language language = (Language)request.getAttribute(Constants.LANGUAGE);
-	    Customer customer = getSessionAttribute(  Constants.CUSTOMER, request );
-        
-        /** there must be a cart in the session **/
-        String cartCode = (String)request.getSession().getAttribute(Constants.SHOPPING_CART);
-        
-        if(StringUtils.isBlank(cartCode)) {
-        	return "redirect:/shop";
-        }
-                
-        ShoppingCartData shoppingCart = shoppingCartFacade.getShoppingCartData(customer, store, cartCode);
-                
-		ShoppingCartData shoppingCartData=shoppingCartFacade.removeCartItem(lineItemId, shoppingCart.getCode(),store,language);
-
-		
 		if(CollectionUtils.isEmpty(shoppingCartData.getShoppingCartItems())) {
-			shoppingCartFacade.deleteShoppingCart(shoppingCartData.getId(), store);
-			return "redirect:/shop";
-		}
-		
-		
-		
-		return Constants.REDIRECT_PREFIX + "/shop/cart/shoppingCart.html";
-
-
-
-
-	}
-
-	/**
-	 * Update the quantity of an item in the Shopping Cart (AJAX exposed method)
-	 * @param request
-	 * @param response
-	 * @return
-	 * @throws Exception
-	 */
-/*	@RequestMapping(value={"/updateShoppingCartItem.html"},  method = { RequestMethod.POST })
-	public @ResponseBody String updateShoppingCartItem( @RequestBody final ShoppingCartItem[] shoppingCartItems, final HttpServletRequest request, final  HttpServletResponse response)  {
-
-		AjaxResponse ajaxResponse = new AjaxResponse();
-		
-		
-		
-	    MerchantStore store = getSessionAttribute(Constants.MERCHANT_STORE, request);
-	    Language language = (Language)request.getAttribute(Constants.LANGUAGE);
-
-        
-        String cartCode = (String)request.getSession().getAttribute(Constants.SHOPPING_CART);
-        
-        if(StringUtils.isBlank(cartCode)) {
-        	return "redirect:/shop";
-        }
-        
-        try {
-        	List<ShoppingCartItem> items = Arrays.asList(shoppingCartItems);
-			ShoppingCartData shoppingCart = shoppingCartFacade.updateCartItems(items, store, language);
-			ajaxResponse.setStatus(AjaxResponse.RESPONSE_STATUS_SUCCESS);
-
-		} catch (Exception e) {
-			LOG.error("Excption while updating cart" ,e);
-			ajaxResponse.setStatus(AjaxResponse.RESPONSE_STATUS_FAIURE);
+			shoppingCartFacade.deleteShoppingCart(shoppingCartData.getId(), merchantStore);
+			request.getSession().removeAttribute(Constants.SHOPPING_CART);
+			return null;
 		}
 
-        	return ajaxResponse.toJSONString();
 
+		request.getSession().setAttribute(Constants.SHOPPING_CART, cart.getCode());
 
-	}
-*/
-
+		LOG.debug("removed item" + lineItemId + "from cart");
+		return shoppingCartData;
+	}	
 }

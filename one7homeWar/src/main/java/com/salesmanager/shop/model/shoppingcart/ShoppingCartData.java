@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.salesmanager.shop.model.ShopEntity;
 import com.salesmanager.shop.model.order.OrderTotal;
 
@@ -18,14 +19,20 @@ public class ShoppingCartData extends ShopEntity implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	@JsonIgnore
 	private String message;
 	private String code;
 	private int quantity;
 	private String total;
+	
+	@JsonIgnore
 	private String subTotal;
 	
-	private List<OrderTotal> totals;//calculated from OrderTotalSummary
+	@JsonIgnore
+	private List<OrderTotal> totals;//calculated from OrderTotalSummary	
+	
 	private List<ShoppingCartItem> shoppingCartItems;
+	@JsonIgnore
 	private List<ShoppingCartItem> unavailables;
 	
 	

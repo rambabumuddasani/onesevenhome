@@ -5,13 +5,13 @@ package com.salesmanager.shop.store.controller.shoppingCart;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.PathParam;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -37,9 +37,7 @@ public class MiniCartController extends AbstractController{
 	@Inject
 	private ShoppingCartFacade shoppingCartFacade;
 	
-	
-
-	
+		
 	@RequestMapping(value={"/displayMiniCartByCode"},  method = { RequestMethod.GET, RequestMethod.POST })
 	public @ResponseBody ShoppingCartData displayMiniCart(final String shoppingCartCode, HttpServletRequest request, Model model){
 		
@@ -62,8 +60,9 @@ public class MiniCartController extends AbstractController{
 	}
 
 	
-	@RequestMapping(value={"/removeMiniShoppingCartItem/shoppingCartCode/lineItemId"},   method = { RequestMethod.GET, RequestMethod.POST })
-	public @ResponseBody ShoppingCartData removeShoppingCartItem(@PathParam("lineItemId") Long lineItemId, @PathParam("shoppingCartCode")final String shoppingCartCode, HttpServletRequest request) throws Exception {
+	@RequestMapping(value={"/removeMiniShoppingCartItem/{shoppingCartCode}/{lineItemId}"},   method = { RequestMethod.GET, RequestMethod.POST })
+	public @ResponseBody ShoppingCartData removeShoppingCartItem(@PathVariable String shoppingCartCode,
+			@PathVariable Long lineItemId, HttpServletRequest request) throws Exception {
 		Language language = (Language)request.getAttribute(Constants.LANGUAGE);
 		MerchantStore merchantStore = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
 		ShoppingCartData cart =  shoppingCartFacade.getShoppingCartData(null, merchantStore, shoppingCartCode);
@@ -84,7 +83,5 @@ public class MiniCartController extends AbstractController{
 		
 		LOG.debug("removed item" + lineItemId + "from cart");
 		return shoppingCartData;
-	}
-	
-	
+	}	
 }

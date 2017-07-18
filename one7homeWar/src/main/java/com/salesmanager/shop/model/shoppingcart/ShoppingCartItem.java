@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.salesmanager.shop.model.ShopEntity;
 
 
@@ -16,16 +17,21 @@ public class ShoppingCartItem extends ShopEntity implements Serializable {
 	private String name;
 	private String price;
 	private String image;
+	@JsonIgnore
 	private BigDecimal productPrice;
 	private int quantity;
 	private long productId;
 	private String productCode;
 	private String code;//shopping cart code
+	@JsonIgnore
 	private boolean productVirtual;
 	
 	private String subTotal;
 	
+	@JsonIgnore
 	private List<ShoppingCartAttribute> shoppingCartAttributes;
+	
+	@JsonIgnore
 	private String customerId;	
 	
 	public void setCustomerId(String customerId) {
