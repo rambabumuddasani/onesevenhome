@@ -1,55 +1,25 @@
 package com.salesmanager.shop.filter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.salesmanager.core.business.services.catalog.category.CategoryService;
-import com.salesmanager.core.business.services.catalog.product.ProductService;
-import com.salesmanager.core.business.services.content.ContentService;
-import com.salesmanager.core.business.services.customer.CustomerService;
-import com.salesmanager.core.business.services.merchant.MerchantStoreService;
-import com.salesmanager.core.business.services.reference.language.LanguageService;
-import com.salesmanager.core.business.services.system.MerchantConfigurationService;
-import com.salesmanager.core.business.utils.CacheUtils;
-import com.salesmanager.core.business.utils.CoreConfiguration;
-import com.salesmanager.core.model.catalog.category.Category;
-import com.salesmanager.core.model.catalog.category.CategoryDescription;
-import com.salesmanager.core.model.catalog.product.Product;
-import com.salesmanager.core.model.content.Content;
-import com.salesmanager.core.model.content.ContentDescription;
-import com.salesmanager.core.model.content.ContentType;
-import com.salesmanager.core.model.customer.Customer;
-import com.salesmanager.core.model.merchant.MerchantStore;
-import com.salesmanager.core.model.reference.language.Language;
-import com.salesmanager.core.model.system.MerchantConfig;
-import com.salesmanager.core.model.system.MerchantConfiguration;
-import com.salesmanager.core.model.system.MerchantConfigurationType;
-import com.salesmanager.shop.constants.Constants;
-import com.salesmanager.shop.model.catalog.category.ReadableCategory;
-import com.salesmanager.shop.model.customer.Address;
-import com.salesmanager.shop.model.customer.AnonymousCustomer;
-import com.salesmanager.shop.model.shop.Breadcrumb;
-import com.salesmanager.shop.model.shop.BreadcrumbItem;
-import com.salesmanager.shop.model.shop.BreadcrumbItemType;
-import com.salesmanager.shop.model.shop.PageInformation;
-import com.salesmanager.shop.populator.catalog.ReadableCategoryPopulator;
-import com.salesmanager.shop.store.controller.category.facade.CategoryFacade;
-import com.salesmanager.shop.utils.GeoLocationUtils;
-import com.salesmanager.shop.utils.LabelUtils;
-import com.salesmanager.shop.utils.LanguageUtils;
-import com.salesmanager.shop.utils.WebApplicationCacheUtils;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import java.util.Locale;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+
+import com.salesmanager.core.business.services.customer.CustomerService;
+import com.salesmanager.core.business.services.merchant.MerchantStoreService;
+import com.salesmanager.core.business.services.reference.language.LanguageService;
+import com.salesmanager.core.model.customer.Customer;
+import com.salesmanager.core.model.merchant.MerchantStore;
+import com.salesmanager.core.model.reference.language.Language;
+import com.salesmanager.shop.constants.Constants;
+import com.salesmanager.shop.utils.LanguageUtils;
 
 /**
  * 

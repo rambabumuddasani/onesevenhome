@@ -1,6 +1,8 @@
 package com.salesmanager.core.business.utils;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Currency;
@@ -215,6 +217,8 @@ public class ProductPriceUtils {
 	 * @param amount
 	 * @return String
 	 * @throws Exception
+	 * 
+	 * updated to remove currenty symbol in price
 	 */
 	public String getStoreFormatedAmountWithCurrency(MerchantStore store, BigDecimal amount) throws Exception {
 		if(amount==null) {
@@ -233,16 +237,12 @@ public class ProductPriceUtils {
 		} catch (Exception e) {
 			LOGGER.error("Cannot create currency or locale instance for store " + store.getCode());
 		}
-		NumberFormat currencyInstance = NumberFormat.getCurrencyInstance(new Locale("en", "IN"));;
-		
-/*		if(store.isCurrencyFormatNational()) {
-			currencyInstance = NumberFormat.getCurrencyInstance(locale);//national
-		} else {
-			currencyInstance = NumberFormat.getCurrencyInstance();//international
-		}
-	    currencyInstance.setCurrency(currency);
-		
-*/	    return currencyInstance.format(amount.doubleValue());
+		DecimalFormat currencyFormaterInstance = (DecimalFormat)NumberFormat.getCurrencyInstance(new Locale("en", "IN"));; // Format currency without currency symbol
+
+		DecimalFormatSymbols symbols = currencyFormaterInstance.getDecimalFormatSymbols();
+		symbols.setCurrencySymbol(""); // Don't use null.
+		currencyFormaterInstance.setDecimalFormatSymbols(symbols);
+		return currencyFormaterInstance.format(amount.doubleValue());
 	}
 	
 	
@@ -251,18 +251,13 @@ public class ProductPriceUtils {
 			return "";
 		}
 
-		Currency curr = currency.getCurrency();
-
-
-		
+		Currency curr = currency.getCurrency();		
 		NumberFormat currencyInstance = null;
 
 		currencyInstance = NumberFormat.getCurrencyInstance(locale);
 		currencyInstance.setCurrency(curr);
 	    return currencyInstance.format(amount.doubleValue());
-		
-
-    }
+	}
 	
 
 	

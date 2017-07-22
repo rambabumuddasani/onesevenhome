@@ -27,6 +27,7 @@ import com.salesmanager.shop.controller.AbstractController;
 import com.salesmanager.shop.model.shoppingcart.ShoppingCartData;
 import com.salesmanager.shop.model.shoppingcart.ShoppingCartItem;
 import com.salesmanager.shop.store.controller.shoppingCart.facade.ShoppingCartFacade;
+import com.salesmanager.shop.store.model.shoppingCart.ShoppingCartItemResponse;
 
 
 /**
@@ -97,7 +98,7 @@ public class ShoppingCartController extends AbstractController {
 	 */
 	@RequestMapping(value={"/addShoppingCartItem"}, method=RequestMethod.POST,produces = {MediaType.APPLICATION_JSON_VALUE})
 	@ResponseBody
-	public String addShoppingCartItem(@RequestBody final ShoppingCartItem item, final HttpServletRequest request) throws Exception {
+	public ShoppingCartItemResponse addShoppingCartItem(@RequestBody final ShoppingCartItem item, final HttpServletRequest request) throws Exception {
 
 		ShoppingCartData shoppingCart=null;
 
@@ -122,15 +123,28 @@ public class ShoppingCartController extends AbstractController {
 
 		shoppingCart = shoppingCartFacade.addItemsToShoppingCart( shoppingCart, item, store,language,customer );
 		request.getSession().setAttribute(Constants.SHOPPING_CART, shoppingCart.getCode());
-		
-		int cartQtry = shoppingCart.getShoppingCartItems().size();
-		String response = "{'miniCartData':{'cartQuantity':"+cartQtry+"}}";
+		System.out.println("request URL "+ request.getRequestURL());
+		System.out.println("URI "+request.getRequestURI());
+		int cartQty = shoppingCart.getShoppingCartItems().size();
+/*		String response = "{'miniCartData':{'cartQuantity':"+cartQtry+"}}";
 		System.out.println("Response "+response);
 		System.out.println("shoppingCart "+shoppingCart.getShoppingCartItems());
-		return response;
+*/		System.out.println(" DisplayCart Link "+getNewResourceURL(request, "cart/addShoppingCartItem"));
+		ShoppingCartItemResponse shoppingCartItemResponse = new ShoppingCartItemResponse();
+		shoppingCartItemResponse.setCartQuantity(cartQty);
+		return shoppingCartItemResponse;
+	}
+	
+	private String getNewResourceURL(HttpServletRequest request,String newResourceURL){
+		StringBuilder newURL =  new StringBuilder();
+		String url = request.getRequestURL().toString();
+		String baseURL = url.substring(0, url.length() - request.getRequestURI().length()) + request.getContextPath() + "/";
+		newURL.append(baseURL).append(newResourceURL);
+		return newURL.toString();
 	}
 
-	@RequestMapping(value={"/displayMiniCartByCode"},  method = { RequestMethod.GET, RequestMethod.POST })
+	//  http://localhost:8080/shop/cart/displayCart?userId=1
+	@RequestMapping(value={"/displayCart"},  method = { RequestMethod.GET, RequestMethod.POST })
 	public @ResponseBody ShoppingCartData displayMiniCart(final String shoppingCartCode, HttpServletRequest request, Model model){
 
 		try {
@@ -151,8 +165,8 @@ public class ShoppingCartController extends AbstractController {
 		return null;
 	}
 
-	//http://localhost:8080/cart/removeMiniShoppingCartItem/3c9cb185cc4c42818790ec73e3e45693/359?userId=1
-	@RequestMapping(value={"/removeMiniShoppingCartItem/{shoppingCartCode}/{lineItemId}"},   method = { RequestMethod.GET})
+	//http://localhost:8080/cart/removeShoppingCartItem/3c9cb185cc4c42818790ec73e3e45693/359?userId=1
+	@RequestMapping(value={"/removeShoppingCartItem/{shoppingCartCode}/{lineItemId}"},   method = { RequestMethod.GET})
 	public @ResponseBody ShoppingCartData removeShoppingCartItem(@PathVariable String shoppingCartCode,
 			@PathVariable Long lineItemId, HttpServletRequest request) throws Exception {
 		Language language = (Language)request.getAttribute(Constants.LANGUAGE);
