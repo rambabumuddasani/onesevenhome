@@ -533,54 +533,68 @@ public class ProductPriceUtils {
 
 		Date today = new Date();
 		//calculate discount price
-		boolean hasDiscount = false;
+		boolean hasSpecialDiscountAmount = false;
 		if(price.getProductPriceSpecialStartDate()!=null
 				|| price.getProductPriceSpecialEndDate()!=null) {
 			
 			
-			if(price.getProductPriceSpecialStartDate()!=null) {
+			if(price.getProductPriceSpecialStartDate()!=null) 
+			{
 				if(price.getProductPriceSpecialStartDate().before(today)) {
 					if(price.getProductPriceSpecialEndDate()!=null) {
 							if(price.getProductPriceSpecialEndDate().after(today)) {
-								hasDiscount = true;
+								hasSpecialDiscountAmount = true;
 								fPrice = price.getProductPriceSpecialAmount();
 								finalPrice.setDiscountEndDate(price.getProductPriceSpecialEndDate());
 							}
-					} 
-						
+					}
 				}
 			}
 			
-			
-			if(!hasDiscount && price.getProductPriceSpecialStartDate()==null && price.getProductPriceSpecialEndDate()!=null) {
+			if(!hasSpecialDiscountAmount && price.getProductPriceSpecialStartDate()==null && price.getProductPriceSpecialEndDate()!=null) {
 				if(price.getProductPriceSpecialEndDate().after(today)) {
-					hasDiscount = true;
+					hasSpecialDiscountAmount = true;
 					fPrice = price.getProductPriceSpecialAmount();
 					finalPrice.setDiscountEndDate(price.getProductPriceSpecialEndDate());
 				}
 			}
+			
 		} else {
 			if(price.getProductPriceSpecialAmount()!=null && price.getProductPriceSpecialAmount().doubleValue()>0) {
-				hasDiscount = true;
+				hasSpecialDiscountAmount = true;
 				fPrice = price.getProductPriceSpecialAmount();
 				finalPrice.setDiscountEndDate(price.getProductPriceSpecialEndDate());
 			}
 		}
-		
+		if(hasSpecialDiscountAmount) {
+			discountPrice(finalPrice);
+		}
+
+		// calcualate discount price based on discount percentage /// ram please revist here, consider start date and end date of discount as well
+		// this logic overrides earlier discount price if it exists.
+		if(isDiscountInPercentage(price)){
+			double discountPercentage = price.getProductDiscountPercentage().doubleValue();
+			double discoutnValue = price.getProductPriceAmount().doubleValue()*(discountPercentage/100);
+			double productPriceSpecialAmount= price.getProductPriceAmount().doubleValue() - discoutnValue;
+			price.setProductPriceSpecialAmount(new BigDecimal(productPriceSpecialAmount));
+			
+			// UPDATE THESE VALUES TO FinalPrice object
+			finalPrice.setDiscounted(true);
+			finalPrice.setDiscountPercent((int)discountPercentage);
+			finalPrice.setDiscountedPrice(finalPrice.getProductPrice().getProductPriceSpecialAmount());
+		}
 		finalPrice.setProductPrice(price);
 		finalPrice.setFinalPrice(fPrice);
 		finalPrice.setOriginalPrice(oPrice);
 		
-		
 		if(price.isDefaultPrice()) {
 			finalPrice.setDefaultPrice(true);
 		}
-		if(hasDiscount) {
-			discountPrice(finalPrice);
-		}
-
-		
 		return finalPrice;
+	}
+
+	private boolean isDiscountInPercentage(ProductPrice price) {
+		return price.getProductDiscountPercentage() != null && price.getProductDiscountPercentage().doubleValue() > 0;
 	}
 	
 	private void discountPrice(FinalPrice finalPrice) {

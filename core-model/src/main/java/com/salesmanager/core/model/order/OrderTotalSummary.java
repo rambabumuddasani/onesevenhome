@@ -18,11 +18,20 @@ public class OrderTotalSummary implements Serializable {
 	private BigDecimal subTotal;//one time price for items
 	private BigDecimal total;//final price
 	private BigDecimal taxTotal;//total of taxes
-	
+	private BigDecimal totalDiscount;//total of discount
+
 	private List<OrderTotal> totals;//all other fees (tax, shipping ....)
 
 	public BigDecimal getSubTotal() {
 		return subTotal;
+	}
+
+	public BigDecimal getTotalDiscount() {
+		return totalDiscount;
+	}
+
+	public void setTotalDiscount(BigDecimal totalDiscount) {
+		this.totalDiscount = totalDiscount;
 	}
 
 	public void setSubTotal(BigDecimal subTotal) {

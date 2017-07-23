@@ -32,10 +32,25 @@ public class ShoppingCartData extends ShopEntity implements Serializable {
 	private List<OrderTotal> totals;//calculated from OrderTotalSummary	
 	
 	private List<ShoppingCartItem> shoppingCartItems;
-	@JsonIgnore
+	
 	private List<ShoppingCartItem> unavailables;
 	
+	private int distinctItemQty;
 	
+	public int getDistinctItemQty() {
+		return distinctItemQty;
+	}
+	public void setDistinctItemQty(int distinctItemQty) {
+		this.distinctItemQty = distinctItemQty;
+	}
+	private String totalDiscount;
+	
+	public String getTotalDiscount() {
+		return totalDiscount;
+	}
+	public void setTotalDiscount(String totalDiscount) {
+		this.totalDiscount = totalDiscount;
+	}
 	public String getMessage() {
 		return message;
 	}

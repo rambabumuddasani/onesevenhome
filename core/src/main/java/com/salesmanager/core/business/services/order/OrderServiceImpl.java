@@ -170,6 +170,7 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
          * qty * price
          * subtotal
          */
+        BigDecimal totDiscount = new BigDecimal(0);
         BigDecimal subTotal = new BigDecimal(0);
         subTotal.setScale(2, RoundingMode.HALF_UP);
         for(ShoppingCartItem item : summary.getProducts()) {
@@ -180,6 +181,9 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
             //Other prices
             FinalPrice finalPrice = item.getFinalPrice();
             if(finalPrice!=null) {
+            	if(finalPrice.isDiscounted()) {
+            		totDiscount = totDiscount.add(finalPrice.getDiscountedPrice());
+            	}
                 List<FinalPrice> otherPrices = finalPrice.getAdditionalPrices();
                 if(otherPrices!=null) {
                     for(FinalPrice price : otherPrices) {
@@ -328,7 +332,8 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
         orderTotal.setSortOrder(500);
         orderTotal.setValue(grandTotal);
         orderTotals.add(orderTotal);
-
+        
+        totalSummary.setTotalDiscount(totDiscount);
         totalSummary.setTotal(grandTotal);
         totalSummary.setTotals(orderTotals);
         return totalSummary;
@@ -348,7 +353,6 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
         } catch (Exception e) {
             throw new ServiceException(e);
         }
-
     }
 
 
@@ -459,9 +463,6 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
         } catch(Exception e) {
             throw new ServiceException(e);
         }
-
-
-
     }
 
     @Override
@@ -485,21 +486,17 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
 
     @Override
     public void saveOrUpdate(final Order order) throws ServiceException {
-
         if(order.getId()!=null && order.getId()>0) {
             LOGGER.debug("Updating Order");
             super.update(order);
-
         } else {
             LOGGER.debug("Creating Order");
             super.create(order);
-
         }
     }
 
 	@Override
 	public boolean hasDownloadFiles(Order order) throws ServiceException {
-		
 		Validate.notNull(order,"Order cannot be null");
 		Validate.notNull(order.getOrderProducts(),"Order products cannot be null");
 		Validate.notEmpty(order.getOrderProducts(),"Order products cannot be empty");
@@ -512,7 +509,6 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
 				break;
 			}
 		}
-		
 		return hasDownloads;
 	}
 

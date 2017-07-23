@@ -35,7 +35,7 @@ import com.salesmanager.core.utils.CloneUtils;
 public class ProductPrice extends SalesManagerEntity<Long, ProductPrice> {
 	private static final long serialVersionUID = -9186473817468772165L;
 	
-	private final static String DEFAULT_PRICE_CODE="base";
+	private final static String DEFAULT_PRICE_CODE = "base";
 
 	@Id
 	@Column(name = "PRODUCT_PRICE_ID")
@@ -72,6 +72,8 @@ public class ProductPrice extends SalesManagerEntity<Long, ProductPrice> {
 	@Column(name = "PRODUCT_PRICE_SPECIAL_AMOUNT")
 	private BigDecimal productPriceSpecialAmount;
 	
+	@Column(name = "PRODUCT_DISCOUNT_PERCENTAGE")
+	private BigDecimal productDiscountPercentage;
 
 	@ManyToOne(targetEntity = ProductAvailability.class)
 	@JoinColumn(name = "PRODUCT_AVAIL_ID", nullable = false)
@@ -122,7 +124,6 @@ public class ProductPrice extends SalesManagerEntity<Long, ProductPrice> {
 	}
 
 
-
 	public BigDecimal getProductPriceSpecialAmount() {
 		return productPriceSpecialAmount;
 	}
@@ -132,6 +133,13 @@ public class ProductPrice extends SalesManagerEntity<Long, ProductPrice> {
 		this.productPriceSpecialAmount = productPriceSpecialAmount;
 	}
 
+	public BigDecimal getProductDiscountPercentage() {
+		return productDiscountPercentage;
+	}
+
+	public void setProductDiscountPercentage(BigDecimal productDiscountPercentage) {
+		this.productDiscountPercentage = productDiscountPercentage;
+	}
 
 
 	public Set<ProductPriceDescription> getDescriptions() {

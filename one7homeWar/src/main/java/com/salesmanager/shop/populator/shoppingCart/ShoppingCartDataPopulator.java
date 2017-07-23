@@ -112,6 +112,9 @@ public class ShoppingCartDataPopulator extends AbstractDataPopulator<ShoppingCar
                     
                     shoppingCartItem.setProductPrice(item.getItemPrice());
                     shoppingCartItem.setSubTotal(pricingService.getDisplayAmount(item.getSubTotal(), store));
+                    if(item.getFinalPrice().isDiscounted()){
+                    	shoppingCartItem.setDiscountPrice(pricingService.getDisplayAmount(item.getFinalPrice().getDiscountedPrice(),store));
+                    }
                     ProductImage image = item.getProduct().getProductImage();
                     if(image!=null && imageUtils!=null) {
                         String imagePath = imageUtils.buildProductImageUtils(store, item.getProduct().getSku(), image.getProductImage());
@@ -163,6 +166,8 @@ public class ShoppingCartDataPopulator extends AbstractDataPopulator<ShoppingCar
             cart.setSubTotal(pricingService.getDisplayAmount(orderSummary.getSubTotal(), store));
             cart.setTotal(pricingService.getDisplayAmount(orderSummary.getTotal(), store));
             cart.setQuantity(cartQuantity);
+            cart.setDistinctItemQty(cart.getShoppingCartItems().size());
+            cart.setTotalDiscount(pricingService.getDisplayAmount(orderSummary.getTotalDiscount(), store));
             cart.setId(shoppingCart.getId());
         }
         catch(ServiceException ex){

@@ -105,8 +105,9 @@ public abstract class AbstractimageFilePath implements ImageFilePath {
 	 * @return
 	 */
 	public String buildProductImageUtils(MerchantStore store, String sku, String imageName) {
-		return new StringBuilder().append(getBasePath()).append(Constants.SLASH).append(store.getCode()).append(Constants.SLASH).append(FileContentType.PRODUCT.name()).append(Constants.SLASH)
-				.append(sku).append(Constants.SLASH).append(imageName).toString();
+		//return new StringBuilder().append(getBasePath()).append(Constants.SLASH).append(store.getCode()).append(Constants.SLASH).append(FileContentType.PRODUCT.name()).append(Constants.SLASH)
+		//		.append(sku).append(Constants.SLASH).append(imageName).toString();
+		return new StringBuilder().append("img").append(Constants.SLASH).append(imageName).toString();
 	}
 	
 	/**

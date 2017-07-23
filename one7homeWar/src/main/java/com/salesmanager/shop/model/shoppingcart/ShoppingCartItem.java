@@ -19,7 +19,7 @@ public class ShoppingCartItem extends ShopEntity implements Serializable {
 	private String image;
 	@JsonIgnore
 	private BigDecimal productPrice;
-	private int quantity;
+	private int quantity;             
 	private long productId;
 	private String productCode;
 	private String code;//shopping cart code
@@ -27,7 +27,14 @@ public class ShoppingCartItem extends ShopEntity implements Serializable {
 	private boolean productVirtual;
 	
 	private String subTotal;
+	private String discountPrice;
 	
+	public String getDiscountPrice() {
+		return discountPrice;
+	}
+	public void setDiscountPrice(String discountPrice) {
+		this.discountPrice = discountPrice;
+	}
 	@JsonIgnore
 	private List<ShoppingCartAttribute> shoppingCartAttributes;
 	
