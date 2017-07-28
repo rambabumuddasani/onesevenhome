@@ -28,14 +28,178 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 	
     @PersistenceContext
     private EntityManager em;
+ 
+	@SuppressWarnings("rawtypes")
+	@Override
+	public List<Product> getProductsListByCategory(String categoryCode) {
+		
+
+		//TODO Test performance 
+		/**
+		 * Testing in debug mode takes a long time with this query
+		 * running in normal mode is fine
+		 */
+
+		
+		StringBuilder qs = new StringBuilder();
+		qs.append("select distinct p from Product as p ");
+		qs.append("join fetch p.merchantStore merch ");
+		qs.append("join fetch p.availabilities pa ");
+		qs.append("left join fetch pa.prices pap ");
+		
+		qs.append("join fetch p.descriptions pd ");
+		qs.append("join fetch p.categories categs ");
+		
+		
+		
+		qs.append("left join fetch pap.descriptions papd ");
+		
+		
+		//images
+		qs.append("left join fetch p.images images ");
+		
+		//options (do not need attributes for listings)
+		qs.append("left join fetch p.attributes pattr ");
+		qs.append("left join fetch pattr.productOption po ");
+		qs.append("left join fetch po.descriptions pod ");
+		qs.append("left join fetch pattr.productOptionValue pov ");
+		qs.append("left join fetch pov.descriptions povd ");
+		
+		//other lefts
+		qs.append("left join fetch p.manufacturer manuf ");
+		qs.append("left join fetch p.type type ");
+		qs.append("left join fetch p.taxClass tx ");
+		
+		//qs.append("where pa.region in (:lid) ");
+		qs.append("where categs.code in (:categoryCode)");
+
+
+
+    	String hql = qs.toString();
+		Query q = this.em.createQuery(hql);
+
+    	q.setParameter("categoryCode", categoryCode);
+
+
+    	
+    	@SuppressWarnings("unchecked")
+		List<Product> products =  q.getResultList();
+
+    	
+    	return products;
+
+
+	}
+
+	@Override
+	public List<Product> getTodaysDeals() {
+		
+		try {
+			
+
+
+			StringBuilder qs = new StringBuilder();
+			qs.append("select distinct p from Product as p ");
+			qs.append("join fetch p.availabilities pa ");
+			qs.append("join fetch p.merchantStore merch ");
+			qs.append("join fetch p.descriptions pd ");
+			qs.append("left join fetch p.categories categs ");
+			qs.append("left join fetch pa.prices pap ");
+			qs.append("left join fetch pap.descriptions papd ");
+			qs.append("left join fetch categs.descriptions categsd ");
+			
+			//images
+			qs.append("left join fetch p.images images ");
+			//options
+			qs.append("left join fetch p.attributes pattr ");
+			qs.append("left join fetch pattr.productOption po ");
+			qs.append("left join fetch po.descriptions pod ");
+			qs.append("left join fetch pattr.productOptionValue pov ");
+			qs.append("left join fetch pov.descriptions povd ");
+			qs.append("left join fetch p.relationships pr ");
+			//other lefts
+			qs.append("left join fetch p.manufacturer manuf ");
+			qs.append("left join fetch manuf.descriptions manufd ");
+			qs.append("left join fetch p.type type ");
+			qs.append("left join fetch p.taxClass tx ");
+			
+			qs.append("where pap.productPriceSpecialStartDate <= sysdate() and pap.productPriceSpecialEndDate >= sysdate()");
+	
+	
+	    	String hql = qs.toString();
+			Query q = this.em.createQuery(hql);
+	
+	
+	
+			List<Product> products =  q.getResultList();
+	
+	
+			return products;
+		
+		} catch(javax.persistence.NoResultException ers) {
+			return null;
+		}
+		
+	}
     
+	@Override
+	public List<Product> getDealOfDay() {
+		
+		try {
+			
+
+
+			StringBuilder qs = new StringBuilder();
+			qs.append("select distinct p from Product as p ");
+			qs.append("join fetch p.availabilities pa ");
+			qs.append("join fetch p.merchantStore merch ");
+			qs.append("join fetch p.descriptions pd ");
+			qs.append("left join fetch p.categories categs ");
+			qs.append("left join fetch pa.prices pap ");
+			qs.append("left join fetch pap.descriptions papd ");
+			qs.append("left join fetch categs.descriptions categsd ");
+			
+			//images
+			qs.append("left join fetch p.images images ");
+			//options
+			qs.append("left join fetch p.attributes pattr ");
+			qs.append("left join fetch pattr.productOption po ");
+			qs.append("left join fetch po.descriptions pod ");
+			qs.append("left join fetch pattr.productOptionValue pov ");
+			qs.append("left join fetch pov.descriptions povd ");
+			qs.append("left join fetch p.relationships pr ");
+			//other lefts
+			qs.append("left join fetch p.manufacturer manuf ");
+			qs.append("left join fetch manuf.descriptions manufd ");
+			qs.append("left join fetch p.type type ");
+			qs.append("left join fetch p.taxClass tx ");
+			
+			qs.append("where pap.productPriceSpecialStartDate <= sysdate() and pap.productPriceSpecialEndDate >= sysdate()");
+			qs.append(" and pap.dealOfDay ='Y'");
+	
+	    	String hql = qs.toString();
+			Query q = this.em.createQuery(hql);
+	
+	
+	
+			List<Product> products =  q.getResultList();
+	
+	
+			return products;
+		
+		} catch(javax.persistence.NoResultException ers) {
+			return null;
+		}
+		
+	}
+
 	@Override
 	public Product getById(Long productId) {
 		
 		try {
 			
 
-
+			System.out.println("invoking getById =="+productId);
 			StringBuilder qs = new StringBuilder();
 			qs.append("select distinct p from Product as p ");
 			qs.append("join fetch p.availabilities pa ");
@@ -80,7 +244,6 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 		}
 		
 	}
-    
 	
 	@Override
 	public Product getByCode(String productCode, Language language) {

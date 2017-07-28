@@ -40,5 +40,8 @@ public interface ProductRepositoryCustom {
 
 		List<Product> getProductsForLocale(MerchantStore store,
 				Set<Long> categoryIds, Language language, Locale locale);
-
+		
+		List<Product> getTodaysDeals();
+		List<Product> getProductsListByCategory(String categoryCode);
+		List<Product> getDealOfDay();
 }

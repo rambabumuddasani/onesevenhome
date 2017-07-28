@@ -118,6 +118,11 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 	}
 	
 	@Override
+	public Product getByProductId(Long productId) {
+		return productRepository.getById(productId);
+	}
+
+	@Override
 	public List<Product> getProducts(List<Long> categoryIds, Language language) throws ServiceException {
 		
 		@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -126,7 +131,23 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 		
 	}
 	
+	@Override
+	public List<Product> getTodaysDeals() throws ServiceException {
+		
+		return productRepository.getTodaysDeals();
+		
+	}
+	@Override
+	public List<Product> getDealOfDay() throws ServiceException {
+		
+		return productRepository.getDealOfDay();
+		
+	}
 
+	@Override
+	public List<Product> getProductsListByCategory(String categoryCode) throws ServiceException {
+		return productRepository.getProductsListByCategory(categoryCode);
+	}
 
 	@Override
 	public ProductDescription getProductDescription(Product product, Language language) {

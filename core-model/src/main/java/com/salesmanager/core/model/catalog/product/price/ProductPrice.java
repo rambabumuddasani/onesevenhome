@@ -79,7 +79,10 @@ public class ProductPrice extends SalesManagerEntity<Long, ProductPrice> {
 	@JoinColumn(name = "PRODUCT_AVAIL_ID", nullable = false)
 	private ProductAvailability productAvailability;
 	
+	@Column(name = "DEAL_OF_DAY", nullable=false)
+	private String dealOfDay = "N";
 
+	
 	public ProductPrice() {
 	}
 	
@@ -184,6 +187,13 @@ public class ProductPrice extends SalesManagerEntity<Long, ProductPrice> {
 
 	public ProductPriceType getProductPriceType() {
 		return productPriceType;
+	}
+	public String getDealOfDay() {
+		return dealOfDay;
+	}
+
+	public void setDealOfDay(String dealOfDay) {
+		this.dealOfDay = dealOfDay;
 	}
 
 

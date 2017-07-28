@@ -11,6 +11,9 @@ import com.salesmanager.core.model.catalog.category.Category;
 public interface CategoryRepository extends JpaRepository<Category, Long>, CategoryRepositoryCustom {
 	
 
+	@Query("select c from Category c")
+	List<Category> getAllCategories();
+
 	@Query("select c from Category c left join fetch c.descriptions cd join fetch cd.language cdl join fetch c.merchantStore cm where cd.seUrl like ?2 and cm.id = ?1 order by c.sortOrder asc")
 	List<Category> listByFriendlyUrl(Integer storeId, String friendlyUrl);
 	
@@ -37,6 +40,9 @@ public interface CategoryRepository extends JpaRepository<Category, Long>, Categ
 	
 	@Query("select c from Category c left join fetch c.descriptions cd join fetch cd.language cdl join fetch c.merchantStore cm where cm.code=?1 and c.code=?2")
 	public Category findByCode(String merchantStoreCode, String code);
+	
+	@Query("select c from Category c left join fetch c.descriptions cd join fetch cd.language cdl where c.code=?1")
+	public Category findByCategoryCode(String code);
 	
 	@Query("select c from Category c left join fetch c.descriptions cd join fetch cd.language cdl join fetch c.merchantStore cm where c.id=?1")
 	public Category findOne(Long categoryId);

@@ -28,7 +28,9 @@ public interface ProductService extends SalesManagerEntityService<Long, Product>
 
 	List<Product> getProducts(List<Long> categoryIds) throws ServiceException;
 
-
+	List<Product> getTodaysDeals() throws ServiceException;
+	List<Product> getDealOfDay() throws ServiceException;
+	List<Product> getProductsListByCategory(String categoryCode) throws ServiceException;
 
 	ProductList listByStore(MerchantStore store, Language language,
 			ProductCriteria criteria);
@@ -50,6 +52,7 @@ public interface ProductService extends SalesManagerEntityService<Long, Product>
 	 */
 	Product getByCode(String productCode, Language language);
 
+	Product getByProductId(Long productId);
 	
 }
 	

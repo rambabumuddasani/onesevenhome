@@ -531,6 +531,14 @@ public class ProductPriceUtils {
 		BigDecimal fPrice = price.getProductPriceAmount();
 		BigDecimal oPrice = price.getProductPriceAmount();
 
+		finalPrice.setProductPrice(price);
+		finalPrice.setFinalPrice(fPrice);
+		finalPrice.setOriginalPrice(oPrice);
+		
+		if(price.isDefaultPrice()) {
+			finalPrice.setDefaultPrice(true);
+		}
+		
 		Date today = new Date();
 		//calculate discount price
 		boolean hasSpecialDiscountAmount = false;
@@ -572,7 +580,7 @@ public class ProductPriceUtils {
 
 		// calcualate discount price based on discount percentage /// ram please revist here, consider start date and end date of discount as well
 		// this logic overrides earlier discount price if it exists.
-		if(isDiscountInPercentage(price)){
+		/*	if(isDiscountInPercentage(price)){
 			double discountPercentage = price.getProductDiscountPercentage().doubleValue();
 			double discoutnValue = price.getProductPriceAmount().doubleValue()*(discountPercentage/100);
 			double productPriceSpecialAmount= price.getProductPriceAmount().doubleValue() - discoutnValue;
@@ -582,14 +590,7 @@ public class ProductPriceUtils {
 			finalPrice.setDiscounted(true);
 			finalPrice.setDiscountPercent((int)discountPercentage);
 			finalPrice.setDiscountedPrice(finalPrice.getProductPrice().getProductPriceSpecialAmount());
-		}
-		finalPrice.setProductPrice(price);
-		finalPrice.setFinalPrice(fPrice);
-		finalPrice.setOriginalPrice(oPrice);
-		
-		if(price.isDefaultPrice()) {
-			finalPrice.setDefaultPrice(true);
-		}
+		} */		
 		return finalPrice;
 	}
 
@@ -607,8 +608,10 @@ public class ProductPriceUtils {
 		int percent = percentagediscount.intValue();
 		finalPrice.setDiscountPercent(percent);
 		
+		// set discount price as final price.
+		finalPrice.setFinalPrice(finalPrice.getProductPrice().getProductPriceSpecialAmount());
 		//calculate percent
-		BigDecimal price = finalPrice.getOriginalPrice();
+		//BigDecimal price = finalPrice.getOriginalPrice();
 		finalPrice.setDiscountedPrice(finalPrice.getProductPrice().getProductPriceSpecialAmount());
 	}
 
