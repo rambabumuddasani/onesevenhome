@@ -84,7 +84,7 @@ public interface CustomerFacade
 	Customer populateCustomerModel(Customer customerModel, PersistableCustomer customer,
 			MerchantStore merchantStore, Language language) throws Exception;
 	
-
+	public void updateCustomer(Customer customer) throws Exception;
 	
 
 }

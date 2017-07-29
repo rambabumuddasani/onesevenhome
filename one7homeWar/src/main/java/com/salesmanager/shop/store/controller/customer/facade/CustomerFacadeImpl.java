@@ -550,4 +550,13 @@ public class CustomerFacadeImpl implements CustomerFacade
             return customerModel;
 	}
 
+    @Override
+    public void updateCustomer(Customer customer)
+        throws Exception
+    {
+       
+       this.customerService.saveOrUpdate( customer );
+       
+    }
+
 }

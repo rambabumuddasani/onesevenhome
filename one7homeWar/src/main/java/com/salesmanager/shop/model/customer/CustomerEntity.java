@@ -7,6 +7,8 @@ import javax.validation.Valid;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import com.salesmanager.core.model.common.VendorAttributes;
+
 public class CustomerEntity extends Customer implements Serializable {
 
 	/**
@@ -21,6 +23,7 @@ public class CustomerEntity extends Customer implements Serializable {
 	@Valid
 	private Address billing;
 	private Address delivery;
+	private Vendor vendorAttrs;
 	private String gender;
 
 	private String language;
@@ -31,6 +34,8 @@ public class CustomerEntity extends Customer implements Serializable {
 	private String clearPassword = null;
 	
 	private String storeCode;
+	private String customerType;
+	private String activated;
 	
 	@NotEmpty(message="{NotEmpty.customer.userName}")
 	private String userName;
@@ -127,8 +132,28 @@ public class CustomerEntity extends Customer implements Serializable {
 		this.clearPassword = clearPassword;
 	}
 
+	public Vendor getVendor() {
+		return vendorAttrs;
+	}
 
+	public void setVendor(Vendor vendorAttrs) {
+		this.vendorAttrs = vendorAttrs;
+	}
 
-    
+	public String getCustomerType() {
+		return customerType;
+	}
+
+	public void setCustomerType(String customerType) {
+		this.customerType = customerType;
+	}
+
+	public String getActivated() {
+		return activated;
+	}
+
+	public void setActivated(String activated) {
+		this.activated = activated;
+	}
 
 }

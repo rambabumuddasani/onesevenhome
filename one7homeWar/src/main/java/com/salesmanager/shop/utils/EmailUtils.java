@@ -61,4 +61,29 @@ public class EmailUtils {
 		return templateTokens;
 	}
 
+	public Map<String, String> createEmailObjectsMap(MerchantStore store, LabelUtils messages, Locale locale){
+		
+		Map<String, String> templateTokens = new HashMap<String, String>();
+		
+		String[] adminNameArg = {store.getStorename()};
+		String[] adminEmailArg = {store.getStoreEmailAddress()};
+		String[] copyArg = {store.getStorename(), DateUtil.getPresentYear()};
+		
+		templateTokens.put(EMAIL_ADMIN_LABEL, messages.getMessage("email.message.from", adminNameArg, locale));
+		templateTokens.put(EMAIL_STORE_NAME, store.getStorename());
+		templateTokens.put(EMAIL_FOOTER_COPYRIGHT, messages.getMessage("email.copyright", copyArg, locale));
+		templateTokens.put(EMAIL_DISCLAIMER, messages.getMessage("email.disclaimer", adminEmailArg, locale));
+		
+		if(store.getStoreLogo()!=null) {
+			//TODO revise
+			StringBuilder logoPath = new StringBuilder();
+			String scheme = Constants.HTTP_SCHEME;
+			logoPath.append("<img src='").append(scheme).append("://").append(store.getDomainName()).append("/").append(imageUtils.buildStoreLogoFilePath(store)).append("' style='max-width:400px;'>");
+			templateTokens.put(LOGOPATH, logoPath.toString());
+		} else {
+			templateTokens.put(LOGOPATH, store.getStorename());
+		}
+
+		return templateTokens;
+	}
 }

@@ -36,6 +36,7 @@ import com.salesmanager.core.constants.SchemaConstant;
 import com.salesmanager.core.model.catalog.product.review.ProductReview;
 import com.salesmanager.core.model.common.Billing;
 import com.salesmanager.core.model.common.Delivery;
+import com.salesmanager.core.model.common.VendorAttributes;
 import com.salesmanager.core.model.customer.attribute.CustomerAttribute;
 import com.salesmanager.core.model.generic.SalesManagerEntity;
 import com.salesmanager.core.model.merchant.MerchantStore;
@@ -87,7 +88,11 @@ public class Customer extends SalesManagerEntity<Long, Customer> {
 	@Column(name="CUSTOMER_ANONYMOUS")
 	private boolean anonymous;
 	
+	@Column(name="CUSTOMER_TYPE", length=2)
+	private String customerType;
 
+	@Column(name="ACTIVATED", length=2)
+	private String activated;
 	
 	@ManyToOne(fetch = FetchType.LAZY, targetEntity = Language.class)
 	@JoinColumn(name = "LANGUAGE_ID", nullable=false)
@@ -110,6 +115,8 @@ public class Customer extends SalesManagerEntity<Long, Customer> {
 	@Embedded
 	private Billing billing = null;
 	
+	@Embedded
+	private VendorAttributes vendorAttrs = null;
 	
 	@ManyToMany(fetch=FetchType.LAZY, cascade = {CascadeType.REFRESH})
 	@JoinTable(name = "CUSTOMER_GROUP", schema=SchemaConstant.SALESMANAGER_SCHEMA, joinColumns = { 
@@ -288,6 +295,30 @@ public class Customer extends SalesManagerEntity<Long, Customer> {
 
 	public CustomerGender getGender() {
 		return gender;
+	}
+
+	public VendorAttributes getVendorAttrs() {
+		return vendorAttrs;
+	}
+
+	public void setVendorAttrs(VendorAttributes vendorAttrs) {
+		this.vendorAttrs = vendorAttrs;
+	}
+
+	public String getCustomerType() {
+		return customerType;
+	}
+
+	public void setCustomerType(String customerType) {
+		this.customerType = customerType;
+	}
+
+	public String getActivated() {
+		return activated;
+	}
+
+	public void setActivated(String activated) {
+		this.activated = activated;
 	}
 	
 }
