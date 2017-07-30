@@ -25,11 +25,14 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.salesmanager.core.business.exception.ConversionException;
 import com.salesmanager.core.business.exception.ServiceException;
@@ -43,10 +46,7 @@ import com.salesmanager.core.business.services.reference.zone.ZoneService;
 import com.salesmanager.core.business.services.shoppingcart.ShoppingCartCalculationService;
 import com.salesmanager.core.business.services.system.EmailService;
 import com.salesmanager.core.business.utils.CoreConfiguration;
-import com.salesmanager.core.model.common.Delivery;
-import com.salesmanager.core.model.common.VendorAttributes;
 import com.salesmanager.core.model.customer.Customer;
-import com.salesmanager.core.model.customer.CustomerGender;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.country.Country;
 import com.salesmanager.core.model.reference.language.Language;
@@ -70,7 +70,6 @@ import com.salesmanager.shop.utils.EmailTemplatesUtils;
 import com.salesmanager.shop.utils.EmailUtils;
 import com.salesmanager.shop.utils.ImageFilePath;
 import com.salesmanager.shop.utils.LabelUtils;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
 //import com.salesmanager.core.business.customer.CustomerRegistrationException;
 
@@ -447,15 +446,11 @@ public class CustomerRegistrationController extends AbstractController {
         	customer.setClearPassword(password);
         	customerData = customerFacade.registerCustomer( customer, merchantStore, language );
             System.out.println("customerData is "+customerData);
-        }       catch ( Exception e )
-        {
+        }       catch ( Exception e ) {
             LOGGER.error( "Error while registering customer.. ", e);
              return new ResponseEntity<CustomerEntity>(customerData,HttpStatus.CONFLICT);
         }  
-         
-       
-        
-		return new ResponseEntity<CustomerEntity>(customerData,HttpStatus.OK);         
+        return new ResponseEntity<CustomerEntity>(customerData,HttpStatus.OK);         
     }
     
 	@RequestMapping(value="/customer/register", method = RequestMethod.POST, 
@@ -584,13 +579,11 @@ public class CustomerRegistrationController extends AbstractController {
         return customerResponse;         
     }
 
-	@RequestMapping(value="/vendor/register", method = RequestMethod.POST, 
-			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value="/vendor/register", method = RequestMethod.POST)
 	@ResponseBody
-    public CustomerResponse registerCustomer(@RequestBody VendorRequest vendorRequest)
-        throws Exception
-    {	
-		System.out.println("vendor ");
+    public CustomerResponse registerCustomer(@RequestPart("vendorRequest") VendorRequest vendorRequest,
+    		@RequestPart("file") MultipartFile uploadFile) throws Exception {
+		System.out.println("vendor file "+uploadFile);
     	CustomerResponse customerResponse = new CustomerResponse();
     	SecuredShopPersistableCustomer customer = new SecuredShopPersistableCustomer();
     	customer.setEmailAddress(vendorRequest.getEmail());

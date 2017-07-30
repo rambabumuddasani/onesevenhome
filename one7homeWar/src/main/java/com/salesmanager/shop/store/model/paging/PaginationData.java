@@ -23,7 +23,7 @@ public class PaginationData implements Serializable
     private int totalCount;
     private int totalPages;
     private int countByPage;
-
+    private int to;
     
     public PaginationData(int pageSize,int currentPage) {
         if (pageSize == 0)

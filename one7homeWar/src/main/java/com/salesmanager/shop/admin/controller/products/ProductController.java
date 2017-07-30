@@ -1101,12 +1101,10 @@ public class ProductController extends AbstractController {
 			productDetails.setProductOriginalPrice(productPrice.getProductPriceAmount());
 			productDetails.setProductDiscountPrice(productPrice.getProductPriceSpecialAmount());
 			productDetails.setDiscountPercentage(getDiscountPercentage(productPrice));
-			
 		}
-
-		
 		return productDetails;
 	}
+	
 	public ProductResponse getProductDetails(Product dbProduct,boolean isSpecial) throws Exception {
 		
 		System.out.println("merchantStoreService =="+merchantStoreService);
@@ -1250,7 +1248,10 @@ public class ProductController extends AbstractController {
 			productResponse.setCategories(categoriesList);
 			responses.add(productResponse);
 		}
-
+		if(responses == null || responses.isEmpty() || responses.size() < page){
+			todaysDeals.setTodaysDealsData(responses);
+			return todaysDeals;
+		}
 	    PaginationData paginaionData=createPaginaionData(page,size);
     	calculatePaginaionData(paginaionData,size, responses.size());
     	todaysDeals.setPaginationData(paginaionData);
@@ -1284,12 +1285,14 @@ public class ProductController extends AbstractController {
 				break;
 			}
 		}
+
 	    PaginationData paginaionData=createPaginaionData(page,size);
     	calculatePaginaionData(paginaionData,size, responses.size());
     	paginatedResponse.setPaginationData(paginaionData);
-    	if(responses == null || responses.isEmpty()){
-    		return paginatedResponse;
-    	}
+		if(responses == null || responses.isEmpty() || responses.size() < paginaionData.getCountByPage()){
+			paginatedResponse.setResponseData(responses);
+			return paginatedResponse;
+		}
     	List<ProductResponse> paginatedResponses = responses.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
     	paginatedResponse.setResponseData(paginatedResponses);
 		return paginatedResponse;

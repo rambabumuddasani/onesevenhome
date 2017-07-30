@@ -179,9 +179,6 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 	
 	    	String hql = qs.toString();
 			Query q = this.em.createQuery(hql);
-	
-	
-	
 			List<Product> products =  q.getResultList();
 	
 	
