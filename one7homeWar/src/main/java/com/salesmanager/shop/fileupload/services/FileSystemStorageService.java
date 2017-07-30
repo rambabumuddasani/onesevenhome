@@ -9,7 +9,6 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -27,12 +26,16 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
-    public void store(MultipartFile file) {
-        try {
+    public String store(MultipartFile file) {
+    	StringBuilder filePath = new StringBuilder();
+    	filePath.append(rootLocation.getFileName()); // assumption output will be /opt/imp/vendor
+    	try {
             if (file.isEmpty()) {
                 throw new StorageException("Failed to store empty file " + file.getOriginalFilename());
             }
+            filePath.append(file.getOriginalFilename()); // do we need to give orginal file name or form certificate name based on customer information.
             Files.copy(file.getInputStream(), this.rootLocation.resolve(file.getOriginalFilename()));
+            return filePath.toString();        // /opt/img/vendor/cert1.jpg
         } catch (IOException e) {
             throw new StorageException("Failed to store file " + file.getOriginalFilename(), e);
         }
@@ -85,6 +88,16 @@ public class FileSystemStorageService implements StorageService {
             throw new StorageException("Could not initialize storage", e);
         }
     }
+
+	@Override
+	public void deleteFile(String fileName){
+		try {
+			Files.delete(rootLocation); // rootpath + fileName
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 
 }

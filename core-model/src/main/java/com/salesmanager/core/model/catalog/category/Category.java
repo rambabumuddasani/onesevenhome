@@ -58,7 +58,8 @@ public class Category extends SalesManagerEntity<Long, Category> implements Audi
 	@JoinColumn(name = "PARENT_ID")
 	private Category parent;
 	
-	@OneToMany(mappedBy = "parent", cascade = CascadeType.REMOVE, orphanRemoval = true)
+	// check with shiva, how he handeled session out of service 
+	@OneToMany(mappedBy = "parent", cascade = CascadeType.REMOVE, orphanRemoval = true,fetch=FetchType.EAGER)
 	private List<Category> categories = new ArrayList<Category>();
 	
 	@Column(name = "CATEGORY_IMAGE", length=100)

@@ -1,5 +1,6 @@
 package com.salesmanager.shop.fileupload.services;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
@@ -8,9 +9,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface StorageService {
 	
-	 void init();
+	 void init();	
 
-	    void store(MultipartFile file);
+	    String store(MultipartFile file);
 
 	    Stream<Path> loadAll();
 
@@ -19,5 +20,6 @@ public interface StorageService {
 	    Resource loadAsResource(String filename);
 
 	    void deleteAll();
-
+	    
+	    void deleteFile(String fileName);
 }

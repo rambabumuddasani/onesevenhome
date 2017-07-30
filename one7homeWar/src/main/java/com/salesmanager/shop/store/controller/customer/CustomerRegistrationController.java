@@ -55,6 +55,8 @@ import com.salesmanager.core.model.shoppingcart.ShoppingCart;
 import com.salesmanager.shop.constants.ApplicationConstants;
 import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.constants.EmailConstants;
+import com.salesmanager.shop.fileupload.services.StorageException;
+import com.salesmanager.shop.fileupload.services.StorageService;
 import com.salesmanager.shop.model.customer.Address;
 import com.salesmanager.shop.model.customer.AnonymousCustomer;
 import com.salesmanager.shop.model.customer.CustomerEntity;
@@ -138,6 +140,10 @@ public class CustomerRegistrationController extends AbstractController {
 	
 	@Inject
     private CustomerService customerService;
+	
+    @Inject
+    private StorageService storageService;
+
 
 	private final static String NEW_USER_ACTIVATION_TMPL = "email_template_new_user_activate.ftl";
 
@@ -582,10 +588,10 @@ public class CustomerRegistrationController extends AbstractController {
 	@RequestMapping(value="/vendor/register", method = RequestMethod.POST)
 	@ResponseBody
     public CustomerResponse registerCustomer(@RequestPart("vendorRequest") VendorRequest vendorRequest,
-    		@RequestPart("file") MultipartFile uploadFile) throws Exception {
-		System.out.println("vendor file "+uploadFile);
+    		@RequestPart("file") MultipartFile vendorCertificate) throws Exception {
+		System.out.println("vendor file "+vendorCertificate);
     	CustomerResponse customerResponse = new CustomerResponse();
-    	SecuredShopPersistableCustomer customer = new SecuredShopPersistableCustomer();
+/*    	SecuredShopPersistableCustomer customer = new SecuredShopPersistableCustomer();
     	customer.setEmailAddress(vendorRequest.getEmail());
     	customer.setPassword(vendorRequest.getPassword());
     	customer.setCheckPassword(vendorRequest.getConfirmPassword());
@@ -610,6 +616,15 @@ public class CustomerRegistrationController extends AbstractController {
     	customer.setBilling(billing);
     	customer.setDelivery(delivery);
     	customer.setCustomerType("1");
+
+    	// Store file into file sytem
+    	String certFileName = "";
+    	try{
+			certFileName = storageService.store(vendorCertificate);
+    	}catch(StorageException se){
+    		System.out.println("StoreException occured, do wee need continue ");
+    		
+    	}
     	
     	Vendor vendorAttrs = new Vendor();
     	vendorAttrs.setVendorName(vendorRequest.getVendorName());
@@ -621,10 +636,11 @@ public class CustomerRegistrationController extends AbstractController {
     	vendorAttrs.setVendorCompanyNature(vendorRequest.getVendorCompanyNature());
     	vendorAttrs.setVendorRegistrationNo(vendorRequest.getVendorRegistrationNo());
     	vendorAttrs.setVendorPAN(vendorRequest.getVendorPAN());
-    	vendorAttrs.setVendorAuthCert(vendorRequest.getVendorAuthCert());
+    	vendorAttrs.setVendorAuthCert(vendorRequest.getVendorAuthCert()); // do we need to comment this line
     	vendorAttrs.setVendorExpLine(vendorRequest.getVendorExpLine());
     	vendorAttrs.setVendorMajorCust(vendorRequest.getVendorMajorCust());
     	//vendorAttrs.setVendorTerms(vendorRequest.getVendorTerms());
+    	vendorAttrs.setVendorAuthCert(certFileName);	// is it correct do we need other column to store file path.
     	
     	customer.setVendor(vendorAttrs);
     	
@@ -675,7 +691,8 @@ public class CustomerRegistrationController extends AbstractController {
         	customerData = customerFacade.registerCustomer( customer, merchantStore, language );
             System.out.println("customerData is "+customerData);
         } catch ( Exception e )
-        {
+        {	/// if any exception raised during creation of customer we have to delete the certificate
+        	storageService.deleteFile(certFileName);
             LOGGER.error( "Error while registering customer.. ", e);
             customerResponse.setErrorMessage(e.getMessage());
              return customerResponse;
@@ -709,7 +726,7 @@ public class CustomerRegistrationController extends AbstractController {
 
 		
 		emailService.sendHtmlEmail(merchantStore, email);
-		return customerResponse;         
+*/		return customerResponse;         
     }
 	@RequestMapping(value="/user/activate", method = RequestMethod.POST, 
 			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)

@@ -69,25 +69,25 @@ public class PaginationData implements Serializable
      * 
      * @return new pagination object with offset shifted by offset+limit
      */
-    public PaginationData getNext()
+/*    public PaginationData getNext()
     {
         return new PaginationData( offset + pageSize, pageSize );
     }
-    
+*/    
     
     /**
     * Creates a new pagination object representing the previous page
     *
     * @return new pagination object with offset shifted by offset-limit
     */
-        public PaginationData getPrevious() {
+/*        public PaginationData getPrevious() {
             if (pageSize >= offset) {
                 return new PaginationData(0, pageSize);
             } else {
                 return new PaginationData(offset - pageSize, pageSize);
             }
         }
-
+*/
 
     public int getCurrentPage()
     {
