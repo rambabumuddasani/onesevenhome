@@ -44,4 +44,6 @@ public interface ProductRepositoryCustom {
 		List<Product> getTodaysDeals();
 		List<Product> getProductsListByCategory(String categoryCode);
 		List<Product> getDealOfDay();
+
+		List<Product> getProduct(String columnName, String coulumnValue);
 }

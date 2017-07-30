@@ -82,6 +82,19 @@ public class ProductPrice extends SalesManagerEntity<Long, ProductPrice> {
 	@Column(name = "DEAL_OF_DAY", nullable=false)
 	private String dealOfDay = "N";
 
+
+	@Column(name = "FEATURE_PRODUCT", nullable=false)
+	private String featuredProduct = "N";
+
+	@Column(name = "RECENT_PRODUCT", nullable=false)
+	private String recentlyBought = "N";
+
+	@Column(name = "NEW_PRODUCT", nullable=false)
+	private String newProduct = "N";
+
+	@Column(name = "REC_PRODUCT", nullable=false)
+	private String recommendedProduct = "N";
+	
 	
 	public ProductPrice() {
 	}
@@ -196,5 +209,36 @@ public class ProductPrice extends SalesManagerEntity<Long, ProductPrice> {
 		this.dealOfDay = dealOfDay;
 	}
 
+	public String getFeaturedProduct() {
+		return featuredProduct;
+	}
 
+	public void setFeaturedProduct(String featuredProduct) {
+		this.featuredProduct = featuredProduct;
+	}
+
+	public String getRecentlyBought() {
+		return recentlyBought;
+	}
+
+	public void setRecentlyBought(String recentlyBought) {
+		this.recentlyBought = recentlyBought;
+	}
+
+	public String getNewProduct() {
+		return newProduct;
+	}
+
+	public void setNewProduct(String newProduct) {
+		this.newProduct = newProduct;
+	}
+
+	public String getRecommendedProduct() {
+		return recommendedProduct;
+	}
+
+	public void setRecommendedProduct(String recommendedProduct) {
+		this.recommendedProduct = recommendedProduct;
+	}
+	
 }

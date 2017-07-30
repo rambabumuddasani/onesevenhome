@@ -1287,6 +1287,9 @@ public class ProductController extends AbstractController {
 	    PaginationData paginaionData=createPaginaionData(page,size);
     	calculatePaginaionData(paginaionData,size, responses.size());
     	paginatedResponse.setPaginationData(paginaionData);
+    	if(responses == null || responses.isEmpty()){
+    		return paginatedResponse;
+    	}
     	List<ProductResponse> paginatedResponses = responses.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
     	paginatedResponse.setResponseData(paginatedResponses);
 		return paginatedResponse;
@@ -1321,7 +1324,7 @@ public class ProductController extends AbstractController {
 		DealOfDay dealOfDay = new DealOfDay();
 		ProductResponse productResponse = new ProductResponse();
 
-		List<Product> dbProducts = productService.getDealOfDay();
+		List<Product> dbProducts = productService.getProduct("dealOfDay","Y");
 
 		for(Product product:dbProducts) {
 			productResponse = getProductDetails(product,true);
@@ -1329,6 +1332,85 @@ public class ProductController extends AbstractController {
 		}
 		return dealOfDay;
 	}
+	
+	@RequestMapping(value="/getNewProduct", method = RequestMethod.GET, 
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public NewProducts getNewProduct() throws Exception {
+		
+		System.out.println("getNewProduct:");
+		
+		NewProducts newProducts = new NewProducts();
+		ProductResponse productResponse = new ProductResponse();
+
+		List<Product> dbProducts = productService.getProduct("newProduct","Y");
+
+		for(Product product:dbProducts) {
+			productResponse = getProductDetails(product,true);
+			newProducts.setNewProducts(productResponse);
+		}
+		return newProducts;
+	}
+	
+	@RequestMapping(value="/getfeatureProduct", method = RequestMethod.GET, 
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public FeatureProduct getfeatureProduct() throws Exception {
+		
+		System.out.println("getFeatureProduct:");
+		
+		FeatureProduct featureProduct = new FeatureProduct();
+		ProductResponse productResponse = new ProductResponse();
+
+		List<Product> dbProducts = productService.getProduct("featuredProduct","Y");
+
+		for(Product product:dbProducts) {
+			productResponse = getProductDetails(product,true);
+			featureProduct.setFeatureProducts(productResponse);
+		}
+		return featureProduct;
+	}
+	
+	@RequestMapping(value="/getRecommendedProduct", method = RequestMethod.GET, 
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public RecommendedProduct getRecommendedProduct() throws Exception {
+		
+		System.out.println("getRecommendedProduct:");
+		
+		RecommendedProduct recommendedProduct = new RecommendedProduct();
+		ProductResponse productResponse = new ProductResponse();
+
+		List<Product> dbProducts = productService.getProduct("recommendedProduct","Y");
+
+		for(Product product:dbProducts) {
+			productResponse = getProductDetails(product,true);
+			recommendedProduct.setRecommendedProducts(productResponse);
+		}
+		return recommendedProduct;
+	}
+	
+	@RequestMapping(value="/getRecentBought", method = RequestMethod.GET, 
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public RecentlyBought getRecentBought() throws Exception {
+		
+		System.out.println("getRecentProduct:");
+		
+		RecentlyBought recentlyBought = new RecentlyBought();
+		ProductResponse productResponse = new ProductResponse();
+
+		List<Product> dbProducts = productService.getProduct("recentlyBought","Y");
+
+		for(Product product:dbProducts) {
+			productResponse = getProductDetails(product,true);
+			recentlyBought.setRecentBought(productResponse);
+		}
+		return recentlyBought;
+	}
+	
+	
+	
 	
 	private String getDiscountPercentage(ProductPrice productPrice){
 		BigDecimal discount = new BigDecimal(0);

@@ -53,6 +53,8 @@ public interface ProductService extends SalesManagerEntityService<Long, Product>
 	Product getByCode(String productCode, Language language);
 
 	Product getByProductId(Long productId);
+
+	List<Product> getProduct(String colName, String colValue) throws ServiceException;
 	
 }
 	
