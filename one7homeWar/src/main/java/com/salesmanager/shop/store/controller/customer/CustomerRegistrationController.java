@@ -591,7 +591,7 @@ public class CustomerRegistrationController extends AbstractController {
     		@RequestPart("file") MultipartFile vendorCertificate) throws Exception {
 		System.out.println("vendor file "+vendorCertificate);
     	CustomerResponse customerResponse = new CustomerResponse();
-/*    	SecuredShopPersistableCustomer customer = new SecuredShopPersistableCustomer();
+    	SecuredShopPersistableCustomer customer = new SecuredShopPersistableCustomer();
     	customer.setEmailAddress(vendorRequest.getEmail());
     	customer.setPassword(vendorRequest.getPassword());
     	customer.setCheckPassword(vendorRequest.getConfirmPassword());
@@ -726,7 +726,7 @@ public class CustomerRegistrationController extends AbstractController {
 
 		
 		emailService.sendHtmlEmail(merchantStore, email);
-*/		return customerResponse;         
+		return customerResponse;         
     }
 	@RequestMapping(value="/user/activate", method = RequestMethod.POST, 
 			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
