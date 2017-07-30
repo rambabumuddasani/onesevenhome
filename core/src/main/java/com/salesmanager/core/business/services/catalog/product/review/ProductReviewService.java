@@ -21,7 +21,5 @@ public interface ProductReviewService extends
 	 * @return
 	 */
 	List<ProductReview> getByProductNoCustomers(Product product);
-
-
-
+	List<ProductReview> getByProductId(Long id);
 }

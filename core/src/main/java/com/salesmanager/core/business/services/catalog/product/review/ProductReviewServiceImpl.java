@@ -43,6 +43,12 @@ public class ProductReviewServiceImpl extends
 	public List<ProductReview> getByProduct(Product product) {
 		return productReviewRepository.findByProduct(product.getId());
 	}
+
+	@Override
+	public List<ProductReview> getByProductId(Long id) {
+		return productReviewRepository.findByProduct(id);
+	}
+
 	
 	@Override
 	public ProductReview getByProductAndCustomer(Long productId, Long customerId) {

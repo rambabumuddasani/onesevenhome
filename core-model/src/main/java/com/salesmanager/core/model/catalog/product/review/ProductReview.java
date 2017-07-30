@@ -22,6 +22,9 @@ import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.Type;
+import org.hibernate.validator.constraints.NotEmpty;
+
 import com.salesmanager.core.constants.SchemaConstant;
 import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.common.audit.AuditListener;
@@ -67,6 +70,15 @@ public class ProductReview extends SalesManagerEntity<Long, ProductReview> imple
 	@JoinColumn(name="PRODUCT_ID")
 	private Product product;
 
+	@NotEmpty
+	@Column(name="DESCRIPTION_NAME", nullable = true, length=120)
+	private String descriptionName;
+	
+	
+	@Column(name="DESCRIPTION")
+	@Type(type = "org.hibernate.type.StringClobType")
+	private String description;
+
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "productReview")
 	private Set<ProductReviewDescription> descriptions = new HashSet<ProductReviewDescription>();
 	
@@ -79,6 +91,23 @@ public class ProductReview extends SalesManagerEntity<Long, ProductReview> imple
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+
+	public String getDescriptionName() {
+		return descriptionName;
+	}
+
+	public void setDescriptionName(String descriptionName) {
+		this.descriptionName = descriptionName;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public Double getReviewRating() {
