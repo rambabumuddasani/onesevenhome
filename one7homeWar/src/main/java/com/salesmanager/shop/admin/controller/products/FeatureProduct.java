@@ -1,16 +1,16 @@
 package com.salesmanager.shop.admin.controller.products;
 
+import java.util.List;
+
 public class FeatureProduct {
 	
-	ProductResponse featureProducts;
+	List<ProductResponse> feaureProducts;
 
-	public ProductResponse getFeatureProducts() {
-		return featureProducts;
+	public List<ProductResponse> getFeaureProducts() {
+		return feaureProducts;
 	}
 
-	public void setFeatureProducts(ProductResponse featureProducts) {
-		this.featureProducts = featureProducts;
+	public void setFeaureProducts(List<ProductResponse> feaureProducts) {
+		this.feaureProducts = feaureProducts;
 	}
-	
-
 }

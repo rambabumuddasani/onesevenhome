@@ -1,14 +1,16 @@
 package com.salesmanager.shop.admin.controller.products;
 
+import java.util.List;
+
 public class RecommendedProduct {
 	
-	ProductResponse recommendedProducts;
+	List<ProductResponse> recommendedProducts;
 
-	public ProductResponse getRecommendedProducts() {
+	public List<ProductResponse> getRecommendedProducts() {
 		return recommendedProducts;
 	}
 
-	public void setRecommendedProducts(ProductResponse recommendedProducts) {
+	public void setRecommendedProducts(List<ProductResponse> recommendedProducts) {
 		this.recommendedProducts = recommendedProducts;
 	}
 	

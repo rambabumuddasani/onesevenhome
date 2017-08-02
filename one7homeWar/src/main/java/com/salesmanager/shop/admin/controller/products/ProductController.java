@@ -270,38 +270,51 @@ public class ProductController extends AbstractController {
 		return "admin-products-edit";
 	}
 	
-
-	@PreAuthorize("hasRole('PRODUCTS')")
-	@RequestMapping(value="/admin/products/save.html", method=RequestMethod.POST)
-	public String saveProduct(@Valid @ModelAttribute("product") com.salesmanager.shop.admin.model.catalog.Product  product, BindingResult result, Model model, HttpServletRequest request, Locale locale) throws Exception {
+	@RequestMapping(value="/products/dummy", method=RequestMethod.GET,produces=MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public com.salesmanager.shop.admin.model.catalog.Product getDummyProduct(){
 		
+		com.salesmanager.shop.admin.model.catalog.Product product = new com.salesmanager.shop.admin.model.catalog.Product();
+		product.setProductPrice("400");
+		product.setDateAvailable("2017-08-02");
+		ProductAvailability productAvailabilty = new ProductAvailability();
+		productAvailabilty.setProductQuantity(10);
+		productAvailabilty.setProductQuantityOrderMin(1);
+		productAvailabilty.setProductQuantityOrderMax(5);
+		product.setAvailability(productAvailabilty);
+		Product dbProduct = productService.getById(100l) ;
+	    product.setProduct(dbProduct);
+		return product;
+	    
+	}
 
-		Language language = (Language)request.getAttribute("LANGUAGE");
+	//@PreAuthorize("hasRole('PRODUCTS')")
+	@RequestMapping(value="/products/save", method=RequestMethod.POST)
+	public String saveProduct(@RequestBody com.salesmanager.shop.admin.model.catalog.Product  product ,HttpServletRequest request, Locale locale) throws Exception {
+		
+		
+		//Language language = (Language)request.getAttribute("LANGUAGE");
 		
 		//display menu
-		setMenu(model,request);
+		//setMenu(model,request);
 		
-		MerchantStore store = (MerchantStore)request.getAttribute(Constants.ADMIN_STORE);
+		MerchantStore store = (MerchantStore)request.getAttribute(Constants.CUSTOMER);
 		
-		List<Manufacturer> manufacturers = manufacturerService.listByStore(store, language);
+		//List<Manufacturer> manufacturers = manufacturerService.listByStore(store, language);
 		
-		List<ProductType> productTypes = productTypeService.list();
+		//List<ProductType> productTypes = productTypeService.list();
 		
-		List<TaxClass> taxClasses = taxClassService.listByStore(store);
+		//List<TaxClass> taxClasses = taxClassService.listByStore(store);
 		
 		List<Language> languages = store.getLanguages();
-		
-		model.addAttribute("manufacturers", manufacturers);
-		model.addAttribute("productTypes", productTypes);
-		model.addAttribute("taxClasses", taxClasses);
-		
+				
 		//validate price
 		BigDecimal submitedPrice = null;
 		try {
 			submitedPrice = priceUtil.getAmount(product.getProductPrice());
 		} catch (Exception e) {
 			ObjectError error = new ObjectError("productPrice",messages.getMessage("NotEmpty.product.productPrice", locale));
-			result.addError(error);
+			//result.addError(error);
 		}
 		Date date = new Date();
 		if(!StringUtils.isBlank(product.getDateAvailable())) {
@@ -311,7 +324,7 @@ public class ProductController extends AbstractController {
 				product.setDateAvailable(DateUtil.formatDate(date));
 			} catch (Exception e) {
 				ObjectError error = new ObjectError("dateAvailable",messages.getMessage("message.invalid.date", locale));
-				result.addError(error);
+				//result.addError(error);
 			}
 		}
 		
@@ -335,7 +348,7 @@ public class ProductController extends AbstractController {
 					int maxImageHeight = Integer.parseInt(maxHeight);
 					if(image.getHeight()>maxImageHeight) {
 						ObjectError error = new ObjectError("image",messages.getMessage("message.image.height", locale) + " {"+maxHeight+"}");
-						result.addError(error);
+						//result.addError(error);
 					}
 					
 				}
@@ -345,7 +358,7 @@ public class ProductController extends AbstractController {
 					int maxImageWidth = Integer.parseInt(maxWidth);
 					if(image.getWidth()>maxImageWidth) {
 						ObjectError error = new ObjectError("image",messages.getMessage("message.image.width", locale) + " {"+maxWidth+"}");
-						result.addError(error);
+						//result.addError(error);
 					}
 					
 				}
@@ -355,7 +368,7 @@ public class ProductController extends AbstractController {
 					int maxImageSize = Integer.parseInt(maxSize);
 					if(product.getImage().getSize()>maxImageSize) {
 						ObjectError error = new ObjectError("image",messages.getMessage("message.image.size", locale) + " {"+maxSize+"}");
-						result.addError(error);
+						//result.addError(error);
 					}
 					
 				}
@@ -370,10 +383,10 @@ public class ProductController extends AbstractController {
 		
 		
 		
-		if (result.hasErrors()) {
+/*		if (result.hasErrors()) {
 			return "admin-products-edit";
 		}
-		
+*/		
 		Product newProduct = product.getProduct();
 		ProductAvailability newProductAvailability = null;
 		ProductPrice newProductPrice = null;
@@ -392,7 +405,7 @@ public class ProductController extends AbstractController {
 			//get actual product
 			newProduct = productService.getById(product.getProduct().getId());
 			if(newProduct!=null && newProduct.getMerchantStore().getId().intValue()!=store.getId().intValue()) {
-				return "redirect:/admin/products/products.html";
+				return "Product already exist";
 			}
 			
 			//copy properties
@@ -544,9 +557,9 @@ public class ProductController extends AbstractController {
 		//}
 		
 		productService.create(newProduct);
-		model.addAttribute("success","success");
+		//model.addAttribute("success","success");
 		
-		return "admin-products-edit";
+		return "Product added successfully";
 	}
 	
 	
@@ -1127,7 +1140,7 @@ public class ProductController extends AbstractController {
 			//Product dbProduct = productService.getById(productId);
 			
 			product.setProduct(dbProduct);
-			Set<ProductDescription> productDescriptions = dbProduct.getDescriptions();
+			//Set<ProductDescription> productDescriptions = dbProduct.getDescriptions();
 			
 			/*for(Language l : languages) {
 				
@@ -1155,9 +1168,7 @@ public class ProductController extends AbstractController {
 					product.setProductImage(image);
 					break;
 				}
-
 			}
-			
 			
 			ProductAvailability productAvailability = null;
 			ProductPrice productPrice = null;
@@ -1269,7 +1280,7 @@ public class ProductController extends AbstractController {
 		System.out.println("getProductForCat ==");
 		PaginatedResponse paginatedResponse = new PaginatedResponse();
 		ProductResponse productResponse = new ProductResponse();
-
+		
 		categoryId = categoryId.replaceAll("_", " ");
 		Category category = categoryService.getByCategoryCode(categoryId);
 		List<ProductResponse> responses = new ArrayList<ProductResponse>();
@@ -1345,17 +1356,18 @@ public class ProductController extends AbstractController {
 		
 		NewProducts newProducts = new NewProducts();
 		ProductResponse productResponse = new ProductResponse();
-
 		List<Product> dbProducts = productService.getProduct("newProduct","Y");
 
+		List<ProductResponse>  productResponseList = new ArrayList<ProductResponse>();
 		for(Product product:dbProducts) {
 			productResponse = getProductDetails(product,true);
-			newProducts.setNewProducts(productResponse);
+		    productResponseList.add(productResponse);   
 		}
+		newProducts.setNewProducts(productResponseList);
 		return newProducts;
 	}
 	
-	@RequestMapping(value="/getfeatureProduct", method = RequestMethod.GET, 
+	@RequestMapping(value="/getFeatureProduct", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public FeatureProduct getfeatureProduct() throws Exception {
@@ -1366,11 +1378,12 @@ public class ProductController extends AbstractController {
 		ProductResponse productResponse = new ProductResponse();
 
 		List<Product> dbProducts = productService.getProduct("featuredProduct","Y");
-
+		List<ProductResponse>  productResponseList = new ArrayList<ProductResponse>();
 		for(Product product:dbProducts) {
 			productResponse = getProductDetails(product,true);
-			featureProduct.setFeatureProducts(productResponse);
+			productResponseList.add(productResponse);
 		}
+		featureProduct.setFeaureProducts(productResponseList);
 		return featureProduct;
 	}
 	
@@ -1385,11 +1398,12 @@ public class ProductController extends AbstractController {
 		ProductResponse productResponse = new ProductResponse();
 
 		List<Product> dbProducts = productService.getProduct("recommendedProduct","Y");
-
+		List<ProductResponse>  productResponseList = new ArrayList<ProductResponse>();
 		for(Product product:dbProducts) {
 			productResponse = getProductDetails(product,true);
-			recommendedProduct.setRecommendedProducts(productResponse);
+			productResponseList.add(productResponse);
 		}
+		recommendedProduct.setRecommendedProducts(productResponseList);
 		return recommendedProduct;
 	}
 	
@@ -1404,11 +1418,12 @@ public class ProductController extends AbstractController {
 		ProductResponse productResponse = new ProductResponse();
 
 		List<Product> dbProducts = productService.getProduct("recentlyBought","Y");
-
+		List<ProductResponse>  productResponseList = new ArrayList<ProductResponse>();
 		for(Product product:dbProducts) {
 			productResponse = getProductDetails(product,true);
-			recentlyBought.setRecentBought(productResponse);
+			productResponseList.add(productResponse);
 		}
+		recentlyBought.setRecentlyBought(productResponseList);
 		return recentlyBought;
 	}
 	

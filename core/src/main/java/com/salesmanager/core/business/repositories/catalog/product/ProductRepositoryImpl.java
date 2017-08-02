@@ -206,26 +206,26 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 			qs.append("left join fetch p.categories categs ");
 			qs.append("left join fetch pa.prices pap ");
 			qs.append("left join fetch pap.descriptions papd ");
-			qs.append("left join fetch categs.descriptions categsd ");
+			//qs.append("left join fetch categs.descriptions categsd ");
 			
 			//images
 			qs.append("left join fetch p.images images ");
 			//options
-			qs.append("left join fetch p.attributes pattr ");
-			qs.append("left join fetch pattr.productOption po ");
-			qs.append("left join fetch po.descriptions pod ");
-			qs.append("left join fetch pattr.productOptionValue pov ");
-			qs.append("left join fetch pov.descriptions povd ");
-			qs.append("left join fetch p.relationships pr ");
+			//qs.append("left join fetch p.attributes pattr ");
+			//qs.append("left join fetch pattr.productOption po ");
+			//qs.append("left join fetch po.descriptions pod ");
+			//qs.append("left join fetch pattr.productOptionValue pov ");
+			//qs.append("left join fetch pov.descriptions povd ");
+			//qs.append("left join fetch p.relationships pr ");
 			//other lefts
 			qs.append("left join fetch p.manufacturer manuf ");
 			qs.append("left join fetch manuf.descriptions manufd ");
-			qs.append("left join fetch p.type type ");
-			qs.append("left join fetch p.taxClass tx ");
+			//qs.append("left join fetch p.type type ");
+			//qs.append("left join fetch p.taxClass tx ");
 			
-			qs.append("where pap.productPriceSpecialStartDate <= sysdate() and pap.productPriceSpecialEndDate >= sysdate()");
-		
-			qs.append(" and pap."+columnName+"="+"'"+coulumnValue+"'");
+			//qs.append("where pap.productPriceSpecialStartDate <= sysdate() and pap.productPriceSpecialEndDate >= sysdate()");
+			qs.append(" where pap."+columnName+"="+"'"+coulumnValue+"'");
+			//qs.append(" and pap."+columnName+"="+"'"+coulumnValue+"'");
 			//qs.append(" and pap.dealOfDay ='Y'");
 	
 	    	String hql = qs.toString();
@@ -235,7 +235,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 	
 			List<Product> products =  q.getResultList();
 	
-	
+	        System.out.println("Products  ==" +products);
 			return products;
 		
 		} catch(javax.persistence.NoResultException ers) {

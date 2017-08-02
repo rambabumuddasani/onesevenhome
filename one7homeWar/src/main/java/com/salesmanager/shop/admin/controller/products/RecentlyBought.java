@@ -1,16 +1,17 @@
 package com.salesmanager.shop.admin.controller.products;
 
+import java.util.List;
+
 public class RecentlyBought {
 	
-	ProductResponse recentBought;
+	List<ProductResponse> recentlyBought;
 
-	public ProductResponse getRecentBought() {
-		return recentBought;
+	public List<ProductResponse> getRecentlyBought() {
+		return recentlyBought;
 	}
 
-	public void setRecentBought(ProductResponse recentBought) {
-		this.recentBought = recentBought;
-	}
+	public void setRecentlyBought(List<ProductResponse> recentlyBought) {
+		this.recentlyBought = recentlyBought;
+	} 
 	
-
 }
