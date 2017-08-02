@@ -622,11 +622,11 @@ public class CustomerRegistrationController extends AbstractController {
     	try{
 			certFileName = storageService.store(vendorCertificate);
     	}catch(StorageException se){
-    		System.out.println("StoreException occured, do wee need continue ");
-    		
+    		System.out.println("StoreException occured, do wee need continue "+se);
     	}
     	
     	Vendor vendorAttrs = new Vendor();
+    	//vendorAttrs.setVendorAuthCert(certFileName);
     	vendorAttrs.setVendorName(vendorRequest.getVendorName());
     	vendorAttrs.setVendorOfficeAddress(vendorRequest.getVendorOfficeAddress());
     	vendorAttrs.setVendorMobile(vendorRequest.getVendorMobile());
@@ -636,7 +636,7 @@ public class CustomerRegistrationController extends AbstractController {
     	vendorAttrs.setVendorCompanyNature(vendorRequest.getVendorCompanyNature());
     	vendorAttrs.setVendorRegistrationNo(vendorRequest.getVendorRegistrationNo());
     	vendorAttrs.setVendorPAN(vendorRequest.getVendorPAN());
-    	vendorAttrs.setVendorAuthCert(vendorRequest.getVendorAuthCert()); // do we need to comment this line
+    	//vendorAttrs.setVendorAuthCert(vendorRequest.getVendorAuthCert()); // do we need to comment this line
     	vendorAttrs.setVendorExpLine(vendorRequest.getVendorExpLine());
     	vendorAttrs.setVendorMajorCust(vendorRequest.getVendorMajorCust());
     	//vendorAttrs.setVendorTerms(vendorRequest.getVendorTerms());
@@ -652,10 +652,8 @@ public class CustomerRegistrationController extends AbstractController {
         Language language = languageService.getByCode( Constants.DEFAULT_LANGUAGE );
         String userName = null;
         String password = null;
-        if ( StringUtils.isNotBlank( customer.getUserName() ) )
-        {
-            if ( customerFacade.checkIfUserExists( customer.getUserName(), merchantStore ) )
-            {
+        if ( StringUtils.isNotBlank( customer.getUserName() ) ) {
+            if ( customerFacade.checkIfUserExists( customer.getUserName(), merchantStore ) ) {
                 LOGGER.debug( "Customer with username {} already exists for this store ", customer.getUserName() );
             	customerResponse.setErrorMessage(messages.getMessage("registration.username.already.exists", locale));
             	return customerResponse;
@@ -664,15 +662,12 @@ public class CustomerRegistrationController extends AbstractController {
         }
         
         
-        if ( StringUtils.isNotBlank( customer.getPassword() ) &&  StringUtils.isNotBlank( customer.getCheckPassword() ))
-        {
-            if (! customer.getPassword().equals(customer.getCheckPassword()) )
-            {
+        if ( StringUtils.isNotBlank( customer.getPassword() ) &&  StringUtils.isNotBlank( customer.getCheckPassword() )) {
+            if (! customer.getPassword().equals(customer.getCheckPassword()) ) {
             	customerResponse.setErrorMessage(messages.getMessage("message.password.checkpassword.identical", locale));
             	return customerResponse;
             }
             password = customer.getPassword();
-            	
         }	
         if ( StringUtils.isBlank( vendorRequest.getActivationURL() ))
         {
