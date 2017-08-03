@@ -43,7 +43,7 @@ public class VendorAttributes {
 	@Column (name ="VENDOR_LICENCE_NUMBER", length=20)
 	private String vendorLicense;
 
-	@Column (name ="VENDOR_AUTH_CERT", length=20)
+	@Column (name ="VENDOR_AUTH_CERT", length=200)
 	private String vendorAuthCert;
 
 	@Column (name ="VENDOR_EXP_LINE", length=200)

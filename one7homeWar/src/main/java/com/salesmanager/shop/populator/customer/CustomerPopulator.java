@@ -12,6 +12,7 @@ import com.salesmanager.core.business.services.reference.zone.ZoneService;
 import com.salesmanager.core.business.utils.AbstractDataPopulator;
 import com.salesmanager.core.model.common.Billing;
 import com.salesmanager.core.model.common.Delivery;
+import com.salesmanager.core.model.common.VendorAttributes;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.customer.attribute.CustomerAttribute;
 import com.salesmanager.core.model.customer.attribute.CustomerOption;
@@ -212,7 +213,30 @@ public class CustomerPopulator extends
 				
 				target.setDefaultLanguage(lang);
 			}
-
+			if(source.getCustomerType() != null){
+				target.setCustomerType(source.getCustomerType());
+			}
+			if(source.getVendor() != null) {
+				VendorAttributes vendorAttrs = new VendorAttributes();
+		    	vendorAttrs.setVendorName(source.getVendor().getVendorName());
+		    	vendorAttrs.setVendorOfficeAddress(source.getVendor().getVendorOfficeAddress());
+		    	vendorAttrs.setVendorMobile(source.getVendor().getVendorMobile());
+		    	vendorAttrs.setVendorTelephone(source.getVendor().getVendorTelephone());
+		    	vendorAttrs.setVendorFax(source.getVendor().getVendorFax());
+		    	vendorAttrs.setVendorConstFirm(source.getVendor().getVendorConstFirm());
+		    	vendorAttrs.setVendorCompanyNature(source.getVendor().getVendorCompanyNature());
+		    	vendorAttrs.setVendorRegistrationNo(source.getVendor().getVendorRegistrationNo());
+		    	vendorAttrs.setVendorPAN(source.getVendor().getVendorPAN());
+		    	vendorAttrs.setVendorAuthCert(source.getVendor().getVendorAuthCert());
+		    	vendorAttrs.setVendorExpLine(source.getVendor().getVendorExpLine());
+		    	vendorAttrs.setVendorMajorCust(source.getVendor().getVendorMajorCust());
+				vendorAttrs.setVendorVatRegNo(source.getVendor().getVendorVatRegNo());
+				
+				target.setVendorAttrs(vendorAttrs);
+			}
+			if(source.getActivated() != null){
+				target.setActivated(source.getActivated());
+			}
 		
 		} catch (Exception e) {
 			throw new ConversionException(e);

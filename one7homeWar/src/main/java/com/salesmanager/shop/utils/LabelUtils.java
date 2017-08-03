@@ -15,7 +15,6 @@ public class LabelUtils implements ApplicationContextAware {
 	public void setApplicationContext(ApplicationContext applicationContext)
 			throws BeansException {
 		this.applicationContext = applicationContext;
-
 	}
 	
 	public String getMessage(String key, Locale locale) {
