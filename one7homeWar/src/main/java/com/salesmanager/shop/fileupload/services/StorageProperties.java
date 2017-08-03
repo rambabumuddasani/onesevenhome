@@ -11,8 +11,9 @@ public class StorageProperties {
      * Folder location for storing files
      */
    // private String location = "upload-dir";
-	private String location = "F:\\cores\\";	// in Windows
-	//private String location = "/opt/img/vendor/"; // in UNIX 
+	//private String location = "F:\\cores\\";	// in Windows
+	private String location = "/opt/img/vendor/certificate/"; // in UNIX 
+	
 	public String getLocation() {
         return location;
     }

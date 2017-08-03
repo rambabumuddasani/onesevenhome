@@ -621,6 +621,7 @@ public class CustomerRegistrationController extends AbstractController {
     	String certFileName = "";
     	try{
 			certFileName = storageService.store(vendorCertificate);
+			System.out.println("certFileName "+certFileName);
     	}catch(StorageException se){
     		System.out.println("StoreException occured, do wee need continue "+se);
     	}

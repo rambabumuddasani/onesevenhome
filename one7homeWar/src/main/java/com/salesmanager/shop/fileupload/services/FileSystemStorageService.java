@@ -96,7 +96,7 @@ public class FileSystemStorageService implements StorageService {
 	@Override
 	public void deleteFile(String fileName){
 		try {
-			Files.delete(Paths.get(rootLocation.toAbsolutePath().toString()+fileName)); // rootpath + fileName
+			Files.delete(Paths.get(fileName)); // fileName (i.e. filePath+fileName)
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			System.out.println("failed to delete the file");
