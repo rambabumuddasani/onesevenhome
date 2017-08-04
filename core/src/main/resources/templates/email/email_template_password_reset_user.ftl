@@ -32,10 +32,7 @@ a:visited {color:#0066cc;}
   <!-- Content Section -->
   <div class="content">
     <div class="content-line">
-    	${EMAIL_STORE_NAME}<br /><br />
     	<p>${EMAIL_RESET_PASSWORD_TXT}</p><br/>
-    	${EMAIL_PASSWORD_LABEL}: ${EMAIL_USER_PASSWORD}<br /><br />
-    	${EMAIL_CONTACT_OWNER}
   	</div>
 </div>
 
@@ -48,7 +45,6 @@ a:visited {color:#0066cc;}
 
 <div class="disclaimer">
   <div class="disclaimer1">${EMAIL_DISCLAIMER}</div>
-  <div class="disclaimer2">${EMAIL_SPAM_DISCLAIMER}</div>
 </div>
 </body>
 </html>

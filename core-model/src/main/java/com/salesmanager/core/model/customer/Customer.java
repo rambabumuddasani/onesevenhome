@@ -94,6 +94,9 @@ public class Customer extends SalesManagerEntity<Long, Customer> {
 	@Column(name="ACTIVATED", length=2)
 	private String activated;
 	
+	@Column(name="OFID", length=50)
+	private String ofid;
+
 	@ManyToOne(fetch = FetchType.LAZY, targetEntity = Language.class)
 	@JoinColumn(name = "LANGUAGE_ID", nullable=false)
 	private Language defaultLanguage;
@@ -319,6 +322,14 @@ public class Customer extends SalesManagerEntity<Long, Customer> {
 
 	public void setActivated(String activated) {
 		this.activated = activated;
+	}
+
+	public String getOfid() {
+		return ofid;
+	}
+
+	public void setOfid(String ofid) {
+		this.ofid = ofid;
 	}
 	
 }

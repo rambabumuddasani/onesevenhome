@@ -28,8 +28,7 @@ a:visited {color:#0066cc;}
   <!-- Content Section -->
   <div class="content">
     <div class="content-line">
-    	${EMAIL_PASSWORD_LINK}<br /><br />
-		<br /><br />
+    	${EMAIL_TEXT_NEW_USER_ACTIVATION_LINK}<br /><br />
     </div>
 </div>
 
@@ -39,9 +38,9 @@ a:visited {color:#0066cc;}
   <div class="footer">
     <div class="copyright">${EMAIL_FOOTER_COPYRIGHT}</div>
   </div>
-
 <div class="disclaimer">
   <div class="disclaimer1">${EMAIL_DISCLAIMER}</div>
 </div>
+  
 </body>
 </html>

@@ -29,8 +29,15 @@ import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
 import com.salesmanager.core.model.tax.taxclass.TaxClass;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import org.springframework.web.bind.annotation.PathVariable;
+import com.salesmanager.shop.admin.controller.products.ProductResponse;
+import com.salesmanager.shop.admin.controller.products.TodaysDeals;
 //import com.salesmanager.shop.admin.model.web.Menu;
 import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.controller.AbstractController;
@@ -1231,6 +1238,42 @@ public class ProductController extends AbstractController {
 	@RequestMapping(value="/getTodaysDeals", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
+	public TodaysDeals getTodaysDeals() throws Exception {
+		
+		System.out.println("getTodaysDeals ==");
+		
+		TodaysDeals todaysDeals = new TodaysDeals();
+		ProductResponse productResponse = new ProductResponse();
+
+		List<Product> dbProducts = productService.getTodaysDeals();
+		
+		List<ProductResponse> responses = new ArrayList<ProductResponse>();
+		for(Product product:dbProducts) {
+			productResponse = getProductDetails(product,true);
+			Set<Category> dbCategories= product.getCategories();
+			List<com.salesmanager.shop.admin.controller.products.Category> categoriesList = new ArrayList<com.salesmanager.shop.admin.controller.products.Category>();
+			for(Category category:dbCategories){
+				com.salesmanager.shop.admin.controller.products.Category cat = new com.salesmanager.shop.admin.controller.products.Category();
+				if(category.getParent() == null)
+					cat.setName(category.getCode());
+				else {
+					System.out.println("parent cat code =="+category.getParent().getCode());
+					cat.setName(category.getParent().getCode());	
+				}
+				
+				categoriesList.add(cat);
+			}
+			productResponse.setCategories(categoriesList);
+			responses.add(productResponse);
+		}
+		
+		todaysDeals.setTodaysDealsData(responses);
+		return todaysDeals;
+	}
+	
+/*	@RequestMapping(value="/getTodaysDeals", method = RequestMethod.GET, 
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
 	public TodaysDeals getTodaysDeals(@RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
 		
 		System.out.println("getTodaysDeals ==");
@@ -1269,13 +1312,41 @@ public class ProductController extends AbstractController {
 		List<ProductResponse> paginatedProdResponses = responses.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
 		todaysDeals.setTodaysDealsData(paginatedProdResponses);
 		return todaysDeals;
-	}
+	}*/
 
 	@RequestMapping(value="/categories/{categoryId}", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public PaginatedResponse getProductForCat(@PathVariable String categoryId,
-			@RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+	public List<ProductResponse> getProductForCat(@PathVariable String categoryId) throws Exception {
+		
+		System.out.println("getProductForCat ==");
+		
+		ProductResponse productResponse = new ProductResponse();
+
+		categoryId = categoryId.replaceAll("_", " ");
+		Category category = categoryService.getByCategoryCode(categoryId);
+		List<ProductResponse> responses = new ArrayList<ProductResponse>();
+		List<Product> tdProducts = productService.getTodaysDeals();
+		Map<Long,Product> todaysDealsMap = null;
+		List<Product> dbProducts = null;
+		responses = invokeProductsData(todaysDealsMap, categoryId,responses,productResponse,tdProducts);
+		if(category.getParent() == null){
+			List<Category> childCatList = category.getCategories();
+			
+			for(Category childCat:childCatList){
+				responses = invokeProductsData(todaysDealsMap, childCat.getCode(),responses,productResponse,tdProducts);
+				//break;
+			}
+		}
+		return responses;
+	}
+	
+/*	@RequestMapping(value="/categories/{categoryId}", method = RequestMethod.GET, 
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public PaginatedResponse getProductForCat(@PathVariable String categoryId) throws Exception {
+	//public PaginatedResponse getProductForCat(@PathVariable String categoryId,
+	//			@RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
 		
 		System.out.println("getProductForCat ==");
 		PaginatedResponse paginatedResponse = new PaginatedResponse();
@@ -1307,7 +1378,8 @@ public class ProductController extends AbstractController {
     	List<ProductResponse> paginatedResponses = responses.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
     	paginatedResponse.setResponseData(paginatedResponses);
 		return paginatedResponse;
-	}
+		
+	} */
 
 	public List<ProductResponse> invokeProductsData(Map<Long,Product> todaysDealsMap,
 			String categoryId,List<ProductResponse> responses,

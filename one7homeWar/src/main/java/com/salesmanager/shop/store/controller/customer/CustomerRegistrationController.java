@@ -6,6 +6,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -66,12 +67,17 @@ import com.salesmanager.shop.model.shoppingcart.ShoppingCartData;
 import com.salesmanager.shop.populator.shoppingCart.ShoppingCartDataPopulator;
 import com.salesmanager.shop.store.controller.AbstractController;
 import com.salesmanager.shop.store.controller.ControllerConstants;
+import com.salesmanager.shop.store.controller.customer.ForgotPwdRequest;
+import com.salesmanager.shop.store.controller.customer.ForgotPwdResponse;
 import com.salesmanager.shop.store.controller.customer.facade.CustomerFacade;
 import com.salesmanager.shop.utils.CaptchaRequestUtils;
 import com.salesmanager.shop.utils.EmailTemplatesUtils;
 import com.salesmanager.shop.utils.EmailUtils;
 import com.salesmanager.shop.utils.ImageFilePath;
 import com.salesmanager.shop.utils.LabelUtils;
+import com.salesmanager.shop.store.controller.customer.ForgotPwdRequest;
+import com.salesmanager.shop.store.controller.customer.ForgotPwdResponse;
+import com.salesmanager.shop.store.controller.customer.facade.CustomerFacade;
 
 //import com.salesmanager.core.business.customer.CustomerRegistrationException;
 
@@ -105,16 +111,10 @@ public class CustomerRegistrationController extends AbstractController {
 	private ZoneService zoneService;
 
 	@Inject
-	private PasswordEncoder passwordEncoder;
-
-	@Inject
 	EmailService emailService;
 
 	@Inject
 	private LabelUtils messages;
-	
-	@Inject
-	private CustomerFacade customerFacade;
 	
 	@Inject
     private AuthenticationManager customerAuthenticationManager;
@@ -144,6 +144,17 @@ public class CustomerRegistrationController extends AbstractController {
     @Inject
     private StorageService storageService;
 
+	@Inject
+	@Named("passwordEncoder")
+	private PasswordEncoder passwordEncoder;
+
+	@Inject
+	private CustomerFacade customerFacade;
+	
+	private final static String RESET_PASSWORD_TPL = "email_template_password_reset_user.ftl";	
+	private final static String NEW_USER_TMPL = "email_template_new_user.ftl";
+	private final static String FORGOT_PASSWORD_TPL = "email_template_user_password_link.ftl";
+    
 
 	private final static String NEW_USER_ACTIVATION_TMPL = "email_template_new_user_activate.ftl";
 
@@ -747,5 +758,126 @@ public class CustomerRegistrationController extends AbstractController {
 		return customerResponse;
     }
 
-    
+
+	@RequestMapping(value="/user/resetpwd", method = RequestMethod.POST, 
+			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+    public ForgotPwdResponse resetPassword(@RequestBody ForgotPwdRequest forgotPwdRequest)
+        throws Exception
+    {	
+		System.out.println("customer activate");
+		ForgotPwdResponse forgotPwdResponse = new ForgotPwdResponse();
+		if(("").equals(forgotPwdRequest.getForgotPwdURL())){
+        	forgotPwdResponse.setErrorMessage("Forgot password link not available");
+        	return forgotPwdResponse;
+		}
+		MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT"); 
+		final Locale locale  = new Locale("en");
+        Customer customer = customerFacade.getCustomerByUserName(forgotPwdRequest.getEmail(), merchantStore );
+        if ( customer == null )
+        {
+        	forgotPwdResponse.setErrorMessage("Email not available");
+        	return forgotPwdResponse;
+        }
+        
+		long currentTime = System.currentTimeMillis();
+		String ofid = String.valueOf(Math.round(currentTime * Math.random()));
+		if(ofid.length() > 40)
+			ofid = ofid.substring(0, 40);
+		
+		customer.setOfid(ofid);
+		customerFacade.updateCustomer(customer);
+        String forgotPwdURL = forgotPwdRequest.getForgotPwdURL()+"?ofid="+ofid;
+        
+        //sending email
+        String[] forgotPwdURLArg = {forgotPwdURL};
+        Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
+		templateTokens.put(EmailConstants.EMAIL_ADMIN_USERNAME_LABEL, messages.getMessage("label.generic.username",locale));
+		templateTokens.put(EmailConstants.EMAIL_PASSWORD_LINK, messages.getMessage("email.user.text.forgotpwd.link",forgotPwdURLArg,locale));
+		templateTokens.put(EmailConstants.EMAIL_ADMIN_PASSWORD_LABEL, messages.getMessage("label.generic.password",locale));
+		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
+		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
+
+		
+		Email email = new Email();
+		email.setFrom(merchantStore.getStorename());
+		email.setFromEmail(merchantStore.getStoreEmailAddress());
+		email.setSubject(messages.getMessage("email.user.text.forgotpwd",locale));
+		email.setTo(forgotPwdRequest.getEmail());
+		email.setTemplateName(FORGOT_PASSWORD_TPL);
+		email.setTemplateTokens(templateTokens);
+
+
+		
+		emailService.sendHtmlEmail(merchantStore, email);
+		
+		forgotPwdResponse.setSuccessMessage("Reset password email sent to the user");
+
+		return forgotPwdResponse;
+    }
+
+	@RequestMapping(value="/user/updatepwd", method = RequestMethod.POST, 
+			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+    public ForgotPwdResponse updatePassword(@RequestBody ForgotPwdRequest forgotPwdRequest)
+        throws Exception
+    {	
+		System.out.println("customer activate");
+		ForgotPwdResponse forgotPwdResponse = new ForgotPwdResponse();
+		if(("").equals(forgotPwdRequest.getOfid())){
+        	forgotPwdResponse.setErrorMessage("Invalid update password request");
+        	return forgotPwdResponse;
+		}
+		MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT"); 
+		final Locale locale  = new Locale("en");
+        Customer customer = customerFacade.getCustomerByUserName(forgotPwdRequest.getEmail(), merchantStore );
+        if ( customer == null )
+        {
+        	forgotPwdResponse.setErrorMessage("Email not available");
+        	return forgotPwdResponse;
+        }
+        
+        if ( !forgotPwdRequest.getOfid().equals(customer.getOfid()) )
+        {
+        	forgotPwdResponse.setErrorMessage("Invalid update password request");
+        	return forgotPwdResponse;
+        }
+
+        if ( !forgotPwdRequest.getNewPassword().equals(forgotPwdRequest.getConfirmPassword()) )
+        {
+        	forgotPwdResponse.setErrorMessage("New and Confirm passwords are not matching");
+        	return forgotPwdResponse;
+        }
+
+        
+        String pass = passwordEncoder.encode(forgotPwdRequest.getNewPassword());
+        customer.setPassword(pass);
+        customerFacade.updateCustomer(customer);
+        
+        //sending email
+        Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
+		templateTokens.put(EmailConstants.EMAIL_ADMIN_USERNAME_LABEL, messages.getMessage("label.generic.username",locale));
+		templateTokens.put(EmailConstants.EMAIL_RESET_PASSWORD_TXT, messages.getMessage("email.user.resetpassword.text",locale));
+		templateTokens.put(EmailConstants.EMAIL_ADMIN_PASSWORD_LABEL, messages.getMessage("label.generic.password",locale));
+		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
+		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
+
+		
+		Email email = new Email();
+		email.setFrom(merchantStore.getStorename());
+		email.setFromEmail(merchantStore.getStoreEmailAddress());
+		email.setSubject(messages.getMessage("email.user.text.forgotpwd.confirmation",locale));
+		email.setTo(forgotPwdRequest.getEmail());
+		email.setTemplateName(RESET_PASSWORD_TPL);
+		email.setTemplateTokens(templateTokens);
+
+
+		
+		emailService.sendHtmlEmail(merchantStore, email);
+		
+		forgotPwdResponse.setSuccessMessage("Password update success. Update password email sent to the user");
+
+		return forgotPwdResponse;
+    }
+	
 }
