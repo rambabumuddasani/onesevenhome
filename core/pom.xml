@@ -60,12 +60,12 @@
 		</dependency>
 		
 		<!-- canadapost -->
-		<dependency>
+<!-- 		<dependency>
 			<groupId>com.rainiersoft</groupId>
 			<artifactId>canadapost-module</artifactId>
 			<version>${e-construct-canadapost.version}</version>
 		</dependency>
-
+ -->
 		<!-- Rules engine -->
 		<dependency>
 			<groupId>org.drools</groupId>
