@@ -519,6 +519,8 @@ public class CustomerRegistrationController extends AbstractController {
         Language language = languageService.getByCode( Constants.DEFAULT_LANGUAGE );
         String userName = null;
         String password = null;
+        customerResponse.setStatus("false");
+        
         if ( StringUtils.isNotBlank( customer.getUserName() ) )
         {
             if ( customerFacade.checkIfUserExists( customer.getUserName(), merchantStore ) )
@@ -554,6 +556,7 @@ public class CustomerRegistrationController extends AbstractController {
         {
             //set user clear password
         	customer.setClearPassword(password);
+        	customer.setActivated("0");
         	customerData = customerFacade.registerCustomer( customer, merchantStore, language );
             System.out.println("customerData is "+customerData);
         }       catch ( Exception e )
@@ -565,8 +568,8 @@ public class CustomerRegistrationController extends AbstractController {
          
        
         customerResponse.setSuccessMessage(messages.getMessage("success.newuser.msg",locale));
-        
-        String activationURL = customerRequest.getActivationURL()+"?emailid="+customerRequest.getEmail();
+        customerResponse.setStatus("true");
+        String activationURL = customerRequest.getActivationURL()+"?email="+customerRequest.getEmail();
         //sending email
         String[] activationURLArg = {activationURL};
         Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
@@ -598,10 +601,12 @@ public class CustomerRegistrationController extends AbstractController {
 
 	@RequestMapping(value="/vendor/register", method = RequestMethod.POST)
 	@ResponseBody
-    public CustomerResponse registerCustomer(@RequestPart("vendorRequest") VendorRequest vendorRequest,
-    		@RequestPart("file") MultipartFile vendorCertificate) throws Exception {
-		System.out.println("vendor file "+vendorCertificate);
+    public CustomerResponse registerCustomer(@RequestBody VendorRequest vendorRequest) throws Exception {
+//    public CustomerResponse registerCustomer(@RequestPart("vendorRequest") VendorRequest vendorRequest,
+  //  		@RequestPart("file") MultipartFile vendorCertificate) throws Exception {
+		//System.out.println("vendor file "+vendorCertificate);
     	CustomerResponse customerResponse = new CustomerResponse();
+        customerResponse.setStatus("false");
     	SecuredShopPersistableCustomer customer = new SecuredShopPersistableCustomer();
     	customer.setEmailAddress(vendorRequest.getEmail());
     	customer.setPassword(vendorRequest.getPassword());
@@ -629,13 +634,13 @@ public class CustomerRegistrationController extends AbstractController {
     	customer.setCustomerType("1");
 
     	// Store file into file sytem
-    	String certFileName = "";
+    	/*String certFileName = "";
     	try{
 			certFileName = storageService.store(vendorCertificate);
 			System.out.println("certFileName "+certFileName);
     	}catch(StorageException se){
     		System.out.println("StoreException occured, do wee need continue "+se);
-    	}
+    	}*/
     	
     	Vendor vendorAttrs = new Vendor();
     	//vendorAttrs.setVendorAuthCert(certFileName);
@@ -652,7 +657,7 @@ public class CustomerRegistrationController extends AbstractController {
     	vendorAttrs.setVendorExpLine(vendorRequest.getVendorExpLine());
     	vendorAttrs.setVendorMajorCust(vendorRequest.getVendorMajorCust());
     	//vendorAttrs.setVendorTerms(vendorRequest.getVendorTerms());
-    	vendorAttrs.setVendorAuthCert(certFileName);	// is it correct do we need other column to store file path.
+    	//vendorAttrs.setVendorAuthCert(certFileName);	// is it correct do we need other column to store file path.
     	
     	customer.setVendor(vendorAttrs);
     	
@@ -699,7 +704,7 @@ public class CustomerRegistrationController extends AbstractController {
             System.out.println("customerData is "+customerData);
         } catch ( Exception e )
         {	/// if any exception raised during creation of customer we have to delete the certificate
-        	storageService.deleteFile(certFileName);
+        	//storageService.deleteFile(certFileName);
             LOGGER.error( "Error while registering customer.. ", e);
             customerResponse.setErrorMessage(e.getMessage());
              return customerResponse;
@@ -707,8 +712,9 @@ public class CustomerRegistrationController extends AbstractController {
          
        
         customerResponse.setSuccessMessage("Vendor registration successfull");
-        
-        String activationURL = vendorRequest.getActivationURL()+"?emailid="+vendorRequest.getEmail();
+        customerResponse.setStatus("true");
+       
+        String activationURL = vendorRequest.getActivationURL()+"?email="+vendorRequest.getEmail();
         //sending email
         String[] activationURLArg = {activationURL};
         Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);

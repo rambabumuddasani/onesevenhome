@@ -1130,6 +1130,7 @@ public class ProductController extends AbstractController {
 		System.out.println("merchantStoreService =="+merchantStoreService);
 		
 		ProductResponse productResponse = new ProductResponse();
+		try {
 		productResponse.setProductId(dbProduct.getId());
 		MerchantStore store=merchantStoreService.getMerchantStore(MerchantStore.DEFAULT_STORE);
 		//List<ProductType> productTypes = productTypeService.list();
@@ -1212,6 +1213,11 @@ public class ProductController extends AbstractController {
 			
 			product.setDateAvailable(DateUtil.formatDate(dbProduct.getDateAvailable()));
 			
+			System.out.println("product id =="+product);
+			System.out.println("product id =="+product.getProduct().getId());
+			System.out.println("product id =="+product.getProductImage());
+			System.out.println("product id =="+product.getProductImage().getProductImageUrl());
+			
 			productResponse.setImageURL(product.getProductImage().getProductImageUrl());
 			if(isSpecial) {
 				productResponse.setProductPrice(productPrice.getProductPriceAmount());
@@ -1231,7 +1237,9 @@ public class ProductController extends AbstractController {
 				productResponse.setVendorName(description.getName());
 				productResponse.setVendorLocation(description.getTitle());
 			}
-			
+		}catch(Exception e){
+			System.out.println("product details ::"+e.getMessage());
+		}
 		return productResponse;
 	}
 
@@ -1329,13 +1337,17 @@ public class ProductController extends AbstractController {
 		List<Product> tdProducts = productService.getTodaysDeals();
 		Map<Long,Product> todaysDealsMap = null;
 		List<Product> dbProducts = null;
+		System.out.println("before invoking product for cat...");
 		responses = invokeProductsData(todaysDealsMap, categoryId,responses,productResponse,tdProducts);
+		System.out.println("category.getParent() =="+category.getParent());
 		if(category.getParent() == null){
 			List<Category> childCatList = category.getCategories();
+			System.out.println("childCatList =="+childCatList);
 			
 			for(Category childCat:childCatList){
+				System.out.println("1");
 				responses = invokeProductsData(todaysDealsMap, childCat.getCode(),responses,productResponse,tdProducts);
-				//break;
+				break;
 			}
 		}
 		return responses;
@@ -1391,8 +1403,10 @@ public class ProductController extends AbstractController {
 		}
 		for(Product product:dbProducts) {
 			if(todaysDealsMap.containsKey(product.getId())){
+				System.out.println("t1");
 				productResponse = getProductDetails(product,true);
 			} else {
+				System.out.println("p1");
 				productResponse = getProductDetails(product,false);
 			}
 			responses.add(productResponse);

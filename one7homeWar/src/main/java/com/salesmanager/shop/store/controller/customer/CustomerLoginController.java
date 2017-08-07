@@ -270,7 +270,7 @@ public class CustomerLoginController extends AbstractController {
 			loginResponse.setSuccess(true);
 			loginResponse.setUserId(customerModel.getId());
 			loginResponse.setType("CUSTOMER");
-			loginResponse.setName(customerModel.getBilling().getFirstName());
+			loginResponse.setName(customerModel.getBilling().getFirstName() + " " + customerModel.getBilling().getLastName());
 			if(customerModel.getCustomerType() != null){
 				if(customerModel.getCustomerType().equals("1")){
 					loginResponse.setType("VENDOR");
