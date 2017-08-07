@@ -144,7 +144,7 @@
 	  	<module>core</module>
 		<module>search</module>
 	  	<module>one7homeWar</module>
-		<!-- <module>canadapost</module> -->
+		<module>canadapost</module>
 		<module>shipping-distance-module</module>
 	</modules>
 
