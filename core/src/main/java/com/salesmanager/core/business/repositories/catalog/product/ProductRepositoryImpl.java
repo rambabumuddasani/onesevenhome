@@ -28,6 +28,8 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 	
     @PersistenceContext
     private EntityManager em;
+    
+    
  
 	@SuppressWarnings("rawtypes")
 	@Override
@@ -79,6 +81,59 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 		Query q = this.em.createQuery(hql);
 
     	q.setParameter("categoryCode", categoryCode);
+
+
+    	
+    	@SuppressWarnings("unchecked")
+		List<Product> products =  q.getResultList();
+
+    	
+    	return products;
+
+
+	}
+	@SuppressWarnings("rawtypes")
+	@Override
+	public List<Product> getProductsListByFilters(Set filterIds) {
+		
+
+		StringBuilder qs = new StringBuilder();
+		qs.append("select distinct p from Product as p ");
+		qs.append("join fetch p.merchantStore merch ");
+		qs.append("join fetch p.availabilities pa ");
+		qs.append("left join fetch pa.prices pap ");
+		
+		qs.append("join fetch p.descriptions pd ");
+		qs.append("join fetch p.filters filters ");
+		
+		
+		
+		qs.append("left join fetch pap.descriptions papd ");
+		
+		
+		//images
+		qs.append("left join fetch p.images images ");
+		
+		//options (do not need attributes for listings)
+		qs.append("left join fetch p.attributes pattr ");
+		qs.append("left join fetch pattr.productOption po ");
+		qs.append("left join fetch po.descriptions pod ");
+		qs.append("left join fetch pattr.productOptionValue pov ");
+		qs.append("left join fetch pov.descriptions povd ");
+		
+		//other lefts
+		qs.append("left join fetch p.manufacturer manuf ");
+		qs.append("left join fetch p.type type ");
+		qs.append("left join fetch p.taxClass tx ");
+		
+		qs.append("where filters.id in (:fid)");
+
+
+
+    	String hql = qs.toString();
+		Query q = this.em.createQuery(hql);
+
+    	q.setParameter("fid", filterIds);
 
 
     	

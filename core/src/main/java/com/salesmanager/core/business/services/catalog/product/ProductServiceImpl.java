@@ -144,7 +144,15 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 		
 	}
 	
-	
+		
+	@Override
+	public List<Product> getProductsListByFilters(List<Long> filterIds) throws ServiceException {
+		
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		Set ids = new HashSet(filterIds);
+		return productRepository.getProductsListByFilters(ids);
+		
+	}
 
 	@Override
 	public List<Product> getProductsListByCategory(String categoryCode) throws ServiceException {

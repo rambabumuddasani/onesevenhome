@@ -46,4 +46,5 @@ public interface ProductRepositoryCustom {
 		List<Product> getDealOfDay();
 
 		List<Product> getProduct(String columnName, String coulumnValue);
+		List<Product> getProductsListByFilters(@SuppressWarnings("rawtypes") Set filterIds);
 }

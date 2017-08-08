@@ -2,6 +2,7 @@ package com.salesmanager.core.business.services.catalog.product;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.services.common.generic.SalesManagerEntityService;
@@ -31,13 +32,13 @@ public interface ProductService extends SalesManagerEntityService<Long, Product>
 	List<Product> getTodaysDeals() throws ServiceException;
 	List<Product> getDealOfDay() throws ServiceException;
 	List<Product> getProductsListByCategory(String categoryCode) throws ServiceException;
-
 	ProductList listByStore(MerchantStore store, Language language,
 			ProductCriteria criteria);
 
 	List<Product> listByStore(MerchantStore store);
 
 	List<Product> listByTaxClass(TaxClass taxClass);
+	List<Product> getProductsListByFilters(List<Long> filterIds) throws ServiceException;
 
 	List<Product> getProducts(List<Long> categoryIds, Language language)
 			throws ServiceException;

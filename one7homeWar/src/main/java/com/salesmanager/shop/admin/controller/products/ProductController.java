@@ -1353,6 +1353,40 @@ public class ProductController extends AbstractController {
 		return responses;
 	}
 	
+	@RequestMapping(value="/getProductsByFilters", method = RequestMethod.POST, 
+			consumes = MediaType.APPLICATION_JSON_VALUE,
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public List<ProductResponse> getProductsByFilters(@RequestBody FiltersRequest filtersRequest) throws Exception {
+		
+		System.out.println("getProductsByFilters ==");
+		
+		List<Long> filterIds = filtersRequest.getFilterIds();
+		
+		ProductResponse productResponse = new ProductResponse();
+		List<ProductResponse> responses = new ArrayList<ProductResponse>();
+
+		if(filterIds != null) {
+			List<Product> dbProducts = productService.getProductsListByFilters(filterIds);
+			List<Product> tdProducts = productService.getTodaysDeals();
+			Map<Long,Product> todaysDealsMap = null;
+			todaysDealsMap = new HashMap<Long, Product>();
+			for(Product tdproduct:tdProducts){
+				todaysDealsMap.put(tdproduct.getId(), tdproduct);
+			}
+			for(Product product:dbProducts) {
+				if(todaysDealsMap.containsKey(product.getId())){
+					productResponse = getProductDetails(product,true);
+				} else {
+					productResponse = getProductDetails(product,false);
+				}
+				responses.add(productResponse);
+			}
+			
+		}
+		return responses;
+	}
+	
 /*	@RequestMapping(value="/categories/{categoryId}", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
