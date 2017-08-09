@@ -5,6 +5,8 @@ package com.salesmanager.shop.store.model.paging;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  *  POJO representation of pagination
  * @author Umesh Awasthi
@@ -19,11 +21,13 @@ public class PaginationData implements Serializable
     /** The number of results per page.*/
     private int pageSize;
     private int currentPage;
+    @JsonIgnore
     private int offset ;
     private int totalCount;
     private int totalPages;
+    @JsonIgnore
     private int countByPage;
-    private int to;
+    //private int to;
     
     public PaginationData(int pageSize,int currentPage) {
         if (pageSize == 0)
@@ -46,12 +50,12 @@ public class PaginationData implements Serializable
     *
     * @return the page number
     */
-    public int getPageNumber() {
+   /* public int getPageNumber() {
         if (offset < pageSize || pageSize == 0)
             return 1;
 
         return (offset / pageSize) + 1;
-    }
+    }*/
     
     
     /**
@@ -60,7 +64,7 @@ public class PaginationData implements Serializable
     * @return the offset
     */
         public int getOffset() {
-            return (currentPage - 1) * pageSize + 1;
+            return ((currentPage - 1) * pageSize + 1)-1;
         }
         
      
@@ -122,6 +126,7 @@ public class PaginationData implements Serializable
 
 
 	public int getCountByPage() {
+		
 		return countByPage;
 	}
 

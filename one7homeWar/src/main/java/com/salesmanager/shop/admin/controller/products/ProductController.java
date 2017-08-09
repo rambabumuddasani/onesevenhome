@@ -1243,7 +1243,7 @@ public class ProductController extends AbstractController {
 		return productResponse;
 	}
 
-	@RequestMapping(value="/getTodaysDeals", method = RequestMethod.GET, 
+	/*@RequestMapping(value="/getTodaysDeals", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public TodaysDeals getTodaysDeals() throws Exception {
@@ -1277,9 +1277,9 @@ public class ProductController extends AbstractController {
 		
 		todaysDeals.setTodaysDealsData(responses);
 		return todaysDeals;
-	}
+	}*/
 	
-/*	@RequestMapping(value="/getTodaysDeals", method = RequestMethod.GET, 
+	@RequestMapping(value="/getTodaysDeals", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public TodaysDeals getTodaysDeals(@RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
@@ -1320,9 +1320,9 @@ public class ProductController extends AbstractController {
 		List<ProductResponse> paginatedProdResponses = responses.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
 		todaysDeals.setTodaysDealsData(paginatedProdResponses);
 		return todaysDeals;
-	}*/
+	}
 
-	@RequestMapping(value="/categories/{categoryId}", method = RequestMethod.GET, 
+	/*@RequestMapping(value="/categories/{categoryId}", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public List<ProductResponse> getProductForCat(@PathVariable String categoryId) throws Exception {
@@ -1351,7 +1351,7 @@ public class ProductController extends AbstractController {
 			}
 		}
 		return responses;
-	}
+	}*/
 	
 	@RequestMapping(value="/getProductsByFilters", method = RequestMethod.POST, 
 			consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -1387,12 +1387,12 @@ public class ProductController extends AbstractController {
 		return responses;
 	}
 	
-/*	@RequestMapping(value="/categories/{categoryId}", method = RequestMethod.GET, 
+	@RequestMapping(value="/categories/{categoryId}", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public PaginatedResponse getProductForCat(@PathVariable String categoryId) throws Exception {
-	//public PaginatedResponse getProductForCat(@PathVariable String categoryId,
-	//			@RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+	//public PaginatedResponse getProductForCat(@PathVariable String categoryId) throws Exception {
+	public PaginatedResponse getProductForCat(@PathVariable String categoryId,
+				@RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
 		
 		System.out.println("getProductForCat ==");
 		PaginatedResponse paginatedResponse = new PaginatedResponse();
@@ -1425,7 +1425,7 @@ public class ProductController extends AbstractController {
     	paginatedResponse.setResponseData(paginatedResponses);
 		return paginatedResponse;
 		
-	} */
+	} 
 
 	public List<ProductResponse> invokeProductsData(Map<Long,Product> todaysDealsMap,
 			String categoryId,List<ProductResponse> responses,
