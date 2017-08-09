@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.salesmanager.core.business.exception.ConversionException;
 import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.modules.email.Email;
@@ -75,6 +76,8 @@ import com.salesmanager.shop.utils.EmailTemplatesUtils;
 import com.salesmanager.shop.utils.EmailUtils;
 import com.salesmanager.shop.utils.ImageFilePath;
 import com.salesmanager.shop.utils.LabelUtils;
+
+
 import com.salesmanager.shop.store.controller.customer.ForgotPwdRequest;
 import com.salesmanager.shop.store.controller.customer.ForgotPwdResponse;
 import com.salesmanager.shop.store.controller.customer.facade.CustomerFacade;
@@ -598,12 +601,15 @@ public class CustomerRegistrationController extends AbstractController {
         
         return customerResponse;         
     }
-
+	//https://stackoverflow.com/questions/33729591/posting-a-file-and-json-data-to-spring-rest-service
 	@RequestMapping(value="/vendor/register", method = RequestMethod.POST)
 	@ResponseBody
-    public CustomerResponse registerCustomer(@RequestBody VendorRequest vendorRequest) throws Exception {
-//    public CustomerResponse registerCustomer(@RequestPart("vendorRequest") VendorRequest vendorRequest,
-  //  		@RequestPart("file") MultipartFile vendorCertificate) throws Exception {
+   // public CustomerResponse registerCustomer(@RequestBody VendorRequest vendorRequest) throws Exception {
+    public CustomerResponse registerCustomer(@RequestPart("vendorRequest") String vendorRequestStr,
+    		@RequestPart("file") MultipartFile vendorCertificate) throws Exception {
+		
+		//VendorRequest vendorRequest = null;
+		VendorRequest vendorRequest = new ObjectMapper().readValue(vendorRequestStr, VendorRequest.class);
 		//System.out.println("vendor file "+vendorCertificate);
     	CustomerResponse customerResponse = new CustomerResponse();
         customerResponse.setStatus("false");
@@ -634,16 +640,16 @@ public class CustomerRegistrationController extends AbstractController {
     	customer.setCustomerType("1");
 
     	// Store file into file sytem
-    	/*String certFileName = "";
+    	String certFileName = "";
     	try{
 			certFileName = storageService.store(vendorCertificate);
 			System.out.println("certFileName "+certFileName);
     	}catch(StorageException se){
     		System.out.println("StoreException occured, do wee need continue "+se);
-    	}*/
+    	}
     	
     	Vendor vendorAttrs = new Vendor();
-    	//vendorAttrs.setVendorAuthCert(certFileName);
+    	vendorAttrs.setVendorAuthCert(certFileName);
     	vendorAttrs.setVendorName(vendorRequest.getVendorName());
     	vendorAttrs.setVendorOfficeAddress(vendorRequest.getVendorOfficeAddress());
     	vendorAttrs.setVendorMobile(vendorRequest.getVendorMobile());
@@ -704,7 +710,7 @@ public class CustomerRegistrationController extends AbstractController {
             System.out.println("customerData is "+customerData);
         } catch ( Exception e )
         {	/// if any exception raised during creation of customer we have to delete the certificate
-        	//storageService.deleteFile(certFileName);
+        	storageService.deleteFile(certFileName);
             LOGGER.error( "Error while registering customer.. ", e);
             customerResponse.setErrorMessage(e.getMessage());
              return customerResponse;
