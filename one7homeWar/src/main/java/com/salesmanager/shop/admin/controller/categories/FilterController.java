@@ -75,14 +75,18 @@ public class FilterController {
 		{
 			System.out.println("inside getAllFilters");
 			List<Filter> filters = filterService.listByCategoryCode(categoryId);
+			List filterName = new ArrayList();
 			List<FilterTypeResponse> response = new ArrayList<FilterTypeResponse>();
 			for(Filter f:filters){
-				filterTypeResponse = new FilterTypeResponse();
-				System.out.println("name :"+f.getFilterName());
-				filterTypeResponse.setFilterName(f.getFilterName());
-				System.out.println("type :"+f.getFilterTypes());
-				filterTypeResponse.setFilterType(f.getFilterTypes());
-				response.add(filterTypeResponse);
+				if(!filterName.contains(f.getFilterName())) {
+					filterTypeResponse = new FilterTypeResponse();
+					System.out.println("name :"+f.getFilterName());
+					filterTypeResponse.setFilterName(f.getFilterName());
+					System.out.println("type :"+f.getFilterTypes());
+					filterTypeResponse.setFilterType(f.getFilterTypes());
+					filterName.add(f.getFilterName());
+					response.add(filterTypeResponse);
+				}
 			}
 			
 			filterResponse.setFilters(response);
