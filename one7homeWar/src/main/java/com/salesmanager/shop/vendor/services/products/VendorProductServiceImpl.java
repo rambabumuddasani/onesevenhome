@@ -19,21 +19,21 @@ import com.salesmanager.shop.vendor.repositories.products.VendorProductRepositor
 public class VendorProductServiceImpl extends SalesManagerEntityServiceImpl<Long, VendorProduct> implements  VendorProductService {
 
 	
-	VendorProductRepository vendorProductRepository;
+	private VendorProductRepository vendorProductRepository;
 
 	@Inject
-	public VendorProductServiceImpl(VendorProductRepository repository) {
-		super(repository);
-		this.vendorProductRepository = repository;
+	public VendorProductServiceImpl(VendorProductRepository vendorProductRepository) {
+		super(vendorProductRepository);
+		this.vendorProductRepository = vendorProductRepository;
 	}
 
 	@Override
-	public void save(List<VendorProduct> vpList) {
+	public void save(List<VendorProduct> vpList) throws ServiceException {
 		vendorProductRepository.save(vpList);
 	}
 
 	@Override
-	public void save(VendorProduct vendorProduct) {
+	public void save(VendorProduct vendorProduct) throws ServiceException {
 		  vendorProductRepository.save(vendorProduct);
 	}
 }

@@ -36,9 +36,9 @@ public class VendorProductController {
 	VendorProductService vendorProductService;
 	
 	@RequestMapping(value="/addVendorProducts", method = RequestMethod.POST, 
-			produces = MediaType.APPLICATION_JSON_VALUE)
+			produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public VendorProductResponse addVendorProducts(@RequestBody VendorProductRequest vendorProductRequest ) {
+	public VendorProductResponse addVendorProducts(@RequestBody VendorProductRequest vendorProductRequest ) throws Exception {
 	   
 		System.out.println("Entered addVendorProducts:");
 		String vendorId = vendorProductRequest.getVendorId();
