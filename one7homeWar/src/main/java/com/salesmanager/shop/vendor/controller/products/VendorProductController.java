@@ -1,6 +1,7 @@
 package com.salesmanager.shop.vendor.controller.products;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -59,17 +60,15 @@ public class VendorProductController {
 			VendorProduct vendorProduct = new VendorProduct();
 			vendorProduct.setProduct(dbProduct);
 			vendorProduct.setCustomer(customer);
-			//vendorProduct.setCreatedDate(new Date());
+			vendorProduct.setCreatedDate(new Date());
 			System.out.println("VendorProduct:"+vendorProduct);
-			vpList.add(vendorProduct);
-			//vendorProductService.save(vendorProduct);
-			
+			//vpList.add(vendorProduct);
+			vendorProductService.save(vendorProduct);
 		}
 		
 		System.out.println("vpList:"+vpList);
 		
-		vendorProductService.save(vpList);
-		
+		//vendorProductService.save(vpList);
 		VendorProducts vProducts = new VendorProducts();
 		List<VendorProducts> vList = new ArrayList<VendorProducts>();
 		for(VendorProduct vendorProducts: vpList) {
@@ -86,9 +85,6 @@ public class VendorProductController {
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public VendorProductRequest dummyMethod(@RequestBody VendorProductRequest vendorProductRequest ) {
-		
-		
 		return vendorProductRequest;
-		
 	}
 }

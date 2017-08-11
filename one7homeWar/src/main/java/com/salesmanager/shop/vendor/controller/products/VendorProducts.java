@@ -2,7 +2,7 @@ package com.salesmanager.shop.vendor.controller.products;
 
 public class VendorProducts {
 	
-	private Integer productId;
+	private Long productId;
 	private String productName;
 	
 	public String getProductName() {
@@ -11,10 +11,10 @@ public class VendorProducts {
 	public void setProductName(String productName) {
 		this.productName = productName;
 	}
-	public Integer getProductId() {
+	public Long getProductId() {
 		return productId;
 	}
-	public void setProductId(Integer productId) {
+	public void setProductId(Long productId) {
 		this.productId = productId;
 	}
 	

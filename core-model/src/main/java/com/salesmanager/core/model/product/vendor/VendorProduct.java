@@ -2,8 +2,6 @@ package com.salesmanager.core.model.product.vendor;
 
 import java.util.Date;
 
-import javax.persistence.AssociationOverride;
-import javax.persistence.AssociationOverrides;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -11,7 +9,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
@@ -25,7 +22,7 @@ import com.salesmanager.core.model.generic.SalesManagerEntity;
 
 @Entity
 @Table(name = "VENDOR_PRODUCT", schema=SchemaConstant.SALESMANAGER_SCHEMA)
-public class VendorProduct extends SalesManagerEntity<Integer, VendorProduct>{
+public class VendorProduct extends SalesManagerEntity<Long, VendorProduct>{
        
 	/**
 	 * 
@@ -37,7 +34,7 @@ public class VendorProduct extends SalesManagerEntity<Integer, VendorProduct>{
 	@TableGenerator(name = "TABLE_GEN", table = "SM_SEQUENCER", pkColumnName = "SEQ_NAME", valueColumnName = "SEQ_COUNT",
 		pkColumnValue = "VENDOR_PRODUCT_SEQ_NEXT_VAL")
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = "TABLE_GEN")
-	private Integer id;
+	private Long id;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="PRODUCT_ID", nullable=false)
@@ -58,11 +55,11 @@ public class VendorProduct extends SalesManagerEntity<Integer, VendorProduct>{
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date adminActivatedDate;
 
-	public Integer getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(Integer id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 

@@ -4,79 +4,36 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
 import com.salesmanager.core.business.exception.ServiceException;
+import com.salesmanager.core.business.services.catalog.category.CategoryService;
+import com.salesmanager.core.business.services.common.generic.SalesManagerEntityServiceImpl;
+import com.salesmanager.core.model.catalog.category.Category;
 import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.product.vendor.VendorProduct;
 import com.salesmanager.shop.vendor.repositories.products.VendorProductRepository;
 
 @Service("vendorProductService")
-public class VendorProductServiceImpl implements VendorProductService {
+public class VendorProductServiceImpl extends SalesManagerEntityServiceImpl<Long, VendorProduct> implements  VendorProductService {
+
 	
 	VendorProductRepository vendorProductRepository;
 
-	@Override
-	public void save(Product entity) throws ServiceException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void update(Product entity) throws ServiceException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void create(Product entity) throws ServiceException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void delete(Product entity) throws ServiceException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public Product getById(Long id) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Product> list() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Long count() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void flush() {
-		// TODO Auto-generated method stub
-		
+	@Inject
+	public VendorProductServiceImpl(VendorProductRepository repository) {
+		super(repository);
+		this.vendorProductRepository = repository;
 	}
 
 	@Override
 	public void save(List<VendorProduct> vpList) {
 		vendorProductRepository.save(vpList);
-		
 	}
 
-	/*@Override
+	@Override
 	public void save(VendorProduct vendorProduct) {
-		
 		  vendorProductRepository.save(vendorProduct);
-		
-	}*/
-
-
-
+	}
 }
