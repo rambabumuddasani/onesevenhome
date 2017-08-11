@@ -44,6 +44,7 @@ import com.salesmanager.core.model.common.audit.AuditSection;
 import com.salesmanager.core.model.common.audit.Auditable;
 import com.salesmanager.core.model.generic.SalesManagerEntity;
 import com.salesmanager.core.model.merchant.MerchantStore;
+import com.salesmanager.core.model.product.vendor.VendorProduct;
 import com.salesmanager.core.model.tax.taxclass.TaxClass;
 
 
@@ -62,6 +63,7 @@ public class Product extends SalesManagerEntity<Long, Product> implements Audita
 
 	@Embedded
 	private AuditSection auditSection = new AuditSection();
+	
 
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "product")
 	private Set<ProductDescription> descriptions = new HashSet<ProductDescription>();
@@ -183,6 +185,10 @@ public class Product extends SalesManagerEntity<Long, Product> implements Audita
 	 */
 	@Column(name = "REF_SKU")
 	private String refSku;
+	
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "product")
+	private Set<VendorProduct> vendorProduct = new HashSet<VendorProduct>();
+
 
 	public Product() {
 	}
@@ -457,5 +463,13 @@ public class Product extends SalesManagerEntity<Long, Product> implements Audita
 		this.refSku = refSku;
 	}
 
+	public Set<VendorProduct> getVendorProduct() {
+		return vendorProduct;
+	}
+
+	public void setVendorProduct(Set<VendorProduct> vendorProduct) {
+		this.vendorProduct = vendorProduct;
+	}
+    
 
 }

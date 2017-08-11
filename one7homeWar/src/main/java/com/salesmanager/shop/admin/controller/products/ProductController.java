@@ -1565,4 +1565,5 @@ public class ProductController extends AbstractController {
 		return df.format(discount);
 
 	}
+	
 }

@@ -40,6 +40,7 @@ import com.salesmanager.core.model.common.VendorAttributes;
 import com.salesmanager.core.model.customer.attribute.CustomerAttribute;
 import com.salesmanager.core.model.generic.SalesManagerEntity;
 import com.salesmanager.core.model.merchant.MerchantStore;
+import com.salesmanager.core.model.product.vendor.VendorProduct;
 import com.salesmanager.core.model.reference.language.Language;
 import com.salesmanager.core.model.user.Group;
 import com.salesmanager.core.utils.CloneUtils;
@@ -136,6 +137,10 @@ public class Customer extends SalesManagerEntity<Long, Customer> {
 		
 	})
 	private List<Group> groups = new ArrayList<Group>();
+	
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "customer")
+	private Set<VendorProduct> vendorProduct = new HashSet<VendorProduct>();
+
 	
 	@Transient
 	private String showCustomerStateList;

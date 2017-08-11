@@ -110,6 +110,8 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 		customerRepository.delete(customer);
 
 	}
+
+	
 	
 
 }
