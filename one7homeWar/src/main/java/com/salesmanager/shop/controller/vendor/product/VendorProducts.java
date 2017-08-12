@@ -1,4 +1,4 @@
-package com.salesmanager.shop.vendor.controller.products;
+package com.salesmanager.shop.controller.vendor.product;
 
 public class VendorProducts {
 	

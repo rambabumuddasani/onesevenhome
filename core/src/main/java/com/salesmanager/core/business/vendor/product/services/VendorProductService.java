@@ -1,4 +1,4 @@
-package com.salesmanager.shop.vendor.services.products;
+package com.salesmanager.core.business.vendor.product.services;
 
 import java.util.List;
 

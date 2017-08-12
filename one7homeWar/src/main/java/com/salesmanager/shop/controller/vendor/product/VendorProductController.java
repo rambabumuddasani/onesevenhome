@@ -1,4 +1,4 @@
-package com.salesmanager.shop.vendor.controller.products;
+package com.salesmanager.shop.controller.vendor.product;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,11 +16,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.salesmanager.core.business.services.catalog.product.ProductService;
 import com.salesmanager.core.business.services.customer.CustomerService;
+import com.salesmanager.core.business.vendor.product.services.VendorProductService;
 import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.product.vendor.VendorProduct;
-//import com.salesmanager.shop.admin.controller.products.VendorProductRequest;
-import com.salesmanager.shop.vendor.services.products.VendorProductService;
 
 @Controller
 @CrossOrigin
