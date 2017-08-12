@@ -6,10 +6,9 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.salesmanager.core.business.repositories.vendor.product.VendorProductRepository;
 import com.salesmanager.core.business.services.common.generic.SalesManagerEntityServiceImpl;
-import com.salesmanager.core.business.vendor.product.repositories.VendorProductRepository;
 import com.salesmanager.core.model.product.vendor.VendorProduct;
-
 
 @Service("vendorProductService")
 public class VendorProductServiceImpl extends SalesManagerEntityServiceImpl<Long, VendorProduct> implements  VendorProductService {
@@ -24,12 +23,12 @@ public class VendorProductServiceImpl extends SalesManagerEntityServiceImpl<Long
 	}
 
 	@Override
-	public void save(List<VendorProduct> vpList) throws ServiceException {
+	public void save(List<VendorProduct> vpList) {
 		vendorProductRepository.save(vpList);
 	}
 
 	@Override
-	public void save(VendorProduct vendorProduct) throws ServiceException {
-		  vendorProductRepository.save(vendorProduct);
+	public void save(VendorProduct vendorProduct) {
+		vendorProductRepository.save(vendorProduct);
 	}
 }

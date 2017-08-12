@@ -1,6 +1,6 @@
 package com.salesmanager.shop.controller.vendor.product;
 
-public class VendorProducts {
+public class ProductsInfo {
 	
 	private Long productId;
 	private String productName;

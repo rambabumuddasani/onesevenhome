@@ -48,10 +48,10 @@ public class VendorProduct extends SalesManagerEntity<Long, VendorProduct>{
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date createdDate;
 	
-	@Column(name="ADMIN_ACTIVATED",nullable=false)
+	@Column(name="ADMIN_ACTIVATED",nullable=true)
 	private boolean adminActivated=false;
 	
-	@Column(name="ADMIN_ACTIVATED_DATE",nullable=false)
+	@Column(name="ADMIN_ACTIVATED_DATE",nullable=true)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date adminActivatedDate;
 

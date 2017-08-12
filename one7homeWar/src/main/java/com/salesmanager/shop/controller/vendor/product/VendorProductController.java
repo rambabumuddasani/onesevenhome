@@ -34,8 +34,7 @@ public class VendorProductController {
 	@Inject
 	VendorProductService vendorProductService;
 	
-	@RequestMapping(value="/addVendorProducts", method = RequestMethod.POST, 
-			produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value="/addVendorProducts", method = RequestMethod.POST) 
 	@ResponseBody
 	public VendorProductResponse addVendorProducts(@RequestBody VendorProductRequest vendorProductRequest ) throws Exception {
 	   
@@ -50,40 +49,24 @@ public class VendorProductController {
 		VendorProductResponse vendorProductResponse = new VendorProductResponse(); 
 		
 		List<VendorProduct> vpList = new ArrayList<VendorProduct>();
+		List<ProductsInfo> vList = new ArrayList<ProductsInfo>();
 		
 		for(String productId : productIds){
-			System.out.println("Entered for:");
-			System.out.println("ProductId:"+productId);
 			Product dbProduct = productService.getById(Long.parseLong(productId));
-			System.out.println("dbProduct:"+dbProduct);
 			VendorProduct vendorProduct = new VendorProduct();
+			ProductsInfo productsInfo = new ProductsInfo();
 			vendorProduct.setProduct(dbProduct);
 			vendorProduct.setCustomer(customer);
 			vendorProduct.setCreatedDate(new Date());
-			System.out.println("VendorProduct:"+vendorProduct);
-			//vpList.add(vendorProduct);
-			vendorProductService.save(vendorProduct);
+			productsInfo.setProductId(dbProduct.getId());
+			productsInfo.setProductName(dbProduct.getSku());
+			vpList.add(vendorProduct);
+			vList.add(productsInfo);
 		}
-		
-		System.out.println("vpList:"+vpList);
-		
-		//vendorProductService.save(vpList);
-		VendorProducts vProducts = new VendorProducts();
-		List<VendorProducts> vList = new ArrayList<VendorProducts>();
-		for(VendorProduct vendorProducts: vpList) {
-			vProducts.setProductId(vendorProducts.getId());
-			vList.add(vProducts);
-		    
-		}
-		
+		System.out.println("vpList:"+vpList.size());
+		vendorProductService.save(vpList);
+		vendorProductResponse.setVenderId(vendorId);
 		vendorProductResponse.setVendorProducts(vList);
 		return vendorProductResponse;
-	}
-	
-	@RequestMapping(value="/dummy", method = RequestMethod.POST, 
-			produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public VendorProductRequest dummyMethod(@RequestBody VendorProductRequest vendorProductRequest ) {
-		return vendorProductRequest;
 	}
 }

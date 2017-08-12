@@ -8,9 +8,6 @@ import com.salesmanager.core.model.product.vendor.VendorProduct;
 
 
 public interface VendorProductService extends SalesManagerEntityService<Long, VendorProduct> {
-
-	void save(List<VendorProduct> vpList) throws ServiceException;
-
-	void save(VendorProduct vendorProduct) throws ServiceException;
-    
+	void save(List<VendorProduct> vpList);
+	void save(VendorProduct vendorProduct) ;
 }

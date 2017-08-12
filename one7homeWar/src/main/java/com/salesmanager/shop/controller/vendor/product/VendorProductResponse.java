@@ -6,18 +6,19 @@ import java.util.List;
 
 public class VendorProductResponse {
 	
-	private String status;
-    private List<VendorProducts> vendorProducts;
-	public String getStatus() {
-		return status;
+	private String venderId;
+	private List<ProductsInfo> vendorProducts;
+
+    public String getVenderId() {
+		return venderId;
 	}
-	public void setStatus(String status) {
-		this.status = status;
+	public void setVenderId(String venderId) {
+		this.venderId = venderId;
 	}
-	public List<VendorProducts> getVendorProducts() {
+	public List<ProductsInfo> getVendorProducts() {
 		return vendorProducts;
 	}
-	public void setVendorProducts(List<VendorProducts> vendorProducts) {
+	public void setVendorProducts(List<ProductsInfo> vendorProducts) {
 		this.vendorProducts = vendorProducts;
 	}
 
