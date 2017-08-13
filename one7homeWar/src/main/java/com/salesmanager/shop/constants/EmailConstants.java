@@ -23,6 +23,7 @@ public class EmailConstants {
 	public static final String EMAIL_NOTIFICATION_MESSAGE = "EMAIL_NOTIFICATION_MESSAGE";
 	public static final String EMAIL_CUSTOMER_GREETING = "EMAIL_CUSTOMER_GREETING";
 	public static final String EMAIL_RESET_PASSWORD_TXT = "EMAIL_RESET_PASSWORD_TXT";
+	public static final String EMAIL_VENDOR_ADD_PRODUCTS_TXT = "EMAIL_VENDOR_ADD_PRODUCTS_TXT";
 	public static final String EMAIL_USER_NAME = "EMAIL_USER_NAME";
 	public static final String EMAIL_USER_PASSWORD = "EMAIL_USER_PASSWORD";
 	
