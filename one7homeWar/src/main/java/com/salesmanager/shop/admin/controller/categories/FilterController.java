@@ -74,6 +74,7 @@ public class FilterController {
 		try
 		{
 			System.out.println("inside getAllFilters");
+			categoryId = categoryId.replaceAll("_", " ");
 			List<Filter> filters = filterService.listByCategoryCode(categoryId);
 			List filterName = new ArrayList();
 			List<FilterTypeResponse> response = new ArrayList<FilterTypeResponse>();

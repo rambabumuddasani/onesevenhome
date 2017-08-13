@@ -1357,13 +1357,14 @@ public class ProductController extends AbstractController {
 			consumes = MediaType.APPLICATION_JSON_VALUE,
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public List<ProductResponse> getProductsByFilters(@RequestBody FiltersRequest filtersRequest) throws Exception {
+	public FilteredProducts getProductsByFilters(@RequestParam(value="pageNumber", defaultValue = "1") int page ,@RequestParam(value="pageSize", defaultValue="15") int size, @RequestBody FiltersRequest filtersRequest) throws Exception {
 		
 		System.out.println("getProductsByFilters ==");
 		
 		List<Long> filterIds = filtersRequest.getFilterIds();
 		
 		ProductResponse productResponse = new ProductResponse();
+		FilteredProducts filteredProducts = new FilteredProducts();
 		List<ProductResponse> responses = new ArrayList<ProductResponse>();
 
 		if(filterIds != null) {
@@ -1384,7 +1385,16 @@ public class ProductController extends AbstractController {
 			}
 			
 		}
-		return responses;
+		if(responses == null || responses.isEmpty() || responses.size() < page){
+			filteredProducts.setFilteredProducts(responses);
+			return filteredProducts;
+		}
+	    PaginationData paginaionData=createPaginaionData(page,size);
+    	calculatePaginaionData(paginaionData,size, responses.size());
+    	filteredProducts.setPaginationData(paginaionData);
+		List<ProductResponse> paginatedProdResponses = responses.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+		filteredProducts.setFilteredProducts(paginatedProdResponses);
+		return filteredProducts;
 	}
 	
 	@RequestMapping(value="/categories/{categoryId}", method = RequestMethod.GET, 
