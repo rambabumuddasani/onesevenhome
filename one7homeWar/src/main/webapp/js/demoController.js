@@ -20,9 +20,10 @@ app.controller("demoController", function ($scope, $http) {
 
     //4. Post data and selected files.
     $scope.save = function () {
+    	newURL = location.origin;
         $http({
             method: 'POST',
-            url: "http://localhost:8080/vendor/register",
+            url: newURL+"/vendor/register",
             headers: { 'Content-Type': undefined },
            
             transformRequest: function (data) {
