@@ -1,5 +1,6 @@
 package com.salesmanager.shop.store.controller.customer;
 
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -28,6 +29,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -489,6 +491,9 @@ public class CustomerRegistrationController extends AbstractController {
     	customer.setLastName(customerRequest.getLastName());
     	customer.setGender(customerRequest.getGender());
     	customer.setUserName(customerRequest.getEmail());
+    	customer.setArea(customerRequest.getArea());
+    	//customer.setDob(customerRequest.getDob());
+    	customer.setDob((new SimpleDateFormat("yyyy/MM/dd").format(customerRequest.getDob())));
     	customer.setStoreCode("DEFAULT");
     	Address billing = new Address();
     	billing.setFirstName(customerRequest.getFirstName());
@@ -892,4 +897,85 @@ public class CustomerRegistrationController extends AbstractController {
 		return forgotPwdResponse;
     }
 	
+	@RequestMapping(value="/getUser/{customerId}", method = RequestMethod.GET,produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public CustomerDetailsResponse getUser(@PathVariable String customerId) {
+		
+		Customer customer = customerService.getById(Long.parseLong(customerId));
+		CustomerDetailsResponse customerDetailsResponse = new CustomerDetailsResponse();
+		
+		if(customer.getCustomerType().equals("0")){
+			CustomerDetails custDetails = new CustomerDetails();
+			custDetails.setEmailAddress(customer.getEmailAddress());
+			custDetails.setFirstName(customer.getBilling().getFirstName());
+			custDetails.setLastName(customer.getBilling().getLastName());
+			custDetails.setPassword(customer.getPassword());
+			custDetails.setDob(customer.getDateOfBirth());
+			custDetails.setArea(customer.getArea());
+			custDetails.setGender(customer.getGender());
+			custDetails.setStoreCode("DEFAULT");
+			
+			Address billing = new Address();
+			billing.setFirstName(customer.getBilling().getFirstName());
+			billing.setLastName(customer.getBilling().getLastName());
+			billing.setAddress(customer.getBilling().getAddress());
+			billing.setCity(customer.getBilling().getCity());
+			billing.setStateProvince(customer.getBilling().getState());
+			billing.setPostalCode(customer.getBilling().getPostalCode());
+			billing.setPhone(customer.getBilling().getTelephone());
+			billing.setCountry("IN");
+			
+			Address delivery = new Address();
+			delivery.setFirstName(customer.getDelivery().getFirstName());
+			delivery.setLastName(customer.getDelivery().getLastName());
+			delivery.setAddress(customer.getBilling().getAddress());
+			delivery.setCity(customer.getBilling().getCity());
+			delivery.setStateProvince(customer.getDelivery().getState());
+			delivery.setPostalCode(customer.getDelivery().getPostalCode());
+			delivery.setPhone(customer.getDelivery().getTelephone());
+			
+			custDetails.setBilling(billing);
+			custDetails.setDelivery(delivery);
+		    customerDetailsResponse.setCustomerDetails(custDetails);
+		    return customerDetailsResponse;
+	}
+		else {
+			VendorDetails vendorDetails = new VendorDetails();
+			vendorDetails.setEmail(customer.getEmailAddress());
+			vendorDetails.setVendorName(customer.getVendorAttrs().getVendorName());
+			vendorDetails.setVendorOfficeAddress(customer.getVendorAttrs().getVendorOfficeAddress());
+			vendorDetails.setVendorMobile(customer.getVendorAttrs().getVendorMobile());
+			vendorDetails.setVendorTelephone(customer.getVendorAttrs().getVendorTelephone());
+			vendorDetails.setVendorFax(customer.getVendorAttrs().getVendorFax());
+			vendorDetails.setVendorConstFirm(customer.getVendorAttrs().getVendorConstFirm());
+			vendorDetails.setVendorCompanyNature(customer.getVendorAttrs().getVendorCompanyNature());
+			vendorDetails.setVendorRegistrationNo(customer.getVendorAttrs().getVendorRegistrationNo());
+			vendorDetails.setVendorPAN(customer.getVendorAttrs().getVendorPAN());
+			vendorDetails.setVendorLicense(customer.getVendorAttrs().getVendorLicense());
+			vendorDetails.setVendorAuthCert(customer.getVendorAttrs().getVendorAuthCert());
+			vendorDetails.setVendorExpLine(customer.getVendorAttrs().getVendorExpLine());
+			vendorDetails.setVendorMajorCust(customer.getVendorAttrs().getVendorMajorCust());
+			vendorDetails.setVatRegNo(customer.getVendorAttrs().getVendorVatRegNo());
+			
+			customerDetailsResponse.setVendorDetails(vendorDetails);
+			return customerDetailsResponse;
+		}
+		//return customeDetailsResponse;
+		
+	}
+	
+	/*@RequestMapping(value="/updateUser/{customerId}", method = RequestMethod.POST,produces = MediaType.APPLICATION_JSON_VALUE,
+			consumes = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public CustomerUpdateResponse updateUser(@RequestBody CustomerUpdateRequest customerUpdateRequest, @PathVariable String customerId) {
+		 
+		Customer customer = customerService.getById(Long.parseLong(customerId));
+		customer.setEmailAddress(customerUpdateRequest.getEmail());
+		customer.setPassword(customerUpdateRequest.getPassword());
+		customer.setDateOfBirth(customerUpdateRequest.getDob());
+	
+		
+		return null;
+		
+	}*/
 }
