@@ -151,6 +151,8 @@ public class Customer extends SalesManagerEntity<Long, Customer> {
 	@Transient
 	private String showDeliveryStateList;
 	
+	@Column(name="CUSTOMER_AREA",length=100)
+	private String area;
 	
 	public Customer() {
 	}
@@ -336,5 +338,22 @@ public class Customer extends SalesManagerEntity<Long, Customer> {
 	public void setOfid(String ofid) {
 		this.ofid = ofid;
 	}
+
+	public Set<VendorProduct> getVendorProduct() {
+		return vendorProduct;
+	}
+
+	public void setVendorProduct(Set<VendorProduct> vendorProduct) {
+		this.vendorProduct = vendorProduct;
+	}
+
+	public String getArea() {
+		return area;
+	}
+
+	public void setArea(String area) {
+		this.area = area;
+	}
+
 	
 }

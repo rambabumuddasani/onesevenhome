@@ -36,6 +36,8 @@ public class CustomerEntity extends Customer implements Serializable {
 	private String storeCode;
 	private String customerType;
 	private String activated;
+	private String area;
+	private String dob;
 	
 	@NotEmpty(message="{NotEmpty.customer.userName}")
 	private String userName;
@@ -154,6 +156,22 @@ public class CustomerEntity extends Customer implements Serializable {
 
 	public void setActivated(String activated) {
 		this.activated = activated;
+	}
+
+	public String getArea() {
+		return area;
+	}
+
+	public void setArea(String area) {
+		this.area = area;
+	}
+
+	public String getDob() {
+		return dob;
+	}
+
+	public void setDob(String dob) {
+		this.dob = dob;
 	}
 
 }
