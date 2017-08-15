@@ -54,6 +54,9 @@ public class VendorProduct extends SalesManagerEntity<Long, VendorProduct>{
 	@Column(name="ADMIN_ACTIVATED_DATE",nullable=true)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date adminActivatedDate;
+	
+	@Column(name="VENDOR_WISH_LISTED",nullable=true)
+	private boolean vendorWishListed =false;
 
 	public Long getId() {
 		return id;
@@ -103,5 +106,11 @@ public class VendorProduct extends SalesManagerEntity<Long, VendorProduct>{
 		this.customer = customer;
 	}
 	
-	
+	public boolean isVendorWishListed() {
+		return vendorWishListed;
+	}
+
+	public void setVendorWishListed(boolean vendorWishListed) {
+		this.vendorWishListed = vendorWishListed;
+	}
 }
