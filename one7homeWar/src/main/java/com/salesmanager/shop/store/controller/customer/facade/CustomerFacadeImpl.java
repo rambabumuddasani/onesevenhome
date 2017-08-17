@@ -290,7 +290,7 @@ public class CustomerFacadeImpl implements CustomerFacade
             LOG.equals( "Unable to create customer in system" );
             //throw new CustomerRegistrationException( "Unable to register customer" );
             throw new Exception( "Unable to register customer" );
-        }
+        } 
         
         LOG.info( "About to persist customer to database." );
         customerService.saveOrUpdate( customerModel );
@@ -450,19 +450,18 @@ public class CustomerFacadeImpl implements CustomerFacade
 
 
     @Override
-    public void updateAddress( Long userId, MerchantStore merchantStore, Address address, final Language language )
+    public void updateAddress(Customer customerModel, MerchantStore merchantStore, Address address, final Language language )
         throws Exception
     {
        
-     Customer customerModel=customerService.getById( userId );
+     //Customer customerModel=customerService.getById( userId );
        Map<String, Country> countriesMap = countryService.getCountriesMap( language );
        Country country = countriesMap.get( address.getCountry() );
       
       if(customerModel ==null){
-           LOG.error( "Customer with ID {} does not exists..", userId);
+           LOG.error( "Customer with ID {} does not exists..", customerModel.getEmailAddress());
            //throw new CustomerNotFoundException( "customer with given id does not exists" );
-           throw new Exception( "customer with given id does not exists" );
-           
+           throw new Exception( "Customer with given id does not exists" );           
        }
        if(address.isBillingAddress()){
            LOG.info( "updating customer billing address..");

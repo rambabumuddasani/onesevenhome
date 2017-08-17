@@ -50,6 +50,8 @@ import com.salesmanager.core.business.services.reference.zone.ZoneService;
 import com.salesmanager.core.business.services.shoppingcart.ShoppingCartCalculationService;
 import com.salesmanager.core.business.services.system.EmailService;
 import com.salesmanager.core.business.utils.CoreConfiguration;
+import com.salesmanager.core.model.common.Billing;
+import com.salesmanager.core.model.common.VendorAttributes;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.country.Country;
@@ -475,137 +477,110 @@ public class CustomerRegistrationController extends AbstractController {
         return new ResponseEntity<CustomerEntity>(customerData,HttpStatus.OK);         
     }
     
-	@RequestMapping(value="/customer/register", method = RequestMethod.POST, 
+    
+   
+    
+	@RequestMapping(value="/customer/update", method = RequestMethod.POST, 
 			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-    public CustomerResponse registerCustomer(@RequestBody CustomerRequest customerRequest)
+    public CustomerResponse updateCustomer(@RequestBody CustomerRequest customerRequest)
         throws Exception
     {	
 		System.out.println("customer ");
     	CustomerResponse customerResponse = new CustomerResponse();
-    	SecuredShopPersistableCustomer customer = new SecuredShopPersistableCustomer();
-    	customer.setEmailAddress(customerRequest.getEmail());
-    	customer.setPassword(customerRequest.getPassword());
-    	customer.setCheckPassword(customerRequest.getConfirmPassword());
-    	customer.setFirstName(customerRequest.getFirstName());
-    	customer.setLastName(customerRequest.getLastName());
-    	customer.setGender(customerRequest.getGender());
-    	customer.setUserName(customerRequest.getEmail());
-    	customer.setArea(customerRequest.getArea());
-    	//customer.setDob(customerRequest.getDob());
-    	customer.setDob((new SimpleDateFormat("yyyy/MM/dd").format(customerRequest.getDob())));
-    	customer.setStoreCode("DEFAULT");
-    	Address billing = new Address();
-    	billing.setFirstName(customerRequest.getFirstName());
-    	billing.setLastName(customerRequest.getLastName());
-    	billing.setBillingAddress(true);
-    	billing.setAddress(customerRequest.getAddress());
-    	billing.setCity(customerRequest.getCity());
-    	billing.setStateProvince(customerRequest.getState());
-    	billing.setPostalCode(customerRequest.getPostalCode());
-    	billing.setPhone(customerRequest.getMobileNo());
-    	billing.setCountry("IN");
-    	
-    	Address delivery = new Address();
-    	delivery.setFirstName(customerRequest.getFirstName());
-    	delivery.setLastName(customerRequest.getLastName());
-    	delivery.setAddress(customerRequest.getAddress());
-    	delivery.setCity(customerRequest.getCity());
-    	delivery.setStateProvince(customerRequest.getState());
-    	delivery.setPostalCode(customerRequest.getPostalCode());
-    	delivery.setPhone(customerRequest.getMobileNo());
-
-    	customer.setBilling(billing);
-    	customer.setDelivery(delivery);
-    	customer.setCustomerType("0");
-    	
-    	final Locale locale  = new Locale("en");
-    	System.out.println("Entered registration");
         MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");  //i will come back here
-        System.out.println("merchantStore "+merchantStore);
-        //Language language = super.getLanguage(request);
-        Language language = languageService.getByCode( Constants.DEFAULT_LANGUAGE );
-        String userName = null;
-        String password = null;
-        customerResponse.setStatus("false");
-        
-        if ( StringUtils.isNotBlank( customer.getUserName() ) )
+
+	    Customer customer = null; 
+    	final Locale locale  = new Locale("en");
+        if ( StringUtils.isNotBlank( customerRequest.getEmail() ) )
         {
-            if ( customerFacade.checkIfUserExists( customer.getUserName(), merchantStore ) )
-            {
-                LOGGER.debug( "Customer with username {} already exists for this store ", customer.getUserName() );
-            	customerResponse.setErrorMessage(messages.getMessage("registration.username.already.exists", locale));
-            	return customerResponse;
-            }
-            userName = customer.getUserName();
+        		customer	= customerFacade.getCustomerByUserName(customerRequest.getEmail(), merchantStore );
+        		if(customer == null){
+        			customerResponse.setErrorMessage("Customer is not exist, update is not possible ");
+        			return customerResponse;
+        		}
         }
-        
-        
-        if ( StringUtils.isNotBlank( customer.getPassword() ) &&  StringUtils.isNotBlank( customer.getCheckPassword() ))
+
+        if ( StringUtils.isNotBlank( customerRequest.getPassword() ) &&  StringUtils.isNotBlank( customerRequest.getConfirmPassword() ))
         {
-            if (! customer.getPassword().equals(customer.getCheckPassword()) )
+            if (! customerRequest.getPassword().equals(customerRequest.getConfirmPassword()) )
             {
             	customerResponse.setErrorMessage(messages.getMessage("message.password.checkpassword.identical", locale));
             	return customerResponse;
             }
-            password = customer.getPassword();
             	
         }	
-        
-        if ( StringUtils.isBlank( customerRequest.getActivationURL() ))
-        {
-        	customerResponse.setErrorMessage(messages.getMessage("failure.customer.activation.link", locale));
-        	return customerResponse;
-        }
-        System.out.println("userName "+userName+" password "+password);
-        @SuppressWarnings( "unused" )
-        CustomerEntity customerData = null;
-        try
-        {
-            //set user clear password
-        	customer.setClearPassword(password);
-        	customer.setActivated("0");
-        	customerData = customerFacade.registerCustomer( customer, merchantStore, language );
-            System.out.println("customerData is "+customerData);
-        }       catch ( Exception e )
-        {
-            LOGGER.error( "Error while registering customer.. ", e);
-            customerResponse.setErrorMessage(e.getMessage());
-             return customerResponse;
-        }  
          
+        // set 	private String dob gender,mobileNo;
+        //customer.setGender(com.salesmanager.core.model.customer.CustomerGender.valueOf(customerRequest.getGender()));
+        //customer.setDateOfBirth(new SimpleDateFormat("yyyy/MM/dd").parse(customerRequest.getDob()));
+        Address address = new Address();
+        address.setAddress(customerRequest.getAddress());
+        address.setPostalCode(customerRequest.getPostalCode());
+        address.setCity(customerRequest.getCity());
+        address.setStateProvince(customerRequest.getState());
+        address.setPhone(customerRequest.getMobileNo());
+        //address.setBillingAddress(true);
+        customer.setArea(customerRequest.getArea());
        
-        customerResponse.setSuccessMessage(messages.getMessage("success.newuser.msg",locale));
+        Language language = languageService.getByCode( Constants.DEFAULT_LANGUAGE );
+        customerFacade.updateAddress(customer, merchantStore, address, language);
+      
+        customerResponse.setSuccessMessage("Customer profile updated successfully");
         customerResponse.setStatus("true");
-        String activationURL = customerRequest.getActivationURL()+"?email="+customerRequest.getEmail();
-        //sending email
-        String[] activationURLArg = {activationURL};
-        Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
-		templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, customer.getFirstName());
-		templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, customer.getLastName());
-		templateTokens.put(EmailConstants.EMAIL_ADMIN_USERNAME_LABEL, messages.getMessage("label.generic.username",locale));
-		templateTokens.put(EmailConstants.EMAIL_TEXT_NEW_USER_ACTIVATION, messages.getMessage("email.newuser.text.activation",locale));
-		templateTokens.put(EmailConstants.EMAIL_TEXT_NEW_USER_ACTIVATION_LINK, messages.getMessage("email.newuser.text.activation.link",activationURLArg,locale));
-		templateTokens.put(EmailConstants.EMAIL_ADMIN_PASSWORD_LABEL, messages.getMessage("label.generic.password",locale));
-		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
-		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
-
-		
-		Email email = new Email();
-		email.setFrom(merchantStore.getStorename());
-		email.setFromEmail(merchantStore.getStoreEmailAddress());
-		email.setSubject(messages.getMessage("email.newuser.text.activation",locale));
-		email.setTo(customerRequest.getEmail());
-		email.setTemplateName(NEW_USER_ACTIVATION_TMPL);
-		email.setTemplateTokens(templateTokens);
-
-
-		
-		emailService.sendHtmlEmail(merchantStore, email);
-        
-        
         return customerResponse;         
     }
+	@RequestMapping(value="/vendor/update", method = RequestMethod.POST, 
+			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public CustomerResponse UpdateVendor(@RequestBody VendorRequest vendorRequest) throws Exception {
+		
+		System.out.println("customer ");
+    	CustomerResponse customerResponse = new CustomerResponse();
+        MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");  //i will come back here
+
+	    Customer customer = null; 
+    	final Locale locale  = new Locale("en");
+        if ( StringUtils.isNotBlank(vendorRequest.getEmail() ) )
+        {
+        		customer	= customerFacade.getCustomerByUserName(vendorRequest.getEmail(), merchantStore );
+        		if(customer == null){
+        			customerResponse.setErrorMessage("Vendor is not exist, update is not possible ");
+        			return customerResponse;
+        		}
+        }
+
+        if ( StringUtils.isNotBlank( vendorRequest.getPassword() ) &&  StringUtils.isNotBlank( vendorRequest.getConfirmPassword() ))
+        {
+            if (! vendorRequest.getPassword().equals(vendorRequest.getConfirmPassword()) )
+            {
+            	customerResponse.setErrorMessage(messages.getMessage("message.password.checkpassword.identical", locale));
+            	return customerResponse;
+            }
+            	
+        }	
+         
+        
+        VendorAttributes vendorAttrs = new VendorAttributes();
+        vendorAttrs.setVendorOfficeAddress(vendorRequest.getVendorOfficeAddress());
+        vendorAttrs.setVendorMobile(vendorRequest.getVendorMobile());
+        vendorAttrs.setVendorTelephone(vendorRequest.getVendorTelephone());
+        vendorAttrs.setVendorFax(vendorRequest.getVendorFax());
+        vendorAttrs.setVendorConstFirm(vendorRequest.getVendorConstFirm());
+        vendorAttrs.setVendorCompanyNature(vendorRequest.getVendorCompanyNature());
+        vendorAttrs.setVendorExpLine(vendorRequest.getVendorExpLine());
+        vendorAttrs.setVendorMajorCust(vendorRequest.getVendorMajorCust());
+        vendorAttrs.setVendorName(vendorRequest.getVendorName());
+        customer.setVendorAttrs(vendorAttrs);
+        
+        customerFacade.updateCustomer(customer);
+        
+        customerResponse.setSuccessMessage("Vendor profile updated successfully");
+        customerResponse.setStatus("true");
+        return customerResponse; 
+		
+	}
+	
 	//https://stackoverflow.com/questions/33729591/posting-a-file-and-json-data-to-spring-rest-service
 	@RequestMapping(value="/vendor/register", method = RequestMethod.POST)
 	@ResponseBody
@@ -964,18 +939,136 @@ public class CustomerRegistrationController extends AbstractController {
 		
 	}
 	
-	/*@RequestMapping(value="/updateUser/{customerId}", method = RequestMethod.POST,produces = MediaType.APPLICATION_JSON_VALUE,
-			consumes = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value="/customer/register", method = RequestMethod.POST, 
+			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public CustomerUpdateResponse updateUser(@RequestBody CustomerUpdateRequest customerUpdateRequest, @PathVariable String customerId) {
-		 
-		Customer customer = customerService.getById(Long.parseLong(customerId));
-		customer.setEmailAddress(customerUpdateRequest.getEmail());
-		customer.setPassword(customerUpdateRequest.getPassword());
-		customer.setDateOfBirth(customerUpdateRequest.getDob());
+    public CustomerResponse registerCustomer(@RequestBody CustomerRequest customerRequest)
+        throws Exception
+    {	
+		System.out.println("customer ");
+    	CustomerResponse customerResponse = new CustomerResponse();
+    	SecuredShopPersistableCustomer customer = new SecuredShopPersistableCustomer();
+    	customer.setEmailAddress(customerRequest.getEmail());
+    	customer.setPassword(customerRequest.getPassword());
+    	customer.setCheckPassword(customerRequest.getConfirmPassword());
+    	customer.setFirstName(customerRequest.getFirstName());
+    	customer.setLastName(customerRequest.getLastName());
+    	customer.setGender(customerRequest.getGender());
+    	customer.setUserName(customerRequest.getEmail());
+    	customer.setArea(customerRequest.getArea());
+    	//customer.setDob(customerRequest.getDob());
+    	customer.setDob((new SimpleDateFormat("yyyy/MM/dd").format(customerRequest.getDob())));
+    	customer.setStoreCode("DEFAULT");
+    	Address billing = new Address();
+    	billing.setFirstName(customerRequest.getFirstName());
+    	billing.setLastName(customerRequest.getLastName());
+    	billing.setBillingAddress(true);
+    	billing.setAddress(customerRequest.getAddress());
+    	billing.setCity(customerRequest.getCity());
+    	billing.setStateProvince(customerRequest.getState());
+    	billing.setPostalCode(customerRequest.getPostalCode());
+    	billing.setPhone(customerRequest.getMobileNo());
+    	billing.setCountry("IN");
+    	
+    	Address delivery = new Address();
+    	delivery.setFirstName(customerRequest.getFirstName());
+    	delivery.setLastName(customerRequest.getLastName());
+    	delivery.setAddress(customerRequest.getAddress());
+    	delivery.setCity(customerRequest.getCity());
+    	delivery.setStateProvince(customerRequest.getState());
+    	delivery.setPostalCode(customerRequest.getPostalCode());
+    	delivery.setPhone(customerRequest.getMobileNo());
+
+    	customer.setBilling(billing);
+    	customer.setDelivery(delivery);
+    	customer.setCustomerType("0");
+    	
+    	final Locale locale  = new Locale("en");
+    	System.out.println("Entered registration");
+        MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");  //i will come back here
+        System.out.println("merchantStore "+merchantStore);
+        //Language language = super.getLanguage(request);
+        Language language = languageService.getByCode( Constants.DEFAULT_LANGUAGE );
+        String userName = null;
+        String password = null;
+        customerResponse.setStatus("false");
+        
+        if ( StringUtils.isNotBlank( customer.getUserName() ) )
+        {
+            if ( customerFacade.checkIfUserExists( customer.getUserName(), merchantStore ) )
+            {
+                LOGGER.debug( "Customer with username {} already exists for this store ", customer.getUserName() );
+            	customerResponse.setErrorMessage(messages.getMessage("registration.username.already.exists", locale));
+            	return customerResponse;
+            }
+            userName = customer.getUserName();
+        }
+        
+        
+        if ( StringUtils.isNotBlank( customer.getPassword() ) &&  StringUtils.isNotBlank( customer.getCheckPassword() ))
+        {
+            if (! customer.getPassword().equals(customer.getCheckPassword()) )
+            {
+            	customerResponse.setErrorMessage(messages.getMessage("message.password.checkpassword.identical", locale));
+            	return customerResponse;
+            }
+            password = customer.getPassword();
+            	
+        }	
+        
+        if ( StringUtils.isBlank( customerRequest.getActivationURL() ))
+        {
+        	customerResponse.setErrorMessage(messages.getMessage("failure.customer.activation.link", locale));
+        	return customerResponse;
+        }
+        System.out.println("userName "+userName+" password "+password);
+        @SuppressWarnings( "unused" )
+        CustomerEntity customerData = null;
+        try
+        {
+            //set user clear password
+        	customer.setActivated("0");
+        	customer.setClearPassword(password);
+        	customerData = customerFacade.registerCustomer( customer, merchantStore, language );
+            System.out.println("customerData is "+customerData);
+        }       catch ( Exception e )
+        {
+            LOGGER.error( "Error while registering customer.. ", e);
+            customerResponse.setErrorMessage(e.getMessage());
+             return customerResponse;
+        }  
+         
+       
+        customerResponse.setSuccessMessage(messages.getMessage("success.newuser.msg",locale));
+        customerResponse.setStatus("true");
+        String activationURL = customerRequest.getActivationURL()+"?email="+customerRequest.getEmail();
+        //sending email
+        String[] activationURLArg = {activationURL};
+        Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
+		templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, customer.getFirstName());
+		templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, customer.getLastName());
+		templateTokens.put(EmailConstants.EMAIL_ADMIN_USERNAME_LABEL, messages.getMessage("label.generic.username",locale));
+		templateTokens.put(EmailConstants.EMAIL_TEXT_NEW_USER_ACTIVATION, messages.getMessage("email.newuser.text.activation",locale));
+		templateTokens.put(EmailConstants.EMAIL_TEXT_NEW_USER_ACTIVATION_LINK, messages.getMessage("email.newuser.text.activation.link",activationURLArg,locale));
+		templateTokens.put(EmailConstants.EMAIL_ADMIN_PASSWORD_LABEL, messages.getMessage("label.generic.password",locale));
+		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
+		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
+
+		
+		Email email = new Email();
+		email.setFrom(merchantStore.getStorename());
+		email.setFromEmail(merchantStore.getStoreEmailAddress());
+		email.setSubject(messages.getMessage("email.newuser.text.activation",locale));
+		email.setTo(customerRequest.getEmail());
+		email.setTemplateName(NEW_USER_ACTIVATION_TMPL);
+		email.setTemplateTokens(templateTokens);
+
+
+		
+		emailService.sendHtmlEmail(merchantStore, email);
+        
+        
+        return customerResponse;         
+    }
 	
-		
-		return null;
-		
-	}*/
 }

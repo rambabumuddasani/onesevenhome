@@ -69,9 +69,9 @@ public interface CustomerFacade
     
     public Address getAddress(final Long userId, final MerchantStore merchantStore,boolean isBillingAddress) throws Exception;
     
-    public void updateAddress( Long userId, MerchantStore merchantStore, Address address, final Language language )
+/*    public void updateAddress( Long userId, MerchantStore merchantStore, Address address, final Language language )
                     throws Exception;
-
+*/
     public void setCustomerModelDefaultProperties(Customer customer, MerchantStore store) throws Exception; 
 	//public Customer populateCustomerModel(PersistableCustomer customer,
 	//		MerchantStore merchantStore) throws Exception;
@@ -85,6 +85,9 @@ public interface CustomerFacade
 			MerchantStore merchantStore, Language language) throws Exception;
 	
 	public void updateCustomer(Customer customer) throws Exception;
-	
+
+	void updateAddress(Customer customerModel, MerchantStore merchantStore, Address address, Language language)
+			throws Exception;
+		
 
 }

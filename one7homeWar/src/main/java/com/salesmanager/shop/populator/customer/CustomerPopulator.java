@@ -1,6 +1,7 @@
 package com.salesmanager.shop.populator.customer;
 
 
+import java.text.SimpleDateFormat;
 import java.util.Map;
 
 import com.salesmanager.core.business.exception.ConversionException;
@@ -68,6 +69,8 @@ public class CustomerPopulator extends
 
 			target.setEmailAddress(source.getEmailAddress());
 			target.setNick(source.getUserName());
+			target.setArea(source.getArea());
+			target.setDateOfBirth(new SimpleDateFormat("yyyy/MM/dd").parse(source.getDob()));
 			if(source.getGender()!=null && target.getGender()==null) {
 				target.setGender( com.salesmanager.core.model.customer.CustomerGender.valueOf( source.getGender() ) );
 			}
