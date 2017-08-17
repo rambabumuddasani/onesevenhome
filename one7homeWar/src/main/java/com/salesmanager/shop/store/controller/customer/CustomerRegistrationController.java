@@ -511,9 +511,6 @@ public class CustomerRegistrationController extends AbstractController {
             	
         }	
          
-        // set 	private String dob gender,mobileNo;
-        //customer.setGender(com.salesmanager.core.model.customer.CustomerGender.valueOf(customerRequest.getGender()));
-        //customer.setDateOfBirth(new SimpleDateFormat("yyyy/MM/dd").parse(customerRequest.getDob()));
         Address address = new Address();
         address.setAddress(customerRequest.getAddress());
         address.setPostalCode(customerRequest.getPostalCode());
@@ -530,6 +527,7 @@ public class CustomerRegistrationController extends AbstractController {
         customerResponse.setStatus("true");
         return customerResponse;         
     }
+	
 	@RequestMapping(value="/vendor/update", method = RequestMethod.POST, 
 			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -779,7 +777,7 @@ public class CustomerRegistrationController extends AbstractController {
 		
 		customer.setOfid(ofid);
 		customerFacade.updateCustomer(customer);
-        String forgotPwdURL = forgotPwdRequest.getForgotPwdURL()+"?ofid="+ofid;
+        String forgotPwdURL = forgotPwdRequest.getForgotPwdURL()+"?ofid="+ofid+"&"+"?email="+forgotPwdRequest.getEmail();
         
         //sending email
         String[] forgotPwdURLArg = {forgotPwdURL};
@@ -957,7 +955,7 @@ public class CustomerRegistrationController extends AbstractController {
     	customer.setUserName(customerRequest.getEmail());
     	customer.setArea(customerRequest.getArea());
     	//customer.setDob(customerRequest.getDob());
-    	customer.setDob((new SimpleDateFormat("yyyy/MM/dd").format(customerRequest.getDob())));
+    	//customer.setDob((new SimpleDateFormat("yyyy/MM/dd").format(customerRequest.getDob())));
     	customer.setStoreCode("DEFAULT");
     	Address billing = new Address();
     	billing.setFirstName(customerRequest.getFirstName());
