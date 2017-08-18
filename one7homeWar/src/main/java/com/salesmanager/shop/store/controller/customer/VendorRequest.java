@@ -22,10 +22,18 @@ public class VendorRequest implements Serializable {
 	private String vendorAuthCert;
 	private String vendorExpLine;
 	private String vendorMajorCust;
-	private String vatRegNo;
-	//private String vendorTerms;
+	//private String vatRegNo;
+	private String termsAndConditions;
 	private String activationURL;
+	private String vendorTIN;
 	
+	public String getTermsAndConditions() {
+		return termsAndConditions;
+	}
+	public void setTermsAndConditions(String termsAndConditions) {
+		this.termsAndConditions = termsAndConditions;
+	}
+
 	public String getEmail() {
 		return email;
 	}
@@ -122,23 +130,23 @@ public class VendorRequest implements Serializable {
 	public void setVendorMajorCust(String vendorMajorCust) {
 		this.vendorMajorCust = vendorMajorCust;
 	}
-/*	public String getVendorTerms() {
-		return vendorTerms;
-	}
-	public void setVendorTerms(String vendorTerms) {
-		this.vendorTerms = vendorTerms;
-	}*/
-	public String getVatRegNo() {
+/*	public String getVatRegNo() {
 		return vatRegNo;
 	}
 	public void setVatRegNo(String vatRegNo) {
 		this.vatRegNo = vatRegNo;
 	}
-	public String getActivationURL() {
+*/	public String getActivationURL() {
 		return activationURL;
 	}
 	public void setActivationURL(String activationURL) {
 		this.activationURL = activationURL;
+	}
+	public String getVendorTIN() {
+		return vendorTIN;
+	}
+	public void setVendorTIN(String vendorTIN) {
+		this.vendorTIN = vendorTIN;
 	}
 	
 

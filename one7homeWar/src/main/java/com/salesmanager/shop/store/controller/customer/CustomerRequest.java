@@ -21,6 +21,7 @@ public class CustomerRequest {
 	private String city;
 	private String area;
 	private String activationURL;
+	private String termsAndConditions;
 	
 	public String getEmail() {
 		return email;
@@ -105,6 +106,12 @@ public class CustomerRequest {
 	}
 	public void setActivationURL(String activationURL) {
 		this.activationURL = activationURL;
+	}
+	public String getTermsAndConditions() {
+		return termsAndConditions;
+	}
+	public void setTermsAndConditions(String termsAndConditions) {
+		this.termsAndConditions = termsAndConditions;
 	}
 
 }

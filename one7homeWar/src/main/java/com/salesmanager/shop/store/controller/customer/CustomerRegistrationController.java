@@ -100,6 +100,9 @@ import com.salesmanager.shop.store.controller.customer.facade.CustomerFacade;
 @CrossOrigin
 public class CustomerRegistrationController extends AbstractController {
 
+	private static final String TRUE = "true";
+
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CustomerRegistrationController.class);
     
     
@@ -524,14 +527,14 @@ public class CustomerRegistrationController extends AbstractController {
         customerFacade.updateAddress(customer, merchantStore, address, language);
       
         customerResponse.setSuccessMessage("Customer profile updated successfully");
-        customerResponse.setStatus("true");
+        customerResponse.setStatus(TRUE);
         return customerResponse;         
     }
 	
 	@RequestMapping(value="/vendor/update", method = RequestMethod.POST, 
 			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public CustomerResponse UpdateVendor(@RequestBody VendorRequest vendorRequest) throws Exception {
+	public CustomerResponse updateVendor(@RequestBody VendorRequest vendorRequest) throws Exception {
 		
 		System.out.println("customer ");
     	CustomerResponse customerResponse = new CustomerResponse();
@@ -569,12 +572,13 @@ public class CustomerRegistrationController extends AbstractController {
         vendorAttrs.setVendorExpLine(vendorRequest.getVendorExpLine());
         vendorAttrs.setVendorMajorCust(vendorRequest.getVendorMajorCust());
         vendorAttrs.setVendorName(vendorRequest.getVendorName());
+        vendorAttrs.setVendorTinNumber(vendorRequest.getVendorTIN());
         customer.setVendorAttrs(vendorAttrs);
         
         customerFacade.updateCustomer(customer);
         
         customerResponse.setSuccessMessage("Vendor profile updated successfully");
-        customerResponse.setStatus("true");
+        customerResponse.setStatus(TRUE);
         return customerResponse; 
 		
 	}
@@ -583,14 +587,17 @@ public class CustomerRegistrationController extends AbstractController {
 	@RequestMapping(value="/vendor/register", method = RequestMethod.POST)
 	@ResponseBody
    // public CustomerResponse registerCustomer(@RequestBody VendorRequest vendorRequest) throws Exception {
-    public CustomerResponse registerCustomer(@RequestPart("vendorRequest") String vendorRequestStr,
+    public CustomerResponse registerVendor(@RequestPart("vendorRequest") String vendorRequestStr,
     		@RequestPart("file") MultipartFile vendorCertificate) throws Exception {
 		
-		//VendorRequest vendorRequest = null;
 		VendorRequest vendorRequest = new ObjectMapper().readValue(vendorRequestStr, VendorRequest.class);
-		//System.out.println("vendor file "+vendorCertificate);
     	CustomerResponse customerResponse = new CustomerResponse();
         customerResponse.setStatus("false");
+        if(isTermsAndConditionsAccepted(vendorRequest.getTermsAndConditions())){
+            customerResponse.setErrorMessage("Please accept Terms & Conditions ");
+            return customerResponse;        	
+        }
+        
     	SecuredShopPersistableCustomer customer = new SecuredShopPersistableCustomer();
     	customer.setEmailAddress(vendorRequest.getEmail());
     	customer.setPassword(vendorRequest.getPassword());
@@ -640,6 +647,7 @@ public class CustomerRegistrationController extends AbstractController {
     	//vendorAttrs.setVendorAuthCert(vendorRequest.getVendorAuthCert()); // do we need to comment this line
     	vendorAttrs.setVendorExpLine(vendorRequest.getVendorExpLine());
     	vendorAttrs.setVendorMajorCust(vendorRequest.getVendorMajorCust());
+    	vendorAttrs.setVendorTIN(vendorRequest.getVendorTIN());
     	//vendorAttrs.setVendorTerms(vendorRequest.getVendorTerms());
     	//vendorAttrs.setVendorAuthCert(certFileName);	// is it correct do we need other column to store file path.
     	
@@ -696,7 +704,7 @@ public class CustomerRegistrationController extends AbstractController {
          
        
         customerResponse.setSuccessMessage("Vendor registration successfull");
-        customerResponse.setStatus("true");
+        customerResponse.setStatus(TRUE);
        
         String activationURL = vendorRequest.getActivationURL()+"?email="+vendorRequest.getEmail();
         //sending email
@@ -725,6 +733,10 @@ public class CustomerRegistrationController extends AbstractController {
 		emailService.sendHtmlEmail(merchantStore, email);
 		return customerResponse;         
     }
+
+	private boolean isTermsAndConditionsAccepted(String termsAndCond) {
+		return TRUE.equals(termsAndCond);
+	}
 	@RequestMapping(value="/user/activate", method = RequestMethod.POST, 
 			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -1038,7 +1050,7 @@ public class CustomerRegistrationController extends AbstractController {
          
        
         customerResponse.setSuccessMessage(messages.getMessage("success.newuser.msg",locale));
-        customerResponse.setStatus("true");
+        customerResponse.setStatus(TRUE);
         String activationURL = customerRequest.getActivationURL()+"?email="+customerRequest.getEmail();
         //sending email
         String[] activationURLArg = {activationURL};

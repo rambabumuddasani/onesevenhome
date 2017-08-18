@@ -7,7 +7,6 @@ import javax.validation.Valid;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.salesmanager.core.model.common.VendorAttributes;
 
 public class CustomerEntity extends Customer implements Serializable {
 

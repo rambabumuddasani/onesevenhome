@@ -52,11 +52,14 @@ public class VendorAttributes {
 	@Column (name ="VENDOR_MAJOR_CUST", length=200)
 	private String vendorMajorCust;
 	
-	@Column (name ="VENDOR_ACCEPT_TERMS", length=2)
+/*	@Column (name ="VENDOR_ACCEPT_TERMS", length=2)
 	private String vendorTerms;
-
+*/
 	@Column (name ="VENDOR_VAT_REG_NO", length=20)
 	private String vendorVatRegNo;
+
+	@Column (name ="VENDOR_TIN_NUMBER", length=20)
+	private String vendorTinNumber;
 
 	public String getVendorName() {
 		return vendorName;
@@ -162,20 +165,28 @@ public class VendorAttributes {
 		this.vendorMajorCust = vendorMajorCust;
 	}
 
-	public String getVendorTerms() {
+/*	public String getVendorTerms() {
 		return vendorTerms;
 	}
 
 	public void setVendorTerms(String vendorTerms) {
 		this.vendorTerms = vendorTerms;
 	}
-
+*/
 	public String getVendorVatRegNo() {
 		return vendorVatRegNo;
 	}
 
 	public void setVendorVatRegNo(String vendorVatRegNo) {
 		this.vendorVatRegNo = vendorVatRegNo;
+	}
+
+	public String getVendorTinNumber() {
+		return vendorTinNumber;
+	}
+
+	public void setVendorTinNumber(String vendorTinNumber) {
+		this.vendorTinNumber = vendorTinNumber;
 	}
 	
 }
