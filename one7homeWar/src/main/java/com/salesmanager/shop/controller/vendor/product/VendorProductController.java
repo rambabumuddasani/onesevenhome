@@ -83,7 +83,7 @@ public class VendorProductController {
 			vendorProduct.setCustomer(customer);
 			vendorProduct.setCreatedDate(new Date());
 			productsInfo.setProductId(dbProduct.getId());
-			productsInfo.setProductName(dbProduct.getSku());
+			productsInfo.setProductName(dbProduct.getProductDescription().getName());
 			vpList.add(vendorProduct);
 			vList.add(productsInfo);
 		}
@@ -144,7 +144,7 @@ public class VendorProductController {
 			vendorProduct.setCreatedDate(new Date());
 			vendorProduct.setVendorWishListed(true);
 			productsInfo.setProductId(dbProduct.getId());
-			productsInfo.setProductName(dbProduct.getSku());			
+			productsInfo.setProductName(dbProduct.getProductDescription().getName());			
 			vpList.add(vendorProduct);
 			vList.add(productsInfo);
 		}

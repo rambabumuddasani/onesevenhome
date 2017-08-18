@@ -777,7 +777,7 @@ public class CustomerRegistrationController extends AbstractController {
 		
 		customer.setOfid(ofid);
 		customerFacade.updateCustomer(customer);
-        String forgotPwdURL = forgotPwdRequest.getForgotPwdURL()+"?ofid="+ofid+"&"+"?email="+forgotPwdRequest.getEmail();
+        String forgotPwdURL = forgotPwdRequest.getForgotPwdURL()+"?ofid="+ofid+"&"+"email="+forgotPwdRequest.getEmail();
         
         //sending email
         String[] forgotPwdURLArg = {forgotPwdURL};
