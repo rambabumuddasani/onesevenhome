@@ -519,7 +519,7 @@ public class CustomerRegistrationController extends AbstractController {
         address.setPostalCode(customerRequest.getPostalCode());
         address.setCity(customerRequest.getCity());
         address.setStateProvince(customerRequest.getState());
-        address.setPhone(customerRequest.getMobileNo());
+        address.setPhone(customerRequest.getPhone());
         //address.setBillingAddress(true);
         customer.setArea(customerRequest.getArea());
        
@@ -891,7 +891,7 @@ public class CustomerRegistrationController extends AbstractController {
 		
 		if(customer.getCustomerType().equals("0")){
 			CustomerDetails custDetails = new CustomerDetails();
-			custDetails.setEmailAddress(customer.getEmailAddress());
+			custDetails.setEmail(customer.getEmailAddress());
 			custDetails.setFirstName(customer.getBilling().getFirstName());
 			custDetails.setLastName(customer.getBilling().getLastName());
 			custDetails.setPassword(customer.getPassword());
@@ -977,7 +977,7 @@ public class CustomerRegistrationController extends AbstractController {
     	billing.setCity(customerRequest.getCity());
     	billing.setStateProvince(customerRequest.getState());
     	billing.setPostalCode(customerRequest.getPostalCode());
-    	billing.setPhone(customerRequest.getMobileNo());
+    	billing.setPhone(customerRequest.getPhone());
     	billing.setCountry("IN");
     	
     	Address delivery = new Address();
@@ -987,7 +987,7 @@ public class CustomerRegistrationController extends AbstractController {
     	delivery.setCity(customerRequest.getCity());
     	delivery.setStateProvince(customerRequest.getState());
     	delivery.setPostalCode(customerRequest.getPostalCode());
-    	delivery.setPhone(customerRequest.getMobileNo());
+    	delivery.setPhone(customerRequest.getPhone());
 
     	customer.setBilling(billing);
     	customer.setDelivery(delivery);

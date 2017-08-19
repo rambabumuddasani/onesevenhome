@@ -7,7 +7,7 @@ import com.salesmanager.shop.model.customer.Address;
 
 public class CustomerDetails {
 	
-	private String emailAddress;
+	private String email;
 	private Address billing;
 	private Address delivery;
 	private CustomerGender gender;
@@ -21,11 +21,12 @@ public class CustomerDetails {
 	private Date dob;
 	private String userName;
 	private String password;
-	public String getEmailAddress() {
-		return emailAddress;
+	
+	public String getEmail() {
+		return email;
 	}
-	public void setEmailAddress(String emailAddress) {
-		this.emailAddress = emailAddress;
+	public void setEmail(String email) {
+		this.email = email;
 	}
 	public Address getBilling() {
 		return billing;
@@ -107,5 +108,4 @@ public class CustomerDetails {
 		this.dob = dob;
 	}
 	
-
 }
