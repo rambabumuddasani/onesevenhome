@@ -126,7 +126,7 @@ public class StoreFilter extends HandlerInterceptorAdapter {
 		        		}
 			        } 					
 */					String cutomerId = request.getParameter("userId");
-					if(cutomerId != null){
+					if(!isEmpty(cutomerId)){
 						long customerIdLong = Long.parseLong(cutomerId);
 						customer = customerService.getById(customerIdLong);
 		        		if(customer!=null) {
@@ -145,7 +145,7 @@ public class StoreFilter extends HandlerInterceptorAdapter {
 				/******* Shopping Cart *********/
 				
 				String shoppingCarCode = (String)request.getSession().getAttribute(Constants.SHOPPING_CART);
-				if(shoppingCarCode!=null) {
+				if(!isEmpty(shoppingCarCode)) {
 					request.setAttribute(Constants.REQUEST_SHOPPING_CART, shoppingCarCode);
 				}			
 			} catch (Exception e) {
@@ -154,6 +154,10 @@ public class StoreFilter extends HandlerInterceptorAdapter {
 			return true;
 		   
 	   }
+
+	private boolean isEmpty(String cutomerId) {
+		return cutomerId == null || cutomerId.trim().isEmpty() || "undefined".equals(cutomerId) ;
+	}
 	   
 	 	   
 	   
