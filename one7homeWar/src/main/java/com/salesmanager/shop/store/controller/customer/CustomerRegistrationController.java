@@ -593,7 +593,7 @@ public class CustomerRegistrationController extends AbstractController {
 		VendorRequest vendorRequest = new ObjectMapper().readValue(vendorRequestStr, VendorRequest.class);
     	CustomerResponse customerResponse = new CustomerResponse();
         customerResponse.setStatus("false");
-        if(isTermsAndConditionsAccepted(vendorRequest.getTermsAndConditions())){
+        if(!isTermsAndConditionsAccepted(vendorRequest.getTermsAndConditions())){
             customerResponse.setErrorMessage("Please accept Terms & Conditions ");
             return customerResponse;        	
         }
@@ -644,12 +644,10 @@ public class CustomerRegistrationController extends AbstractController {
     	vendorAttrs.setVendorCompanyNature(vendorRequest.getVendorCompanyNature());
     	vendorAttrs.setVendorRegistrationNo(vendorRequest.getVendorRegistrationNo());
     	vendorAttrs.setVendorPAN(vendorRequest.getVendorPAN());
-    	//vendorAttrs.setVendorAuthCert(vendorRequest.getVendorAuthCert()); // do we need to comment this line
+    	vendorAttrs.setVendorVatRegNo(vendorRequest.getVatRegNo());
     	vendorAttrs.setVendorExpLine(vendorRequest.getVendorExpLine());
     	vendorAttrs.setVendorMajorCust(vendorRequest.getVendorMajorCust());
     	vendorAttrs.setVendorTIN(vendorRequest.getVendorTIN());
-    	//vendorAttrs.setVendorTerms(vendorRequest.getVendorTerms());
-    	//vendorAttrs.setVendorAuthCert(certFileName);	// is it correct do we need other column to store file path.
     	
     	customer.setVendor(vendorAttrs);
     	
@@ -734,8 +732,8 @@ public class CustomerRegistrationController extends AbstractController {
 		return customerResponse;         
     }
 
-	private boolean isTermsAndConditionsAccepted(String termsAndCond) {
-		return TRUE.equals(termsAndCond);
+	private boolean isTermsAndConditionsAccepted(boolean termsAndCond) {
+		return termsAndCond;
 	}
 	@RequestMapping(value="/user/activate", method = RequestMethod.POST, 
 			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
