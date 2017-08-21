@@ -1,6 +1,5 @@
 package com.salesmanager.shop.store.controller.customer;
 
-import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -50,7 +49,6 @@ import com.salesmanager.core.business.services.reference.zone.ZoneService;
 import com.salesmanager.core.business.services.shoppingcart.ShoppingCartCalculationService;
 import com.salesmanager.core.business.services.system.EmailService;
 import com.salesmanager.core.business.utils.CoreConfiguration;
-import com.salesmanager.core.model.common.Billing;
 import com.salesmanager.core.model.common.VendorAttributes;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.merchant.MerchantStore;
@@ -72,19 +70,12 @@ import com.salesmanager.shop.model.shoppingcart.ShoppingCartData;
 import com.salesmanager.shop.populator.shoppingCart.ShoppingCartDataPopulator;
 import com.salesmanager.shop.store.controller.AbstractController;
 import com.salesmanager.shop.store.controller.ControllerConstants;
-import com.salesmanager.shop.store.controller.customer.ForgotPwdRequest;
-import com.salesmanager.shop.store.controller.customer.ForgotPwdResponse;
 import com.salesmanager.shop.store.controller.customer.facade.CustomerFacade;
 import com.salesmanager.shop.utils.CaptchaRequestUtils;
 import com.salesmanager.shop.utils.EmailTemplatesUtils;
 import com.salesmanager.shop.utils.EmailUtils;
 import com.salesmanager.shop.utils.ImageFilePath;
 import com.salesmanager.shop.utils.LabelUtils;
-
-
-import com.salesmanager.shop.store.controller.customer.ForgotPwdRequest;
-import com.salesmanager.shop.store.controller.customer.ForgotPwdResponse;
-import com.salesmanager.shop.store.controller.customer.facade.CustomerFacade;
 
 //import com.salesmanager.core.business.customer.CustomerRegistrationException;
 
@@ -101,10 +92,7 @@ import com.salesmanager.shop.store.controller.customer.facade.CustomerFacade;
 public class CustomerRegistrationController extends AbstractController {
 
 	private static final String TRUE = "true";
-
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CustomerRegistrationController.class);
-    
     
 	@Inject
 	private CoreConfiguration coreConfiguration;
@@ -624,6 +612,33 @@ public class CustomerRegistrationController extends AbstractController {
     	customer.setDelivery(delivery);
     	customer.setCustomerType("1");
 
+        MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");  //i will come back here
+    	final Locale locale  = new Locale("en");
+    	
+        if ( StringUtils.isNotBlank( customer.getUserName() ) )
+        {
+            if ( customerFacade.checkIfUserExists( customer.getUserName(), merchantStore ) )
+            {
+                LOGGER.debug( "Customer with username {} already exists for this store ", customer.getUserName() );
+            	customerResponse.setErrorMessage(messages.getMessage("registration.username.already.exists", locale));
+            	return customerResponse;
+            }
+        }
+        
+        
+        if ( StringUtils.isNotBlank( customer.getPassword() ) &&  StringUtils.isNotBlank( customer.getCheckPassword() )) {
+            if (! customer.getPassword().equals(customer.getCheckPassword()) )
+            {
+            	customerResponse.setErrorMessage(messages.getMessage("message.password.checkpassword.identical", locale));
+            	return customerResponse;
+            }
+        }	
+        
+        if ( StringUtils.isBlank( vendorRequest.getActivationURL() )) {
+        	customerResponse.setErrorMessage(messages.getMessage("failure.customer.activation.link", locale));
+        	return customerResponse;
+        }
+    	
     	// Store file into file sytem
     	String certFileName = "";
     	try{
@@ -650,12 +665,6 @@ public class CustomerRegistrationController extends AbstractController {
     	vendorAttrs.setVendorTIN(vendorRequest.getVendorTIN());
     	
     	customer.setVendor(vendorAttrs);
-    	
-    	final Locale locale  = new Locale("en");
-    	System.out.println("Entered registration");
-        MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");  //i will come back here
-        System.out.println("merchantStore "+merchantStore);
-        //Language language = super.getLanguage(request);
         Language language = languageService.getByCode( Constants.DEFAULT_LANGUAGE );
         String userName = null;
         String password = null;
@@ -667,7 +676,6 @@ public class CustomerRegistrationController extends AbstractController {
             }
             userName = customer.getUserName();
         }
-        
         
         if ( StringUtils.isNotBlank( customer.getPassword() ) &&  StringUtils.isNotBlank( customer.getCheckPassword() )) {
             if (! customer.getPassword().equals(customer.getCheckPassword()) ) {
@@ -1013,22 +1021,20 @@ public class CustomerRegistrationController extends AbstractController {
         }
         
         
-        if ( StringUtils.isNotBlank( customer.getPassword() ) &&  StringUtils.isNotBlank( customer.getCheckPassword() ))
-        {
+        if ( StringUtils.isNotBlank( customer.getPassword() ) &&  StringUtils.isNotBlank( customer.getCheckPassword() )) {
             if (! customer.getPassword().equals(customer.getCheckPassword()) )
             {
             	customerResponse.setErrorMessage(messages.getMessage("message.password.checkpassword.identical", locale));
             	return customerResponse;
             }
             password = customer.getPassword();
-            	
         }	
         
-        if ( StringUtils.isBlank( customerRequest.getActivationURL() ))
-        {
+        if ( StringUtils.isBlank( customerRequest.getActivationURL() )) {
         	customerResponse.setErrorMessage(messages.getMessage("failure.customer.activation.link", locale));
         	return customerResponse;
         }
+        
         System.out.println("userName "+userName+" password "+password);
         @SuppressWarnings( "unused" )
         CustomerEntity customerData = null;
