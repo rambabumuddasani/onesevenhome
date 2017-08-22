@@ -519,7 +519,7 @@ public class CustomerRegistrationController extends AbstractController {
         return customerResponse;         
     }
 	
-	@RequestMapping(value="/vendor/update", method = RequestMethod.POST, 
+	/*@RequestMapping(value="/vendor/update", method = RequestMethod.POST, 
 			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public CustomerResponse updateVendor(@RequestBody VendorRequest vendorRequest) throws Exception {
@@ -561,6 +561,11 @@ public class CustomerRegistrationController extends AbstractController {
         vendorAttrs.setVendorMajorCust(vendorRequest.getVendorMajorCust());
         vendorAttrs.setVendorName(vendorRequest.getVendorName());
         vendorAttrs.setVendorTinNumber(vendorRequest.getVendorTIN());
+        vendorAttrs.setVendorRegistrationNo(vendorRequest.getVendorRegistrationNo());
+        vendorAttrs.setVendorPAN(vendorRequest.getVendorPAN());
+        vendorAttrs.setVendorLicense(vendorRequest.getVendorLicense());
+        vendorAttrs.setVendorAuthCert(vendorRequest.getVendorAuthCert());
+        vendorAttrs.setVendorVatRegNo(vendorRequest.getVatRegNo());
         customer.setVendorAttrs(vendorAttrs);
         
         customerFacade.updateCustomer(customer);
@@ -569,7 +574,7 @@ public class CustomerRegistrationController extends AbstractController {
         customerResponse.setStatus(TRUE);
         return customerResponse; 
 		
-	}
+	}*/
 	
 	//https://stackoverflow.com/questions/33729591/posting-a-file-and-json-data-to-spring-rest-service
 	@RequestMapping(value="/vendor/register", method = RequestMethod.POST)
@@ -919,8 +924,8 @@ public class CustomerRegistrationController extends AbstractController {
 			Address delivery = new Address();
 			delivery.setFirstName(customer.getDelivery().getFirstName());
 			delivery.setLastName(customer.getDelivery().getLastName());
-			delivery.setAddress(customer.getBilling().getAddress());
-			delivery.setCity(customer.getBilling().getCity());
+			delivery.setAddress(customer.getDelivery().getAddress());
+			delivery.setCity(customer.getDelivery().getCity());
 			delivery.setStateProvince(customer.getDelivery().getState());
 			delivery.setPostalCode(customer.getDelivery().getPostalCode());
 			delivery.setPhone(customer.getDelivery().getTelephone());
@@ -947,7 +952,7 @@ public class CustomerRegistrationController extends AbstractController {
 			vendorDetails.setVendorExpLine(customer.getVendorAttrs().getVendorExpLine());
 			vendorDetails.setVendorMajorCust(customer.getVendorAttrs().getVendorMajorCust());
 			vendorDetails.setVatRegNo(customer.getVendorAttrs().getVendorVatRegNo());
-			
+			vendorDetails.setVendorTIN(customer.getVendorAttrs().getVendorTinNumber());
 			customerDetailsResponse.setVendorDetails(vendorDetails);
 			return customerDetailsResponse;
 		}
@@ -1084,5 +1089,79 @@ public class CustomerRegistrationController extends AbstractController {
         
         return customerResponse;         
     }
+	
+	@RequestMapping(value="/vendor/update", method = RequestMethod.POST, 
+			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public CustomerResponse updateVendor(@RequestPart("vendorRequest") String vendorRequestStr,
+    		@RequestPart("file") MultipartFile vendorCertificate) throws Exception {
+		
+		System.out.println("customer ");
+		VendorRequest vendorRequest = new ObjectMapper().readValue(vendorRequestStr, VendorRequest.class);
+    	CustomerResponse customerResponse = new CustomerResponse();
+        MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");  //i will come back here
+
+	    Customer customer = null; 
+    	final Locale locale  = new Locale("en");
+        if ( StringUtils.isNotBlank(vendorRequest.getEmail() ) )
+        {
+        		customer	= customerFacade.getCustomerByUserName(vendorRequest.getEmail(), merchantStore );
+        		if(customer == null){
+        			customerResponse.setErrorMessage("Vendor is not exist, update is not possible ");
+        			return customerResponse;
+        		}
+        }
+
+        if ( StringUtils.isNotBlank( vendorRequest.getPassword() ) &&  StringUtils.isNotBlank( vendorRequest.getConfirmPassword() ))
+        {
+            if (! vendorRequest.getPassword().equals(vendorRequest.getConfirmPassword()) )
+            {
+            	customerResponse.setErrorMessage(messages.getMessage("message.password.checkpassword.identical", locale));
+            	return customerResponse;
+            }
+            	
+        }	
+        String certFileName = "";
+    	try{
+			certFileName = storageService.store(vendorCertificate);
+			System.out.println("certFileName "+certFileName);
+    	}catch(StorageException se){
+    		System.out.println("StoreException occured, do wee need continue "+se);
+    	}
+        
+        
+        VendorAttributes vendorAttrs = new VendorAttributes();
+        vendorAttrs.setVendorOfficeAddress(vendorRequest.getVendorOfficeAddress());
+        vendorAttrs.setVendorMobile(vendorRequest.getVendorMobile());
+        vendorAttrs.setVendorTelephone(vendorRequest.getVendorTelephone());
+        vendorAttrs.setVendorFax(vendorRequest.getVendorFax());
+        vendorAttrs.setVendorConstFirm(vendorRequest.getVendorConstFirm());
+        vendorAttrs.setVendorCompanyNature(vendorRequest.getVendorCompanyNature());
+        vendorAttrs.setVendorExpLine(vendorRequest.getVendorExpLine());
+        vendorAttrs.setVendorMajorCust(vendorRequest.getVendorMajorCust());
+        vendorAttrs.setVendorName(vendorRequest.getVendorName());
+        vendorAttrs.setVendorTinNumber(vendorRequest.getVendorTIN());
+        vendorAttrs.setVendorRegistrationNo(vendorRequest.getVendorRegistrationNo());
+        vendorAttrs.setVendorPAN(vendorRequest.getVendorPAN());
+        vendorAttrs.setVendorLicense(vendorRequest.getVendorLicense());
+        //vendorAttrs.setVendorAuthCert(vendorRequest.getVendorAuthCert());
+        vendorAttrs.setVendorVatRegNo(vendorRequest.getVatRegNo());
+        vendorAttrs.setVendorAuthCert(certFileName);
+        customer.setVendorAttrs(vendorAttrs);
+        
+        try {
+        customerFacade.updateCustomer(customer);
+        }catch(Exception e) {
+        	storageService.deleteFile(certFileName);
+            LOGGER.error( "Error while updating customer.. ", e);
+            customerResponse.setErrorMessage(e.getMessage());
+            return customerResponse;
+        }
+        
+        customerResponse.setSuccessMessage("Vendor profile updated successfully");
+        customerResponse.setStatus(TRUE);
+        return customerResponse; 
+		
+	}
 	
 }

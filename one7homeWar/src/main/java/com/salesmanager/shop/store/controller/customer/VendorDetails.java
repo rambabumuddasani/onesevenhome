@@ -20,6 +20,7 @@ public class VendorDetails {
 	private String vatRegNo;
 	//private String vendorTerms;
 	private String activationURL;
+	private String vendorTIN;
 	public String getEmail() {
 		return email;
 	}
@@ -127,6 +128,12 @@ public class VendorDetails {
 	}
 	public void setActivationURL(String activationURL) {
 		this.activationURL = activationURL;
+	}
+	public String getVendorTIN() {
+		return vendorTIN;
+	}
+	public void setVendorTIN(String vendorTIN) {
+		this.vendorTIN = vendorTIN;
 	}
 	
 }

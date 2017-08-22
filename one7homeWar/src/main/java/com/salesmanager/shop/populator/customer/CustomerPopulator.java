@@ -235,6 +235,7 @@ public class CustomerPopulator extends
 		    	vendorAttrs.setVendorMajorCust(source.getVendor().getVendorMajorCust());
 				vendorAttrs.setVendorVatRegNo(source.getVendor().getVendorVatRegNo());
 				vendorAttrs.setVendorTinNumber(source.getVendor().getVendorTIN());
+				vendorAttrs.setVendorLicense(source.getVendor().getVendorLicense());
 				target.setVendorAttrs(vendorAttrs);
 			}
 			if(source.getActivated() != null){
