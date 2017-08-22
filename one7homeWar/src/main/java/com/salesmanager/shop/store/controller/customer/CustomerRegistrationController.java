@@ -582,7 +582,7 @@ public class CustomerRegistrationController extends AbstractController {
    // public CustomerResponse registerCustomer(@RequestBody VendorRequest vendorRequest) throws Exception {
     public CustomerResponse registerVendor(@RequestPart("vendorRequest") String vendorRequestStr,
     		@RequestPart("file") MultipartFile vendorCertificate) throws Exception {
-		
+
 		VendorRequest vendorRequest = new ObjectMapper().readValue(vendorRequestStr, VendorRequest.class);
     	CustomerResponse customerResponse = new CustomerResponse();
         customerResponse.setStatus("false");
@@ -646,11 +646,13 @@ public class CustomerRegistrationController extends AbstractController {
     	
     	// Store file into file sytem
     	String certFileName = "";
-    	try{
-			certFileName = storageService.store(vendorCertificate);
-			System.out.println("certFileName "+certFileName);
-    	}catch(StorageException se){
-    		System.out.println("StoreException occured, do wee need continue "+se);
+    	if(vendorCertificate.getSize() != 0) {
+    		try{
+    			certFileName = storageService.store(vendorCertificate);
+    			System.out.println("certFileName "+certFileName);
+    		}catch(StorageException se){
+    			System.out.println("StoreException occured, do wee need continue "+se);
+    		}
     	}
     	
     	Vendor vendorAttrs = new Vendor();
