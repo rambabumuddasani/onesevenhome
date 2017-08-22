@@ -25,7 +25,8 @@ app.controller("demoController", function ($scope, $http) {
     	newURL = location.origin;
         $http({
             method: 'POST',
-            url: newURL+"/vendor/register",
+            //url: newURL+"/vendor/register",
+            url: newURL+"/vendor/update",
             headers: { 'Content-Type': undefined },
            
             transformRequest: function (data) {

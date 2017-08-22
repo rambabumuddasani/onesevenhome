@@ -1092,8 +1092,7 @@ public class CustomerRegistrationController extends AbstractController {
         return customerResponse;         
     }
 	
-	@RequestMapping(value="/vendor/update", method = RequestMethod.POST, 
-			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value="/vendor/update", method = RequestMethod.POST)
 	@ResponseBody
 	public CustomerResponse updateVendor(@RequestPart("vendorRequest") String vendorRequestStr,
     		@RequestPart("file") MultipartFile vendorCertificate) throws Exception {
@@ -1124,13 +1123,14 @@ public class CustomerRegistrationController extends AbstractController {
             	
         }	
         String certFileName = "";
-    	try{
-			certFileName = storageService.store(vendorCertificate);
-			System.out.println("certFileName "+certFileName);
-    	}catch(StorageException se){
-    		System.out.println("StoreException occured, do wee need continue "+se);
-    	}
-        
+        if(vendorCertificate.getSize() != 0) {
+        	try{
+        		certFileName = storageService.store(vendorCertificate);
+        		System.out.println("certFileName "+certFileName);
+        	}catch(StorageException se){
+        		System.out.println("StoreException occured, do wee need continue "+se);
+        	}
+        }
         
         VendorAttributes vendorAttrs = new VendorAttributes();
         vendorAttrs.setVendorOfficeAddress(vendorRequest.getVendorOfficeAddress());
