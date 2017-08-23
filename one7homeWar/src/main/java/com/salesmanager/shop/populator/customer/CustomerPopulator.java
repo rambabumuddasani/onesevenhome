@@ -27,6 +27,7 @@ import com.salesmanager.shop.model.customer.PersistableCustomer;
 import com.salesmanager.shop.model.customer.attribute.PersistableCustomerAttribute;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +71,7 @@ public class CustomerPopulator extends
 			target.setEmailAddress(source.getEmailAddress());
 			target.setNick(source.getUserName());
 			target.setArea(source.getArea());
-			//target.setDateOfBirth(new SimpleDateFormat("yyyy/MM/dd").parse(source.getDob()));
+			target.setDateOfBirth(new SimpleDateFormat("yyyy/MM/dd").parse(source.getDob()));
 			if(source.getGender()!=null && target.getGender()==null) {
 				target.setGender( com.salesmanager.core.model.customer.CustomerGender.valueOf( source.getGender() ) );
 			}
