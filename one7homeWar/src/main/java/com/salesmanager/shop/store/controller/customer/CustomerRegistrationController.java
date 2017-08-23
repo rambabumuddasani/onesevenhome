@@ -985,10 +985,6 @@ public class CustomerRegistrationController extends AbstractController {
     	customer.setArea(customerRequest.getArea());
     	//customer.setDob(customerRequest.getDob());
     	//customer.setDob((new SimpleDateFormat("yyyy/MM/dd").format(customerRequest.getDob())));
-    	Date date = new SimpleDateFormat("dd/MM/yyyy").parse(customerRequest.getDob());
-    	String dateString = DateUtil.formatDate(date);
-    	System.out.println(dateString);
-    	customer.setDob(dateString);
     	customer.setStoreCode("DEFAULT");
     	Address billing = new Address();
     	billing.setFirstName(customerRequest.getFirstName());
@@ -1137,8 +1133,6 @@ public class CustomerRegistrationController extends AbstractController {
         		System.out.println("certFileName "+certFileName);
         	}catch(StorageException se){
         		System.out.println("StoreException occured, do wee need continue "+se);
-        		customerResponse.setErrorMessage(se.getMessage());
-        		return customerResponse;
         	}
         }
         

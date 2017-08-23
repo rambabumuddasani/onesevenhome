@@ -10,7 +10,6 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
-import org.apache.tomcat.jni.File;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -30,8 +29,8 @@ public class FileSystemStorageService implements StorageService {
     @Override
     public String store(MultipartFile file) {
     	StringBuilder filePath = new StringBuilder();
-    	//filePath.append(rootLocation+"\\"); // assumption output will be /opt/imp/vendor
-    	filePath.append(rootLocation+java.io.File.separator);
+    	filePath.append(rootLocation+"\\"); // assumption output will be /opt/imp/vendor
+    	//filePath.append(rootLocation+java.io.File.separator);
     	try {
             if (file.isEmpty()) {
                 throw new StorageException("Failed to store empty file " + file.getOriginalFilename());
