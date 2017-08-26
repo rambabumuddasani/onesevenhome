@@ -1,8 +1,12 @@
 package com.salesmanager.shop.populator.customer;
 
 
-import java.text.SimpleDateFormat;
 import java.util.Map;
+
+import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.salesmanager.core.business.exception.ConversionException;
 import com.salesmanager.core.business.services.customer.attribute.CustomerOptionService;
@@ -25,11 +29,7 @@ import com.salesmanager.core.model.reference.zone.Zone;
 import com.salesmanager.shop.model.customer.Address;
 import com.salesmanager.shop.model.customer.PersistableCustomer;
 import com.salesmanager.shop.model.customer.attribute.PersistableCustomerAttribute;
-import org.apache.commons.lang.Validate;
-import org.apache.commons.lang3.StringUtils;
-import org.joda.time.format.DateTimeFormat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.salesmanager.shop.utils.DateUtil;
 
 public class CustomerPopulator extends
 		AbstractDataPopulator<PersistableCustomer, Customer> {
@@ -67,7 +67,10 @@ public class CustomerPopulator extends
 				target.setPassword(source.getEncodedPassword());
 				target.setAnonymous(false);
 			}
-
+		    String dateOfBirth = source.getDob();
+		    if(!StringUtils.isEmpty(dateOfBirth)){
+		    	target.setDateOfBirth(DateUtil.getDate(dateOfBirth));
+		    }
 			target.setEmailAddress(source.getEmailAddress());
 			target.setNick(source.getUserName());
 			target.setArea(source.getArea());

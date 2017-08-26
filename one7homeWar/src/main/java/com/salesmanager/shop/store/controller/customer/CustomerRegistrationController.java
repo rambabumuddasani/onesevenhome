@@ -1,8 +1,6 @@
 package com.salesmanager.shop.store.controller.customer;
 
-import java.text.SimpleDateFormat;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -39,7 +37,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mchange.v2.cfg.PropertiesConfigSource.Parse;
 import com.salesmanager.core.business.exception.ConversionException;
 import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.modules.email.Email;
@@ -514,7 +511,10 @@ public class CustomerRegistrationController extends AbstractController {
         address.setPhone(customerRequest.getPhone());
         //address.setBillingAddress(true);
         customer.setArea(customerRequest.getArea());
-       
+        String dobStr = customerRequest.getDob();        
+        if(StringUtils.isBlank(dobStr)){
+        	customer.setDateOfBirth(DateUtil.getDate(dobStr));
+        }
         Language language = languageService.getByCode( Constants.DEFAULT_LANGUAGE );
         customerFacade.updateAddress(customer, merchantStore, address, language);
       
@@ -983,8 +983,7 @@ public class CustomerRegistrationController extends AbstractController {
     	customer.setGender(customerRequest.getGender());
     	customer.setUserName(customerRequest.getEmail());
     	customer.setArea(customerRequest.getArea());
-    	//customer.setDob(customerRequest.getDob());
-    	//customer.setDob((new SimpleDateFormat("yyyy/MM/dd").format(customerRequest.getDob())));
+    	customer.setDob(customerRequest.getDob());
     	customer.setStoreCode("DEFAULT");
     	Address billing = new Address();
     	billing.setFirstName(customerRequest.getFirstName());
