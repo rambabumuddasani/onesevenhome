@@ -8,21 +8,24 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.modules.email.Email;
+import com.salesmanager.core.business.services.catalog.product.PricingService;
 import com.salesmanager.core.business.services.catalog.product.ProductService;
 import com.salesmanager.core.business.services.customer.CustomerService;
 import com.salesmanager.core.business.services.merchant.MerchantStoreService;
 import com.salesmanager.core.business.services.system.EmailService;
 import com.salesmanager.core.business.vendor.product.services.VendorProductService;
 import com.salesmanager.core.model.catalog.product.Product;
+import com.salesmanager.core.model.catalog.product.image.ProductImage;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.product.vendor.VendorProduct;
@@ -54,6 +57,10 @@ public class VendorProductController {
     
 	@Inject
 	private EmailUtils emailUtils;
+	
+	@Inject
+	private PricingService pricingService;
+
 
 	private final static String VENDOR_ADD_PRODUCTS_TPL = "email_template_vendor_add_products.ftl";
 	
@@ -175,9 +182,64 @@ public class VendorProductController {
 		return vendorProductResponse;
 	}
 	
-/*	public List<WishListProducts> getWishListProducts(){
-		
-		return null;
+	@RequestMapping(value={"/wishlist/{vendorId}"},  method = { RequestMethod.GET })
+	@ResponseBody	
+	public VendortProductList getWishListProducts(@PathVariable Long vendorId){
+		VendortProductList vendorProductList = new VendortProductList();
+		List<VendorProductData> vendorProductData = new ArrayList<VendorProductData>();
+		List<VendorProduct> dbVendorProductList = vendorProductService.findProductsByVendor(vendorId);
+		for(VendorProduct vendorProduct : dbVendorProductList){
+			VendorProductData vpData = new VendorProductData();
+			Product product = vendorProduct.getProduct();
+			if(product != null) {
+				ProductImage image = product.getProductImage();
+				if(image != null) {
+					String imagePath =  image.getProductImage();
+					vpData.setProductImg(imagePath);
+				}
+                vpData.setProductCode(product.getSku());
+                vpData.setProductId(product.getId());
+                vpData.setProductName(product.getProductDescription().getName());
+                try {
+					vpData.setProductPrice(pricingService.calculateProductPrice(product).getOriginalPrice().toString());
+				} catch (ServiceException e) {
+					e.printStackTrace();
+				}
+				vendorProductData.add(vpData);
+			}
+		}
+		vendorProductList.setVendorProductData(vendorProductData);
+		return vendorProductList;
 	}
-*/
+
+	@RequestMapping(value={"/productList/{vendorId}"},  method = { RequestMethod.GET })
+	@ResponseBody	
+	public VendortProductList getVendorProductList(@PathVariable Long vendorId){
+		VendortProductList vendorProductList = new VendortProductList();
+		List<VendorProductData> vendorProductData = new ArrayList<VendorProductData>();
+		List<VendorProduct> dbVendorProductList = vendorProductService.findProductsByVendor(vendorId);
+		for(VendorProduct vendorProduct : dbVendorProductList){
+			VendorProductData vpData = new VendorProductData();
+			Product product = vendorProduct.getProduct();
+			if(product != null) {
+				ProductImage image = product.getProductImage();
+				if(image != null) {
+					String imagePath =  image.getProductImage();
+					vpData.setProductImg(imagePath);
+				}
+                vpData.setProductCode(product.getSku());
+                vpData.setProductId(product.getId());
+                vpData.setProductName(product.getProductDescription().getName());
+                try {
+					vpData.setProductPrice(pricingService.calculateProductPrice(product).getOriginalPrice().toString());
+				} catch (ServiceException e) {
+					e.printStackTrace();
+				}
+				vendorProductData.add(vpData);
+			}
+		}
+		vendorProductList.setVendorProductData(vendorProductData);
+		return vendorProductList;
+	}
+
 }

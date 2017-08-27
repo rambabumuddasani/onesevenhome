@@ -56,7 +56,7 @@ public class VendorProduct extends SalesManagerEntity<Long, VendorProduct>{
 	private Date adminActivatedDate;
 	
 	@Column(name="VENDOR_WISH_LISTED",nullable=true)
-	private boolean vendorWishListed =false;
+	private Boolean vendorWishListed =false;
 
 	public Long getId() {
 		return id;
@@ -106,11 +106,11 @@ public class VendorProduct extends SalesManagerEntity<Long, VendorProduct>{
 		this.customer = customer;
 	}
 	
-	public boolean isVendorWishListed() {
+	public Boolean isVendorWishListed() {
 		return vendorWishListed;
 	}
 
-	public void setVendorWishListed(boolean vendorWishListed) {
+	public void setVendorWishListed(Boolean vendorWishListed) {
 		this.vendorWishListed = vendorWishListed;
 	}
 }
