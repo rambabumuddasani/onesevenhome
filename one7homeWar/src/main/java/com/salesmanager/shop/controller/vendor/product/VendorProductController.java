@@ -89,6 +89,7 @@ public class VendorProductController {
 			vendorProduct.setProduct(dbProduct);
 			vendorProduct.setCustomer(customer);
 			vendorProduct.setCreatedDate(new Date());
+			vendorProduct.setVendorWishListed(false);
 			productsInfo.setProductId(dbProduct.getId());
 			productsInfo.setProductName(dbProduct.getProductDescription().getName());
 			vpList.add(vendorProduct);
@@ -194,7 +195,7 @@ public class VendorProductController {
 			if(product != null) {
 				ProductImage image = product.getProductImage();
 				if(image != null) {
-					String imagePath =  image.getProductImage();
+					String imagePath =  image.getProductImageUrl();
 					vpData.setProductImg(imagePath);
 				}
                 vpData.setProductCode(product.getSku());
@@ -224,7 +225,7 @@ public class VendorProductController {
 			if(product != null) {
 				ProductImage image = product.getProductImage();
 				if(image != null) {
-					String imagePath =  image.getProductImage();
+					String imagePath =  image.getProductImageUrl();
 					vpData.setProductImg(imagePath);
 				}
                 vpData.setProductCode(product.getSku());

@@ -56,7 +56,7 @@ public class VendorProduct extends SalesManagerEntity<Long, VendorProduct>{
 	private Date adminActivatedDate;
 	
 	@Column(name="VENDOR_WISH_LISTED",nullable=true)
-	private Boolean vendorWishListed =false;
+	private Boolean vendorWishListed = false;
 
 	public Long getId() {
 		return id;
