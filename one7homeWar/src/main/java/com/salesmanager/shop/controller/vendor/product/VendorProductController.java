@@ -187,7 +187,7 @@ public class VendorProductController {
 	public VendortProductList getWishListProducts(@PathVariable Long vendorId){
 		VendortProductList vendorProductList = new VendortProductList();
 		List<VendorProductData> vendorProductData = new ArrayList<VendorProductData>();
-		List<VendorProduct> dbVendorProductList = vendorProductService.findProductsByVendor(vendorId);
+		List<VendorProduct> dbVendorProductList = vendorProductService.findProductWishListByVendor(vendorId);
 		for(VendorProduct vendorProduct : dbVendorProductList){
 			VendorProductData vpData = new VendorProductData();
 			Product product = vendorProduct.getProduct();

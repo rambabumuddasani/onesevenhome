@@ -37,5 +37,10 @@ public class VendorProductServiceImpl extends SalesManagerEntityServiceImpl<Long
 		return vendorProductRepository.findProductsByVendor(vendorId);
 	}
 
+	@Override
+	public List<VendorProduct> findProductWishListByVendor(Long vendorId) {
+		return vendorProductRepository.findProductWishListByVendor(vendorId);
+	}
+
 	
 }

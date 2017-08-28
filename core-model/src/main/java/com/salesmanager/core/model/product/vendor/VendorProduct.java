@@ -49,7 +49,7 @@ public class VendorProduct extends SalesManagerEntity<Long, VendorProduct>{
 	private Date createdDate;
 	
 	@Column(name="ADMIN_ACTIVATED",nullable=true)
-	private boolean adminActivated=false;
+	private Boolean adminActivated=false;
 	
 	@Column(name="ADMIN_ACTIVATED_DATE",nullable=true)
 	@Temporal(TemporalType.TIMESTAMP)
@@ -74,11 +74,11 @@ public class VendorProduct extends SalesManagerEntity<Long, VendorProduct>{
 		this.createdDate = createdDate;
 	}
 
-	public boolean isAdminActivated() {
+	public Boolean isAdminActivated() {
 		return adminActivated;
 	}
 
-	public void setAdminActivated(boolean adminActivated) {
+	public void setAdminActivated(Boolean adminActivated) {
 		this.adminActivated = adminActivated;
 	}
 
