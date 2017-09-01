@@ -512,7 +512,7 @@ public class CustomerRegistrationController extends AbstractController {
         //address.setBillingAddress(true);
         customer.setArea(customerRequest.getArea());
         String dobStr = customerRequest.getDob();        
-        if(StringUtils.isBlank(dobStr)){
+        if(StringUtils.isNotBlank(dobStr)){
         	customer.setDateOfBirth(DateUtil.getDate(dobStr));
         }
         Language language = languageService.getByCode( Constants.DEFAULT_LANGUAGE );
