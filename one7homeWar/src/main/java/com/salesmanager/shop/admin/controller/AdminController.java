@@ -181,6 +181,11 @@ public class AdminController {
 	       UserVO userVO = new UserVO();
 	       userVO.setId(user.getId());
 	       userVO.setAdminName(user.getAdminName());
+	       userVO.setStoreCode(user.getMerchantStore().getCode());
+	       userVO.setEmail(user.getAdminEmail());
+	       userVO.setFirstName(user.getFirstName());
+	       userVO.setLastName(user.getLastName());
+	       userVO.setDefaultLang(user.getDefaultLanguage());
 	       userList.add(userVO);
 	    }
 	    adminListResponse.setAdminList(userList);
