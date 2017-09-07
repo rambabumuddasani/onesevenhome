@@ -5,12 +5,14 @@ import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -50,11 +52,15 @@ public class AdminLoginController extends AbstractController {
     
     @Inject
     UserService userService;
+    
+    @Inject
+	@Named("passwordEncoder")
+	private PasswordEncoder passwordEncoder;
  
 
 	private static final Logger LOG = LoggerFactory.getLogger(CustomerLoginController.class);
 
-	private LoginResponse logon(String userName, String password) throws Exception {
+	/*private LoginResponse logon(String userName, String password) throws Exception {
 
 		LoginResponse loginResponse = new LoginResponse();
 		try {
@@ -126,7 +132,7 @@ public class AdminLoginController extends AbstractController {
 		
 		LoginResponse loginResponse = this.logon(userName, password);
 		return loginResponse;
-	}
+	}*/
 	
 	@RequestMapping(value="/vendor/activate", method=RequestMethod.POST,consumes=MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody ActivateVendorResponse activateVendor(@RequestBody ActivateVendorRequest activateVendorRequest) {
@@ -153,6 +159,39 @@ public class AdminLoginController extends AbstractController {
 		activateVendorResponse.setActiveVendors(actVendorList);
 		return activateVendorResponse;
 		
+	}
+	private AdminLoginResponse logon(String userName, String password) throws Exception {
+
+		AdminLoginResponse adminLoginResponse = new AdminLoginResponse();
+		
+		User dbUser= userService.getByUserName(userName);
+		if(dbUser==null) {
+			adminLoginResponse.setErrorMessage("Admin not exist for the userName "+userName);
+			return adminLoginResponse;
+		}
+	
+		if (!passwordEncoder.matches(password, dbUser.getAdminPassword())){
+			adminLoginResponse.setErrorMessage("Failed to Login, Invalid credentials");
+			adminLoginResponse.setStatus("false");
+			return adminLoginResponse;
+		}
+		
+		adminLoginResponse.setSuccessMessage("You are Successfully logged in as "+dbUser.getAdminName());
+		adminLoginResponse.setStatus("true");
+
+		return adminLoginResponse;
+	}
+
+	//http://localhost:8080/shop/customer/authenticate.html?userName=shopizer&password=password&storeCode=DEFAULT
+	@RequestMapping(value="/admin/login", method=RequestMethod.POST,consumes=MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody AdminLoginResponse basicLogon(@RequestBody AdminLoginRequest adminLoginRequest) throws Exception {
+		
+		System.out.println("username"+adminLoginRequest.getUserName()+" password "+adminLoginRequest.getPassword());
+		String userName = adminLoginRequest.getUserName();
+		String password = adminLoginRequest.getPassword();
+		
+		AdminLoginResponse adminLoginResponse = this.logon(userName, password);
+		return adminLoginResponse;
 	}
 	
 }
