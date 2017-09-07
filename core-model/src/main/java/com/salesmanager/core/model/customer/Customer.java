@@ -29,6 +29,7 @@ import javax.persistence.Transient;
 import javax.validation.Valid;
 
 import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -153,6 +154,15 @@ public class Customer extends SalesManagerEntity<Long, Customer> {
 	
 	@Column(name="CUSTOMER_AREA",length=100)
 	private String area;
+	
+	@Column(name="IS_ADMIN", length=3)
+	private String isAdmin;
+	
+	@Column(name="IS_SUPER_ADMIN", length=3)
+	private String isSuperAdmin;
+	
+	@Column(name="IS_VENDOR_ACTIVATED",nullable=false)
+	private String isVendorActivated="N";
 	
 	public Customer() {
 	}
@@ -354,6 +364,32 @@ public class Customer extends SalesManagerEntity<Long, Customer> {
 	public void setArea(String area) {
 		this.area = area;
 	}
+
+	public String getIsAdmin() {
+		return isAdmin;
+	}
+
+	public void setIsAdmin(String isAdmin) {
+		this.isAdmin = isAdmin;
+	}
+
+	public String getIsSuperAdmin() {
+		return isSuperAdmin;
+	}
+
+	public void setIsSuperAdmin(String isSuperAdmin) {
+		this.isSuperAdmin = isSuperAdmin;
+	}
+
+	public String getIsVendorActivated() {
+		return isVendorActivated;
+	}
+
+	public void setIsVendorActivated(String isVendorActivated) {
+		this.isVendorActivated = isVendorActivated;
+	}
+
+	
 
 	
 }
