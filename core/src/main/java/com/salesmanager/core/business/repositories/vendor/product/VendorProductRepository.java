@@ -23,5 +23,7 @@ public interface VendorProductRepository extends JpaRepository<VendorProduct, Lo
 			+ " join fetch pd.descriptions descriptions join fetch vp.customer customer where vp.vendorWishListed = TRUE  and vp.customer.id=?1 ")
 	public List<VendorProduct> findProductWishListByVendor(Long vendorId);
 
+	public List<VendorProduct> findVendorById(Long vendorId);
+
 	
 }
