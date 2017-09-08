@@ -3,9 +3,6 @@
  */
 package com.salesmanager.shop.admin.controller;
 
-import com.salesmanager.core.model.merchant.MerchantStore;
-import com.salesmanager.core.model.reference.language.Language;
-
 /**
  * @author welcome
  *
@@ -18,7 +15,7 @@ public class UserVO {
 	private String email;
 	private String firstName;
 	private String lastName;
-	private Language defaultLang;
+	//private Language defaultLang;
 	
 	public Long getId() {
 		return id;
@@ -56,11 +53,11 @@ public class UserVO {
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
 	}
-	public Language getDefaultLang() {
+	/*public Language getDefaultLang() {
 		return defaultLang;
 	}
 	public void setDefaultLang(Language defaultLang) {
 		this.defaultLang = defaultLang;
-	}
+	}*/
 
 }

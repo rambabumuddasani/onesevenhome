@@ -12,7 +12,7 @@ public class EditUserAdminRequest {
 	private String email;
 	private String firstName;
 	private String lastName;
-	private String defaultLang;
+	//private String defaultLang;
 	
 	public String getId() {
 		return id;
@@ -50,11 +50,11 @@ public class EditUserAdminRequest {
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
 	}
-	public String getDefaultLang() {
+	/*public String getDefaultLang() {
 		return defaultLang;
 	}
 	public void setDefaultLang(String defaultLang) {
 		this.defaultLang = defaultLang;
-	}
+	}*/
 
 }

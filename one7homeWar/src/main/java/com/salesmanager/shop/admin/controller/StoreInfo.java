@@ -2,9 +2,6 @@ package com.salesmanager.shop.admin.controller;
 
 import java.util.Date;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.salesmanager.core.model.reference.country.Country;
-
 public class StoreInfo {
      
 	private String storeName;

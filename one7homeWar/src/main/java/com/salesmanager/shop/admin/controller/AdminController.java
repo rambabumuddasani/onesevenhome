@@ -20,13 +20,9 @@ import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.services.merchant.MerchantStoreService;
 import com.salesmanager.core.business.services.reference.country.CountryService;
 import com.salesmanager.core.business.services.reference.language.LanguageService;
-import com.salesmanager.core.business.services.system.EmailService;
 import com.salesmanager.core.business.services.user.UserService;
 import com.salesmanager.core.model.merchant.MerchantStore;
-import com.salesmanager.core.model.reference.language.Language;
 import com.salesmanager.core.model.user.User;
-//import com.salesmanager.shop.utils.EmailUtils;
-//import com.salesmanager.shop.utils.LabelUtils;
 
 @Controller
 @CrossOrigin
@@ -47,15 +43,6 @@ public class AdminController {
     @Inject
 	@Named("passwordEncoder")
 	private PasswordEncoder passwordEncoder;
-    
- /*   @Inject
-	private EmailUtils emailUtils;*/
-    
-    @Inject
-	EmailService emailService;
-
-	/*@Inject
-	private LabelUtils messages;*/
     
 	@RequestMapping(value="/admin/updatestore", method = RequestMethod.POST, 
 			produces = MediaType.APPLICATION_JSON_VALUE,consumes=MediaType.APPLICATION_JSON_VALUE)
@@ -152,8 +139,8 @@ public class AdminController {
 			
 			dbUser.setFirstName(editUserAdminRequest.getFirstName());
 			dbUser.setLastName(editUserAdminRequest.getLastName());
-			Language  language = languageService.getByCode(editUserAdminRequest.getDefaultLang());
-			dbUser.setDefaultLanguage(language);
+			//Language  language = languageService.getByCode(editUserAdminRequest.getDefaultLang());
+			//dbUser.setDefaultLanguage(language);
 			dbUser.setAdminName(editUserAdminRequest.getUserName());
 			dbUser.setAdminEmail(editUserAdminRequest.getEmail());
 			MerchantStore store = merchantStoreService.getByCode(editUserAdminRequest.getStoreCode());
@@ -185,7 +172,7 @@ public class AdminController {
 	       userVO.setEmail(user.getAdminEmail());
 	       userVO.setFirstName(user.getFirstName());
 	       userVO.setLastName(user.getLastName());
-	       userVO.setDefaultLang(user.getDefaultLanguage());
+	       //userVO.setDefaultLang(user.getDefaultLanguage());
 	       userList.add(userVO);
 	    }
 	    adminListResponse.setAdminList(userList);
