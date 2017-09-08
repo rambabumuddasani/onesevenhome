@@ -1,17 +1,14 @@
 package com.salesmanager.shop.admin.controller.login;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -25,22 +22,14 @@ import com.salesmanager.core.business.services.merchant.MerchantStoreService;
 import com.salesmanager.core.business.services.user.UserService;
 import com.salesmanager.core.business.vendor.product.services.VendorProductService;
 import com.salesmanager.core.model.customer.Customer;
-import com.salesmanager.core.model.merchant.MerchantStore;
-import com.salesmanager.core.model.product.vendor.VendorProduct;
 import com.salesmanager.core.model.user.User;
 import com.salesmanager.shop.store.controller.AbstractController;
 import com.salesmanager.shop.store.controller.customer.CustomerLoginController;
-import com.salesmanager.shop.store.controller.customer.LoginRequest;
-import com.salesmanager.shop.store.controller.customer.LoginResponse;
-import com.salesmanager.shop.store.controller.customer.facade.CustomerFacade;
 
 @Controller
 @CrossOrigin
 public class AdminLoginController extends AbstractController {
 	
-	@Inject
-	private  CustomerFacade customerFacade;
-  
     @Inject
     MerchantStoreService merchantStoreService ;
     
@@ -134,7 +123,7 @@ public class AdminLoginController extends AbstractController {
 		return loginResponse;
 	}*/
 	
-	@RequestMapping(value="/vendor/activate", method=RequestMethod.POST,consumes=MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
+	/*@RequestMapping(value="/vendor/activate", method=RequestMethod.POST,consumes=MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody ActivateVendorResponse activateVendor(@RequestBody ActivateVendorRequest activateVendorRequest) {
 		
 		System.out.println("Entered activateVendor:");
@@ -159,14 +148,16 @@ public class AdminLoginController extends AbstractController {
 		activateVendorResponse.setActiveVendors(actVendorList);
 		return activateVendorResponse;
 		
-	}
-	private AdminLoginResponse logon(String userName, String password) throws Exception {
+	}*/
+	
+	private AdminLoginResponse logon(String email, String password) throws Exception {
 
 		AdminLoginResponse adminLoginResponse = new AdminLoginResponse();
 		
-		User dbUser= userService.getByUserName(userName);
+		//User dbUser= userService.getByUserName(userName);
+		User dbUser= userService.getByEmail(email);
 		if(dbUser==null) {
-			adminLoginResponse.setErrorMessage("Admin not exist for the userName "+userName);
+			adminLoginResponse.setErrorMessage("Admin not exist for this email "+email);
 			return adminLoginResponse;
 		}
 	
@@ -182,16 +173,14 @@ public class AdminLoginController extends AbstractController {
 		return adminLoginResponse;
 	}
 
-	//http://localhost:8080/shop/customer/authenticate.html?userName=shopizer&password=password&storeCode=DEFAULT
 	@RequestMapping(value="/admin/login", method=RequestMethod.POST,consumes=MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody AdminLoginResponse basicLogon(@RequestBody AdminLoginRequest adminLoginRequest) throws Exception {
 		
-		System.out.println("username"+adminLoginRequest.getUserName()+" password "+adminLoginRequest.getPassword());
-		String userName = adminLoginRequest.getUserName();
+		System.out.println("username"+adminLoginRequest.getEmailAddress()+" password "+adminLoginRequest.getPassword());
+		String email = adminLoginRequest.getEmailAddress();
 		String password = adminLoginRequest.getPassword();
 		
-		AdminLoginResponse adminLoginResponse = this.logon(userName, password);
+		AdminLoginResponse adminLoginResponse = this.logon(email, password);
 		return adminLoginResponse;
 	}
-	
 }
