@@ -3,8 +3,10 @@ package com.salesmanager.shop.admin.controller.login;
 public class AdminLoginResponse {
 	
 	private String  successMessage;
-	private  String errorMessage;
+	private String errorMessage;
 	private String status;
+	private Long id;
+	private String adminName;
 	public String getSuccessMessage() {
 		return successMessage;
 	}
@@ -23,4 +25,17 @@ public class AdminLoginResponse {
 	public void setStatus(String status) {
 		this.status = status;
 	}
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+	public String getAdminName() {
+		return adminName;
+	}
+	public void setAdminName(String adminName) {
+		this.adminName = adminName;
+	}
+	
 }

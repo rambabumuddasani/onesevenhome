@@ -169,6 +169,8 @@ public class AdminLoginController extends AbstractController {
 		
 		adminLoginResponse.setSuccessMessage("You are Successfully logged in as "+dbUser.getAdminName());
 		adminLoginResponse.setStatus("true");
+		adminLoginResponse.setId(dbUser.getId());
+		adminLoginResponse.setAdminName(dbUser.getAdminName());
 
 		return adminLoginResponse;
 	}
