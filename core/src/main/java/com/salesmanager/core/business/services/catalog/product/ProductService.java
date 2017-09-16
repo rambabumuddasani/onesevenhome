@@ -1,5 +1,6 @@
 package com.salesmanager.core.business.services.catalog.product;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -56,6 +57,9 @@ public interface ProductService extends SalesManagerEntityService<Long, Product>
 	Product getByProductId(Long productId);
 
 	List<Product> getProduct(String colName, String colValue) throws ServiceException;
+
+	List<Product> getProductsListByFiltersAndPrice(List<Long> filterIds, BigDecimal minPrice, BigDecimal maxPrice);
+
 	
 }
 	

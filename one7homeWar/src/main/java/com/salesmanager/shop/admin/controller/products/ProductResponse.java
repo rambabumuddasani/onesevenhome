@@ -20,7 +20,6 @@ public class ProductResponse {
 	List<Category> categories;
 	private Date productPriceSpecialEndDate;
 	private Timestamp productPriceSpecialEndTime;
-
 	public Long getProductId() {
 		return productId;
 	}

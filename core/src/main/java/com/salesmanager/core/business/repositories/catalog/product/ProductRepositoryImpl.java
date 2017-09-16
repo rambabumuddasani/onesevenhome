@@ -1,5 +1,6 @@
 package com.salesmanager.core.business.repositories.catalog.product;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -1168,6 +1169,64 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
     	return products;
 		
 		
+	}
+	@Override
+	public List<Product> findProductsByFiltersAndPrice(List<Long> filterIds, BigDecimal minPrice, BigDecimal maxPrice) {
+		StringBuilder qs = new StringBuilder();
+		qs.append("select distinct p from Product as p ");
+		qs.append("join fetch p.merchantStore merch ");
+		qs.append("join fetch p.availabilities pa ");
+		qs.append("left join fetch pa.prices pap ");
+		
+		qs.append("join fetch p.descriptions pd ");
+		qs.append("join fetch p.filters filters ");
+		
+		
+		
+		qs.append("left join fetch pap.descriptions papd ");
+		
+		
+		//images
+		qs.append("left join fetch p.images images ");
+		
+		//options (do not need attributes for listings)
+		qs.append("left join fetch p.attributes pattr ");
+		qs.append("left join fetch pattr.productOption po ");
+		qs.append("left join fetch po.descriptions pod ");
+		qs.append("left join fetch pattr.productOptionValue pov ");
+		qs.append("left join fetch pov.descriptions povd ");
+		
+		//other lefts
+		qs.append("left join fetch p.manufacturer manuf ");
+		qs.append("left join fetch p.type type ");
+		qs.append("left join fetch p.taxClass tx ");
+		
+		qs.append("where filters.id in (:fid)");
+		qs.append("and pap.productPriceAmount between :minPrice and :maxPrice");
+		//qs.append("where pap.productPriceAmount between :minPrice and :maxPrice");
+        //qs.append("where");
+        /*if(!filterIds.isEmpty()) {
+        	qs.append(" filters.id in (:fid)");
+        	qs.append("and pap.productPriceAmount between :minPrice and :maxPrice");
+        }
+        else {
+        	qs.append(" pap.productPriceAmount between :minPrice and :maxPrice");
+        }*/
+        
+    	String hql = qs.toString();
+		Query q = this.em.createQuery(hql);
+
+    	q.setParameter("fid", filterIds);
+    	q.setParameter("minPrice", minPrice);
+    	q.setParameter("maxPrice", maxPrice);
+
+        
+    	@SuppressWarnings("unchecked")
+		List<Product> products =  q.getResultList();
+        
+    	
+    	return products;
+
 	}
 	
 }
