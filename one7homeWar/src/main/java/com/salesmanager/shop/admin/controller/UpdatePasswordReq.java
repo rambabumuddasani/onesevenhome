@@ -7,7 +7,8 @@ public class UpdatePasswordReq implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private String id;
-	private String adminName;
+	//private String adminName;
+	private String emailAddress;
 	private String newPassword;
 	
 	public String getId() {
@@ -16,17 +17,23 @@ public class UpdatePasswordReq implements Serializable {
 	public void setId(String id) {
 		this.id = id;
 	}
-	public String getAdminName() {
+	/*public String getAdminName() {
 		return adminName;
 	}
 	public void setAdminName(String adminName) {
 		this.adminName = adminName;
-	}
+	}*/
 	public String getNewPassword() {
 		return newPassword;
 	}
 	public void setNewPassword(String newPassword) {
 		this.newPassword = newPassword;
+	}
+	public String getEmailAddress() {
+		return emailAddress;
+	}
+	public void setEmailAddress(String emailAddress) {
+		this.emailAddress = emailAddress;
 	}
 
 }
