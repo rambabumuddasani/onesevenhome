@@ -123,6 +123,9 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 		return productRepository.getById(productId);
 	}
 
+	public Product getProductAndProductReviewByProductId(Long productId) {
+		return productRepository.getProductAndProductReviewByProductId(productId);
+	}
 	@Override
 	public List<Product> getProducts(List<Long> categoryIds, Language language) throws ServiceException {
 		
@@ -357,9 +360,9 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 	}
 
 	@Override
-	public List<Product> getProductsListByFiltersAndPrice(List<Long> filterIds, BigDecimal minPrice, BigDecimal maxPrice) {
+	public List<Product> getProductsListByFiltersAndPrice(List<Long> filterIds, BigDecimal minPrice, BigDecimal maxPrice,Double productRating) {
 		
-		return productRepository.findProductsByFiltersAndPrice(filterIds,minPrice,maxPrice);
+		return productRepository.findProductsByFiltersAndPrice(filterIds,minPrice,maxPrice,productRating);
 	}
 
 	

@@ -24,6 +24,7 @@ import com.salesmanager.core.model.catalog.product.manufacturer.ManufacturerDesc
 import com.salesmanager.core.model.catalog.product.price.ProductPrice;
 import com.salesmanager.core.model.catalog.product.price.ProductPriceDescription;
 import com.salesmanager.core.model.catalog.product.relationship.ProductRelationship;
+import com.salesmanager.core.model.catalog.product.review.ProductReview;
 import com.salesmanager.core.model.catalog.product.type.ProductType;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
@@ -1591,8 +1592,9 @@ public class ProductController extends AbstractController {
 		List<ProductResponse> responses = new ArrayList<ProductResponse>();
 		BigDecimal minPrice= new BigDecimal(filtersRequest.getMinPrice());
 		BigDecimal maxPrice= new BigDecimal(filtersRequest.getMaxPrice());
-		if(filterIds != null) {
-			List<Product> dbProducts = productService.getProductsListByFiltersAndPrice(filterIds,minPrice,maxPrice);
+		Double productRating = filtersRequest.getProductRating();
+		if((filterIds != null && !filterIds.isEmpty()) || (minPrice!=null && maxPrice!=null) || productRating!=null) {
+			List<Product> dbProducts = productService.getProductsListByFiltersAndPrice(filterIds,minPrice,maxPrice,productRating);
 			List<Product> tdProducts = productService.getTodaysDeals();
 			Map<Long,Product> todaysDealsMap = null;
 			todaysDealsMap = new HashMap<Long, Product>();
@@ -1699,6 +1701,10 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
 			for(ManufacturerDescription description:manufacturerDescription){
 				productResponse.setVendorName(description.getName());
 				productResponse.setVendorLocation(description.getTitle());
+			}
+			Set<ProductReview> productReviews = dbProduct.getProductReview();
+			for(ProductReview productReview : productReviews){
+				productResponse.setProductRating(productReview.getReviewRating());
 			}
 		}catch(Exception e){
 			System.out.println("product details ::"+e.getMessage());

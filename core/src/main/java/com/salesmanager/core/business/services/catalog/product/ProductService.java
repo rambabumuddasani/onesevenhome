@@ -58,8 +58,8 @@ public interface ProductService extends SalesManagerEntityService<Long, Product>
 
 	List<Product> getProduct(String colName, String colValue) throws ServiceException;
 
-	List<Product> getProductsListByFiltersAndPrice(List<Long> filterIds, BigDecimal minPrice, BigDecimal maxPrice);
+	List<Product> getProductsListByFiltersAndPrice(List<Long> filterIds, BigDecimal minPrice, BigDecimal maxPrice,Double productRating);
 
-	
+	public Product getProductAndProductReviewByProductId(Long productId) ;
 }
 	

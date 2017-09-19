@@ -1,5 +1,6 @@
 package com.salesmanager.shop.admin.controller.products;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 
@@ -10,6 +11,7 @@ public class FiltersRequest {
 	List<Long> filterIds;
 	private String minPrice;
     private String maxPrice;
+    private Double productRating;
 	public List<Long> getFilterIds() {
 		return filterIds;
 	}
@@ -32,6 +34,14 @@ public class FiltersRequest {
 
 	public void setMaxPrice(String maxPrice) {
 		this.maxPrice = maxPrice;
+	}
+
+	public Double getProductRating() {
+		return productRating;
+	}
+
+	public void setProductRating(Double productRating) {
+		this.productRating = productRating;
 	}
 
 	
