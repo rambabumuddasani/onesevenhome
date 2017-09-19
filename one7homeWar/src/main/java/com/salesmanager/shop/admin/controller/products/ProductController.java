@@ -1702,10 +1702,11 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
 				productResponse.setVendorName(description.getName());
 				productResponse.setVendorLocation(description.getTitle());
 			}
-			Set<ProductReview> productReviews = dbProduct.getProductReview();
+			/*Set<ProductReview> productReviews = dbProduct.getProductReview();
 			for(ProductReview productReview : productReviews){
 				productResponse.setProductRating(productReview.getReviewRating());
-			}
+			}*/	
+			productResponse.setProductRating((dbProduct.getProductReviewAvg()).doubleValue());
 		}catch(Exception e){
 			System.out.println("product details ::"+e.getMessage());
 		}
