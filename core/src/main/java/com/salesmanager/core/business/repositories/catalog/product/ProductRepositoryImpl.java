@@ -1227,7 +1227,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 		qs.append("left join fetch p.type type ");
 		qs.append("left join fetch p.taxClass tx where");
 		boolean isAndNeeded = false;
-		if(!isFilterIDsEmpty(filterIds) ) {
+		if(filterIds != null && !isFilterIDsEmpty(filterIds) ) {
 			qs.append(" filters.id in (:fid)");
 			isAndNeeded = true;
 		}
@@ -1248,7 +1248,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 				qs.append("  productReview.reviewRating <= :productRating");				
 			}
         }*/
-		if(productRating>=1 && productRating <= 5){
+		if(productRating != null && (productRating>=1 && productRating <= 5)){
 				if(isAndNeeded) {
 					qs.append(" and p.productReviewAvg <= :productRating");				
 				}else {
@@ -1266,7 +1266,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 			q.setParameter("minPrice", minPrice);
 			q.setParameter("maxPrice", maxPrice);
 		}
-		if(productRating >= 1 && productRating <= 5) {
+		if(productRating != null && (productRating>=1 && productRating <= 5)) {
 			BigDecimal pRating = new BigDecimal(productRating);
 			q.setParameter("productRating", pRating);
 		}
@@ -1281,6 +1281,9 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 		return price == null;
 	}
 	private boolean isFilterIDsEmpty(List<Long> filterIds) {
+		if(filterIds == null) {
+			return true;
+		}
 		return filterIds.isEmpty();
 	}
 	
