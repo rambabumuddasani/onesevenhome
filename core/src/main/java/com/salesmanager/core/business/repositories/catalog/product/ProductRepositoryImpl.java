@@ -1,5 +1,6 @@
 package com.salesmanager.core.business.repositories.catalog.product;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -351,6 +352,32 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 		}
 		
 	}
+
+	@Override
+	public Product getProductAndProductReviewByProductId(Long productId) {
+		
+		try {
+			
+
+			System.out.println("invoking getById =="+productId);
+			StringBuilder qs = new StringBuilder();
+			qs.append("select distinct p from Product as p ");
+			qs.append("left join fetch p.productReview productReview ");			
+			qs.append("where p.id=:pid");
+
+			String hql = qs.toString();
+			Query q = this.em.createQuery(hql);
+	
+	    	q.setParameter("pid", productId);
+	    	Product p = (Product)q.getSingleResult();
+			return p;
+		
+		} catch(javax.persistence.NoResultException ers) {
+			return null;
+		}
+		
+	}
+
 	
 	@Override
 	public Product getByCode(String productCode, Language language) {
@@ -1168,6 +1195,93 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
     	return products;
 		
 		
+	}
+	@Override
+	public List<Product> findProductsByFiltersAndPrice(List<Long> filterIds, BigDecimal minPrice, BigDecimal maxPrice,Double productRating) {
+		StringBuilder qs = new StringBuilder();
+		qs.append("select distinct p from Product as p ");
+		qs.append("join fetch p.merchantStore merch ");
+		qs.append("join fetch p.availabilities pa ");
+		qs.append("left join fetch pa.prices pap ");
+		
+		qs.append("join fetch p.descriptions pd ");
+		qs.append("join fetch p.filters filters ");
+		//qs.append("left join fetch p.productReview productReview ");
+		
+		
+		qs.append("left join fetch pap.descriptions papd ");
+		
+		
+		//images
+		qs.append("left join fetch p.images images ");
+		
+		//options (do not need attributes for listings)
+		qs.append("left join fetch p.attributes pattr ");
+		qs.append("left join fetch pattr.productOption po ");
+		qs.append("left join fetch po.descriptions pod ");
+		qs.append("left join fetch pattr.productOptionValue pov ");
+		qs.append("left join fetch pov.descriptions povd ");
+		
+		//other lefts
+		qs.append("left join fetch p.manufacturer manuf ");
+		qs.append("left join fetch p.type type ");
+		qs.append("left join fetch p.taxClass tx where");
+		boolean isAndNeeded = false;
+		if(!isFilterIDsEmpty(filterIds) ) {
+			qs.append(" filters.id in (:fid)");
+			isAndNeeded = true;
+		}
+		if(!isPriceEmpty(minPrice) && !isPriceEmpty(maxPrice)) {
+			if(isAndNeeded) {
+				qs.append(" and pap.productPriceAmount between :minPrice and :maxPrice");
+			} else {
+				isAndNeeded = true;
+				qs.append(" pap.productPriceAmount between :minPrice and :maxPrice");
+			}
+		}
+		
+      //  double productRaiting = 0l;
+       /* if(productRating >= 1 && productRating <= 5){
+			if(isAndNeeded) {
+				qs.append(" and productReview.reviewRating <= :productRating");				
+			}else {
+				qs.append("  productReview.reviewRating <= :productRating");				
+			}
+        }*/
+		if(productRating>=1 && productRating <= 5){
+				if(isAndNeeded) {
+					qs.append(" and p.productReviewAvg <= :productRating");				
+				}else {
+					qs.append("  p.productReviewAvg <= :productRating");				
+				}
+	     }
+		
+    	String hql = qs.toString();
+		Query q = this.em.createQuery(hql);
+		
+		if(!isFilterIDsEmpty(filterIds) ) {
+    	    q.setParameter("fid", filterIds);
+		}
+		if(!isPriceEmpty(minPrice) && !isPriceEmpty(maxPrice)) {
+			q.setParameter("minPrice", minPrice);
+			q.setParameter("maxPrice", maxPrice);
+		}
+		if(productRating >= 1 && productRating <= 5) {
+			BigDecimal pRating = new BigDecimal(productRating);
+			q.setParameter("productRating", pRating);
+		}
+    	@SuppressWarnings("unchecked")
+		List<Product> products =  q.getResultList();
+        
+    	
+    	return products;
+
+	}
+	private boolean isPriceEmpty(BigDecimal price) {
+		return price == null;
+	}
+	private boolean isFilterIDsEmpty(List<Long> filterIds) {
+		return filterIds.isEmpty();
 	}
 	
 }

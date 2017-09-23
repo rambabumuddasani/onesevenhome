@@ -94,6 +94,12 @@ public class UserServiceLDAPImpl implements UserService {
 		
 	}
 
+	@Override
+	public User getByEmail(String email) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
 
 }

@@ -49,11 +49,14 @@ public class VendorProduct extends SalesManagerEntity<Long, VendorProduct>{
 	private Date createdDate;
 	
 	@Column(name="ADMIN_ACTIVATED",nullable=true)
-	private boolean adminActivated=false;
+	private Boolean adminActivated=false;
 	
 	@Column(name="ADMIN_ACTIVATED_DATE",nullable=true)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date adminActivatedDate;
+	
+	@Column(name="VENDOR_WISH_LISTED",nullable=true)
+	private Boolean vendorWishListed = false;
 
 	public Long getId() {
 		return id;
@@ -71,11 +74,11 @@ public class VendorProduct extends SalesManagerEntity<Long, VendorProduct>{
 		this.createdDate = createdDate;
 	}
 
-	public boolean isAdminActivated() {
+	public Boolean isAdminActivated() {
 		return adminActivated;
 	}
 
-	public void setAdminActivated(boolean adminActivated) {
+	public void setAdminActivated(Boolean adminActivated) {
 		this.adminActivated = adminActivated;
 	}
 
@@ -103,5 +106,11 @@ public class VendorProduct extends SalesManagerEntity<Long, VendorProduct>{
 		this.customer = customer;
 	}
 	
-	
+	public Boolean isVendorWishListed() {
+		return vendorWishListed;
+	}
+
+	public void setVendorWishListed(Boolean vendorWishListed) {
+		this.vendorWishListed = vendorWishListed;
+	}
 }

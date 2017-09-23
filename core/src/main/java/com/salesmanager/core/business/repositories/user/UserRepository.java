@@ -20,4 +20,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	
 	@Query("select distinct u from User as u inner join fetch u.groups ug inner join fetch u.merchantStore um left join fetch u.defaultLanguage ul where um.id = ?1 order by u.id")
 	List<User> findByStore(Integer storeId);
+	@Query("select u from User as u inner join fetch u.groups ug inner join fetch u.merchantStore um left join fetch u.defaultLanguage ul where u.adminEmail = ?1")
+	User findByEmail(String email);
 }

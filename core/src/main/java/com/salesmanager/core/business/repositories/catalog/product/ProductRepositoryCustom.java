@@ -1,5 +1,6 @@
 package com.salesmanager.core.business.repositories.catalog.product;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -47,4 +48,8 @@ public interface ProductRepositoryCustom {
 
 		List<Product> getProduct(String columnName, String coulumnValue);
 		List<Product> getProductsListByFilters(@SuppressWarnings("rawtypes") Set filterIds);
+		List<Product> findProductsByFiltersAndPrice(List<Long> filterIds, BigDecimal minPrice, BigDecimal maxPrice,Double productRating);
+
+		Product getProductAndProductReviewByProductId(Long productId);
+
 }

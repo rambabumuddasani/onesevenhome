@@ -28,6 +28,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -48,6 +49,7 @@ import com.salesmanager.core.business.services.reference.zone.ZoneService;
 import com.salesmanager.core.business.services.shoppingcart.ShoppingCartCalculationService;
 import com.salesmanager.core.business.services.system.EmailService;
 import com.salesmanager.core.business.utils.CoreConfiguration;
+import com.salesmanager.core.model.common.VendorAttributes;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.country.Country;
@@ -68,19 +70,13 @@ import com.salesmanager.shop.model.shoppingcart.ShoppingCartData;
 import com.salesmanager.shop.populator.shoppingCart.ShoppingCartDataPopulator;
 import com.salesmanager.shop.store.controller.AbstractController;
 import com.salesmanager.shop.store.controller.ControllerConstants;
-import com.salesmanager.shop.store.controller.customer.ForgotPwdRequest;
-import com.salesmanager.shop.store.controller.customer.ForgotPwdResponse;
 import com.salesmanager.shop.store.controller.customer.facade.CustomerFacade;
 import com.salesmanager.shop.utils.CaptchaRequestUtils;
+import com.salesmanager.shop.utils.DateUtil;
 import com.salesmanager.shop.utils.EmailTemplatesUtils;
 import com.salesmanager.shop.utils.EmailUtils;
 import com.salesmanager.shop.utils.ImageFilePath;
 import com.salesmanager.shop.utils.LabelUtils;
-
-
-import com.salesmanager.shop.store.controller.customer.ForgotPwdRequest;
-import com.salesmanager.shop.store.controller.customer.ForgotPwdResponse;
-import com.salesmanager.shop.store.controller.customer.facade.CustomerFacade;
 
 //import com.salesmanager.core.business.customer.CustomerRegistrationException;
 
@@ -96,8 +92,8 @@ import com.salesmanager.shop.store.controller.customer.facade.CustomerFacade;
 @CrossOrigin
 public class CustomerRegistrationController extends AbstractController {
 
+	private static final String TRUE = "true";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CustomerRegistrationController.class);
-    
     
 	@Inject
 	private CoreConfiguration coreConfiguration;
@@ -473,146 +469,132 @@ public class CustomerRegistrationController extends AbstractController {
         return new ResponseEntity<CustomerEntity>(customerData,HttpStatus.OK);         
     }
     
-	@RequestMapping(value="/customer/register", method = RequestMethod.POST, 
+    
+   
+    
+	@RequestMapping(value="/customer/update", method = RequestMethod.POST, 
 			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-    public CustomerResponse registerCustomer(@RequestBody CustomerRequest customerRequest)
+    public CustomerResponse updateCustomer(@RequestBody CustomerRequest customerRequest)
         throws Exception
     {	
 		System.out.println("customer ");
     	CustomerResponse customerResponse = new CustomerResponse();
-    	SecuredShopPersistableCustomer customer = new SecuredShopPersistableCustomer();
-    	customer.setEmailAddress(customerRequest.getEmail());
-    	customer.setPassword(customerRequest.getPassword());
-    	customer.setCheckPassword(customerRequest.getConfirmPassword());
-    	customer.setFirstName(customerRequest.getFirstName());
-    	customer.setLastName(customerRequest.getLastName());
-    	customer.setGender(customerRequest.getGender());
-    	customer.setUserName(customerRequest.getEmail());
-    	customer.setStoreCode("DEFAULT");
-    	Address billing = new Address();
-    	billing.setFirstName(customerRequest.getFirstName());
-    	billing.setLastName(customerRequest.getLastName());
-    	billing.setBillingAddress(true);
-    	billing.setAddress(customerRequest.getAddress());
-    	billing.setCity(customerRequest.getCity());
-    	billing.setStateProvince(customerRequest.getState());
-    	billing.setPostalCode(customerRequest.getPostalCode());
-    	billing.setPhone(customerRequest.getMobileNo());
-    	billing.setCountry("IN");
-    	
-    	Address delivery = new Address();
-    	delivery.setFirstName(customerRequest.getFirstName());
-    	delivery.setLastName(customerRequest.getLastName());
-    	delivery.setAddress(customerRequest.getAddress());
-    	delivery.setCity(customerRequest.getCity());
-    	delivery.setStateProvince(customerRequest.getState());
-    	delivery.setPostalCode(customerRequest.getPostalCode());
-    	delivery.setPhone(customerRequest.getMobileNo());
-
-    	customer.setBilling(billing);
-    	customer.setDelivery(delivery);
-    	customer.setCustomerType("0");
-    	
-    	final Locale locale  = new Locale("en");
-    	System.out.println("Entered registration");
         MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");  //i will come back here
-        System.out.println("merchantStore "+merchantStore);
-        //Language language = super.getLanguage(request);
-        Language language = languageService.getByCode( Constants.DEFAULT_LANGUAGE );
-        String userName = null;
-        String password = null;
-        customerResponse.setStatus("false");
-        
-        if ( StringUtils.isNotBlank( customer.getUserName() ) )
+
+	    Customer customer = null; 
+    	final Locale locale  = new Locale("en");
+        if ( StringUtils.isNotBlank( customerRequest.getEmail() ) )
         {
-            if ( customerFacade.checkIfUserExists( customer.getUserName(), merchantStore ) )
-            {
-                LOGGER.debug( "Customer with username {} already exists for this store ", customer.getUserName() );
-            	customerResponse.setErrorMessage(messages.getMessage("registration.username.already.exists", locale));
-            	return customerResponse;
-            }
-            userName = customer.getUserName();
+        		customer	= customerFacade.getCustomerByUserName(customerRequest.getEmail(), merchantStore );
+        		if(customer == null){
+        			customerResponse.setErrorMessage("Customer is not exist, update is not possible ");
+        			return customerResponse;
+        		}
         }
-        
-        
-        if ( StringUtils.isNotBlank( customer.getPassword() ) &&  StringUtils.isNotBlank( customer.getCheckPassword() ))
+
+        if ( StringUtils.isNotBlank( customerRequest.getPassword() ) &&  StringUtils.isNotBlank( customerRequest.getConfirmPassword() ))
         {
-            if (! customer.getPassword().equals(customer.getCheckPassword()) )
+            if (! customerRequest.getPassword().equals(customerRequest.getConfirmPassword()) )
             {
             	customerResponse.setErrorMessage(messages.getMessage("message.password.checkpassword.identical", locale));
             	return customerResponse;
             }
-            password = customer.getPassword();
             	
         }	
-        
-        if ( StringUtils.isBlank( customerRequest.getActivationURL() ))
-        {
-        	customerResponse.setErrorMessage(messages.getMessage("failure.customer.activation.link", locale));
-        	return customerResponse;
-        }
-        System.out.println("userName "+userName+" password "+password);
-        @SuppressWarnings( "unused" )
-        CustomerEntity customerData = null;
-        try
-        {
-            //set user clear password
-        	customer.setClearPassword(password);
-        	customer.setActivated("0");
-        	customerData = customerFacade.registerCustomer( customer, merchantStore, language );
-            System.out.println("customerData is "+customerData);
-        }       catch ( Exception e )
-        {
-            LOGGER.error( "Error while registering customer.. ", e);
-            customerResponse.setErrorMessage(e.getMessage());
-             return customerResponse;
-        }  
          
-       
-        customerResponse.setSuccessMessage(messages.getMessage("success.newuser.msg",locale));
-        customerResponse.setStatus("true");
-        String activationURL = customerRequest.getActivationURL()+"?email="+customerRequest.getEmail();
-        //sending email
-        String[] activationURLArg = {activationURL};
-        Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
-		templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, customer.getFirstName());
-		templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, customer.getLastName());
-		templateTokens.put(EmailConstants.EMAIL_ADMIN_USERNAME_LABEL, messages.getMessage("label.generic.username",locale));
-		templateTokens.put(EmailConstants.EMAIL_TEXT_NEW_USER_ACTIVATION, messages.getMessage("email.newuser.text.activation",locale));
-		templateTokens.put(EmailConstants.EMAIL_TEXT_NEW_USER_ACTIVATION_LINK, messages.getMessage("email.newuser.text.activation.link",activationURLArg,locale));
-		templateTokens.put(EmailConstants.EMAIL_ADMIN_PASSWORD_LABEL, messages.getMessage("label.generic.password",locale));
-		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
-		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
-
-		
-		Email email = new Email();
-		email.setFrom(merchantStore.getStorename());
-		email.setFromEmail(merchantStore.getStoreEmailAddress());
-		email.setSubject(messages.getMessage("email.newuser.text.activation",locale));
-		email.setTo(customerRequest.getEmail());
-		email.setTemplateName(NEW_USER_ACTIVATION_TMPL);
-		email.setTemplateTokens(templateTokens);
-
-
-		
-		emailService.sendHtmlEmail(merchantStore, email);
-        
-        
+        Address address = new Address();
+        address.setAddress(customerRequest.getAddress());
+        address.setPostalCode(customerRequest.getPostalCode());
+        address.setCity(customerRequest.getCity());
+        address.setStateProvince(customerRequest.getState());
+        address.setPhone(customerRequest.getPhone());
+        //address.setBillingAddress(true);
+        customer.setArea(customerRequest.getArea());
+        String dobStr = customerRequest.getDob();        
+        if(StringUtils.isNotBlank(dobStr)){
+        	customer.setDateOfBirth(DateUtil.getDate(dobStr));
+        }
+        Language language = languageService.getByCode( Constants.DEFAULT_LANGUAGE );
+        customerFacade.updateAddress(customer, merchantStore, address, language);
+      
+        customerResponse.setSuccessMessage("Customer profile updated successfully");
+        customerResponse.setStatus(TRUE);
         return customerResponse;         
     }
+	
+	/*@RequestMapping(value="/vendor/update", method = RequestMethod.POST, 
+			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public CustomerResponse updateVendor(@RequestBody VendorRequest vendorRequest) throws Exception {
+		
+		System.out.println("customer ");
+    	CustomerResponse customerResponse = new CustomerResponse();
+        MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");  //i will come back here
+
+	    Customer customer = null; 
+    	final Locale locale  = new Locale("en");
+        if ( StringUtils.isNotBlank(vendorRequest.getEmail() ) )
+        {
+        		customer	= customerFacade.getCustomerByUserName(vendorRequest.getEmail(), merchantStore );
+        		if(customer == null){
+        			customerResponse.setErrorMessage("Vendor is not exist, update is not possible ");
+        			return customerResponse;
+        		}
+        }
+
+        if ( StringUtils.isNotBlank( vendorRequest.getPassword() ) &&  StringUtils.isNotBlank( vendorRequest.getConfirmPassword() ))
+        {
+            if (! vendorRequest.getPassword().equals(vendorRequest.getConfirmPassword()) )
+            {
+            	customerResponse.setErrorMessage(messages.getMessage("message.password.checkpassword.identical", locale));
+            	return customerResponse;
+            }
+            	
+        }	
+         
+        
+        VendorAttributes vendorAttrs = new VendorAttributes();
+        vendorAttrs.setVendorOfficeAddress(vendorRequest.getVendorOfficeAddress());
+        vendorAttrs.setVendorMobile(vendorRequest.getVendorMobile());
+        vendorAttrs.setVendorTelephone(vendorRequest.getVendorTelephone());
+        vendorAttrs.setVendorFax(vendorRequest.getVendorFax());
+        vendorAttrs.setVendorConstFirm(vendorRequest.getVendorConstFirm());
+        vendorAttrs.setVendorCompanyNature(vendorRequest.getVendorCompanyNature());
+        vendorAttrs.setVendorExpLine(vendorRequest.getVendorExpLine());
+        vendorAttrs.setVendorMajorCust(vendorRequest.getVendorMajorCust());
+        vendorAttrs.setVendorName(vendorRequest.getVendorName());
+        vendorAttrs.setVendorTinNumber(vendorRequest.getVendorTIN());
+        vendorAttrs.setVendorRegistrationNo(vendorRequest.getVendorRegistrationNo());
+        vendorAttrs.setVendorPAN(vendorRequest.getVendorPAN());
+        vendorAttrs.setVendorLicense(vendorRequest.getVendorLicense());
+        vendorAttrs.setVendorAuthCert(vendorRequest.getVendorAuthCert());
+        vendorAttrs.setVendorVatRegNo(vendorRequest.getVatRegNo());
+        customer.setVendorAttrs(vendorAttrs);
+        
+        customerFacade.updateCustomer(customer);
+        
+        customerResponse.setSuccessMessage("Vendor profile updated successfully");
+        customerResponse.setStatus(TRUE);
+        return customerResponse; 
+		
+	}*/
+	
 	//https://stackoverflow.com/questions/33729591/posting-a-file-and-json-data-to-spring-rest-service
 	@RequestMapping(value="/vendor/register", method = RequestMethod.POST)
 	@ResponseBody
    // public CustomerResponse registerCustomer(@RequestBody VendorRequest vendorRequest) throws Exception {
-    public CustomerResponse registerCustomer(@RequestPart("vendorRequest") String vendorRequestStr,
+    public CustomerResponse registerVendor(@RequestPart("vendorRequest") String vendorRequestStr,
     		@RequestPart("file") MultipartFile vendorCertificate) throws Exception {
-		
-		//VendorRequest vendorRequest = null;
+
 		VendorRequest vendorRequest = new ObjectMapper().readValue(vendorRequestStr, VendorRequest.class);
-		//System.out.println("vendor file "+vendorCertificate);
     	CustomerResponse customerResponse = new CustomerResponse();
         customerResponse.setStatus("false");
+        if(!isTermsAndConditionsAccepted(vendorRequest.getTermsAndConditions())){
+            customerResponse.setErrorMessage("Please accept Terms & Conditions ");
+            return customerResponse;        	
+        }
+        
     	SecuredShopPersistableCustomer customer = new SecuredShopPersistableCustomer();
     	customer.setEmailAddress(vendorRequest.getEmail());
     	customer.setPassword(vendorRequest.getPassword());
@@ -639,13 +621,42 @@ public class CustomerRegistrationController extends AbstractController {
     	customer.setDelivery(delivery);
     	customer.setCustomerType("1");
 
+        MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");  //i will come back here
+    	final Locale locale  = new Locale("en");
+    	
+        if ( StringUtils.isNotBlank( customer.getUserName() ) )
+        {
+            if ( customerFacade.checkIfUserExists( customer.getUserName(), merchantStore ) )
+            {
+                LOGGER.debug( "Customer with username {} already exists for this store ", customer.getUserName() );
+            	customerResponse.setErrorMessage(messages.getMessage("registration.username.already.exists", locale));
+            	return customerResponse;
+            }
+        }
+        
+        
+        if ( StringUtils.isNotBlank( customer.getPassword() ) &&  StringUtils.isNotBlank( customer.getCheckPassword() )) {
+            if (! customer.getPassword().equals(customer.getCheckPassword()) )
+            {
+            	customerResponse.setErrorMessage(messages.getMessage("message.password.checkpassword.identical", locale));
+            	return customerResponse;
+            }
+        }	
+        
+        if ( StringUtils.isBlank( vendorRequest.getActivationURL() )) {
+        	customerResponse.setErrorMessage(messages.getMessage("failure.customer.activation.link", locale));
+        	return customerResponse;
+        }
+    	
     	// Store file into file sytem
     	String certFileName = "";
-    	try{
-			certFileName = storageService.store(vendorCertificate);
-			System.out.println("certFileName "+certFileName);
-    	}catch(StorageException se){
-    		System.out.println("StoreException occured, do wee need continue "+se);
+    	if(vendorCertificate.getSize() != 0) {
+    		try{
+    			certFileName = storageService.store(vendorCertificate);
+    			System.out.println("certFileName "+certFileName);
+    		}catch(StorageException se){
+    			System.out.println("StoreException occured, do wee need continue "+se);
+    		}
     	}
     	
     	Vendor vendorAttrs = new Vendor();
@@ -659,19 +670,12 @@ public class CustomerRegistrationController extends AbstractController {
     	vendorAttrs.setVendorCompanyNature(vendorRequest.getVendorCompanyNature());
     	vendorAttrs.setVendorRegistrationNo(vendorRequest.getVendorRegistrationNo());
     	vendorAttrs.setVendorPAN(vendorRequest.getVendorPAN());
-    	//vendorAttrs.setVendorAuthCert(vendorRequest.getVendorAuthCert()); // do we need to comment this line
+    	vendorAttrs.setVendorVatRegNo(vendorRequest.getVatRegNo());
     	vendorAttrs.setVendorExpLine(vendorRequest.getVendorExpLine());
     	vendorAttrs.setVendorMajorCust(vendorRequest.getVendorMajorCust());
-    	//vendorAttrs.setVendorTerms(vendorRequest.getVendorTerms());
-    	//vendorAttrs.setVendorAuthCert(certFileName);	// is it correct do we need other column to store file path.
+    	vendorAttrs.setVendorTIN(vendorRequest.getVendorTIN());
     	
     	customer.setVendor(vendorAttrs);
-    	
-    	final Locale locale  = new Locale("en");
-    	System.out.println("Entered registration");
-        MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");  //i will come back here
-        System.out.println("merchantStore "+merchantStore);
-        //Language language = super.getLanguage(request);
         Language language = languageService.getByCode( Constants.DEFAULT_LANGUAGE );
         String userName = null;
         String password = null;
@@ -683,7 +687,6 @@ public class CustomerRegistrationController extends AbstractController {
             }
             userName = customer.getUserName();
         }
-        
         
         if ( StringUtils.isNotBlank( customer.getPassword() ) &&  StringUtils.isNotBlank( customer.getCheckPassword() )) {
             if (! customer.getPassword().equals(customer.getCheckPassword()) ) {
@@ -718,7 +721,7 @@ public class CustomerRegistrationController extends AbstractController {
          
        
         customerResponse.setSuccessMessage("Vendor registration successfull");
-        customerResponse.setStatus("true");
+        customerResponse.setStatus(TRUE);
        
         String activationURL = vendorRequest.getActivationURL()+"?email="+vendorRequest.getEmail();
         //sending email
@@ -747,6 +750,10 @@ public class CustomerRegistrationController extends AbstractController {
 		emailService.sendHtmlEmail(merchantStore, email);
 		return customerResponse;         
     }
+
+	private boolean isTermsAndConditionsAccepted(boolean termsAndCond) {
+		return termsAndCond;
+	}
 	@RequestMapping(value="/user/activate", method = RequestMethod.POST, 
 			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -799,7 +806,7 @@ public class CustomerRegistrationController extends AbstractController {
 		
 		customer.setOfid(ofid);
 		customerFacade.updateCustomer(customer);
-        String forgotPwdURL = forgotPwdRequest.getForgotPwdURL()+"?ofid="+ofid;
+        String forgotPwdURL = forgotPwdRequest.getForgotPwdURL()+"?ofid="+ofid+"&"+"email="+forgotPwdRequest.getEmail();
         
         //sending email
         String[] forgotPwdURLArg = {forgotPwdURL};
@@ -891,5 +898,275 @@ public class CustomerRegistrationController extends AbstractController {
 
 		return forgotPwdResponse;
     }
+	
+	@RequestMapping(value="/getUser/{customerId}", method = RequestMethod.GET,produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public CustomerDetailsResponse getUser(@PathVariable String customerId) {
+		
+		Customer customer = customerService.getById(Long.parseLong(customerId));
+		CustomerDetailsResponse customerDetailsResponse = new CustomerDetailsResponse();
+		
+		if(customer.getCustomerType().equals("0")){
+			CustomerDetails custDetails = new CustomerDetails();
+			custDetails.setEmail(customer.getEmailAddress());
+			custDetails.setFirstName(customer.getBilling().getFirstName());
+			custDetails.setLastName(customer.getBilling().getLastName());
+			custDetails.setPassword(customer.getPassword());
+			custDetails.setDob(customer.getDateOfBirth());
+			custDetails.setArea(customer.getArea());
+			custDetails.setGender(customer.getGender());
+			custDetails.setStoreCode("DEFAULT");
+			
+			Address billing = new Address();
+			billing.setFirstName(customer.getBilling().getFirstName());
+			billing.setLastName(customer.getBilling().getLastName());
+			billing.setAddress(customer.getBilling().getAddress());
+			billing.setCity(customer.getBilling().getCity());
+			billing.setStateProvince(customer.getBilling().getState());
+			billing.setPostalCode(customer.getBilling().getPostalCode());
+			billing.setPhone(customer.getBilling().getTelephone());
+			billing.setCountry("IN");
+			
+			Address delivery = new Address();
+			delivery.setFirstName(customer.getDelivery().getFirstName());
+			delivery.setLastName(customer.getDelivery().getLastName());
+			delivery.setAddress(customer.getDelivery().getAddress());
+			delivery.setCity(customer.getDelivery().getCity());
+			delivery.setStateProvince(customer.getDelivery().getState());
+			delivery.setPostalCode(customer.getDelivery().getPostalCode());
+			delivery.setPhone(customer.getDelivery().getTelephone());
+			
+			custDetails.setBilling(billing);
+			custDetails.setDelivery(delivery);
+		    customerDetailsResponse.setCustomerDetails(custDetails);
+		    return customerDetailsResponse;
+	}
+		else {
+			VendorDetails vendorDetails = new VendorDetails();
+			vendorDetails.setEmail(customer.getEmailAddress());
+			vendorDetails.setVendorName(customer.getVendorAttrs().getVendorName());
+			vendorDetails.setVendorOfficeAddress(customer.getVendorAttrs().getVendorOfficeAddress());
+			vendorDetails.setVendorMobile(customer.getVendorAttrs().getVendorMobile());
+			vendorDetails.setVendorTelephone(customer.getVendorAttrs().getVendorTelephone());
+			vendorDetails.setVendorFax(customer.getVendorAttrs().getVendorFax());
+			vendorDetails.setVendorConstFirm(customer.getVendorAttrs().getVendorConstFirm());
+			vendorDetails.setVendorCompanyNature(customer.getVendorAttrs().getVendorCompanyNature());
+			vendorDetails.setVendorRegistrationNo(customer.getVendorAttrs().getVendorRegistrationNo());
+			vendorDetails.setVendorPAN(customer.getVendorAttrs().getVendorPAN());
+			vendorDetails.setVendorLicense(customer.getVendorAttrs().getVendorLicense());
+			vendorDetails.setVendorAuthCert(customer.getVendorAttrs().getVendorAuthCert());
+			vendorDetails.setVendorExpLine(customer.getVendorAttrs().getVendorExpLine());
+			vendorDetails.setVendorMajorCust(customer.getVendorAttrs().getVendorMajorCust());
+			vendorDetails.setVatRegNo(customer.getVendorAttrs().getVendorVatRegNo());
+			vendorDetails.setVendorTIN(customer.getVendorAttrs().getVendorTinNumber());
+			customerDetailsResponse.setVendorDetails(vendorDetails);
+			return customerDetailsResponse;
+		}
+		//return customeDetailsResponse;
+		
+	}
+	
+	@RequestMapping(value="/customer/register", method = RequestMethod.POST, 
+			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+    public CustomerResponse registerCustomer(@RequestBody CustomerRequest customerRequest)
+        throws Exception
+    {	
+		System.out.println("customer ");
+    	CustomerResponse customerResponse = new CustomerResponse();
+    	SecuredShopPersistableCustomer customer = new SecuredShopPersistableCustomer();
+    	customer.setEmailAddress(customerRequest.getEmail());
+    	customer.setPassword(customerRequest.getPassword());
+    	customer.setCheckPassword(customerRequest.getConfirmPassword());
+    	customer.setFirstName(customerRequest.getFirstName());
+    	customer.setLastName(customerRequest.getLastName());
+    	customer.setGender(customerRequest.getGender());
+    	customer.setUserName(customerRequest.getEmail());
+    	customer.setArea(customerRequest.getArea());
+    	customer.setDob(customerRequest.getDob());
+    	customer.setStoreCode("DEFAULT");
+    	Address billing = new Address();
+    	billing.setFirstName(customerRequest.getFirstName());
+    	billing.setLastName(customerRequest.getLastName());
+    	billing.setBillingAddress(true);
+    	billing.setAddress(customerRequest.getAddress());
+    	billing.setCity(customerRequest.getCity());
+    	billing.setStateProvince(customerRequest.getState());
+    	billing.setPostalCode(customerRequest.getPostalCode());
+    	billing.setPhone(customerRequest.getPhone());
+    	billing.setCountry("IN");
+    	
+    	Address delivery = new Address();
+    	delivery.setFirstName(customerRequest.getFirstName());
+    	delivery.setLastName(customerRequest.getLastName());
+    	delivery.setAddress(customerRequest.getAddress());
+    	delivery.setCity(customerRequest.getCity());
+    	delivery.setStateProvince(customerRequest.getState());
+    	delivery.setPostalCode(customerRequest.getPostalCode());
+    	delivery.setPhone(customerRequest.getPhone());
+
+    	customer.setBilling(billing);
+    	customer.setDelivery(delivery);
+    	customer.setCustomerType("0");
+    	
+    	final Locale locale  = new Locale("en");
+    	System.out.println("Entered registration");
+        MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");  //i will come back here
+        System.out.println("merchantStore "+merchantStore);
+        //Language language = super.getLanguage(request);
+        Language language = languageService.getByCode( Constants.DEFAULT_LANGUAGE );
+        String userName = null;
+        String password = null;
+        customerResponse.setStatus("false");
+        
+        if ( StringUtils.isNotBlank( customer.getUserName() ) )
+        {
+            if ( customerFacade.checkIfUserExists( customer.getUserName(), merchantStore ) )
+            {
+                LOGGER.debug( "Customer with username {} already exists for this store ", customer.getUserName() );
+            	customerResponse.setErrorMessage(messages.getMessage("registration.username.already.exists", locale));
+            	return customerResponse;
+            }
+            userName = customer.getUserName();
+        }
+        
+        
+        if ( StringUtils.isNotBlank( customer.getPassword() ) &&  StringUtils.isNotBlank( customer.getCheckPassword() )) {
+            if (! customer.getPassword().equals(customer.getCheckPassword()) )
+            {
+            	customerResponse.setErrorMessage(messages.getMessage("message.password.checkpassword.identical", locale));
+            	return customerResponse;
+            }
+            password = customer.getPassword();
+        }	
+        
+        if ( StringUtils.isBlank( customerRequest.getActivationURL() )) {
+        	customerResponse.setErrorMessage(messages.getMessage("failure.customer.activation.link", locale));
+        	return customerResponse;
+        }
+        
+        System.out.println("userName "+userName+" password "+password);
+        @SuppressWarnings( "unused" )
+        CustomerEntity customerData = null;
+        try
+        {
+            //set user clear password
+        	customer.setActivated("0");
+        	customer.setClearPassword(password);
+        	customerData = customerFacade.registerCustomer( customer, merchantStore, language );
+            System.out.println("customerData is "+customerData);
+        }       catch ( Exception e )
+        {
+            LOGGER.error( "Error while registering customer.. ", e);
+            customerResponse.setErrorMessage(e.getMessage());
+             return customerResponse;
+        }  
+         
+       
+        customerResponse.setSuccessMessage(messages.getMessage("success.newuser.msg",locale));
+        customerResponse.setStatus(TRUE);
+        String activationURL = customerRequest.getActivationURL()+"?email="+customerRequest.getEmail();
+        //sending email
+        String[] activationURLArg = {activationURL};
+        Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
+		templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, customer.getFirstName());
+		templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, customer.getLastName());
+		templateTokens.put(EmailConstants.EMAIL_ADMIN_USERNAME_LABEL, messages.getMessage("label.generic.username",locale));
+		templateTokens.put(EmailConstants.EMAIL_TEXT_NEW_USER_ACTIVATION, messages.getMessage("email.newuser.text.activation",locale));
+		templateTokens.put(EmailConstants.EMAIL_TEXT_NEW_USER_ACTIVATION_LINK, messages.getMessage("email.newuser.text.activation.link",activationURLArg,locale));
+		templateTokens.put(EmailConstants.EMAIL_ADMIN_PASSWORD_LABEL, messages.getMessage("label.generic.password",locale));
+		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
+		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
+
+		
+		Email email = new Email();
+		email.setFrom(merchantStore.getStorename());
+		email.setFromEmail(merchantStore.getStoreEmailAddress());
+		email.setSubject(messages.getMessage("email.newuser.text.activation",locale));
+		email.setTo(customerRequest.getEmail());
+		email.setTemplateName(NEW_USER_ACTIVATION_TMPL);
+		email.setTemplateTokens(templateTokens);
+
+
+		
+		emailService.sendHtmlEmail(merchantStore, email);
+        
+        
+        return customerResponse;         
+    }
+	
+	@RequestMapping(value="/vendor/update", method = RequestMethod.POST)
+	@ResponseBody
+	public CustomerResponse updateVendor(@RequestPart("vendorRequest") String vendorRequestStr,
+    		@RequestPart("file") MultipartFile vendorCertificate) throws Exception {
+		
+		System.out.println("customer ");
+		VendorRequest vendorRequest = new ObjectMapper().readValue(vendorRequestStr, VendorRequest.class);
+    	CustomerResponse customerResponse = new CustomerResponse();
+        MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");  //i will come back here
+
+	    Customer customer = null; 
+    	final Locale locale  = new Locale("en");
+        if ( StringUtils.isNotBlank(vendorRequest.getEmail() ) )
+        {
+        		customer	= customerFacade.getCustomerByUserName(vendorRequest.getEmail(), merchantStore );
+        		if(customer == null){
+        			customerResponse.setErrorMessage("Vendor is not exist, update is not possible ");
+        			return customerResponse;
+        		}
+        }
+
+        if ( StringUtils.isNotBlank( vendorRequest.getPassword() ) &&  StringUtils.isNotBlank( vendorRequest.getConfirmPassword() ))
+        {
+            if (! vendorRequest.getPassword().equals(vendorRequest.getConfirmPassword()) )
+            {
+            	customerResponse.setErrorMessage(messages.getMessage("message.password.checkpassword.identical", locale));
+            	return customerResponse;
+            }
+            	
+        }	
+        String certFileName = "";
+        if(vendorCertificate.getSize() != 0) {
+        	try{
+        		certFileName = storageService.store(vendorCertificate);
+        		System.out.println("certFileName "+certFileName);
+        	}catch(StorageException se){
+        		System.out.println("StoreException occured, do wee need continue "+se);
+        	}
+        }
+        
+        VendorAttributes vendorAttrs = new VendorAttributes();
+        vendorAttrs.setVendorOfficeAddress(vendorRequest.getVendorOfficeAddress());
+        vendorAttrs.setVendorMobile(vendorRequest.getVendorMobile());
+        vendorAttrs.setVendorTelephone(vendorRequest.getVendorTelephone());
+        vendorAttrs.setVendorFax(vendorRequest.getVendorFax());
+        vendorAttrs.setVendorConstFirm(vendorRequest.getVendorConstFirm());
+        vendorAttrs.setVendorCompanyNature(vendorRequest.getVendorCompanyNature());
+        vendorAttrs.setVendorExpLine(vendorRequest.getVendorExpLine());
+        vendorAttrs.setVendorMajorCust(vendorRequest.getVendorMajorCust());
+        vendorAttrs.setVendorName(vendorRequest.getVendorName());
+        vendorAttrs.setVendorTinNumber(vendorRequest.getVendorTIN());
+        vendorAttrs.setVendorRegistrationNo(vendorRequest.getVendorRegistrationNo());
+        vendorAttrs.setVendorPAN(vendorRequest.getVendorPAN());
+        vendorAttrs.setVendorLicense(vendorRequest.getVendorLicense());
+        //vendorAttrs.setVendorAuthCert(vendorRequest.getVendorAuthCert());
+        vendorAttrs.setVendorVatRegNo(vendorRequest.getVatRegNo());
+        vendorAttrs.setVendorAuthCert(certFileName);
+        customer.setVendorAttrs(vendorAttrs);
+        
+        try {
+        customerFacade.updateCustomer(customer);
+        }catch(Exception e) {
+        	storageService.deleteFile(certFileName);
+            LOGGER.error( "Error while updating customer.. ", e);
+            customerResponse.setErrorMessage(e.getMessage());
+            return customerResponse;
+        }
+        
+        customerResponse.setSuccessMessage("Vendor profile updated successfully");
+        customerResponse.setStatus(TRUE);
+        return customerResponse; 
+		
+	}
 	
 }

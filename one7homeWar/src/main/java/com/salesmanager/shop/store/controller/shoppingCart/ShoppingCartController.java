@@ -1,9 +1,12 @@
 package com.salesmanager.shop.store.controller.shoppingCart;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.salesmanager.core.business.services.shoppingcart.ShoppingCartService;
+import com.salesmanager.core.business.utils.ajax.AjaxResponse;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
@@ -190,4 +195,36 @@ public class ShoppingCartController extends AbstractController {
 		LOG.debug("removed item" + lineItemId + "from cart");
 		return shoppingCartData;
 	}	
+	
+	/**
+	 * Update the quantity of an item in the Shopping Cart (AJAX exposed method)
+	 * @param request
+	 * @param response
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value={"/updateShoppingCartItem"},  method = { RequestMethod.POST })
+	public @ResponseBody ShoppingCartData updateShoppingCartItem( @RequestBody final ShoppingCartItem[] shoppingCartItems, final HttpServletRequest request)  {
+		ShoppingCartData shoppingCart = null;
+	    MerchantStore store = getSessionAttribute(Constants.MERCHANT_STORE, request);
+	    Language language = (Language)request.getAttribute(Constants.LANGUAGE);
+        
+        String cartCode = (String)request.getSession().getAttribute(Constants.SHOPPING_CART);
+        
+        if(StringUtils.isEmpty(cartCode)) {
+			LOG.error(" cart code is null, returning validation failed message" );
+        }
+        try {
+        	List<ShoppingCartItem> items = Arrays.asList(shoppingCartItems);
+			shoppingCart = shoppingCartFacade.updateCartItems(items, store, language);
+		} catch (Exception e) {
+			LOG.error("Excption while updating cart" ,e);
+		}
+        if(shoppingCart == null){
+        	shoppingCart = new ShoppingCartData();
+        }
+        return shoppingCart;
+	}
+
+
 }

@@ -1,5 +1,6 @@
 package com.salesmanager.shop.admin.controller.products;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -120,6 +121,10 @@ public class ProductReviewController {
 			Long totalRatingCount = getTotalRatingCount(reviews);
 			productReviewResponse.setAvgReview(avgReview);
 			productReviewResponse.setTotalRatingCount(totalRatingCount);
+			/*Product dbProduct = productService.getById(productId);
+			BigDecimal productAvgReview = new BigDecimal(avgReview);
+			dbProduct.setProductReviewAvg(productAvgReview);
+			productService.update(dbProduct);*/
 			//productReviewResponse.setStatus(1);
 		} catch (Exception e) {			
 		    System.out.println("Error in retrieving Product Reviews");
@@ -356,20 +361,26 @@ public class ProductReviewController {
 			productReview.setDescription( productReviewReq.getDescription());
 			productReview.setDescriptionName( productReviewReq.getDescriptionName());
 			productReview.setStatus(1);
-			Product product = new Product();
+			Product product = productService.getProductAndProductReviewByProductId(productReviewReq.getProductId());
 			product.setId(productReviewReq.getProductId());
 			productReview.setProduct(product);
+			product.getProductReview().add(productReview);
 			// get customer from session object
+
+			List<ProductReview>  productReviews = new ArrayList<ProductReview>(product.getProductReview());
+			Double avgReview = getAvgReview(productReviews);
+			product.setProductReviewAvg(new BigDecimal(avgReview));
 			
 			//Customer customer = (Customer)request.getSession().getAttribute(Constants.CUSTOMER);	// ram hard coded here
 			Customer customer = customerService.getById(productReviewReq.getProductId());
 			productReview.setCustomer(customer);
-			
 			productReviewService.save(productReview);
-			if(productReview.getId() == null){
+			if(productReview.getId() == null) {
 				productReviewSaveResponse.setStatus("false");
-				productReviewSaveResponse.setMessage("Error in saving the Product review");				
+				productReviewSaveResponse.setMessage("Error in saving the Product review");		
+				return productReviewSaveResponse;
 			}
+			
 			productReviewSaveResponse.setStatus("true");
 		    productReviewSaveResponse.setMessage("Product Review saved successfully");		     
 		    //return  productReviewSaveResponse;
@@ -377,6 +388,7 @@ public class ProductReviewController {
 			LOGGER.error("Error while saving productReview", e);
 			productReviewSaveResponse.setStatus("false");
 			productReviewSaveResponse.setMessage("Error in saving the Product review");
+			return productReviewSaveResponse;
 		}		 
 		return productReviewSaveResponse;
 	}

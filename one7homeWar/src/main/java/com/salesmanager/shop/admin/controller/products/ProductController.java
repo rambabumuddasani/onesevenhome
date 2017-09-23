@@ -24,6 +24,7 @@ import com.salesmanager.core.model.catalog.product.manufacturer.ManufacturerDesc
 import com.salesmanager.core.model.catalog.product.price.ProductPrice;
 import com.salesmanager.core.model.catalog.product.price.ProductPriceDescription;
 import com.salesmanager.core.model.catalog.product.relationship.ProductRelationship;
+import com.salesmanager.core.model.catalog.product.review.ProductReview;
 import com.salesmanager.core.model.catalog.product.type.ProductType;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
@@ -1218,7 +1219,14 @@ public class ProductController extends AbstractController {
 			System.out.println("product id =="+product.getProductImage());
 			System.out.println("product id =="+product.getProductImage().getProductImageUrl());
 			
-			productResponse.setImageURL(product.getProductImage().getProductImageUrl());
+			System.out.println("product id =="+dbProduct.getProductDescription().getName());
+			System.out.println("product id =="+product.getProduct().getProductDescription());
+			System.out.println("product id =="+product.getProduct().getProductDescription().getName());
+			
+			if(product.getProductImage() != null)
+				productResponse.setImageURL(product.getProductImage().getProductImageUrl());
+			
+		
 			if(isSpecial) {
 				productResponse.setProductPrice(productPrice.getProductPriceAmount());
 				productResponse.setProductDiscountPrice(productPrice.getProductPriceSpecialAmount());
@@ -1576,4 +1584,228 @@ public class ProductController extends AbstractController {
 
 	}
 	
+	@RequestMapping(value="/getProductsByFiltersAndPrice", method = RequestMethod.POST, 
+			consumes = MediaType.APPLICATION_JSON_VALUE,
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public FilteredProducts getProductsByFiltersAndPrice(@RequestParam(value="pageNumber", defaultValue = "1") int page ,@RequestParam(value="pageSize", defaultValue="15") int size, @RequestBody FiltersRequest filtersRequest) throws Exception {
+		
+		System.out.println("getProductsByFiltersAndPrice ==");
+		
+		List<Long> filterIds = filtersRequest.getFilterIds();
+		
+		ProductResponse productResponse = new ProductResponse();
+		FilteredProducts filteredProducts = new FilteredProducts();
+		List<ProductResponse> responses = new ArrayList<ProductResponse>();
+		BigDecimal minPrice= new BigDecimal(filtersRequest.getMinPrice());
+		BigDecimal maxPrice= new BigDecimal(filtersRequest.getMaxPrice());
+		Double productRating = filtersRequest.getProductRating();
+		if((filterIds != null && !filterIds.isEmpty()) || (minPrice!=null && maxPrice!=null) || productRating!=null) {
+			List<Product> dbProducts = productService.getProductsListByFiltersAndPrice(filterIds,minPrice,maxPrice,productRating);
+			List<Product> tdProducts = productService.getTodaysDeals();
+			Map<Long,Product> todaysDealsMap = null;
+			todaysDealsMap = new HashMap<Long, Product>();
+			for(Product tdproduct:tdProducts){
+				todaysDealsMap.put(tdproduct.getId(), tdproduct);
+			}
+			for(Product product:dbProducts) {
+				if(todaysDealsMap.containsKey(product.getId())){
+					productResponse = getProductDetails(product,true);
+				} else {
+					productResponse = getProductDetails(product,false);
+				}
+				responses.add(productResponse);
+			}
+			
+		}
+		if(responses == null || responses.isEmpty() || responses.size() < page){
+			filteredProducts.setFilteredProducts(responses);
+			return filteredProducts;
+		}
+	    PaginationData paginaionData=createPaginaionData(page,size);
+    	calculatePaginaionData(paginaionData,size, responses.size());
+    	filteredProducts.setPaginationData(paginaionData);
+		List<ProductResponse> paginatedProdResponses = responses.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+		filteredProducts.setFilteredProducts(paginatedProdResponses);
+		return filteredProducts;
+	}
+public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpecial,String minPrice,String maxPrice) throws Exception {
+		
+		System.out.println("merchantStoreService =="+merchantStoreService);
+		
+		ProductResponse productResponse = new ProductResponse();
+		try {
+		productResponse.setProductId(dbProduct.getId());
+		MerchantStore store=merchantStoreService.getMerchantStore(MerchantStore.DEFAULT_STORE);
+		
+		com.salesmanager.shop.admin.model.catalog.Product product = new com.salesmanager.shop.admin.model.catalog.Product();
+		List<ProductDescription> descriptions = new ArrayList<ProductDescription>();
+			
+			product.setProduct(dbProduct);
+			
+			for(ProductImage image : dbProduct.getImages()) {
+				if(image.isDefaultImage()) {
+					product.setProductImage(image);
+					break;
+				}
+			}
+			
+			ProductAvailability productAvailability = null;
+			ProductPrice productPrice = null;
+			
+			Set<ProductAvailability> availabilities = dbProduct.getAvailabilities();
+			if(availabilities!=null && availabilities.size()>0) {
+				
+				for(ProductAvailability availability : availabilities) {
+					if(availability.getRegion().equals(com.salesmanager.core.business.constants.Constants.ALL_REGIONS)) {
+						productAvailability = availability;
+						Set<ProductPrice> prices = availability.getPrices();
+						for(ProductPrice price : prices) {
+							if(price.isDefaultPrice()) {
+								productPrice = price;
+								product.setProductPrice(priceUtil.getAdminFormatedAmount(store, productPrice.getProductPriceAmount()));
+							} 
+						}
+					}
+				}
+			}
+			
+			if(productAvailability==null) {
+				productAvailability = new ProductAvailability();
+			}
+			
+			if(productPrice==null) {
+				productPrice = new ProductPrice();
+			}
+			
+			product.setAvailability(productAvailability);
+			product.setPrice(productPrice);
+			product.setDescriptions(descriptions);
+			
+			
+			product.setDateAvailable(DateUtil.formatDate(dbProduct.getDateAvailable()));
+			
+			System.out.println("product id =="+product);
+			System.out.println("product id =="+product.getProduct().getId());
+			System.out.println("product id =="+product.getProductImage());
+			System.out.println("product id =="+product.getProductImage().getProductImageUrl());
+			
+			productResponse.setImageURL(product.getProductImage().getProductImageUrl());
+			if(isSpecial) {
+				productResponse.setProductPrice(productPrice.getProductPriceAmount());
+				productResponse.setProductDiscountPrice(productPrice.getProductPriceSpecialAmount());
+				productResponse.setDiscountPercentage(getDiscountPercentage(productPrice));
+				productResponse.setProductPriceSpecialEndDate(productPrice.getProductPriceSpecialEndDate());
+				//productResponse.setProductPriceSpecialEndTime(productPrice.getProductPriceSpecialEndDateTime());
+			}
+			else
+				productResponse.setProductPrice(productPrice.getProductPriceAmount());
+				
+			productResponse.setProductName(dbProduct.getProductDescription().getName());
+			//productResponse.setVendorName(dbProduct.getManufacturer().getCode());
+			
+			Set<ManufacturerDescription> manufacturerDescription =  dbProduct.getManufacturer().getDescriptions();
+			for(ManufacturerDescription description:manufacturerDescription){
+				productResponse.setVendorName(description.getName());
+				productResponse.setVendorLocation(description.getTitle());
+			}
+			/*Set<ProductReview> productReviews = dbProduct.getProductReview();
+			for(ProductReview productReview : productReviews){
+				productResponse.setProductRating(productReview.getReviewRating());
+			}*/	
+			productResponse.setProductRating((dbProduct.getProductReviewAvg()).doubleValue());
+		}catch(Exception e){
+			System.out.println("product details ::"+e.getMessage());
+		}
+		return productResponse;
+	}
+
+      @RequestMapping(value="/createProduct", method = RequestMethod.POST, 
+		               consumes = MediaType.APPLICATION_JSON_VALUE,
+		               produces = MediaType.APPLICATION_JSON_VALUE)
+      @ResponseBody
+      public CreateProductResponse createProduct(@RequestBody CreateProductRequest createProductRequest) throws Exception {
+	
+	System.out.println("createProduct:");
+	/*{"sku":"1234"
+"description":""
+"name":""
+"title":""
+"short_desc":"used in production description page"
+"product_desc_title":"used in production description page"
+"price":""
+"discount_price":""
+"category":""}*/
+	CreateProductResponse createProductResponse = new CreateProductResponse();
+	try {
+	MerchantStore merchantStore=merchantStoreService.getMerchantStore(MerchantStore.DEFAULT_STORE);
+	com.salesmanager.shop.admin.model.catalog.Product  product = new com.salesmanager.shop.admin.model.catalog.Product();
+	Product newProduct = new Product();
+	Set<ProductDescription> descriptions = new HashSet<ProductDescription>();
+	ProductDescription productDescription = new ProductDescription();
+	Set<ProductAvailability> availabilities = new HashSet<ProductAvailability>();
+	Set<ProductPrice> prices = new HashSet<ProductPrice>();
+	ProductAvailability productAvailability = new ProductAvailability();
+	ProductPrice productPrice = new ProductPrice();
+	
+	System.out.println("createProductRequest.getSku() =="+createProductRequest.getSku());
+	System.out.println("createProductRequest.getDescription() =="+createProductRequest.getDescription());
+	System.out.println("createProductRequest.getProductName() =="+createProductRequest.getProductName());
+	System.out.println("createProductRequest.getTitle() =="+createProductRequest.getTitle());
+	System.out.println("createProductRequest.getShortDesc() =="+createProductRequest.getShortDesc());
+	System.out.println("createProductRequest.getProductDescTitle() =="+createProductRequest.getProductDescTitle());
+	System.out.println("createProductRequest.getProductPrice() =="+createProductRequest.getProductPrice());
+	System.out.println("createProductRequest.getCategory() =="+createProductRequest.getCategory());
+	
+	productDescription.setName(createProductRequest.getProductName());
+	productDescription.setDescription(createProductRequest.getDescription());
+	productDescription.setTitle(createProductRequest.getTitle());
+	productDescription.setMetatagDescription(createProductRequest.getShortDesc());
+	productDescription.setMetatagTitle(createProductRequest.getProductDescTitle());
+	Language language = new Language();
+	language.setId(1);
+	productDescription.setLanguage(language);
+	productDescription.setProduct(newProduct);
+	descriptions.add(productDescription);
+	
+	//availability
+	productAvailability.setRegion("*");
+	productAvailability.setProductQuantity(0);
+
+	//price
+	productPrice.setDefaultPrice(true);
+	productPrice.setProductPriceAmount(createProductRequest.getProductPrice());
+	productPrice.setCode("base");
+	productPrice.setProductAvailability(productAvailability);
+	productPrice.setFeaturedProduct("N");
+	productPrice.setNewProduct("N");
+	productPrice.setRecommendedProduct("N");
+	prices.add(productPrice);
+	
+	productAvailability.setPrices(prices);
+	productAvailability.setProduct(newProduct);
+	
+	availabilities.add(productAvailability);
+	
+	
+	newProduct.setSku(createProductRequest.getSku());
+	newProduct.setDescriptions(descriptions);
+	newProduct.setMerchantStore(merchantStore);
+	newProduct.setAvailabilities(availabilities);
+	String categoryId = createProductRequest.getCategory().replaceAll("_", " ");
+	Category category = categoryService.getByCategoryCode(categoryId);
+	Set<Category> categories = new HashSet<Category>();
+	categories.add(category);
+	newProduct.setCategories(categories);
+	productService.save(newProduct);
+	System.out.println("created ..");
+	createProductResponse.setStatus(true);
+	createProductResponse.setProductId(newProduct.getId());
+	}catch (Exception e){
+		System.out.println("failed while creating product ==="+e.getMessage());
+	}
+	return createProductResponse;
+	
+}
+    
 }

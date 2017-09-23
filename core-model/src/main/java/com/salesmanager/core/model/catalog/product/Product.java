@@ -38,6 +38,7 @@ import com.salesmanager.core.model.catalog.product.filter.FilterType;
 import com.salesmanager.core.model.catalog.product.image.ProductImage;
 import com.salesmanager.core.model.catalog.product.manufacturer.Manufacturer;
 import com.salesmanager.core.model.catalog.product.relationship.ProductRelationship;
+import com.salesmanager.core.model.catalog.product.review.ProductReview;
 import com.salesmanager.core.model.catalog.product.type.ProductType;
 import com.salesmanager.core.model.common.audit.AuditListener;
 import com.salesmanager.core.model.common.audit.AuditSection;
@@ -80,6 +81,8 @@ public class Product extends SalesManagerEntity<Long, Product> implements Audita
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "product")
 	private Set<ProductRelationship> relationships = new HashSet<ProductRelationship>();
 
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "product")
+	private Set<ProductReview> productReview = new HashSet<ProductReview>();
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="MERCHANT_ID", nullable=false)
@@ -469,6 +472,22 @@ public class Product extends SalesManagerEntity<Long, Product> implements Audita
 
 	public void setVendorProduct(Set<VendorProduct> vendorProduct) {
 		this.vendorProduct = vendorProduct;
+	}
+
+	public Set<ProductReview> getProductReview() {
+		return productReview;
+	}
+
+	public void setProductReview(Set<ProductReview> productReview) {
+		this.productReview = productReview;
+	}
+
+	public Set<FilterType> getFilters() {
+		return filters;
+	}
+
+	public void setFilters(Set<FilterType> filters) {
+		this.filters = filters;
 	}
     
 

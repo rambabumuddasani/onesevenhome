@@ -8,7 +8,9 @@ app.controller("demoController", function ($scope, $http) {
         password: "secret",
         confirmPassword: "secret",
         vendorName: "vendorName1",				
-        vendorMobile: "98989888",		
+        vendorMobile: "98989888",
+        termsAndConditions: true,
+        activationURL: "someURL"
     };
     //3. listen for the file selected event which is raised from directive
     $scope.$on("seletedFile", function (event, args) {
@@ -20,17 +22,24 @@ app.controller("demoController", function ($scope, $http) {
 
     //4. Post data and selected files.
     $scope.save = function () {
+    	newURL = location.origin;
         $http({
             method: 'POST',
-            url: "http://localhost:8080/vendor/register",
+            //url: newURL+"/vendor/register",
+            url: newURL+"/vendor/update",
             headers: { 'Content-Type': undefined },
            
             transformRequest: function (data) {
                 var formData = new FormData();
                 formData.append("vendorRequest", JSON.stringify(data.fileInfo));
-                for (var i = 0; i < data.file.length; i++) {
-                   // formData.append("file", data.file);
-					  formData.append("file", data.file[i]);
+                // if file length is 0, set empty file 
+                if(data.file.length == 0){
+                	formData.append("file",new File([""], "emptyFile.jpg", {type: "impage/jpeg"}));
+                }else {
+                	for (var i = 0; i < data.file.length; i++) {
+                		// formData.append("file", data.file);
+                		formData.append("file", data.file[i]);
+                	}
                 }
                 return formData;
             },

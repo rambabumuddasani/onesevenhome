@@ -29,7 +29,8 @@ public class FileSystemStorageService implements StorageService {
     @Override
     public String store(MultipartFile file) {
     	StringBuilder filePath = new StringBuilder();
-    	filePath.append(rootLocation+"\\"); // assumption output will be /opt/imp/vendor
+    	//filePath.append(rootLocation+"\\"); // assumption output will be /opt/imp/vendor
+    	filePath.append(rootLocation+java.io.File.separator);
     	try {
             if (file.isEmpty()) {
                 throw new StorageException("Failed to store empty file " + file.getOriginalFilename());

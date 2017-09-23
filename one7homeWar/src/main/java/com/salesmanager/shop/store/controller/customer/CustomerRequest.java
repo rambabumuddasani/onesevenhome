@@ -14,20 +14,17 @@ public class CustomerRequest {
 	private String lastName;
 	private String dob;
 	private String gender;
-	private String mobileNo;
+	//private String mobileNo;
+	private String phone;
 	private String address;
 	private String postalCode;
 	private String state;
 	private String city;
 	private String area;
 	private String activationURL;
+	private String termsAndConditions;
 	
-	public String getEmail() {
-		return email;
-	}
-	public void setEmail(String email) {
-		this.email = email;
-	}
+	
 	public String getPassword() {
 		return password;
 	}
@@ -64,11 +61,17 @@ public class CustomerRequest {
 	public void setGender(String gender) {
 		this.gender = gender;
 	}
-	public String getMobileNo() {
+	/*public String getMobileNo() {
 		return mobileNo;
 	}
 	public void setMobileNo(String mobileNo) {
 		this.mobileNo = mobileNo;
+	}*/
+	public String getPhone() {
+		return phone;
+	}
+	public void setPhone(String phone) {
+		this.phone = phone;
 	}
 	public String getAddress() {
 		return address;
@@ -106,5 +109,18 @@ public class CustomerRequest {
 	public void setActivationURL(String activationURL) {
 		this.activationURL = activationURL;
 	}
+	public String getTermsAndConditions() {
+		return termsAndConditions;
+	}
+	public void setTermsAndConditions(String termsAndConditions) {
+		this.termsAndConditions = termsAndConditions;
+	}
+	public String getEmail() {
+		return email;
+	}
+	public void setEmail(String email) {
+		this.email = email;
+	}
+	
 
 }

@@ -12,7 +12,7 @@ public class StorageProperties {
      */
    // private String location = "upload-dir";
 	//private String location = "F:\\cores\\";	// in Windows
-	private String location = "/opt/img/vendor/certificate/"; // in UNIX 
+	private String location = "/opt/img/vendor/certificate"; // in UNIX 
 	
 	public String getLocation() {
         return location;

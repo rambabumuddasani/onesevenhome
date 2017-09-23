@@ -1,6 +1,7 @@
 package com.salesmanager.core.business.services.catalog.product;
 
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -122,6 +123,9 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 		return productRepository.getById(productId);
 	}
 
+	public Product getProductAndProductReviewByProductId(Long productId) {
+		return productRepository.getProductAndProductReviewByProductId(productId);
+	}
 	@Override
 	public List<Product> getProducts(List<Long> categoryIds, Language language) throws ServiceException {
 		
@@ -353,6 +357,12 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 	public List<Product> getProduct(String columnName, String columnValue) throws ServiceException {
 		
 		return productRepository.getProduct(columnName,columnValue);
+	}
+
+	@Override
+	public List<Product> getProductsListByFiltersAndPrice(List<Long> filterIds, BigDecimal minPrice, BigDecimal maxPrice,Double productRating) {
+		
+		return productRepository.findProductsByFiltersAndPrice(filterIds,minPrice,maxPrice,productRating);
 	}
 
 	

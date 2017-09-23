@@ -24,6 +24,8 @@ public interface UserService extends SalesManagerEntityService<Long, User> {
 
 	List<User> listByStore(MerchantStore store) throws ServiceException;
 
+	User getByEmail(String email);
+
 
 
 }

@@ -45,8 +45,11 @@ public class PersistableCustomerShippingAddressPopulator extends AbstractDataPop
                   delivery.setPostalCode( source.getPostalCode());
               }
               
-              if(StringUtils.isNotBlank( source.getStateProvince())){
+              /*if(StringUtils.isNotBlank( source.getStateProvince())){
                   delivery.setPostalCode( source.getStateProvince());
+              }*/
+              if(StringUtils.isNotBlank( source.getStateProvince())){
+                  delivery.setState(source.getStateProvince());
               }
               
               target.setDelivery( delivery );
@@ -77,9 +80,13 @@ public class PersistableCustomerShippingAddressPopulator extends AbstractDataPop
                target.getDelivery().setPostalCode( source.getPostalCode());
            }
            
-           if(StringUtils.isNotBlank( source.getStateProvince())){
+           /*if(StringUtils.isNotBlank( source.getStateProvince())){
                target.getDelivery().setPostalCode( source.getStateProvince());
+           }*/
+           if(StringUtils.isNotBlank( source.getStateProvince())){
+               target.getDelivery().setState(source.getStateProvince());
            }
+           
           }
            
            return target;

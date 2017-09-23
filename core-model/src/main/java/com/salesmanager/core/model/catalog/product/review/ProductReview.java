@@ -66,7 +66,7 @@ public class ProductReview extends SalesManagerEntity<Long, ProductReview> imple
 	@JoinColumn(name="CUSTOMERS_ID")
 	private Customer customer;
 	
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name="PRODUCT_ID")
 	private Product product;
 

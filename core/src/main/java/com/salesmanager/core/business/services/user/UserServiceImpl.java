@@ -77,4 +77,10 @@ public class UserServiceImpl extends SalesManagerEntityServiceImpl<Long, User>
 		
 	}
 
+	@Override
+	public User getByEmail(String email) {
+		// TODO Auto-generated method stub
+		return userRepository.findByEmail(email);
+	}
+
 }

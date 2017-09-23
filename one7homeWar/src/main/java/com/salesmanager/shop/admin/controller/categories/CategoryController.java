@@ -30,8 +30,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.salesmanager.core.business.services.merchant.MerchantStoreService;
+
 
 import com.salesmanager.core.business.services.catalog.category.CategoryService;
+import com.salesmanager.core.business.services.merchant.MerchantStoreService;
 import com.salesmanager.core.business.services.reference.country.CountryService;
 import com.salesmanager.core.business.services.reference.language.LanguageService;
 import com.salesmanager.core.business.utils.ajax.AjaxResponse;
@@ -63,6 +66,9 @@ public class CategoryController {
 	
 	@Inject
 	LabelUtils messages;
+	
+	@Inject
+	MerchantStoreService merchantStoreService;
 
 	@RequestMapping(value="/getCategories", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
@@ -689,4 +695,48 @@ public class CategoryController {
 		
 	}
 
+	@RequestMapping(value="/createCategory", method = RequestMethod.POST, 
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public CreateCategoryResponse createCategory(@RequestBody CreateCategoryRequest createCategoryRequest) throws Exception {
+		CreateCategoryResponse createCategoryResponse = new CreateCategoryResponse();
+		try {
+			MerchantStore merchantStore=merchantStoreService.getMerchantStore(MerchantStore.DEFAULT_STORE);
+			String categoryName = createCategoryRequest.getCategoryName();
+			String parentName = createCategoryRequest.getParentName();
+			categoryName = categoryName.replaceAll("_", " ");
+			parentName = parentName.replaceAll("_", " ");
+			Category category = categoryService.getByCategoryCode(categoryName);
+			Category categoryParent = categoryService.getByCategoryCode(parentName);
+			
+			if(category != null){
+				System.out.println("category already exists.");
+				createCategoryResponse.setStatus(false);
+				createCategoryResponse.setErrorMessage("category already exists.");
+			} else {
+				Category childCat = new Category();
+				childCat.setCode(categoryName);
+				childCat.setMerchantStore(merchantStore);
+				//check parent
+				if(categoryParent == null) {
+						childCat.setParent(null);
+						childCat.setLineage("/");
+						childCat.setDepth(0);
+					} else {
+						categoryService.addChild(categoryParent, childCat);
+					}
+				
+				categoryService.saveOrUpdate(childCat);
+				createCategoryResponse.setStatus(true);
+				createCategoryResponse.setCategoryId(childCat.getId());
+				
+			}
+		} catch (Exception e){
+			createCategoryResponse.setStatus(false);
+			createCategoryResponse.setErrorMessage("category already exists.");
+		}
+		return createCategoryResponse;
+
+	}
 }

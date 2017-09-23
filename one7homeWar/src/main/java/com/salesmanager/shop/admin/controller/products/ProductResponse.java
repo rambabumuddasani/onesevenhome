@@ -20,7 +20,7 @@ public class ProductResponse {
 	List<Category> categories;
 	private Date productPriceSpecialEndDate;
 	private Timestamp productPriceSpecialEndTime;
-
+	private Double productRating;
 	public Long getProductId() {
 		return productId;
 	}
@@ -87,6 +87,12 @@ public class ProductResponse {
 	}
 	public void setProductDiscountPrice(BigDecimal productDiscountPrice) {
 		this.productDiscountPrice = productDiscountPrice;
+	}
+	public Double getProductRating() {
+		return productRating;
+	}
+	public void setProductRating(Double productRating) {
+		this.productRating = productRating;
 	}
 	
 }
