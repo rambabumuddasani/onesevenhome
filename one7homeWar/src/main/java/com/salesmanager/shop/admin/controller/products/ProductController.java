@@ -1592,14 +1592,26 @@ public class ProductController extends AbstractController {
 		
 		System.out.println("getProductsByFiltersAndPrice ==");
 		
-		List<Long> filterIds = filtersRequest.getFilterIds();
+		List<Long> filterIds = null;
+		if(filtersRequest.getFilterIds() != null) {
+			filterIds = filtersRequest.getFilterIds();
+		}
 		
 		ProductResponse productResponse = new ProductResponse();
 		FilteredProducts filteredProducts = new FilteredProducts();
+		try {
 		List<ProductResponse> responses = new ArrayList<ProductResponse>();
-		BigDecimal minPrice= new BigDecimal(filtersRequest.getMinPrice());
-		BigDecimal maxPrice= new BigDecimal(filtersRequest.getMaxPrice());
-		Double productRating = filtersRequest.getProductRating();
+		BigDecimal minPrice= null;
+		System.out.println("filtersRequest.getMinPrice() =="+filtersRequest.getMinPrice());
+		if(filtersRequest.getMinPrice() != null && !("").equals(filtersRequest.getMinPrice()))
+				minPrice= new BigDecimal(filtersRequest.getMinPrice());
+		BigDecimal maxPrice= null;
+		if(filtersRequest.getMaxPrice() != null && !("").equals(filtersRequest.getMaxPrice()))
+				maxPrice= new BigDecimal(filtersRequest.getMaxPrice());
+		Double productRating = null;
+		if(filtersRequest.getProductRating() != null && !("").equals(filtersRequest.getProductRating()))
+				productRating = filtersRequest.getProductRating();
+		
 		if((filterIds != null && !filterIds.isEmpty()) || (minPrice!=null && maxPrice!=null) || productRating!=null) {
 			List<Product> dbProducts = productService.getProductsListByFiltersAndPrice(filterIds,minPrice,maxPrice,productRating);
 			List<Product> tdProducts = productService.getTodaysDeals();
@@ -1627,6 +1639,10 @@ public class ProductController extends AbstractController {
     	filteredProducts.setPaginationData(paginaionData);
 		List<ProductResponse> paginatedProdResponses = responses.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
 		filteredProducts.setFilteredProducts(paginatedProdResponses);
+		}catch(Exception e){
+			System.out.println("error occured=="+e.getMessage());
+			e.printStackTrace(System.out);
+		}
 		return filteredProducts;
 	}
 public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpecial,String minPrice,String maxPrice) throws Exception {
