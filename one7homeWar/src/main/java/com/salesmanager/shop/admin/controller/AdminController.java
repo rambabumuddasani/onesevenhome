@@ -3,6 +3,7 @@ package com.salesmanager.shop.admin.controller;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.salesmanager.core.business.exception.ServiceException;
@@ -27,12 +29,13 @@ import com.salesmanager.core.business.services.catalog.category.CategoryService;
 import com.salesmanager.core.business.services.catalog.product.ProductService;
 import com.salesmanager.core.business.services.catalog.product.price.ProductPriceService;
 import com.salesmanager.core.business.services.catalog.product.type.ProductTypeService;
+import com.salesmanager.core.business.services.customer.CustomerService;
 import com.salesmanager.core.business.services.merchant.MerchantStoreService;
 import com.salesmanager.core.business.services.reference.country.CountryService;
 import com.salesmanager.core.business.services.reference.language.LanguageService;
-import com.salesmanager.core.business.services.tax.TaxClassService;
 import com.salesmanager.core.business.services.user.UserService;
 import com.salesmanager.core.business.utils.ProductPriceUtils;
+import com.salesmanager.core.business.vendor.product.services.VendorProductService;
 import com.salesmanager.core.model.catalog.category.Category;
 import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.catalog.product.availability.ProductAvailability;
@@ -42,9 +45,9 @@ import com.salesmanager.core.model.catalog.product.manufacturer.ManufacturerDesc
 import com.salesmanager.core.model.catalog.product.price.ProductPrice;
 import com.salesmanager.core.model.catalog.product.type.ProductType;
 import com.salesmanager.core.model.merchant.MerchantStore;
-import com.salesmanager.core.model.tax.taxclass.TaxClass;
+import com.salesmanager.core.model.product.vendor.VendorProduct;
 import com.salesmanager.core.model.user.User;
-import com.salesmanager.shop.admin.controller.products.ProductResponse;
+import com.salesmanager.shop.admin.controller.products.PaginatedResponse;
 import com.salesmanager.shop.utils.DateUtil;
 
 @Controller
@@ -84,6 +87,12 @@ public class AdminController {
     
     @Inject
 	private ProductPriceUtils priceUtil;
+    
+    @Inject
+	VendorProductService vendorProductService;
+    
+    @Inject
+    private CustomerService customerService;
     
     
 	@RequestMapping(value="/admin/updatestore", method = RequestMethod.POST, 
@@ -554,4 +563,87 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
 	return df.format(discount);
 
 }
+    @RequestMapping(value="/admin/vendor/products/{vendorId}", method = RequestMethod.GET, 
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public AdminVendorProductResponse getAdminVendorProducts(@PathVariable String vendorId) throws Exception {
+    	System.out.println("Inside getAdminVendorProducts: ");
+    	AdminVendorProductResponse adminVendorProductResponse = new AdminVendorProductResponse();
+    	Long  vId = Long.parseLong(vendorId);
+    	List<VendorProduct> vendorProducts = vendorProductService.findProductsByVendor(vId);
+    	if(vendorProducts==null) {
+    		adminVendorProductResponse.setErrorMsg("Vendor products not found");
+    		return adminVendorProductResponse;
+    	}
+    	System.out.println("VendorProducts: "+vendorProducts);
+    	List<VendorProductVO> vproductList = new ArrayList<VendorProductVO>();
+    	for(VendorProduct vendorProduct : vendorProducts) {
+    		VendorProductVO vendorProductVO = new VendorProductVO();
+    		vendorProductVO.setVendorId(vendorProduct.getCustomer().getId());
+    		vendorProductVO.setVendorName(vendorProduct.getCustomer().getNick());
+    		vendorProductVO.setProductId(vendorProduct.getProduct().getId());
+    		vendorProductVO.setProductName(vendorProduct.getProduct().getProductDescription().getName());
+    		vproductList.add(vendorProductVO);
+    	}
+    	adminVendorProductResponse.setVendorProducts(vproductList);
+    	return adminVendorProductResponse;
+    	
+    }
+    
+    @RequestMapping(value="/admin/vendor/products", method = RequestMethod.GET)
+	@ResponseBody
+	public AdminVendorProductResponse getVendorProducts() throws Exception {
+    	System.out.println("Inside getVendorProducts: ");
+    	AdminVendorProductResponse adminVendorProductResponse = new AdminVendorProductResponse();
+    	List<VendorProduct> vendorProducts = vendorProductService.getVendorProducts();
+    	if(vendorProducts==null) {
+    		adminVendorProductResponse.setErrorMsg("Vendor products not found");
+    		return adminVendorProductResponse;
+    	}
+    	System.out.println("VendorProducts: "+vendorProducts);
+    	List<VendorProductVO> vproductList = new ArrayList<VendorProductVO>();
+    	for(VendorProduct vendorProduct : vendorProducts) {
+    		System.out.println("vendorProduct"+vendorProduct);
+    		VendorProductVO vendorProductVO = new VendorProductVO();
+    		vendorProductVO.setVendorProductId(vendorProduct.getId());
+    		vendorProductVO.setVendorId(vendorProduct.getCustomer().getId());
+    		System.out.println("vendorProduct.getCustomer().getId()"+vendorProduct.getCustomer().getId());
+    		if (!(vendorProduct.getCustomer().getVendorAttrs().getVendorName().equals(null))){
+    		vendorProductVO.setVendorName(vendorProduct.getCustomer().getVendorAttrs().getVendorName());
+    		}
+    		vendorProductVO.setProductId(vendorProduct.getProduct().getId());
+    		vendorProductVO.setProductName(vendorProduct.getProduct().getProductDescription().getName());
+    		//vendorProductVO.setDescription(vendorProduct.getProduct().getProductDescription().getDescription());
+    		vproductList.add(vendorProductVO);
+    	}
+    	adminVendorProductResponse.setVendorProducts(vproductList);
+    	return adminVendorProductResponse;
+    }
+    
+    @RequestMapping(value="/admin/products/activate", method = RequestMethod.POST)
+	@ResponseBody
+	public ActivateProductResponse adminApproveProducts(@RequestBody ActivateProductRequest activateProductRequest) throws Exception {
+    	System.out.println("Inside adminApproveProducts:");
+    	ActivateProductResponse activateProductResponse = new ActivateProductResponse();
+    	Long vendorProductId = activateProductRequest.getVendorProductId();
+    	System.out.println("vendorProductId : "+vendorProductId);
+	    VendorProduct vendorProduct = vendorProductService.getVendorProductById(vendorProductId);
+    	if(vendorProduct==null) {
+    		activateProductResponse.setErrorMesg("Vendor product not found");
+    		return activateProductResponse;
+    	}
+    	vendorProduct.setAdminActivatedDate(new Date());
+    	vendorProduct.setAdminActivated(activateProductRequest.isStatus());
+    	vendorProductService.update(vendorProduct);
+    	if(vendorProduct.isAdminActivated()==true) {
+    		activateProductResponse.setSuccessMsg("Activated");
+    		activateProductResponse.setStatus("true");
+    	} else {
+    		activateProductResponse.setErrorMesg("Declined");
+    		activateProductResponse.setStatus("false");
+    	}
+	    return activateProductResponse;
+    	
+    }
+   
 }
