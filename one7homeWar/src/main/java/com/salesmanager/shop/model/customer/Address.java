@@ -12,10 +12,10 @@ public class Address implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	@NotEmpty(message="{NotEmpty.customer.firstName}")
+	//@NotEmpty(message="{NotEmpty.customer.firstName}")
 	private String firstName;
 	
-	@NotEmpty(message="{NotEmpty.customer.lastName}")
+	//@NotEmpty(message="{NotEmpty.customer.lastName}")
 	private String lastName;
 	private String bilstateOther;
 
@@ -37,7 +37,7 @@ public class Address implements Serializable {
 	
 	private String zone;//code
 	
-	@NotEmpty(message="{NotEmpty.customer.billing.country}")
+	//@NotEmpty(message="{NotEmpty.customer.billing.country}")
 	private String country;//code
 	
 

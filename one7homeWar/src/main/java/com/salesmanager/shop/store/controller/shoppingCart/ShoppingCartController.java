@@ -167,7 +167,7 @@ public class ShoppingCartController extends AbstractController {
 		} catch(Exception e) {
 			LOG.error("Error while getting the shopping cart",e);
 		}		
-		return null;
+		return new ShoppingCartData();
 	}
 
 	//http://localhost:8080/cart/removeShoppingCartItem/3c9cb185cc4c42818790ec73e3e45693/359?userId=1
@@ -178,7 +178,7 @@ public class ShoppingCartController extends AbstractController {
 		MerchantStore merchantStore = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
 		ShoppingCartData cart =  shoppingCartFacade.getShoppingCartData(null, merchantStore, shoppingCartCode);
 		if(cart==null) {
-			return null;
+			return new ShoppingCartData();
 		}
 		ShoppingCartData shoppingCartData=shoppingCartFacade.removeCartItem(lineItemId, cart.getCode(), merchantStore,language);
 
@@ -186,7 +186,7 @@ public class ShoppingCartController extends AbstractController {
 		if(CollectionUtils.isEmpty(shoppingCartData.getShoppingCartItems())) {
 			shoppingCartFacade.deleteShoppingCart(shoppingCartData.getId(), merchantStore);
 			request.getSession().removeAttribute(Constants.SHOPPING_CART);
-			return null;
+			return new ShoppingCartData();
 		}
 
 
