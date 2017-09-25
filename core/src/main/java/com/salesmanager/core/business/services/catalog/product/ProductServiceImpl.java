@@ -3,6 +3,7 @@ package com.salesmanager.core.business.services.catalog.product;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -365,6 +366,10 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 		return productRepository.findProductsByFiltersAndPrice(filterIds,minPrice,maxPrice,productRating);
 	}
 
-	
+	@Override
+	public List<Product> getDealOfDay(Date startDate, Date endDate, String status) {
+		// TODO Auto-generated method stub
+		return productRepository.findDealOfDay(startDate,endDate,status);
+	}
 
 }
