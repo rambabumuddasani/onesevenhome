@@ -18,6 +18,7 @@ public class CreateProductRequest {
 	String productName;
 	BigDecimal productPrice;
 	String category;
+	
 	public String getSku() {
 		return sku;
 	}

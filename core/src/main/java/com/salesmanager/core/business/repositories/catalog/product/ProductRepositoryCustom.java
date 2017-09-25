@@ -48,7 +48,7 @@ public interface ProductRepositoryCustom {
 
 		List<Product> getProduct(String columnName, String coulumnValue);
 		List<Product> getProductsListByFilters(@SuppressWarnings("rawtypes") Set filterIds);
-		List<Product> findProductsByFiltersAndPrice(List<Long> filterIds, BigDecimal minPrice, BigDecimal maxPrice,Double productRating);
+		List<Product> findProductsByFiltersAndPrice(String categoryCode,List<Long> filterIds, BigDecimal minPrice, BigDecimal maxPrice,Double productRating);
 
 		Product getProductAndProductReviewByProductId(Long productId);
 

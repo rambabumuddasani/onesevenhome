@@ -1197,7 +1197,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 		
 	}
 	@Override
-	public List<Product> findProductsByFiltersAndPrice(List<Long> filterIds, BigDecimal minPrice, BigDecimal maxPrice,Double productRating) {
+	public List<Product> findProductsByFiltersAndPrice(String categoryCode,List<Long> filterIds, BigDecimal minPrice, BigDecimal maxPrice,Double productRating) {
 		StringBuilder qs = new StringBuilder();
 		qs.append("select distinct p from Product as p ");
 		qs.append("join fetch p.merchantStore merch ");
@@ -1205,6 +1205,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 		qs.append("left join fetch pa.prices pap ");
 		
 		qs.append("join fetch p.descriptions pd ");
+		qs.append("join fetch p.categories categs ");
 		qs.append("join fetch p.filters filters ");
 		//qs.append("left join fetch p.productReview productReview ");
 		
@@ -1225,10 +1226,11 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 		//other lefts
 		qs.append("left join fetch p.manufacturer manuf ");
 		qs.append("left join fetch p.type type ");
-		qs.append("left join fetch p.taxClass tx where");
+		qs.append("left join fetch p.taxClass tx ");
+		qs.append("where categs.code in (:categoryCode)");
 		boolean isAndNeeded = false;
 		if(filterIds != null && !isFilterIDsEmpty(filterIds) ) {
-			qs.append(" filters.id in (:fid)");
+			qs.append(" and filters.id in (:fid)");
 			isAndNeeded = true;
 		}
 		if(!isPriceEmpty(minPrice) && !isPriceEmpty(maxPrice)) {
@@ -1236,7 +1238,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 				qs.append(" and pap.productPriceAmount between :minPrice and :maxPrice");
 			} else {
 				isAndNeeded = true;
-				qs.append(" pap.productPriceAmount between :minPrice and :maxPrice");
+				qs.append(" and pap.productPriceAmount between :minPrice and :maxPrice");
 			}
 		}
 		
@@ -1252,12 +1254,14 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 				if(isAndNeeded) {
 					qs.append(" and p.productReviewAvg <= :productRating");				
 				}else {
-					qs.append("  p.productReviewAvg <= :productRating");				
+					qs.append(" and p.productReviewAvg <= :productRating");				
 				}
 	     }
 		
     	String hql = qs.toString();
 		Query q = this.em.createQuery(hql);
+		
+		q.setParameter("categoryCode", categoryCode);
 		
 		if(!isFilterIDsEmpty(filterIds) ) {
     	    q.setParameter("fid", filterIds);

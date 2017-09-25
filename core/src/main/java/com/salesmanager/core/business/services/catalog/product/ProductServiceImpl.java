@@ -360,9 +360,9 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 	}
 
 	@Override
-	public List<Product> getProductsListByFiltersAndPrice(List<Long> filterIds, BigDecimal minPrice, BigDecimal maxPrice,Double productRating) {
+	public List<Product> getProductsListByFiltersAndPrice(String categoryCode,List<Long> filterIds, BigDecimal minPrice, BigDecimal maxPrice,Double productRating) {
 		
-		return productRepository.findProductsByFiltersAndPrice(filterIds,minPrice,maxPrice,productRating);
+		return productRepository.findProductsByFiltersAndPrice(categoryCode,filterIds,minPrice,maxPrice,productRating);
 	}
 
 	

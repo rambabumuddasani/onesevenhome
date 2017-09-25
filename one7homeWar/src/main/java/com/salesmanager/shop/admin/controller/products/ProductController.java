@@ -1612,8 +1612,11 @@ public class ProductController extends AbstractController {
 		if(filtersRequest.getProductRating() != null && !("").equals(filtersRequest.getProductRating()))
 				productRating = filtersRequest.getProductRating();
 		
+		String categoryCode = filtersRequest.getCategoryCode();
+		categoryCode = categoryCode.replaceAll("_", " ");
+				
 		if((filterIds != null && !filterIds.isEmpty()) || (minPrice!=null && maxPrice!=null) || productRating!=null) {
-			List<Product> dbProducts = productService.getProductsListByFiltersAndPrice(filterIds,minPrice,maxPrice,productRating);
+			List<Product> dbProducts = productService.getProductsListByFiltersAndPrice(categoryCode,filterIds,minPrice,maxPrice,productRating);
 			List<Product> tdProducts = productService.getTodaysDeals();
 			Map<Long,Product> todaysDealsMap = null;
 			todaysDealsMap = new HashMap<Long, Product>();

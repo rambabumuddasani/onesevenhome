@@ -12,6 +12,8 @@ public class FiltersRequest {
 	private String minPrice;
     private String maxPrice;
     private Double productRating;
+    String categoryCode;
+    
 	public List<Long> getFilterIds() {
 		return filterIds;
 	}
@@ -44,5 +46,12 @@ public class FiltersRequest {
 		this.productRating = productRating;
 	}
 
-	
+	public String getCategoryCode() {
+		return categoryCode;
+	}
+
+	public void setCategoryCode(String categoryCode) {
+		this.categoryCode = categoryCode;
+	}
+
 }
