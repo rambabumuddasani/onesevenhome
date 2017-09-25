@@ -94,7 +94,7 @@ public class AdminController {
     @Inject
     private CustomerService customerService;
     
-    
+    // Admin can can update store address
 	@RequestMapping(value="/admin/updatestore", method = RequestMethod.POST, 
 			produces = MediaType.APPLICATION_JSON_VALUE,consumes=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -136,6 +136,7 @@ public class AdminController {
 	    
     }
 	
+	// Display store address
 	@RequestMapping(value="/admin/getStore", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -169,7 +170,7 @@ public class AdminController {
 		    return storeInfoResponse;
 		
 	}
-	
+	// Admin edit details 
 	@RequestMapping(value="/admin/update", method = RequestMethod.POST, 
 			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -206,7 +207,7 @@ public class AdminController {
 		
 		
 	}
-	
+	// Get list of admin
 	@RequestMapping(value="/admin/list", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -230,7 +231,7 @@ public class AdminController {
 		return adminListResponse;
 		
 	}
-	
+	// Admin password update
 	@RequestMapping(value="/admin/updatepassword", method=RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -254,23 +255,7 @@ public class AdminController {
 		return updatePasswordResp;
 	}
 	
-	/*@RequestMapping(value="/admin/addProducts", method=RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
-			produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public AddProductResp addProducts(@RequestBody AddProductReq addProductReq) throws Exception {
-		AddProductResp addProductResp = new AddProductResp();
-		String productId = addProductReq.getProductId();
-		Long longId = Long.parseLong(productId);
-	    Product dbProduct = productService.getByProductId(longId);
-	    if(dbProduct==null) {
-	    	addProductResp.setErrormessage("Product not exist");
-	    	return addProductResp;
-	    }
-	    
-		return null;
-	
-	}
-	*/
+	// Admin add new products, feature products, recommended and recent bought to his store
 	@RequestMapping(value="/admin/addOrRemove", method=RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -384,7 +369,7 @@ public class AdminController {
 		}
 		return false;
 	}*/
-
+    // Show new products, feature products, recommended and recent bought products in admin GUI
 	@RequestMapping(value="/admin/categories/{categoryCode}/{title}", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -563,6 +548,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
 	return df.format(discount);
 
 }
+    // Get products for vendor who added products to product list
     @RequestMapping(value="/admin/vendor/products/{vendorId}", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -589,7 +575,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     	return adminVendorProductResponse;
     	
     }
-    
+    // To show vendor products under admin gui so that admin can approve vendor products 
     @RequestMapping(value="/admin/vendor/products", method = RequestMethod.GET)
 	@ResponseBody
 	public AdminVendorProductResponse getVendorProducts() throws Exception {
@@ -619,7 +605,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     	adminVendorProductResponse.setVendorProducts(vproductList);
     	return adminVendorProductResponse;
     }
-    
+    // Admin approve products added by  different vendors
     @RequestMapping(value="/admin/products/activate", method = RequestMethod.POST)
 	@ResponseBody
 	public ActivateProductResponse adminApproveProducts(@RequestBody ActivateProductRequest activateProductRequest) throws Exception {
@@ -646,4 +632,79 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     	
     }
    
+ 
+    
+    // Admin can show a product under deal of day
+    @RequestMapping(value="/admin/dealOfDay", method=RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public AdminDealOfDayResponse adminDealOfDay(@RequestBody AdminDealOfDayRequest adminDealOfDayReq) throws Exception {
+    	System.out.println("adminDealOfDay: ");
+    	AdminDealOfDayResponse adminDealOfDayResponse = new AdminDealOfDayResponse();
+    	
+    	// Get the product details based on the AdminDeal of the day request 
+    	// This will get the product details, which need to be further updated with prices.
+    	Long productId = adminDealOfDayReq.getProductId();
+    	
+    	/*String status = adminDealOfDayReq.getStatus();
+    	String title = adminDealOfDayReq.getTitle();*/
+    	
+    	//Get the complete product details.
+    	Product dbProduct = productService.getByProductId(productId);
+    	
+    	if(dbProduct==null) {
+    		adminDealOfDayResponse.setErrorMesg("Deal of Day product is not found");
+    		return adminDealOfDayResponse;
+	    }
+    	
+    	MerchantStore store=merchantStoreService.getMerchantStore(MerchantStore.DEFAULT_STORE);
+	    
+    	com.salesmanager.shop.admin.model.catalog.Product product = new com.salesmanager.shop.admin.model.catalog.Product();
+    	
+     	product.setProduct(dbProduct);
+    	
+	    ProductAvailability productAvailability = null;
+		ProductPrice pPrice = null;
+	    Set<ProductAvailability> availabilities = dbProduct.getAvailabilities();
+	    
+	    if(availabilities!=null && availabilities.size()>0)
+	    {
+			
+			for(ProductAvailability availability : availabilities)
+			{
+				if(availability.getRegion().equals(com.salesmanager.core.business.constants.Constants.ALL_REGIONS))
+				 {
+					productAvailability = availability;
+					
+					Set<ProductPrice> prices = availability.getPrices();
+					for(ProductPrice price : prices)
+					{
+						if(price.isDefaultPrice()) {
+							pPrice = price;
+							product.setProductPrice(priceUtil.getAdminFormatedAmount(store, pPrice.getProductPriceAmount()));
+						}
+						if(adminDealOfDayReq.getTitle().equals("dealOfDay")) {
+							if(adminDealOfDayReq.getStatus().equals("Y")) { 
+								price.setDealOfDay("Y");
+								price.setProductPriceSpecialStartDate(adminDealOfDayReq.getStartDate());
+								price.setProductPriceSpecialEndDate(adminDealOfDayReq.getEndDate());
+								productPrice.saveOrUpdate(price);
+								adminDealOfDayResponse.setSuccessMsg("DealOfDay is set successfully");
+							}
+							if(adminDealOfDayReq.getStatus().equals("N")) {
+								price.setDealOfDay("N");
+								productPrice.saveOrUpdate(price);
+								adminDealOfDayResponse.setSuccessMsg("Product is disabled from DealOfDay");
+							}
+							
+						}
+						
+				}
+			}
+		}
+			
+     }
+		return adminDealOfDayResponse;
+  }
+    
 }
