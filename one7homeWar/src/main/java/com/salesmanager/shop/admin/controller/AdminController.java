@@ -684,12 +684,22 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
 							product.setProductPrice(priceUtil.getAdminFormatedAmount(store, pPrice.getProductPriceAmount()));
 						}
 						if(adminDealOfDayReq.getTitle().equals("dealOfDay")) {
-							if(adminDealOfDayReq.getStatus().equals("Y")) { 
+							if(adminDealOfDayReq.getStatus().equals("Y")) {
+								//Checking DealOfDay product which is available in the given date  
+								List<Product> dodProducts = productService.getDealOfDay(adminDealOfDayReq.getStartDate(),adminDealOfDayReq.getEndDate(),adminDealOfDayReq.getStatus());
+								System.out.println(dodProducts);
+								if(dodProducts!=null && !(dodProducts.isEmpty())) {
+									adminDealOfDayResponse.setErrorMesg("Please provide diffrent date to set DealOfDay");
+									return adminDealOfDayResponse;
+								}
+								else {
+							    // if no product is available in the specified date, then upadte the product in dealofday 
 								price.setDealOfDay("Y");
 								price.setProductPriceSpecialStartDate(adminDealOfDayReq.getStartDate());
 								price.setProductPriceSpecialEndDate(adminDealOfDayReq.getEndDate());
 								productPrice.saveOrUpdate(price);
 								adminDealOfDayResponse.setSuccessMsg("DealOfDay is set successfully");
+								}
 							}
 							if(adminDealOfDayReq.getStatus().equals("N")) {
 								price.setDealOfDay("N");

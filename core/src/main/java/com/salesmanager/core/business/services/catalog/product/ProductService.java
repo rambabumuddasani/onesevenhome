@@ -1,6 +1,7 @@
 package com.salesmanager.core.business.services.catalog.product;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -61,5 +62,8 @@ public interface ProductService extends SalesManagerEntityService<Long, Product>
 	List<Product> getProductsListByFiltersAndPrice(String categoryCode,List<Long> filterIds, BigDecimal minPrice, BigDecimal maxPrice,Double productRating);
 
 	public Product getProductAndProductReviewByProductId(Long productId) ;
+
+	List<Product> getDealOfDay(Date startDate, Date endDate, String status);
+
 }
 	

@@ -374,7 +374,9 @@ public class ShoppingCartFacadeImpl
                     //shoppingCartService.saveOrUpdate( cartModel );
 
                     cartModel = getCartModel( cartId,store );
-
+                    if(cartModel == null){
+                    	return new ShoppingCartData();
+                    }
 
                     ShoppingCartDataPopulator shoppingCartDataPopulator = new ShoppingCartDataPopulator();
                     shoppingCartDataPopulator.setShoppingCartCalculationService( shoppingCartCalculationService );
