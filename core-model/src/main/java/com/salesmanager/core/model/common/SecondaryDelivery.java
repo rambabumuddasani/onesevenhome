@@ -11,49 +11,45 @@ import com.salesmanager.core.model.reference.country.Country;
 import com.salesmanager.core.model.reference.zone.Zone;
 
 @Embeddable
-public class Delivery {
+public class SecondaryDelivery {
 	
-	@Column (name ="DELIVERY_LAST_NAME", length=64)
+	@Column (name ="DELIVERY_LAST_NAME_2", length=64)
 	private String lastName;
 
-	@Column (name ="DELIVERY_FIRST_NAME", length=64)
+	@Column (name ="DELIVERY_FIRST_NAME_2", length=64)
 	private String firstName;
 
-	@Column (name ="DELIVERY_COMPANY", length=100)
+	@Column (name ="DELIVERY_COMPANY_2", length=100)
 	private String company;
 	
-	@Column (name ="DELIVERY_STREET_ADDRESS", length=256)
+	@Column (name ="DELIVERY_STREET_ADDRESS_2", length=256)
 	private String address;
 
-	@Column (name ="DELIVERY_CITY", length=100)
+	@Column (name ="DELIVERY_CITY_2", length=100)
 	private String city;
 	
-	@Column (name ="DELIVERY_POSTCODE", length=20)
+	@Column (name ="DELIVERY_POSTCODE_2", length=20)
 	private String postalCode;
 	
-	@Column (name ="DELIVERY_STATE", length=100)
+	@Column (name ="DELIVERY_STATE_2", length=100)
 	private String state;
 	
-	@Column(name="DELIVERY_TELEPHONE", length=32)
+	@Column(name="DELIVERY_TELEPHONE_2", length=32)
 	private String telephone;
 	
 	@ManyToOne(fetch = FetchType.EAGER, targetEntity = Country.class)
-	@JoinColumn(name="DELIVERY_COUNTRY_ID", nullable=true)
+	@JoinColumn(name="DELIVERY_COUNTRY_ID_2", nullable=true)
 	private Country country;
-	
 
 	@ManyToOne(fetch = FetchType.EAGER, targetEntity = Zone.class)
-	@JoinColumn(name="DELIVERY_ZONE_ID", nullable=true)
+	@JoinColumn(name="DELIVERY_ZONE_ID_2", nullable=true)
 	private Zone zone;
 	
 	@Transient
 	private String latitude = null;
 	
-
-
 	@Transient
 	private String longitude = null;
-
 
 	public String getCompany() {
 		return company;

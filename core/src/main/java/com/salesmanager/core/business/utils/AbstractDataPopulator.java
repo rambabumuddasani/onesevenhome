@@ -6,6 +6,7 @@ package com.salesmanager.core.business.utils;
 import java.util.Locale;
 
 import com.salesmanager.core.business.exception.ConversionException;
+import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
 
@@ -35,7 +36,7 @@ public abstract class AbstractDataPopulator<Source,Target> implements DataPopula
 	}
 	
 	protected abstract Target createTarget();
-
+	
    
 
 }

@@ -29,7 +29,6 @@ import javax.persistence.Transient;
 import javax.validation.Valid;
 
 import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -37,6 +36,7 @@ import com.salesmanager.core.constants.SchemaConstant;
 import com.salesmanager.core.model.catalog.product.review.ProductReview;
 import com.salesmanager.core.model.common.Billing;
 import com.salesmanager.core.model.common.Delivery;
+import com.salesmanager.core.model.common.SecondaryDelivery;
 import com.salesmanager.core.model.common.VendorAttributes;
 import com.salesmanager.core.model.customer.attribute.CustomerAttribute;
 import com.salesmanager.core.model.generic.SalesManagerEntity;
@@ -112,9 +112,11 @@ public class Customer extends SalesManagerEntity<Long, Customer> {
 	@JoinColumn(name="MERCHANT_ID", nullable=false)
 	private MerchantStore merchantStore;
 	
-
 	@Embedded
 	private Delivery delivery = null;
+
+	@Embedded
+	private SecondaryDelivery secondaryDelivery = null;
 	
 	@Valid
 	@Embedded
@@ -387,6 +389,14 @@ public class Customer extends SalesManagerEntity<Long, Customer> {
 
 	public void setIsVendorActivated(String isVendorActivated) {
 		this.isVendorActivated = isVendorActivated;
+	}
+
+	public SecondaryDelivery getSecondaryDelivery() {
+		return secondaryDelivery;
+	}
+
+	public void setSecondaryDelivery(SecondaryDelivery delivery2) {
+		this.secondaryDelivery = delivery2;
 	}
 
 	

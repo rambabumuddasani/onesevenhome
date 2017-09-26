@@ -24,13 +24,13 @@ public class Address implements Serializable {
 	private String phone;
 	private String address;
 	private String city;
-	
-
 	private String postalCode;
-	
-
+	private String area;
 	private String stateProvince;
 	private boolean billingAddress;
+
+	private boolean deliveryAddress;
+	private boolean secondaryDeliveryAddress;
 	
 	private String latitude;
 	private String longitude;
@@ -40,6 +40,13 @@ public class Address implements Serializable {
 	//@NotEmpty(message="{NotEmpty.customer.billing.country}")
 	private String country;//code
 	
+	public boolean isDeliveryAddress() {
+		return deliveryAddress;
+	}
+
+	public void setDeliveryAddress(boolean deliveryAddress1) {
+		this.deliveryAddress = deliveryAddress1;
+	}
 
 
 	public void setStateProvince(String stateProvince) {
@@ -158,6 +165,22 @@ public class Address implements Serializable {
 
 	public void setLongitude(String longitude) {
 		this.longitude = longitude;
+	}
+
+	public boolean isSecondaryDeliveryAddress() {
+		return secondaryDeliveryAddress;
+	}
+
+	public void setSecondaryDeliveryAddress(boolean secondaryDeliveryAddress) {
+		this.secondaryDeliveryAddress = secondaryDeliveryAddress;
+	}
+
+	public String getArea() {
+		return area;
+	}
+
+	public void setArea(String area) {
+		this.area = area;
 	}
 
 }

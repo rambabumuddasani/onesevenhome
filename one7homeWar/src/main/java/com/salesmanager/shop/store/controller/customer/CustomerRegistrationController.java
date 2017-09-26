@@ -201,7 +201,7 @@ public class CustomerRegistrationController extends AbstractController {
             if ( !validateCaptcha )
             {
                 LOGGER.debug( "Captcha response does not matched" );
-    			FieldError error = new FieldError("captchaChallengeField","captchaChallengeField",messages.getMessage("validaion.recaptcha.not.matched", locale));
+    			FieldError error = new FieldError("captcrehaChallengeField","captchaChallengeField",messages.getMessage("validaion.recaptcha.not.matched", locale));
     			bindingResult.addError(error);
             }
         }
@@ -509,7 +509,7 @@ public class CustomerRegistrationController extends AbstractController {
         address.setCity(customerRequest.getCity());
         address.setStateProvince(customerRequest.getState());
         address.setPhone(customerRequest.getPhone());
-        //address.setBillingAddress(true);
+        address.setBillingAddress(true);
         customer.setArea(customerRequest.getArea());
         String dobStr = customerRequest.getDob();        
         if(StringUtils.isNotBlank(dobStr)){
@@ -610,15 +610,15 @@ public class CustomerRegistrationController extends AbstractController {
     	billing.setAddress(vendorRequest.getVendorOfficeAddress());
     	billing.setPhone(vendorRequest.getVendorTelephone());
     	billing.setCountry("IN");
-    	
-    	Address delivery = new Address();
+    	billing.setBillingAddress(true);
+/*    	Address delivery = new Address();
     	delivery.setFirstName(vendorRequest.getVendorName());
     	delivery.setLastName(vendorRequest.getVendorName());
     	delivery.setAddress(vendorRequest.getVendorOfficeAddress());
     	delivery.setPhone(vendorRequest.getVendorTelephone());
-
+*/
     	customer.setBilling(billing);
-    	customer.setDelivery(delivery);
+    	//customer.setDelivery(delivery);
     	customer.setCustomerType("1");
 
         MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");  //i will come back here
@@ -995,8 +995,9 @@ public class CustomerRegistrationController extends AbstractController {
     	billing.setPostalCode(customerRequest.getPostalCode());
     	billing.setPhone(customerRequest.getPhone());
     	billing.setCountry("IN");
-    	
-    	Address delivery = new Address();
+    	billing.setBillingAddress(true);
+
+/*    	Address delivery = new Address();
     	delivery.setFirstName(customerRequest.getFirstName());
     	delivery.setLastName(customerRequest.getLastName());
     	delivery.setAddress(customerRequest.getAddress());
@@ -1004,9 +1005,9 @@ public class CustomerRegistrationController extends AbstractController {
     	delivery.setStateProvince(customerRequest.getState());
     	delivery.setPostalCode(customerRequest.getPostalCode());
     	delivery.setPhone(customerRequest.getPhone());
-
+*/
     	customer.setBilling(billing);
-    	customer.setDelivery(delivery);
+    	//customer.setDelivery(delivery);
     	customer.setCustomerType("0");
     	
     	final Locale locale  = new Locale("en");
@@ -1166,7 +1167,6 @@ public class CustomerRegistrationController extends AbstractController {
         customerResponse.setSuccessMessage("Vendor profile updated successfully");
         customerResponse.setStatus(TRUE);
         return customerResponse; 
-		
 	}
 	
 }

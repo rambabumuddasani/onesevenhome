@@ -163,7 +163,7 @@ public class CustomerPopulator extends
 					delivery.setZone(zoneDescription);
 				}
 				target.setDelivery(delivery);
-			}
+				}
 			
 			if(target.getDelivery() ==null && source.getDelivery()!=null){
 			    LOG.info( "Setting default value for delivery" );

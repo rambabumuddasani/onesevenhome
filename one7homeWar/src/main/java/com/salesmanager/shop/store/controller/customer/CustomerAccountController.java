@@ -1,36 +1,18 @@
 package com.salesmanager.shop.store.controller.customer;
 
-import com.salesmanager.core.business.exception.ServiceException;
-import com.salesmanager.core.business.services.customer.CustomerService;
-import com.salesmanager.core.business.services.customer.attribute.CustomerAttributeService;
-import com.salesmanager.core.business.services.customer.attribute.CustomerOptionService;
-import com.salesmanager.core.business.services.customer.attribute.CustomerOptionSetService;
-import com.salesmanager.core.business.services.customer.attribute.CustomerOptionValueService;
-import com.salesmanager.core.business.services.order.OrderService;
-import com.salesmanager.core.business.services.reference.country.CountryService;
-import com.salesmanager.core.business.services.reference.language.LanguageService;
-import com.salesmanager.core.business.services.reference.zone.ZoneService;
-import com.salesmanager.core.business.utils.ajax.AjaxResponse;
-import com.salesmanager.core.model.customer.Customer;
-import com.salesmanager.core.model.customer.attribute.CustomerAttribute;
-import com.salesmanager.core.model.customer.attribute.CustomerOptionType;
-import com.salesmanager.core.model.merchant.MerchantStore;
-import com.salesmanager.core.model.reference.country.Country;
-import com.salesmanager.core.model.reference.language.Language;
-import com.salesmanager.shop.constants.Constants;
-import com.salesmanager.shop.model.customer.Address;
-import com.salesmanager.shop.model.customer.CustomerEntity;
-import com.salesmanager.shop.model.customer.CustomerPassword;
-import com.salesmanager.shop.model.customer.ReadableCustomer;
-import com.salesmanager.shop.populator.customer.ReadableCustomerPopulator;
-import com.salesmanager.shop.store.controller.AbstractController;
-import com.salesmanager.shop.store.controller.ControllerConstants;
-import com.salesmanager.shop.store.controller.customer.facade.CustomerFacade;
-import com.salesmanager.shop.store.controller.order.facade.OrderFacade;
-import com.salesmanager.shop.utils.EmailTemplatesUtils;
-import com.salesmanager.shop.utils.LabelUtils;
-import com.salesmanager.shop.utils.LanguageUtils;
-import com.salesmanager.shop.utils.LocaleUtils;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,13 +28,51 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import java.util.*;
+import com.salesmanager.core.business.exception.ServiceException;
+import com.salesmanager.core.business.services.customer.CustomerService;
+import com.salesmanager.core.business.services.customer.attribute.CustomerAttributeService;
+import com.salesmanager.core.business.services.customer.attribute.CustomerOptionService;
+import com.salesmanager.core.business.services.customer.attribute.CustomerOptionSetService;
+import com.salesmanager.core.business.services.customer.attribute.CustomerOptionValueService;
+import com.salesmanager.core.business.services.merchant.MerchantStoreService;
+import com.salesmanager.core.business.services.order.OrderService;
+import com.salesmanager.core.business.services.reference.country.CountryService;
+import com.salesmanager.core.business.services.reference.language.LanguageService;
+import com.salesmanager.core.business.services.reference.zone.ZoneService;
+import com.salesmanager.core.business.utils.ajax.AjaxResponse;
+import com.salesmanager.core.model.common.Billing;
+import com.salesmanager.core.model.common.Delivery;
+import com.salesmanager.core.model.common.SecondaryDelivery;
+import com.salesmanager.core.model.customer.Customer;
+import com.salesmanager.core.model.customer.attribute.CustomerAttribute;
+import com.salesmanager.core.model.customer.attribute.CustomerOptionType;
+import com.salesmanager.core.model.merchant.MerchantStore;
+import com.salesmanager.core.model.reference.country.Country;
+import com.salesmanager.core.model.reference.language.Language;
+import com.salesmanager.shop.constants.Constants;
+import com.salesmanager.shop.model.customer.Address;
+import com.salesmanager.shop.model.customer.AddressResponse;
+import com.salesmanager.shop.model.customer.CustomerEntity;
+import com.salesmanager.shop.model.customer.CustomerPassword;
+import com.salesmanager.shop.model.customer.ReadableAddress;
+import com.salesmanager.shop.model.customer.ReadableCustomer;
+import com.salesmanager.shop.populator.customer.ReadableCustomerPopulator;
+import com.salesmanager.shop.store.controller.AbstractController;
+import com.salesmanager.shop.store.controller.ControllerConstants;
+import com.salesmanager.shop.store.controller.customer.facade.CustomerFacade;
+import com.salesmanager.shop.store.controller.order.facade.OrderFacade;
+import com.salesmanager.shop.utils.EmailTemplatesUtils;
+import com.salesmanager.shop.utils.LabelUtils;
+import com.salesmanager.shop.utils.LanguageUtils;
+import com.salesmanager.shop.utils.LocaleUtils;
 
 /**
  * Entry point for logged in customers
@@ -115,6 +135,8 @@ public class CustomerAccountController extends AbstractController {
 	@Inject
 	private LabelUtils messages;
 
+    @Inject
+    MerchantStoreService merchantStoreService ;
 
 	
 	/**
@@ -477,8 +499,6 @@ public class CustomerAccountController extends AbstractController {
     		return "redirect:/"+Constants.SHOP_URI;
     	}
         
-        
-        
         Address address=customerFacade.getAddress( customer.getId(), store, billingAddress );
         model.addAttribute( "address", address);
         model.addAttribute( "customerId", customer.getId() );
@@ -489,43 +509,204 @@ public class CustomerAccountController extends AbstractController {
     
 	//@PreAuthorize("hasRole('AUTH_CUSTOMER')")
 
-    @RequestMapping(value="/updateAddress/{customerId}", method={RequestMethod.POST})
+    @RequestMapping(value="/updateShippingAddress/{customerId}", method={RequestMethod.POST})
     @ResponseBody
-    public String updateCustomerAddress(@RequestBody
-                                        Address address,@PathVariable String customerId,  final HttpServletRequest request,
-                              @RequestParam(value = "billingAddress", required = false) Boolean billingAddress) throws Exception {
-        MerchantStore store = getSessionAttribute(Constants.MERCHANT_STORE, request);
+    public AddressResponse updateCustomerAddress(@RequestBody
+                                        Address address,@PathVariable String customerId,  final HttpServletRequest request) throws Exception {
+    	AddressResponse addressResponse = new AddressResponse();
+        MerchantStore store = merchantStoreService.getByCode("DEFAULT");;
 		//Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		Customer customer = customerService.getById(Long.parseLong(customerId));
-    	/*if(auth != null &&
-        		 request.isUserInRole("AUTH_CUSTOMER")) {
-    		customer = customerFacade.getCustomerByUserName(auth.getName(), store);
-
-        }*/    	
-    	//StringBuilder template = new StringBuilder().append(ControllerConstants.Tiles.Customer.EditAddress).append(".").append(store.getStoreTemplate());
     	if(customer==null) {
-    		return "customer not found error";
+	    		return new AddressResponse();
     	}
+		addressResponse.setCustomerName(customer.getNick());
     	
-/*    	model.addAttribute( "address", address);
-        model.addAttribute( "customerId", customer.getId() );
-*/        
-        
-/*        if(bindingResult.hasErrors()){
-            LOGGER.info( "found {} error(s) while validating  customer address ",
-                         bindingResult.getErrorCount() );
-            return template.toString();
-        }
-*/        
         Language language = getSessionAttribute(Constants.LANGUAGE, request);
         customerFacade.updateAddress( customer, store, address, language);
         
-        Customer c = customerService.getById(customer.getId());
-		super.setSessionAttribute(Constants.CUSTOMER, c, request);
-        //model.addAttribute("success", "success");
-        return "update success";
+        Customer customerEntity = customerService.getById(customer.getId());
+        List<ReadableAddress> shippingAddrList = new ArrayList<>();
+        if(customerEntity.getBilling() != null){
+        	ReadableAddress billingAddr = new ReadableAddress();
+        	Billing bilAddr = customerEntity.getBilling();
+        	billingAddr.setAddress(bilAddr.getAddress());
+        	billingAddr.setArea(customerEntity.getArea());
+        	billingAddr.setCity(bilAddr.getCity());
+        	billingAddr.setCompany(bilAddr.getCompany());
+        	billingAddr.setCountry("India");
+        	billingAddr.setPhone(bilAddr.getTelephone());
+        	billingAddr.setPostalCode(bilAddr.getPostalCode());
+        	billingAddr.setState(bilAddr.getState());
+        	billingAddr.setPreferenceOrder("1");
+        	shippingAddrList.add(billingAddr);
+        }
+        
+        if(customerEntity.getDelivery() != null){
+        	ReadableAddress deliveryAddr = new ReadableAddress();
+        	Delivery delAddr = customerEntity.getDelivery();
+        	deliveryAddr.setAddress(delAddr.getAddress());
+        	deliveryAddr.setArea(customerEntity.getArea());
+        	deliveryAddr.setCity(delAddr.getCity());
+        	deliveryAddr.setCompany(delAddr.getCompany());
+        	deliveryAddr.setCountry("India");
+        	deliveryAddr.setPhone(delAddr.getTelephone());
+        	deliveryAddr.setPostalCode(delAddr.getPostalCode());
+        	deliveryAddr.setState(delAddr.getState());
+        	deliveryAddr.setPreferenceOrder("2");
+        	shippingAddrList.add(deliveryAddr);
+        }
+
+        if(customerEntity.getSecondaryDelivery() != null){
+        	ReadableAddress secAddr = new ReadableAddress();
+        	SecondaryDelivery secondaryDelAddr = customerEntity.getSecondaryDelivery();
+        	secAddr.setAddress(secondaryDelAddr.getAddress());	
+        	secAddr.setArea(customerEntity.getArea());
+        	secAddr.setCity(secondaryDelAddr.getCity());
+        	secAddr.setCompany(secondaryDelAddr.getCompany());
+        	secAddr.setCountry("India");
+        	secAddr.setPhone(secondaryDelAddr.getTelephone());
+        	secAddr.setPostalCode(secondaryDelAddr.getPostalCode());
+        	secAddr.setState(secondaryDelAddr.getState());
+        	secAddr.setPreferenceOrder("3");
+        	shippingAddrList.add(secAddr);
+        }
+    	addressResponse.setShippingAddress(shippingAddrList);
+        System.out.println(customerEntity.getBilling());
+        System.out.println(customerEntity.getDelivery());
+        System.out.println(customerEntity.getSecondaryDelivery());
+		super.setSessionAttribute(Constants.CUSTOMER, customerEntity, request);
+        return addressResponse;
     }
+
     
+    @RequestMapping(value="/displayShippingAddress/{customerId}", method={RequestMethod.GET})
+    @ResponseBody
+    public AddressResponse displayShippingAddress(@PathVariable String customerId,  final HttpServletRequest request) throws Exception {
+    	AddressResponse addressResponse = new AddressResponse();
+		Customer customer = customerService.getById(Long.parseLong(customerId));
+		if(customer==null) {
+	    		return new AddressResponse();
+    	}
+		addressResponse.setCustomerName(customer.getNick());
+		       
+        Customer customerEntity = customerService.getById(customer.getId());
+        List<ReadableAddress> shippingAddrList = new ArrayList<>();
+        if(customerEntity.getBilling() != null){
+        	ReadableAddress billingAddr = new ReadableAddress();
+        	Billing bilAddr = customerEntity.getBilling();
+        	billingAddr.setAddress(bilAddr.getAddress());
+        	billingAddr.setArea(customerEntity.getArea());
+        	billingAddr.setCity(bilAddr.getCity());
+        	billingAddr.setCompany(bilAddr.getCompany());
+        	billingAddr.setCountry("India");
+        	billingAddr.setPhone(bilAddr.getTelephone());
+        	billingAddr.setPostalCode(bilAddr.getPostalCode());
+        	billingAddr.setState(bilAddr.getState());
+        	billingAddr.setPreferenceOrder("1");
+        	shippingAddrList.add(billingAddr);
+        }
+        
+        if(customerEntity.getDelivery() != null){
+        	ReadableAddress deliveryAddr = new ReadableAddress();
+        	Delivery delAddr = customerEntity.getDelivery();
+        	deliveryAddr.setAddress(delAddr.getAddress());
+        	deliveryAddr.setArea(customerEntity.getArea());
+        	deliveryAddr.setCity(delAddr.getCity());
+        	deliveryAddr.setCompany(delAddr.getCompany());
+        	deliveryAddr.setCountry("India");
+        	deliveryAddr.setPhone(delAddr.getTelephone());
+        	deliveryAddr.setPostalCode(delAddr.getPostalCode());
+        	deliveryAddr.setState(delAddr.getState());
+        	deliveryAddr.setPreferenceOrder("2");
+        	shippingAddrList.add(deliveryAddr);
+        }
+
+        if(customerEntity.getSecondaryDelivery() != null){
+        	ReadableAddress secAddr = new ReadableAddress();
+        	SecondaryDelivery secondaryDelAddr = customerEntity.getSecondaryDelivery();
+        	secAddr.setAddress(secondaryDelAddr.getAddress());	
+        	secAddr.setArea(customerEntity.getArea());
+        	secAddr.setCity(secondaryDelAddr.getCity());
+        	secAddr.setCompany(secondaryDelAddr.getCompany());
+        	secAddr.setCountry("India");
+        	secAddr.setPhone(secondaryDelAddr.getTelephone());
+        	secAddr.setPostalCode(secondaryDelAddr.getPostalCode());
+        	secAddr.setState(secondaryDelAddr.getState());
+        	secAddr.setPreferenceOrder("3");
+        	shippingAddrList.add(secAddr);
+        }
+    	addressResponse.setShippingAddress(shippingAddrList);
+		super.setSessionAttribute(Constants.CUSTOMER, customerEntity, request);
+        return addressResponse;
+    }
+
+    @RequestMapping(value="/removeShippingAddress/{customerId}", method={RequestMethod.GET})
+    @ResponseBody
+    public AddressResponse removeShippingAddress(@PathVariable String customerId,  @RequestParam(value = "addressPref", defaultValue="3") String addressPreference, final HttpServletRequest request) throws Exception {
+    	AddressResponse addressResponse = new AddressResponse();
+		Customer customerEntity = customerService.getById(Long.parseLong(customerId));
+    	if(customerEntity==null ) {
+	    		return new AddressResponse();
+    	}
+		addressResponse.setCustomerName(customerEntity.getNick());
+		  this.customerService.saveOrUpdate( customerEntity );
+        if("2".equals(addressPreference)){
+        	customerEntity.setDelivery(null);
+        }else if("3".equals(addressPreference)){
+        	customerEntity.setSecondaryDelivery(null);
+        }
+        customerEntity = customerService.getById(customerEntity.getId()); // refresh the customer object
+        List<ReadableAddress> shippingAddrList = new ArrayList<>();
+        if(customerEntity.getBilling() != null){
+        	ReadableAddress billingAddr = new ReadableAddress();
+        	Billing bilAddr = customerEntity.getBilling();
+        	billingAddr.setAddress(bilAddr.getAddress());
+        	billingAddr.setArea(customerEntity.getArea());
+        	billingAddr.setCity(bilAddr.getCity());
+        	billingAddr.setCompany(bilAddr.getCompany());
+        	billingAddr.setCountry("India");
+        	billingAddr.setPhone(bilAddr.getTelephone());
+        	billingAddr.setPostalCode(bilAddr.getPostalCode());
+        	billingAddr.setState(bilAddr.getState());
+        	billingAddr.setPreferenceOrder("1");
+        	shippingAddrList.add(billingAddr);
+        }
+        
+        if(customerEntity.getDelivery() != null){
+        	ReadableAddress deliveryAddr = new ReadableAddress();
+        	Delivery delAddr = customerEntity.getDelivery();
+        	deliveryAddr.setAddress(delAddr.getAddress());
+        	deliveryAddr.setArea(customerEntity.getArea());
+        	deliveryAddr.setCity(delAddr.getCity());
+        	deliveryAddr.setCompany(delAddr.getCompany());
+        	deliveryAddr.setCountry("India");
+        	deliveryAddr.setPhone(delAddr.getTelephone());
+        	deliveryAddr.setPostalCode(delAddr.getPostalCode());
+        	deliveryAddr.setState(delAddr.getState());
+        	deliveryAddr.setPreferenceOrder("2");
+        	shippingAddrList.add(deliveryAddr);
+        }
+
+        if(customerEntity.getSecondaryDelivery() != null){
+        	ReadableAddress secAddr = new ReadableAddress();
+        	SecondaryDelivery secondaryDelAddr = customerEntity.getSecondaryDelivery();
+        	secAddr.setAddress(secondaryDelAddr.getAddress());	
+        	secAddr.setArea(customerEntity.getArea());
+        	secAddr.setCity(secondaryDelAddr.getCity());
+        	secAddr.setCompany(secondaryDelAddr.getCompany());
+        	secAddr.setCountry("India");
+        	secAddr.setPhone(secondaryDelAddr.getTelephone());
+        	secAddr.setPostalCode(secondaryDelAddr.getPostalCode());
+        	secAddr.setState(secondaryDelAddr.getState());
+        	secAddr.setPreferenceOrder("3");
+        	shippingAddrList.add(secAddr);
+        }
+    	addressResponse.setShippingAddress(shippingAddrList);
+		super.setSessionAttribute(Constants.CUSTOMER, customerEntity, request);
+        return addressResponse;
+    }
+
     
 	@ModelAttribute("countries")
 	protected List<Country> getCountries(final HttpServletRequest request){

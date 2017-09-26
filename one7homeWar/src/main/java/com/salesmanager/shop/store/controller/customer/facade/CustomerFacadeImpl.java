@@ -441,7 +441,6 @@ public class CustomerFacadeImpl implements CustomerFacade
             address.setBillingAddress( true );
             return address;
         }
-        
         LOG.info( "getting Delivery address.." );
         CustomerDeliveryAddressPopulator deliveryAddressPopulator=new CustomerDeliveryAddressPopulator();
         return deliveryAddressPopulator.populate( customerModel, merchantStore, merchantStore.getDefaultLanguage() );
@@ -453,7 +452,6 @@ public class CustomerFacadeImpl implements CustomerFacade
     public void updateAddress(Customer customerModel, MerchantStore merchantStore, Address address, final Language language )
         throws Exception
     {
-       
      //Customer customerModel=customerService.getById( userId );
        Map<String, Country> countriesMap = countryService.getCountriesMap( language );
        Country country = countriesMap.get( address.getCountry() );
@@ -464,26 +462,22 @@ public class CustomerFacadeImpl implements CustomerFacade
            throw new Exception( "Customer with given id does not exists" );           
        }
        if(address.isBillingAddress()){
-           LOG.info( "updating customer billing address..");
-           PersistableCustomerBillingAddressPopulator billingAddressPopulator=new PersistableCustomerBillingAddressPopulator();
-           customerModel= billingAddressPopulator.populate( address, customerModel, merchantStore, merchantStore.getDefaultLanguage() );
-           customerModel.getBilling().setCountry( country );
-           if(StringUtils.isNotBlank( address.getZone() )){
-               Zone zone = zoneService.getByCode(address.getZone());
-               if(zone==null) {
-                  throw new ConversionException("Unsuported zone code " + address.getZone());
-               }
-                   customerModel.getBilling().setZone( zone );
-                   customerModel.getBilling().setState(null);
-               
-           } else {
-        	   customerModel.getBilling().setZone(null);
-           }
-          
+           customerModel = updateBillingAddress(customerModel, merchantStore, address, country);          
        }
-       else{
+       else if(address.isDeliveryAddress()){
            LOG.info( "updating customer shipping address..");
-           PersistableCustomerShippingAddressPopulator shippingAddressPopulator=new PersistableCustomerShippingAddressPopulator();
+           customerModel = updateFirstDeliveryAddressOne(customerModel, merchantStore, address, country);           
+       }else { // which means this is deliveryAddress 2
+           customerModel = updateSecondaryDeliveryAddress(customerModel, merchantStore, address, country);           
+       }
+      // same update address with customer model
+       this.customerService.saveOrUpdate( customerModel );
+    }
+
+
+	private Customer updateFirstDeliveryAddressOne(Customer customerModel, MerchantStore merchantStore, Address address,
+			Country country) throws ConversionException {
+		PersistableCustomerSecondaryShippingAddressPopulator shippingAddressPopulator=new PersistableCustomerSecondaryShippingAddressPopulator();
            customerModel= shippingAddressPopulator.populate( address, customerModel, merchantStore, merchantStore.getDefaultLanguage() );
            customerModel.getDelivery().setCountry( country );
            if(StringUtils.isNotBlank( address.getZone() )){
@@ -498,14 +492,49 @@ public class CustomerFacadeImpl implements CustomerFacade
            } else {
         	   customerModel.getDelivery().setZone(null);
            }
-           
-       }
-  
-     
-      // same update address with customer model
-       this.customerService.saveOrUpdate( customerModel );
-       
-    }
+		return customerModel;
+	}
+
+	private Customer updateSecondaryDeliveryAddress(Customer customerModel, MerchantStore merchantStore, Address address,
+			Country country) throws ConversionException {
+		PersistableCustomerSecondaryShippingAddressPopulator shippingAddress2Populator=new PersistableCustomerSecondaryShippingAddressPopulator();
+           customerModel= shippingAddress2Populator.populate( address, customerModel, merchantStore, merchantStore.getDefaultLanguage() );
+           customerModel.getSecondaryDelivery().setCountry( country );
+           if(StringUtils.isNotBlank( address.getZone() )){
+               Zone zone = zoneService.getByCode(address.getZone());
+               if(zone==null) {
+                   throw new ConversionException("Unsuported zone code " + address.getZone());
+               }
+
+               customerModel.getSecondaryDelivery().setZone( zone );
+               customerModel.getSecondaryDelivery().setState(null);
+              
+           } else {
+        	   customerModel.getSecondaryDelivery().setZone(null);
+           }
+		return customerModel;
+	}
+
+
+	private Customer updateBillingAddress(Customer customerModel, MerchantStore merchantStore, Address address,
+			Country country) throws ConversionException {
+		LOG.info( "updating customer billing address..");
+           PersistableCustomerBillingAddressPopulator billingAddressPopulator=new PersistableCustomerBillingAddressPopulator();
+           customerModel= billingAddressPopulator.populate( address, customerModel, merchantStore, merchantStore.getDefaultLanguage() );
+           customerModel.getBilling().setCountry( country );
+           if(StringUtils.isNotBlank( address.getZone() )){
+               Zone zone = zoneService.getByCode(address.getZone());
+               if(zone==null) {
+            	   throw new ConversionException("Unsuported zone code " + address.getZone());
+               }
+                   customerModel.getBilling().setZone( zone );
+                   customerModel.getBilling().setState(null);
+               
+           } else {
+        	   customerModel.getBilling().setZone(null);
+           }
+		return customerModel;
+	}
     
 	@Override
 	public ReadableCustomer getCustomerById(final Long id, final MerchantStore merchantStore, final Language language) throws Exception {
@@ -513,12 +542,9 @@ public class CustomerFacadeImpl implements CustomerFacade
 		if(customerModel==null) {
 			return null;
 		}
-		
 		ReadableCustomer readableCustomer = new ReadableCustomer();
-		
 		ReadableCustomerPopulator customerPopulator = new ReadableCustomerPopulator();
 		customerPopulator.populate(customerModel,readableCustomer, merchantStore, language);
-		
 		return readableCustomer;
 	}
 
