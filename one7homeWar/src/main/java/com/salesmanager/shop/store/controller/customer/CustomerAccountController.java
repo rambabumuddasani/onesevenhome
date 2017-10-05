@@ -650,12 +650,15 @@ public class CustomerAccountController extends AbstractController {
 	    		return new AddressResponse();
     	}
 		addressResponse.setCustomerName(customerEntity.getNick());
-		  this.customerService.saveOrUpdate( customerEntity );
-        if("2".equals(addressPreference)){
+/*		if("1".equals(addressPreference)){
+        	customerEntity.setBilling(null);
+        }else */ 
+		if("2".equals(addressPreference)){
         	customerEntity.setDelivery(null);
         }else if("3".equals(addressPreference)){
         	customerEntity.setSecondaryDelivery(null);
         }
+	    this.customerService.saveOrUpdate( customerEntity );
         customerEntity = customerService.getById(customerEntity.getId()); // refresh the customer object
         List<ReadableAddress> shippingAddrList = new ArrayList<>();
         if(customerEntity.getBilling() != null){
