@@ -372,4 +372,16 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 		return productRepository.findDealOfDay(startDate,endDate,status);
 	}
 
+	@Override
+	public List<Product> getTodaysDeals(Date date) {
+		// Retrieves Deals for the particular date
+		return productRepository.findTodayDeals(date);
+	}
+
+	@Override
+	public List<Product> getAdminTodaysDeals() {
+		// Retrieves Deals from current date
+		return productRepository.getAdminTodaysDeals();
+	}
+
 }

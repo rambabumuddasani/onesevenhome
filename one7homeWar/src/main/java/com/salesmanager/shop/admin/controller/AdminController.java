@@ -1,7 +1,9 @@
 package com.salesmanager.shop.admin.controller;
 
 import java.math.BigDecimal;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -13,6 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -48,11 +51,15 @@ import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.product.vendor.VendorProduct;
 import com.salesmanager.core.model.user.User;
 import com.salesmanager.shop.admin.controller.products.PaginatedResponse;
+import com.salesmanager.shop.admin.controller.products.ProductResponse;
+import com.salesmanager.shop.admin.controller.products.TodaysDeals;
+import com.salesmanager.shop.controller.AbstractController;
+import com.salesmanager.shop.store.model.paging.PaginationData;
 import com.salesmanager.shop.utils.DateUtil;
 
 @Controller
 @CrossOrigin
-public class AdminController {
+public class AdminController extends AbstractController {
 	
 	@Inject
 	private MerchantStoreService merchantStoreService;
@@ -94,7 +101,7 @@ public class AdminController {
     @Inject
     private CustomerService customerService;
     
-    // Admin can can update store address
+    // Admin update store address
 	@RequestMapping(value="/admin/updatestore", method = RequestMethod.POST, 
 			produces = MediaType.APPLICATION_JSON_VALUE,consumes=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -112,6 +119,7 @@ public class AdminController {
 			adminUpdateStoreResponse.setErrorMessage("Error in updating Store");
 			adminUpdateStoreResponse.setStatus("false");
 		}
+		//update store
 	    merchantStore.setStorename(adminUpdateStoreRequest.getStoreName());
 	    merchantStore.setCode(adminUpdateStoreRequest.getStoreCode());
 	    merchantStore.setStorephone(adminUpdateStoreRequest.getStorePhone());
@@ -122,6 +130,14 @@ public class AdminController {
 	    merchantStore.setStorepostalcode(adminUpdateStoreRequest.getStorePostalCode());
 	    //merchantStore.setCountry(adminUpdateStoreRequest.getStoreCountry());
 	    
+	    System.out.println("adminUpdateStoreRequest.getStoreName()= "+adminUpdateStoreRequest.getStoreName());
+	    System.out.println("adminUpdateStoreRequest.getStoreCode()= "+adminUpdateStoreRequest.getStoreCode());
+	    System.out.println("adminUpdateStoreRequest.getStorePhone()= "+adminUpdateStoreRequest.getStorePhone());
+	    System.out.println("adminUpdateStoreRequest.getEmailAddress()= "+adminUpdateStoreRequest.getEmailAddress());
+	    System.out.println("adminUpdateStoreRequest.getStoreAddress()= "+adminUpdateStoreRequest.getStoreAddress());
+	    System.out.println("adminUpdateStoreRequest.getStoreCity()= "+adminUpdateStoreRequest.getStoreCity());
+	    System.out.println("adminUpdateStoreRequest.getStoreState()= "+adminUpdateStoreRequest.getStoreState());
+	    System.out.println("adminUpdateStoreRequest.getStorePostalCode()= "+adminUpdateStoreRequest.getStorePostalCode());
 	    try {
 			merchantStoreService.update(merchantStore);
 		} catch (ServiceException e) {
@@ -141,9 +157,10 @@ public class AdminController {
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public StoreInfoResponse getStoreInfo(HttpServletRequest request) {
-		
+		System.out.println("getStoreInfo: ");
 		StoreInfoResponse storeInfoResponse=new StoreInfoResponse();
 		try {
+			//getting store
 			MerchantStore merchantStore=merchantStoreService.getMerchantStore(MerchantStore.DEFAULT_STORE);
 	        System.out.println("merchantStore="+merchantStore);
 	       
@@ -157,6 +174,18 @@ public class AdminController {
 	        storeInfo.setStorePostalCode(merchantStore.getStorepostalcode());
 	        storeInfo.setStoreCountry(merchantStore.getCountry().getIsoCode());
 	        storeInfo.setStoreCode(merchantStore.getCode());
+	        
+	        System.out.println("merchantStore.getStorename()=="+merchantStore.getStorename());
+	        System.out.println("merchantStore.getStoreaddress()=="+merchantStore.getStoreaddress());
+	        System.out.println("merchantStore.getStoreEmailAddress()=="+merchantStore.getStoreEmailAddress());
+	        System.out.println("merchantStore.getStorephone()=="+merchantStore.getStorephone());
+	        System.out.println("merchantStore.getStorecity()=="+merchantStore.getStorecity());
+	        System.out.println("merchantStore.getStorestateprovince()=="+merchantStore.getStorestateprovince());
+	        System.out.println("merchantStore.getStorepostalcode()=="+merchantStore.getStorepostalcode());
+	        System.out.println("merchantStore.getCountry().getIsoCode()=="+merchantStore.getCountry().getIsoCode());
+	        System.out.println("merchantStore.getCode()=="+merchantStore.getCode());
+	        
+	        System.out.println("StoreInfo=  "+storeInfo);
 	        
 	        User user = userService.getById(1l);
 	        storeInfo.setAdminName(user.getAdminName());
@@ -181,14 +210,15 @@ public class AdminController {
 		    EditUserAdminResponse editUserAdminResponse = new EditUserAdminResponse();
 		    String stringId = editUserAdminRequest.getId();
 		    Long longId = Long.parseLong(stringId);
+		    //Getting admin by id
 			User dbUser = userService.getById(longId);
-			
+			// Checing admin null
 			if(dbUser==null) {
 				editUserAdminResponse.setErrorMessage("Admin is null for this id: "+longId);
 				editUserAdminResponse.setSucessMessage("false");
 				return editUserAdminResponse;
 			}
-			
+			// Update admin details
 			dbUser.setFirstName(editUserAdminRequest.getFirstName());
 			dbUser.setLastName(editUserAdminRequest.getLastName());
 			//Language  language = languageService.getByCode(editUserAdminRequest.getDefaultLang());
@@ -197,7 +227,7 @@ public class AdminController {
 			dbUser.setAdminEmail(editUserAdminRequest.getEmail());
 			MerchantStore store = merchantStoreService.getByCode(editUserAdminRequest.getStoreCode());
 			dbUser.setMerchantStore(store);
-			
+			// Saving admin details
 			userService.saveOrUpdate(dbUser);
 			
 			editUserAdminResponse.setSucessMessage("Admin profile updated successfully");
@@ -215,6 +245,7 @@ public class AdminController {
 		AdminListResponse  adminListResponse = new AdminListResponse();
 		List<UserVO> userList = new ArrayList<UserVO>();
 		MerchantStore store = merchantStoreService.getByCode(MerchantStore.DEFAULT_STORE);
+		//Getting list of admin for the store
 	    List<User> users = userService.listByStore(store);
 	    for(User user:users) {
 	       UserVO userVO = new UserVO();
@@ -225,18 +256,21 @@ public class AdminController {
 	       userVO.setFirstName(user.getFirstName());
 	       userVO.setLastName(user.getLastName());
 	       //userVO.setDefaultLang(user.getDefaultLanguage());
+	       System.out.println("userVO: "+userVO);
 	       userList.add(userVO);
 	    }
+	    System.out.println("userList :"+userList);
 	    adminListResponse.setAdminList(userList);
 		return adminListResponse;
 		
 	}
+	
 	// Admin password update
 	@RequestMapping(value="/admin/updatepassword", method=RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public UpdatePasswordResp changePassword(@RequestBody UpdatePasswordReq updatePasswordReq) throws Exception {
-		
+		System.out.println("changePassword: ");
 		UpdatePasswordResp updatePasswordResp = new UpdatePasswordResp();
 		String stringId = updatePasswordReq.getId();
 		Long longId = Long.parseLong(stringId);
@@ -247,6 +281,7 @@ public class AdminController {
 			updatePasswordResp.setStatus("false");
 			return updatePasswordResp;
 		}
+		//encoding password and update password
 		String pass = passwordEncoder.encode(updatePasswordReq.getNewPassword());
 		dbUser.setAdminPassword(pass);
 		userService.update(dbUser);	
@@ -260,6 +295,7 @@ public class AdminController {
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public AddProductResp addProducts(@RequestBody AddProductReq addProductReq) throws Exception {
+		System.out.println("addProducts: ");
 		AddProductResp addProductResp = new AddProductResp();
 		String productId = addProductReq.getProductId();
 		Long longId = Long.parseLong(productId);
@@ -282,6 +318,7 @@ public class AdminController {
 				}
 
 			}
+	    // Getting product availabilities
 	    ProductAvailability productAvailability = null;
 		ProductPrice pPrice = null;
 	    Set<ProductAvailability> availabilities = dbProduct.getAvailabilities();
@@ -296,16 +333,7 @@ public class AdminController {
 							pPrice = price;
 							product.setProductPrice(priceUtil.getAdminFormatedAmount(store, pPrice.getProductPriceAmount()));
 						}
-						/*if(isFeatureProduct(addProductReq.getIsfeatureProduct())) {
-						if(addProductReq.getStatus().equals("Y")) { 
-							price.setFeaturedProduct("N");
-							addProductResp.setStatusMessage("Product is added to feature product");
-						}
-						else {
-							price.setFeaturedProduct("Y");
-							addProductResp.setStatusMessage("Product is removed from feature product");
-					   }
-				      }*/
+						//checking for featureproduct
 						if(addProductReq.getTitle().equals("featureProduct")) {
 							if(addProductReq.getStatus().equals("Y")) { 
 								price.setFeaturedProduct("Y");
@@ -318,6 +346,7 @@ public class AdminController {
 								addProductResp.setStatusMessage("Product is removed from feature product");
 						   }
 						}
+						//checking new product
 						if(addProductReq.getTitle().equals("newProduct")) {
 							if(addProductReq.getStatus().equals("Y")) { 
 								price.setNewProduct("Y");
@@ -330,6 +359,7 @@ public class AdminController {
 								addProductResp.setStatusMessage("Product is removed from New Product");
 						   }
 						}
+						//checking recommended product
 						if(addProductReq.getTitle().equals("recommendedProduct")) {
 							if(addProductReq.getStatus().equals("Y")) { 
 								price.setRecommendedProduct("Y");
@@ -342,6 +372,7 @@ public class AdminController {
 								addProductResp.setStatusMessage("Product is removed Recommended Product");
 						   }
 						}
+						//checking recent bought
 						if(addProductReq.getTitle().equals("recentBought")) {
 							if(addProductReq.getStatus().equals("Y")) { 
 								price.setRecentlyBought("Y");
@@ -369,12 +400,13 @@ public class AdminController {
 		}
 		return false;
 	}*/
+	
     // Show new products, feature products, recommended and recent bought products in admin GUI
 	@RequestMapping(value="/admin/categories/{categoryCode}/{title}", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public List<AdminProductResponse> getProduct(@PathVariable String categoryCode,@PathVariable String title) throws Exception {
-		
+		System.out.println("getProduct : ");
 		AdminProductResponse adminProductResponse = new AdminProductResponse();
 
 		categoryCode = categoryCode.replaceAll("_", " ");
@@ -509,7 +541,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
 			
 			
 			product.setDateAvailable(DateUtil.formatDate(dbProduct.getDateAvailable()));
-			
+			if(product.getProductImage() != null)
 			adminProductResponse.setImageURL(product.getProductImage().getProductImageUrl());
 			if(isSpecial) {
 				adminProductResponse.setProductPrice(productPrice.getProductPriceAmount());
@@ -524,11 +556,11 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
 			adminProductResponse.setProductName(dbProduct.getProductDescription().getName());
 			//productResponse.setVendorName(dbProduct.getManufacturer().getCode());
 			
-			Set<ManufacturerDescription> manufacturerDescription =  dbProduct.getManufacturer().getDescriptions();
+			/*Set<ManufacturerDescription> manufacturerDescription =  dbProduct.getManufacturer().getDescriptions();
 			for(ManufacturerDescription description:manufacturerDescription){
 				adminProductResponse.setVendorName(description.getName());
 				adminProductResponse.setVendorLocation(description.getTitle());
-			}
+			}*/
 			
 		return adminProductResponse;
 	}
@@ -571,15 +603,17 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     		vendorProductVO.setProductName(vendorProduct.getProduct().getProductDescription().getName());
     		vproductList.add(vendorProductVO);
     	}
+    	System.out.println("Vendor productList: "+vproductList);
     	adminVendorProductResponse.setVendorProducts(vproductList);
     	return adminVendorProductResponse;
     	
     }
-    // To show vendor products under admin gui so that admin can approve vendor products 
+    
+    /*//show vendor products under admin gui so that admin can approve vendor products 
     @RequestMapping(value="/admin/vendor/products", method = RequestMethod.GET)
 	@ResponseBody
 	public AdminVendorProductResponse getVendorProducts() throws Exception {
-    	System.out.println("Inside getVendorProducts: ");
+    	System.out.println("getVendorProducts() : ");
     	AdminVendorProductResponse adminVendorProductResponse = new AdminVendorProductResponse();
     	List<VendorProduct> vendorProducts = vendorProductService.getVendorProducts();
     	if(vendorProducts==null) {
@@ -604,8 +638,51 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     	}
     	adminVendorProductResponse.setVendorProducts(vproductList);
     	return adminVendorProductResponse;
+    }*/
+    
+    // get vendor products with pagination
+    @RequestMapping(value="/admin/vendor/products", method = RequestMethod.GET)
+	@ResponseBody
+	public PaginatedResponse getVendorProductsPagination(@RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+    	PaginatedResponse paginatedResponse = new PaginatedResponse();
+    	System.out.println("Inside getVendorProducts: ");
+    	// Get vendor products are added by vendors to product list
+    	List<VendorProduct> vendorProducts = vendorProductService.getVendorProducts();
+    	if(vendorProducts==null) {
+    		paginatedResponse.setErrorMsg("Vendor products not found");
+    		return paginatedResponse;
+    	}
+    	System.out.println("VendorProducts: "+vendorProducts);
+    	List<VendorProductVO> vproductList = new ArrayList<VendorProductVO>();
+    	for(VendorProduct vendorProduct : vendorProducts) {
+    		System.out.println("vendorProduct :"+vendorProduct);
+    		VendorProductVO vendorProductVO = new VendorProductVO();
+    		vendorProductVO.setVendorProductId(vendorProduct.getId());
+    		vendorProductVO.setVendorId(vendorProduct.getCustomer().getId());
+    		System.out.println("vendorProduct.getCustomer().getId()"+vendorProduct.getCustomer().getId());
+    		if (!(vendorProduct.getCustomer().getVendorAttrs().getVendorName().equals(null))){
+    		vendorProductVO.setVendorName(vendorProduct.getCustomer().getVendorAttrs().getVendorName());
+    		}
+    		vendorProductVO.setProductId(vendorProduct.getProduct().getId());
+    		vendorProductVO.setProductName(vendorProduct.getProduct().getProductDescription().getName());
+    		//vendorProductVO.setDescription(vendorProduct.getProduct().getProductDescription().getDescription());
+    		vproductList.add(vendorProductVO);
+    	}
+    	System.out.println("Vendor productList: "+vproductList);
+    	//Pagination
+    	PaginationData paginaionData=createPaginaionData(page,size);
+    	calculatePaginaionData(paginaionData,size, vproductList.size());
+    	paginatedResponse.setPaginationData(paginaionData);
+		if(vproductList == null || vproductList.isEmpty() || vproductList.size() < paginaionData.getCountByPage()){
+			paginatedResponse.setResponseData(vproductList);
+			return paginatedResponse;
+		}
+    	List<VendorProductVO> paginatedResponses = vproductList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+    	paginatedResponse.setResponseData(paginatedResponses);
+		return paginatedResponse;
     }
-    // Admin approve products added by  different vendors
+    
+    // Admin approve products
     @RequestMapping(value="/admin/products/activate", method = RequestMethod.POST)
 	@ResponseBody
 	public ActivateProductResponse adminApproveProducts(@RequestBody ActivateProductRequest activateProductRequest) throws Exception {
@@ -613,11 +690,13 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     	ActivateProductResponse activateProductResponse = new ActivateProductResponse();
     	Long vendorProductId = activateProductRequest.getVendorProductId();
     	System.out.println("vendorProductId : "+vendorProductId);
+    	//getting vendor product to be approved by by admin
 	    VendorProduct vendorProduct = vendorProductService.getVendorProductById(vendorProductId);
     	if(vendorProduct==null) {
     		activateProductResponse.setErrorMesg("Vendor product not found");
     		return activateProductResponse;
     	}
+    	// Approving and updating vendor product
     	vendorProduct.setAdminActivatedDate(new Date());
     	vendorProduct.setAdminActivated(activateProductRequest.isStatus());
     	vendorProductService.update(vendorProduct);
@@ -645,13 +724,15 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     	// Get the product details based on the AdminDeal of the day request 
     	// This will get the product details, which need to be further updated with prices.
     	Long productId = adminDealOfDayReq.getProductId();
-    	
+    	Date startDate = adminDealOfDayReq.getProductPriceSpecialStartDate();
+    	Date endDate = adminDealOfDayReq.getProductPriceSpecialEndDate();
+    	String status = adminDealOfDayReq.getStatus();
     	/*String status = adminDealOfDayReq.getStatus();
     	String title = adminDealOfDayReq.getTitle();*/
     	
     	//Get the complete product details.
     	Product dbProduct = productService.getByProductId(productId);
-    	
+    	System.out.println("dbProduct : "+dbProduct);
     	if(dbProduct==null) {
     		adminDealOfDayResponse.setErrorMesg("Deal of Day product is not found");
     		return adminDealOfDayResponse;
@@ -683,20 +764,20 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
 							pPrice = price;
 							product.setProductPrice(priceUtil.getAdminFormatedAmount(store, pPrice.getProductPriceAmount()));
 						}
-						if(adminDealOfDayReq.getTitle().equals("dealOfDay")) {
+						
 							if(adminDealOfDayReq.getStatus().equals("Y")) {
 								//Checking DealOfDay product which is available in the given date  
-								List<Product> dodProducts = productService.getDealOfDay(adminDealOfDayReq.getStartDate(),adminDealOfDayReq.getEndDate(),adminDealOfDayReq.getStatus());
+								List<Product> dodProducts = productService.getDealOfDay(startDate,endDate,adminDealOfDayReq.getStatus());
 								System.out.println(dodProducts);
 								if(dodProducts!=null && !(dodProducts.isEmpty())) {
 									adminDealOfDayResponse.setErrorMesg("Please provide diffrent date to set DealOfDay");
 									return adminDealOfDayResponse;
 								}
 								else {
-							    // if no product is available in the specified date, then upadte the product in dealofday 
+							    // if no product is available in the specified date, then upadate the product in dealofday 
 								price.setDealOfDay("Y");
-								price.setProductPriceSpecialStartDate(adminDealOfDayReq.getStartDate());
-								price.setProductPriceSpecialEndDate(adminDealOfDayReq.getEndDate());
+								price.setProductPriceSpecialStartDate(adminDealOfDayReq.getProductPriceSpecialStartDate());
+								price.setProductPriceSpecialEndDate(adminDealOfDayReq.getProductPriceSpecialEndDate());
 								productPrice.saveOrUpdate(price);
 								adminDealOfDayResponse.setSuccessMsg("DealOfDay is set successfully");
 								}
@@ -707,7 +788,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
 								adminDealOfDayResponse.setSuccessMsg("Product is disabled from DealOfDay");
 							}
 							
-						}
+						
 						
 				}
 			}
@@ -716,5 +797,122 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
      }
 		return adminDealOfDayResponse;
   }
+    
+    // Admin Deal Management
+    // Retrieving all deals from current date and for particular date
+    @RequestMapping(value="/admin/getDeals", method = RequestMethod.POST, 
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public AdminTodaysDeals getDeals(@RequestBody AdminDealRequest adminDealRequest, @RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+		
+		System.out.println("getDeals ==");
+		
+		AdminTodaysDeals todaysDeals = new AdminTodaysDeals();
+		AdminDealProductResponse productResponse = new AdminDealProductResponse();
+		List<Product> tdProducts = null; 
+        if(adminDealRequest.getStatus().equals("ALL")) {
+        //Retrieves all Deals starting from current date
+		List<Product> dbProducts = productService.getAdminTodaysDeals();
+        // If no products found from db returning messsage
+		if(dbProducts==null) {
+    		todaysDeals.setErrorMesg("No Deals found");
+    		return todaysDeals;
+    	}
+		System.out.println("dbProducts"+dbProducts);
+		tdProducts = dbProducts;
+        }else {
+        	DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        	String cunvertCurrentDate = adminDealRequest.getStatus();
+        	Date date = new Date();
+        	date = df.parse(cunvertCurrentDate);
+        	System.out.println("Date :" +cunvertCurrentDate); 
+        	//Retrieves Deals for the particular date
+        	List<Product> dbProducts = productService.getTodaysDeals(date);
+        	// If no products found from db for particular date returning messsage
+        	if(dbProducts==null) {
+        		todaysDeals.setErrorMesg("No Deals found");
+        		return todaysDeals;
+        	}
+        	tdProducts = dbProducts;
+        }
+       
+        // Getting product details
+		List<AdminDealProductResponse> responses = new ArrayList<AdminDealProductResponse>();
+		for(Product product:tdProducts) {
+			productResponse = getProductDetails(product,true);
+			responses.add(productResponse);
+		}
+		if(responses == null || responses.isEmpty() || responses.size() < page){
+			todaysDeals.setTodaysDealsData(responses);
+			return todaysDeals;
+		}
+	    PaginationData paginaionData=createPaginaionData(page,size);
+    	calculatePaginaionData(paginaionData,size, responses.size());
+    	todaysDeals.setPaginationData(paginaionData);
+		List<AdminDealProductResponse> paginatedProdResponses = responses.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+		todaysDeals.setTodaysDealsData(paginatedProdResponses);
+		
+        return todaysDeals;
+    }   
+	
+   
+public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSpecial) throws Exception {
+		
+		System.out.println("merchantStoreService =="+merchantStoreService);
+		
+		AdminDealProductResponse productResponse = new AdminDealProductResponse();
+		try {
+		productResponse.setProductId(dbProduct.getId());
+		MerchantStore store=merchantStoreService.getMerchantStore(MerchantStore.DEFAULT_STORE);
+		
+		com.salesmanager.shop.admin.model.catalog.Product product = new com.salesmanager.shop.admin.model.catalog.Product();
+		List<ProductDescription> descriptions = new ArrayList<ProductDescription>();
+			
+			product.setProduct(dbProduct);
+			
+			ProductAvailability productAvailability = null;
+			ProductPrice productPrice = null;
+			//Getting Product Availabilities for the product retrieved from which we will get product price
+			Set<ProductAvailability> availabilities = dbProduct.getAvailabilities();
+			if(availabilities!=null && availabilities.size()>0) {
+				
+				for(ProductAvailability availability : availabilities) {
+					if(availability.getRegion().equals(com.salesmanager.core.business.constants.Constants.ALL_REGIONS)) {
+						productAvailability = availability;
+						Set<ProductPrice> prices = availability.getPrices();
+						for(ProductPrice price : prices) {
+							if(price.isDefaultPrice()) {
+								productPrice = price;
+								product.setProductPrice(priceUtil.getAdminFormatedAmount(store, productPrice.getProductPriceAmount()));
+							}
+							productResponse.setProductPriceSpecialStartDate(price.getProductPriceSpecialStartDate());
+							productResponse.setProductPriceSpecialEndDate(price.getProductPriceSpecialEndDate());
+						}
+					}
+				}
+			}
+			
+			if(productAvailability==null) {
+				//productAvailability = new ProductAvailability();
+				productResponse.setErrorMesg("Product is not available");
+			}
+					
+			product.setAvailability(productAvailability);
+			product.setPrice(productPrice);
+			product.setDescriptions(descriptions);
+			
+			product.setDateAvailable(DateUtil.formatDate(dbProduct.getDateAvailable()));
+			
+			System.out.println("product id =="+product);
+			System.out.println("product id =="+product.getProduct().getId());
+			System.out.println("product id =="+dbProduct.getProductDescription().getName());
+				
+			productResponse.setProductName(dbProduct.getProductDescription().getName());
+			
+		}catch(Exception e){
+			System.out.println("product details ::"+e.getMessage());
+		}
+		return productResponse;
+	}
     
 }

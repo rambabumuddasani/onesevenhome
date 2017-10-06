@@ -65,5 +65,9 @@ public interface ProductService extends SalesManagerEntityService<Long, Product>
 
 	List<Product> getDealOfDay(Date startDate, Date endDate, String status);
 
+	List<Product> getTodaysDeals(Date date);
+
+	List<Product> getAdminTodaysDeals();
+
 }
 	

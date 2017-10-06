@@ -8,7 +8,7 @@ public class PaginatedResponse {
 	
 	private PaginationData paginationData;
 	private List responseData;
-	
+	private String errorMsg;
 	public PaginationData getPaginationData() {
 		return paginationData;
 	}
@@ -20,6 +20,12 @@ public class PaginatedResponse {
 	}
 	public void setResponseData(List responseData) {
 		this.responseData = responseData;
+	}
+	public String getErrorMsg() {
+		return errorMsg;
+	}
+	public void setErrorMsg(String errorMsg) {
+		this.errorMsg = errorMsg;
 	}
 	
 }

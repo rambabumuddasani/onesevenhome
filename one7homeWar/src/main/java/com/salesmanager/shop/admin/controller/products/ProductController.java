@@ -1194,6 +1194,12 @@ public class ProductController extends AbstractController {
 								productPrice = price;
 								product.setProductPrice(priceUtil.getAdminFormatedAmount(store, productPrice.getProductPriceAmount()));
 							}
+							if(price.getDealOfDay().equals("Y")) {
+								productResponse.setDealOfDay(true);
+							}
+							else {
+								productResponse.setDealOfDay(false);
+							}
 						}
 					}
 				}
@@ -1232,6 +1238,7 @@ public class ProductController extends AbstractController {
 				productResponse.setProductDiscountPrice(productPrice.getProductPriceSpecialAmount());
 				productResponse.setDiscountPercentage(getDiscountPercentage(productPrice));
 				productResponse.setProductPriceSpecialEndDate(productPrice.getProductPriceSpecialEndDate());
+				productResponse.setProductPriceSpecialStartDate(productPrice.getProductPriceSpecialStartDate());
 				//productResponse.setProductPriceSpecialEndTime(productPrice.getProductPriceSpecialEndDateTime());
 			}
 			else
@@ -1470,19 +1477,57 @@ public class ProductController extends AbstractController {
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public DealOfDay getDealOfDay() throws Exception {
-		
+		//Get dealofday 
 		System.out.println("getDealOfDay ==");
 		
 		DealOfDay dealOfDay = new DealOfDay();
 		ProductResponse productResponse = new ProductResponse();
 
-		List<Product> dbProducts = productService.getProduct("dealOfDay","Y");
-
+		//List<Product> dbProducts = productService.getProduct("dealOfDay","Y");
+		List<Product> dbProducts = productService.getDealOfDay();
 		for(Product product:dbProducts) {
 			productResponse = getProductDetails(product,true);
 			dealOfDay.setDealOfDay(productResponse);
 		}
 		return dealOfDay;
+	}
+	private String getDiscountPercentage(ProductPrice productPrice){
+		BigDecimal discount = new BigDecimal(0);
+		DecimalFormat df = new DecimalFormat();
+		df.setMaximumFractionDigits(2); //Sets the maximum number of digits after the decimal point
+		df.setMinimumFractionDigits(0); //Sets the minimum number of digits after the decimal point
+		df.setGroupingUsed(false); //If false thousands separator such ad 1,000 wont work so it will display 1000
+		if(productPrice.getProductPriceAmount().intValue() > 0 && productPrice.getProductPriceSpecialAmount().intValue() > 0) {
+			discount = productPrice.getProductPriceAmount().subtract(productPrice.getProductPriceSpecialAmount());
+			discount = discount.multiply(new BigDecimal(100));
+			discount = discount.divide(productPrice.getProductPriceAmount(),2,4);
+			return df.format(discount);
+		}
+		return df.format(discount);
+	
+	}
+
+	@RequestMapping(value="/getAllDealOfDay", method = RequestMethod.GET, 
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public AdminDealOfDay getAllDealOfDay() throws Exception {
+		// List all dealofday products
+		System.out.println("getDealOfDay ==");
+		AdminDealOfDay adminDealOfDay = new AdminDealOfDay();
+		
+		ProductResponse productResponse = new ProductResponse();
+		
+		List<ProductResponse> prodRespList = new ArrayList<ProductResponse>();
+		List<Product> dbProducts = productService.getProduct("dealOfDay","Y");
+		System.out.println("dbProducts=="+dbProducts);
+		for(Product product:dbProducts) {
+			productResponse = getProductDetails(product,true);
+			prodRespList.add(productResponse);
+			
+		}
+		adminDealOfDay.setAdminDealOfDay(prodRespList);
+		return adminDealOfDay;
+		
 	}
 	
 	@RequestMapping(value="/getNewProduct", method = RequestMethod.GET, 
@@ -1567,22 +1612,6 @@ public class ProductController extends AbstractController {
 	
 	
 	
-	
-	private String getDiscountPercentage(ProductPrice productPrice){
-		BigDecimal discount = new BigDecimal(0);
-		DecimalFormat df = new DecimalFormat();
-		df.setMaximumFractionDigits(2); //Sets the maximum number of digits after the decimal point
-		df.setMinimumFractionDigits(0); //Sets the minimum number of digits after the decimal point
-		df.setGroupingUsed(false); //If false thousands separator such ad 1,000 wont work so it will display 1000
-		if(productPrice.getProductPriceAmount().intValue() > 0 && productPrice.getProductPriceSpecialAmount().intValue() > 0) {
-			discount = productPrice.getProductPriceAmount().subtract(productPrice.getProductPriceSpecialAmount());
-			discount = discount.multiply(new BigDecimal(100));
-			discount = discount.divide(productPrice.getProductPriceAmount(),2,4);
-			return df.format(discount);
-		}
-		return df.format(discount);
-
-	}
 	
 	@RequestMapping(value="/getProductsByFiltersAndPrice", method = RequestMethod.POST, 
 			consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -1715,6 +1744,7 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
 				productResponse.setProductDiscountPrice(productPrice.getProductPriceSpecialAmount());
 				productResponse.setDiscountPercentage(getDiscountPercentage(productPrice));
 				productResponse.setProductPriceSpecialEndDate(productPrice.getProductPriceSpecialEndDate());
+				productResponse.setProductPriceSpecialStartDate(productPrice.getProductPriceSpecialStartDate());
 				//productResponse.setProductPriceSpecialEndTime(productPrice.getProductPriceSpecialEndDateTime());
 			}
 			else

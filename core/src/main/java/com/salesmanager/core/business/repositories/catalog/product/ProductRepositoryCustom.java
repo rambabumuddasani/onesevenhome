@@ -1,6 +1,7 @@
 package com.salesmanager.core.business.repositories.catalog.product;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -43,6 +44,7 @@ public interface ProductRepositoryCustom {
 				Set<Long> categoryIds, Language language, Locale locale);
 		
 		List<Product> getTodaysDeals();
+		List<Product> getAdminTodaysDeals();
 		List<Product> getProductsListByCategory(String categoryCode);
 		List<Product> getDealOfDay();
 
