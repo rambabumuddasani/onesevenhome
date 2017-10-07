@@ -16,6 +16,8 @@ import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -54,6 +56,7 @@ import com.salesmanager.shop.admin.controller.products.PaginatedResponse;
 import com.salesmanager.shop.admin.controller.products.ProductResponse;
 import com.salesmanager.shop.admin.controller.products.TodaysDeals;
 import com.salesmanager.shop.controller.AbstractController;
+import com.salesmanager.shop.store.controller.customer.CustomerAccountController;
 import com.salesmanager.shop.store.model.paging.PaginationData;
 import com.salesmanager.shop.utils.DateUtil;
 
@@ -914,5 +917,73 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		}
 		return productResponse;
 	}
+    /*
+     * Admin Deal Management
+     * Admin update a deal or remove a deal
+     */
+    @RequestMapping(value="/admin/deals/updateorremove", method = RequestMethod.POST)
+    @ResponseBody
+    public DealUpdateOrRemoveResponse adminDealUpdateOrRemove(@RequestBody DealUpdateOrRemoveRequest dealUpdateOrRemoveRequest) throws Exception {
+    System.out.println("Entered adminDealUpdateOrRemove===");
+	DealUpdateOrRemoveResponse dealUpdateOrRemoveResponse = new DealUpdateOrRemoveResponse();
+	Long productId = dealUpdateOrRemoveRequest.getProductId();
+	
+    // getting product from db
+    Product dbProduct = productService.getByProductId(productId);
+	System.out.println("dbProduct : "+dbProduct);
+	if(dbProduct==null) {
+		dealUpdateOrRemoveResponse.setErrorMesg("Product is not found");
+		dealUpdateOrRemoveResponse.setStatus("false");
+		return dealUpdateOrRemoveResponse;
+    }
+	
+	com.salesmanager.shop.admin.model.catalog.Product product = new com.salesmanager.shop.admin.model.catalog.Product();
+	
+ 	product.setProduct(dbProduct);
+	
+    ProductAvailability productAvailability = null;
+	ProductPrice pPrice = null;
+    Set<ProductAvailability> availabilities = dbProduct.getAvailabilities();
     
+    if(availabilities!=null && availabilities.size()>0)
+    {
+		
+		for(ProductAvailability availability : availabilities)
+		{
+			if(availability.getRegion().equals(com.salesmanager.core.business.constants.Constants.ALL_REGIONS))
+			 {
+				productAvailability = availability;
+				
+				Set<ProductPrice> prices = availability.getPrices();
+				for(ProductPrice price : prices)
+				{
+					// if status is true, updating the product 
+					if(dealUpdateOrRemoveRequest.isStatus()) {
+					Date startDate = dealUpdateOrRemoveRequest.getProductPriceSpecialStartDate();
+				    Date endDate = dealUpdateOrRemoveRequest.getProductPriceSpecialEndDate();
+					price.setProductPriceSpecialStartDate(startDate);
+					price.setProductPriceSpecialEndDate(endDate);
+					productPrice.saveOrUpdate(price);
+					System.out.println("Product Id == "+dbProduct.getId());
+					System.out.println("ProductPriceSpecialStartDate == "+price.getProductPriceSpecialStartDate());
+					System.out.println("ProductPriceSpecialEndDate==="+price.getProductPriceSpecialEndDate());
+					dealUpdateOrRemoveResponse.setSuccessMsg("Deal Updated successfully");
+					dealUpdateOrRemoveResponse.setStatus("true");
+					}
+					// if status is false removing the product from todaysDeals 
+					else {
+						price.setProductPriceSpecialStartDate(null);
+						price.setProductPriceSpecialEndDate(null);
+						productPrice.saveOrUpdate(price);
+						dealUpdateOrRemoveResponse.setSuccessMsg("Deal Removed");
+						dealUpdateOrRemoveResponse.setStatus("true");
+					}
+			}
+		}
+	}
+		
+ }
+     return dealUpdateOrRemoveResponse;
+
+}
 }

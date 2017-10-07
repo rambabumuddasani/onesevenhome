@@ -1194,12 +1194,12 @@ public class ProductController extends AbstractController {
 								productPrice = price;
 								product.setProductPrice(priceUtil.getAdminFormatedAmount(store, productPrice.getProductPriceAmount()));
 							}
-							if(price.getDealOfDay().equals("Y")) {
+							/*if(price.getDealOfDay().equals("Y")) {
 								productResponse.setDealOfDay(true);
 							}
-							else {
+							else if(price.getDealOfDay().equals("N") || price.getDealOfDay().equals(null)){
 								productResponse.setDealOfDay(false);
-							}
+							}*/
 						}
 					}
 				}
