@@ -22,7 +22,6 @@ public class ProductResponse {
 	private Timestamp productPriceSpecialEndTime;
 	private Double productRating;
 	private Date productPriceSpecialStartDate;
-	private boolean isDealOfDay;
 	public Long getProductId() {
 		return productId;
 	}
@@ -101,12 +100,6 @@ public class ProductResponse {
 	}
 	public void setProductPriceSpecialStartDate(Date productPriceSpecialStartDate) {
 		this.productPriceSpecialStartDate = productPriceSpecialStartDate;
-	}
-	public boolean isDealOfDay() {
-		return isDealOfDay;
-	}
-	public void setDealOfDay(boolean isDealOfDay) {
-		this.isDealOfDay = isDealOfDay;
 	}
 	
 }
