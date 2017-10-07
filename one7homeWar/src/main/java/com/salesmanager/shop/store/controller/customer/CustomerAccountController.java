@@ -588,7 +588,8 @@ public class CustomerAccountController extends AbstractController {
 		if(customer==null) {
 	    		return new AddressResponse();
     	}
-		addressResponse.setCustomerName(customer.getNick());
+		addressResponse.setCustomerName(customer.getBilling().getFirstName()+" "+customer.getBilling().getLastName());
+		//addressResponse.setCustomerName(customer.getNick());
 		       
         Customer customerEntity = customerService.getById(customer.getId());
         List<ReadableAddress> shippingAddrList = new ArrayList<>();

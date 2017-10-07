@@ -917,27 +917,42 @@ public class CustomerRegistrationController extends AbstractController {
 			custDetails.setGender(customer.getGender());
 			custDetails.setStoreCode("DEFAULT");
 			
-			Address billing = new Address();
-			billing.setFirstName(customer.getBilling().getFirstName());
-			billing.setLastName(customer.getBilling().getLastName());
-			billing.setAddress(customer.getBilling().getAddress());
-			billing.setCity(customer.getBilling().getCity());
-			billing.setStateProvince(customer.getBilling().getState());
-			billing.setPostalCode(customer.getBilling().getPostalCode());
-			billing.setPhone(customer.getBilling().getTelephone());
-			billing.setCountry("IN");
+			//if(customer.getBilling() != null){ // It is mandatory to have billing address
+				Address billing = new Address();
+				billing.setFirstName(customer.getBilling().getFirstName());
+				billing.setLastName(customer.getBilling().getLastName());
+				billing.setAddress(customer.getBilling().getAddress());
+				billing.setCity(customer.getBilling().getCity());
+				billing.setStateProvince(customer.getBilling().getState());
+				billing.setPostalCode(customer.getBilling().getPostalCode());
+				billing.setPhone(customer.getBilling().getTelephone());
+				billing.setCountry("IN");
+				custDetails.setBilling(billing);
+			//}
+			if(customer.getDelivery() != null) {
+				Address delivery = new Address();
+				delivery.setFirstName(customer.getDelivery().getFirstName());
+				delivery.setLastName(customer.getDelivery().getLastName());
+				delivery.setAddress(customer.getDelivery().getAddress());
+				delivery.setCity(customer.getDelivery().getCity());
+				delivery.setStateProvince(customer.getDelivery().getState());
+				delivery.setPostalCode(customer.getDelivery().getPostalCode());
+				delivery.setPhone(customer.getDelivery().getTelephone());			
+				custDetails.setDelivery(delivery);
+			}
 			
-			Address delivery = new Address();
-			delivery.setFirstName(customer.getDelivery().getFirstName());
-			delivery.setLastName(customer.getDelivery().getLastName());
-			delivery.setAddress(customer.getDelivery().getAddress());
-			delivery.setCity(customer.getDelivery().getCity());
-			delivery.setStateProvince(customer.getDelivery().getState());
-			delivery.setPostalCode(customer.getDelivery().getPostalCode());
-			delivery.setPhone(customer.getDelivery().getTelephone());
-			
-			custDetails.setBilling(billing);
-			custDetails.setDelivery(delivery);
+			if(customer.getSecondaryDelivery() != null) {
+				Address secondaryDeliveryAddr = new Address();
+				secondaryDeliveryAddr.setFirstName(customer.getSecondaryDelivery().getFirstName());
+				secondaryDeliveryAddr.setLastName(customer.getSecondaryDelivery().getLastName());
+				secondaryDeliveryAddr.setAddress(customer.getSecondaryDelivery().getAddress());
+				secondaryDeliveryAddr.setCity(customer.getSecondaryDelivery().getCity());
+				secondaryDeliveryAddr.setStateProvince(customer.getSecondaryDelivery().getState());
+				secondaryDeliveryAddr.setPostalCode(customer.getSecondaryDelivery().getPostalCode());
+				secondaryDeliveryAddr.setPhone(customer.getSecondaryDelivery().getTelephone());			
+				custDetails.setDelivery(secondaryDeliveryAddr);
+			}
+
 		    customerDetailsResponse.setCustomerDetails(custDetails);
 		    return customerDetailsResponse;
 	}

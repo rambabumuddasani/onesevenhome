@@ -1,6 +1,5 @@
 package com.salesmanager.shop.model.customer;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class AddressResponse {
