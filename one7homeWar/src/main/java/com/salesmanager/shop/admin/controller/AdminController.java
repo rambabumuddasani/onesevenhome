@@ -933,7 +933,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	System.out.println("dbProduct : "+dbProduct);
 	if(dbProduct==null) {
 		dealUpdateOrRemoveResponse.setErrorMesg("Product is not found");
-		dealUpdateOrRemoveResponse.setStatus("status");
+		dealUpdateOrRemoveResponse.setStatus("false");
 		return dealUpdateOrRemoveResponse;
     }
 	
@@ -975,7 +975,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 						price.setProductPriceSpecialStartDate(null);
 						price.setProductPriceSpecialEndDate(null);
 						productPrice.saveOrUpdate(price);
-						dealUpdateOrRemoveResponse.setErrorMesg("Deal Removed ");
+						dealUpdateOrRemoveResponse.setSuccessMsg("Deal Removed");
 						dealUpdateOrRemoveResponse.setStatus("true");
 					}
 			}
