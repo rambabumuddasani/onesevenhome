@@ -650,7 +650,8 @@ public class CustomerAccountController extends AbstractController {
     	if(customerEntity==null ) {
 	    		return new AddressResponse();
     	}
-		addressResponse.setCustomerName(customerEntity.getNick());
+		//addressResponse.setCustomerName(customerEntity.getNick());
+		addressResponse.setCustomerName(customerEntity.getBilling().getFirstName()+" "+customerEntity.getBilling().getLastName());
 /*		if("1".equals(addressPreference)){
         	customerEntity.setBilling(null);
         }else */ 

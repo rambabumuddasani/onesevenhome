@@ -18,6 +18,8 @@ import com.salesmanager.core.business.services.shoppingcart.ShoppingCartService;
 import com.salesmanager.core.business.services.system.EmailService;
 import com.salesmanager.core.business.services.user.GroupService;
 import com.salesmanager.core.business.services.user.PermissionService;
+import com.salesmanager.core.model.common.Delivery;
+import com.salesmanager.core.model.common.SecondaryDelivery;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.country.Country;
@@ -454,7 +456,7 @@ public class CustomerFacadeImpl implements CustomerFacade
     {
      //Customer customerModel=customerService.getById( userId );
        Map<String, Country> countriesMap = countryService.getCountriesMap( language );
-       Country country = countriesMap.get( address.getCountry() );
+       Country country = countriesMap.get( "IN" );
       
       if(customerModel ==null){
            LOG.error( "Customer with ID {} does not exists..", customerModel.getEmailAddress());
@@ -477,8 +479,12 @@ public class CustomerFacadeImpl implements CustomerFacade
 
 	private Customer updateFirstDeliveryAddressOne(Customer customerModel, MerchantStore merchantStore, Address address,
 			Country country) throws ConversionException {
-		PersistableCustomerSecondaryShippingAddressPopulator shippingAddressPopulator=new PersistableCustomerSecondaryShippingAddressPopulator();
+		//PersistableCustomerSecondaryShippingAddressPopulator shippingAddressPopulator=new PersistableCustomerSecondaryShippingAddressPopulator();
+		   PersistableCustomerShippingAddressPopulator shippingAddressPopulator=new PersistableCustomerShippingAddressPopulator();
            customerModel= shippingAddressPopulator.populate( address, customerModel, merchantStore, merchantStore.getDefaultLanguage() );
+           if(customerModel.getDelivery() == null) {
+        	   customerModel.setDelivery(new Delivery());
+           }
            customerModel.getDelivery().setCountry( country );
            if(StringUtils.isNotBlank( address.getZone() )){
                Zone zone = zoneService.getByCode(address.getZone());
@@ -499,6 +505,9 @@ public class CustomerFacadeImpl implements CustomerFacade
 			Country country) throws ConversionException {
 		PersistableCustomerSecondaryShippingAddressPopulator shippingAddress2Populator=new PersistableCustomerSecondaryShippingAddressPopulator();
            customerModel= shippingAddress2Populator.populate( address, customerModel, merchantStore, merchantStore.getDefaultLanguage() );
+           if(customerModel.getSecondaryDelivery() == null){
+        	   customerModel.setSecondaryDelivery(new SecondaryDelivery());
+           }
            customerModel.getSecondaryDelivery().setCountry( country );
            if(StringUtils.isNotBlank( address.getZone() )){
                Zone zone = zoneService.getByCode(address.getZone());
