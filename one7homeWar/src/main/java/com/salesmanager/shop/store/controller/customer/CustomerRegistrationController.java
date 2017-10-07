@@ -472,8 +472,7 @@ public class CustomerRegistrationController extends AbstractController {
     
    
     
-	@RequestMapping(value="/customer/update", method = RequestMethod.POST, 
-			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value="/customer/update", method = RequestMethod.POST)
 	@ResponseBody
     public CustomerResponse updateCustomer(@RequestBody CustomerRequest customerRequest)
         throws Exception
@@ -504,6 +503,8 @@ public class CustomerRegistrationController extends AbstractController {
         }	
          
         Address address = new Address();
+        address.setFirstName(customerRequest.getFirstName());
+        address.setLastName(customerRequest.getLastName());
         address.setAddress(customerRequest.getAddress());
         address.setPostalCode(customerRequest.getPostalCode());
         address.setCity(customerRequest.getCity());
