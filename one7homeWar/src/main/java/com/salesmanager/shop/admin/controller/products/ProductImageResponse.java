@@ -3,11 +3,13 @@ package com.salesmanager.shop.admin.controller.products;
 
 
 
-public class CreateProductResponse {
+public class ProductImageResponse {
 
 	Long productId;
 	boolean status;
 	String errorMsg;
+	String fileName;
+	
 	public Long getProductId() {
 		return productId;
 	}
@@ -25,6 +27,12 @@ public class CreateProductResponse {
 	}
 	public void setErrorMsg(String errorMsg) {
 		this.errorMsg = errorMsg;
+	}
+	public String getFileName() {
+		return fileName;
+	}
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
 	}
 
 	

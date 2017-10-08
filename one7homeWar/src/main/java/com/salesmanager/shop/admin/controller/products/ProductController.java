@@ -34,7 +34,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.web.bind.annotation.PathVariable;
 import com.salesmanager.shop.admin.controller.products.ProductResponse;
@@ -42,6 +45,10 @@ import com.salesmanager.shop.admin.controller.products.TodaysDeals;
 //import com.salesmanager.shop.admin.model.web.Menu;
 import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.controller.AbstractController;
+import com.salesmanager.shop.fileupload.services.StorageException;
+import com.salesmanager.shop.fileupload.services.StorageService;
+import com.salesmanager.shop.store.controller.customer.CustomerResponse;
+import com.salesmanager.shop.store.controller.customer.VendorRequest;
 import com.salesmanager.shop.store.model.paging.PaginationData;
 import com.salesmanager.shop.utils.DateUtil;
 import com.salesmanager.shop.utils.LabelUtils;
@@ -77,6 +84,8 @@ public class ProductController extends AbstractController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProductController.class);
 	
 
+    @Inject
+    private StorageService storageService;
 	
 	@Inject
 	private ProductService productService;
@@ -1222,8 +1231,6 @@ public class ProductController extends AbstractController {
 			
 			System.out.println("product id =="+product);
 			System.out.println("product id =="+product.getProduct().getId());
-			System.out.println("product id =="+product.getProductImage());
-			System.out.println("product id =="+product.getProductImage().getProductImageUrl());
 			
 			System.out.println("product id =="+dbProduct.getProductDescription().getName());
 			System.out.println("product id =="+product.getProduct().getProductDescription());
@@ -1769,92 +1776,211 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
 		return productResponse;
 	}
 
-      @RequestMapping(value="/createProduct", method = RequestMethod.POST, 
-		               consumes = MediaType.APPLICATION_JSON_VALUE,
-		               produces = MediaType.APPLICATION_JSON_VALUE)
-      @ResponseBody
-      public CreateProductResponse createProduct(@RequestBody CreateProductRequest createProductRequest) throws Exception {
+	@RequestMapping(value="/uploadProductImage", method = RequestMethod.POST)
+	@ResponseBody
+	public ProductImageResponse uploadProductImage(@RequestPart("productRequest") String productRequestStr,
+			@RequestPart("file") MultipartFile productUploadedImage) throws Exception {
+		ProductImageRequest productImageRequest = new ObjectMapper().readValue(productRequestStr, ProductImageRequest.class);
+		ProductImageResponse productImageResponse = new ProductImageResponse();
+		
+		if(productImageRequest.getProductId() == null){
+			productImageResponse.setErrorMsg("ProductId can not be null");
+			productImageResponse.setStatus(false);
+			return productImageResponse;
+		}
+    	// Store file into file sytem
+    	String fileName = "";
+    	if(productUploadedImage.getSize() != 0) {
+    		try{
+    			fileName = storageService.store(productUploadedImage);
+    			System.out.println("fileName "+fileName);
+    		}catch(StorageException se){
+    			System.out.println("StoreException occured, do wee need continue "+se);
+    			productImageResponse.setErrorMsg("Failed while storing image");
+    			productImageResponse.setStatus(false);
+    			return productImageResponse;
+    		}
+    		try {
+    			ProductImage productImage = new ProductImage();
+    			Set<ProductImage> images = new HashSet<ProductImage>();
+    			Product dbProduct = productService.getById(productImageRequest.getProductId());
+    			if(dbProduct == null){
+        			productImageResponse.setErrorMsg("No product available with product id : "+productImageRequest.getProductId());
+        			productImageResponse.setStatus(false);
+        			return productImageResponse;
+    			}
+    			productImage.setProduct(dbProduct);
+    			productImage.setDefaultImage(productImageRequest.isDefaultImage());
+    			productImage.setProductImageUrl(fileName);
+    			images.add(productImage);
+    			
+    			dbProduct.setImages(images);
+    			productService.update(dbProduct);
+    			
+    		}catch(Exception e){
+    			productImageResponse.setErrorMsg("Failed while saving image details in database for product id : "+productImageRequest.getProductId());
+    			productImageResponse.setStatus(false);
+    			return productImageResponse;
+    		}
+    		productImageResponse.setStatus(true);
+    		productImageResponse.setFileName(fileName);
+    		productImageResponse.setProductId(productImageRequest.getProductId());
+    	}
+		
+		return productImageResponse;
+	}
+	      @RequestMapping(value="/createProduct", method = RequestMethod.POST, 
+			               consumes = MediaType.APPLICATION_JSON_VALUE,
+			               produces = MediaType.APPLICATION_JSON_VALUE)
+	      @ResponseBody
+	      public CreateProductResponse createProduct(@RequestBody CreateProductRequest createProductRequest) throws Exception {
+		
+		System.out.println("createProduct:");
+		/*{"sku":"1234"
+	"description":""
+	"name":""
+	"title":""
+	"short_desc":"used in production description page"
+	"product_desc_title":"used in production description page"
+	"price":""
+	"discount_price":""
+	"category":""}*/
+		CreateProductResponse createProductResponse = new CreateProductResponse();
+		try {
+		MerchantStore merchantStore=merchantStoreService.getMerchantStore(MerchantStore.DEFAULT_STORE);
+		com.salesmanager.shop.admin.model.catalog.Product  product = new com.salesmanager.shop.admin.model.catalog.Product();
+		Product newProduct = new Product();
+		Set<ProductDescription> descriptions = new HashSet<ProductDescription>();
+		ProductDescription productDescription = new ProductDescription();
+		Set<ProductAvailability> availabilities = new HashSet<ProductAvailability>();
+		Set<ProductPrice> prices = new HashSet<ProductPrice>();
+		ProductAvailability productAvailability = new ProductAvailability();
+		ProductPrice productPrice = new ProductPrice();
+		
+		System.out.println("createProductRequest.getSku() =="+createProductRequest.getSku());
+		System.out.println("createProductRequest.getDescription() =="+createProductRequest.getDescription());
+		System.out.println("createProductRequest.getProductName() =="+createProductRequest.getProductName());
+		System.out.println("createProductRequest.getTitle() =="+createProductRequest.getTitle());
+		System.out.println("createProductRequest.getShortDesc() =="+createProductRequest.getShortDesc());
+		System.out.println("createProductRequest.getProductDescTitle() =="+createProductRequest.getProductDescTitle());
+		System.out.println("createProductRequest.getProductPrice() =="+createProductRequest.getProductPrice());
+		System.out.println("createProductRequest.getCategory() =="+createProductRequest.getCategory());
+		
+		productDescription.setName(createProductRequest.getProductName());
+		productDescription.setDescription(createProductRequest.getDescription());
+		productDescription.setTitle(createProductRequest.getTitle());
+		productDescription.setMetatagDescription(createProductRequest.getShortDesc());
+		productDescription.setMetatagTitle(createProductRequest.getProductDescTitle());
+		Language language = new Language();
+		language.setId(1);
+		productDescription.setLanguage(language);
+		productDescription.setProduct(newProduct);
+		descriptions.add(productDescription);
+		
+		//availability
+		productAvailability.setRegion("*");
+		productAvailability.setProductQuantity(0);
 	
-	System.out.println("createProduct:");
-	/*{"sku":"1234"
-"description":""
-"name":""
-"title":""
-"short_desc":"used in production description page"
-"product_desc_title":"used in production description page"
-"price":""
-"discount_price":""
-"category":""}*/
-	CreateProductResponse createProductResponse = new CreateProductResponse();
-	try {
-	MerchantStore merchantStore=merchantStoreService.getMerchantStore(MerchantStore.DEFAULT_STORE);
-	com.salesmanager.shop.admin.model.catalog.Product  product = new com.salesmanager.shop.admin.model.catalog.Product();
-	Product newProduct = new Product();
-	Set<ProductDescription> descriptions = new HashSet<ProductDescription>();
-	ProductDescription productDescription = new ProductDescription();
-	Set<ProductAvailability> availabilities = new HashSet<ProductAvailability>();
-	Set<ProductPrice> prices = new HashSet<ProductPrice>();
-	ProductAvailability productAvailability = new ProductAvailability();
-	ProductPrice productPrice = new ProductPrice();
-	
-	System.out.println("createProductRequest.getSku() =="+createProductRequest.getSku());
-	System.out.println("createProductRequest.getDescription() =="+createProductRequest.getDescription());
-	System.out.println("createProductRequest.getProductName() =="+createProductRequest.getProductName());
-	System.out.println("createProductRequest.getTitle() =="+createProductRequest.getTitle());
-	System.out.println("createProductRequest.getShortDesc() =="+createProductRequest.getShortDesc());
-	System.out.println("createProductRequest.getProductDescTitle() =="+createProductRequest.getProductDescTitle());
-	System.out.println("createProductRequest.getProductPrice() =="+createProductRequest.getProductPrice());
-	System.out.println("createProductRequest.getCategory() =="+createProductRequest.getCategory());
-	
-	productDescription.setName(createProductRequest.getProductName());
-	productDescription.setDescription(createProductRequest.getDescription());
-	productDescription.setTitle(createProductRequest.getTitle());
-	productDescription.setMetatagDescription(createProductRequest.getShortDesc());
-	productDescription.setMetatagTitle(createProductRequest.getProductDescTitle());
-	Language language = new Language();
-	language.setId(1);
-	productDescription.setLanguage(language);
-	productDescription.setProduct(newProduct);
-	descriptions.add(productDescription);
-	
-	//availability
-	productAvailability.setRegion("*");
-	productAvailability.setProductQuantity(0);
+		//price
+		productPrice.setDefaultPrice(true);
+		productPrice.setProductPriceAmount(createProductRequest.getProductPrice());
+		productPrice.setCode("base");
+		productPrice.setProductAvailability(productAvailability);
+		productPrice.setFeaturedProduct("N");
+		productPrice.setNewProduct("N");
+		productPrice.setRecommendedProduct("N");
+		prices.add(productPrice);
+		
+		productAvailability.setPrices(prices);
+		productAvailability.setProduct(newProduct);
+		
+		availabilities.add(productAvailability);
+		
+		
+		newProduct.setSku(createProductRequest.getSku());
+		newProduct.setDescriptions(descriptions);
+		newProduct.setMerchantStore(merchantStore);
+		newProduct.setAvailabilities(availabilities);
+		String categoryId = createProductRequest.getCategory().replaceAll("_", " ");
+		Category category = categoryService.getByCategoryCode(categoryId);
+		Set<Category> categories = new HashSet<Category>();
+		categories.add(category);
+		newProduct.setCategories(categories);
+		productService.save(newProduct);
+		System.out.println("created ..");
+		createProductResponse.setStatus(true);
+		createProductResponse.setProductId(newProduct.getId());
+		}catch (Exception e){
+			System.out.println("failed while creating product ==="+e.getMessage());
+		}
+		return createProductResponse;
+		
+	}
+    
+  @RequestMapping(value="/updateProductDiscount", method = RequestMethod.POST, 
+           consumes = MediaType.APPLICATION_JSON_VALUE,
+           produces = MediaType.APPLICATION_JSON_VALUE)
+ @ResponseBody
+ public CreateProductResponse updateProductDiscount(@RequestBody ProductDiscountRequest productDiscountRequest) throws Exception {
 
-	//price
-	productPrice.setDefaultPrice(true);
-	productPrice.setProductPriceAmount(createProductRequest.getProductPrice());
-	productPrice.setCode("base");
-	productPrice.setProductAvailability(productAvailability);
-	productPrice.setFeaturedProduct("N");
-	productPrice.setNewProduct("N");
-	productPrice.setRecommendedProduct("N");
-	prices.add(productPrice);
-	
-	productAvailability.setPrices(prices);
-	productAvailability.setProduct(newProduct);
-	
-	availabilities.add(productAvailability);
-	
-	
-	newProduct.setSku(createProductRequest.getSku());
-	newProduct.setDescriptions(descriptions);
-	newProduct.setMerchantStore(merchantStore);
-	newProduct.setAvailabilities(availabilities);
-	String categoryId = createProductRequest.getCategory().replaceAll("_", " ");
-	Category category = categoryService.getByCategoryCode(categoryId);
-	Set<Category> categories = new HashSet<Category>();
-	categories.add(category);
-	newProduct.setCategories(categories);
-	productService.save(newProduct);
-	System.out.println("created ..");
-	createProductResponse.setStatus(true);
-	createProductResponse.setProductId(newProduct.getId());
+	System.out.println("updateProductDiscount:");
+	CreateProductResponse createProductResponse = new CreateProductResponse();
+	createProductResponse.setStatus(false);
+	try {
+			Product dbProduct = productService.getById(productDiscountRequest.getProductId());
+			if(dbProduct == null){
+				createProductResponse.setErrorMsg("No product available with product id : "+productDiscountRequest.getProductId());
+				return createProductResponse;
+			}
+			Set<ProductAvailability> availabilities = dbProduct.getAvailabilities();
+			ProductAvailability productAvailability = null;
+			ProductPrice productPrice = null;
+			Set<ProductPrice> prices = null;
+			
+			if(availabilities!=null && availabilities.size()>0) {
+				
+				for(ProductAvailability availability : availabilities) {
+					if(availability.getRegion().equals(com.salesmanager.core.business.constants.Constants.ALL_REGIONS)) {
+						productAvailability = availability;
+						prices = availability.getPrices();
+						for(ProductPrice price : prices) {
+							if(price.isDefaultPrice()) {
+								productPrice = price;
+							}
+						}
+					}
+				}
+				productPrice.setProductPriceSpecialAmount(productDiscountRequest.getProductDiscountPrice());
+				if(productDiscountRequest.getProductPriceSpecialStartDate() != null){
+					productPrice.setProductPriceSpecialStartDate(productDiscountRequest.getProductPriceSpecialStartDate());
+				}
+				if(productDiscountRequest.getProductPriceSpecialEndDate() != null){
+					productPrice.setProductPriceSpecialEndDate(productDiscountRequest.getProductPriceSpecialEndDate());
+				}
+				if(prices == null)
+				{
+					System.out.println("Price object not found for this product id");
+					createProductResponse.setErrorMsg("Price object not found for this product id");
+					return createProductResponse;
+				}
+				prices.add(productPrice);
+				productAvailability.setPrices(prices);
+				availabilities.add(productAvailability);
+				dbProduct.setAvailabilities(availabilities);
+				productService.update(dbProduct);
+				createProductResponse.setStatus(true);
+				createProductResponse.setProductId(productDiscountRequest.getProductId());
+
+			}
+		
+
 	}catch (Exception e){
-		System.out.println("failed while creating product ==="+e.getMessage());
+		System.out.println("failed while updating product discount==="+e.getMessage());
+		createProductResponse.setErrorMsg("failed while updating product discount==="+e.getMessage());
+		return createProductResponse;
 	}
 	return createProductResponse;
 	
-}
-    
+	}
+
 }

@@ -31,6 +31,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.salesmanager.core.business.services.merchant.MerchantStoreService;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 import com.salesmanager.core.business.services.catalog.category.CategoryService;
@@ -42,8 +45,12 @@ import com.salesmanager.core.model.catalog.category.Category;
 import com.salesmanager.core.model.catalog.category.CategoryDescription;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
+import com.salesmanager.shop.admin.controller.products.ProductImageRequest;
+import com.salesmanager.shop.admin.controller.products.ProductImageResponse;
 import com.salesmanager.shop.admin.model.web.Menu;
 import com.salesmanager.shop.constants.Constants;
+import com.salesmanager.shop.fileupload.services.StorageException;
+import com.salesmanager.shop.fileupload.services.StorageService;
 import com.salesmanager.shop.utils.LabelUtils;
 import com.sun.prism.Image;
 
@@ -55,7 +62,10 @@ public class CategoryController {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(CategoryController.class);
 	
-	@Inject
+    @Inject
+    private StorageService storageService;
+
+    @Inject
 	LanguageService languageService;
 	
 	@Inject
@@ -726,6 +736,78 @@ public class CategoryController {
 					} else {
 						categoryService.addChild(categoryParent, childCat);
 					}
+				
+				categoryService.saveOrUpdate(childCat);
+				createCategoryResponse.setStatus(true);
+				createCategoryResponse.setCategoryId(childCat.getId());
+				
+			}
+		} catch (Exception e){
+			createCategoryResponse.setStatus(false);
+			createCategoryResponse.setErrorMessage("category already exists.");
+		}
+		return createCategoryResponse;
+
+	}
+	
+	@RequestMapping(value="/createCategoryWithImage", method = RequestMethod.POST)
+	@ResponseBody
+	public CreateCategoryResponse createCategoryWithImage(@RequestPart("createCategoryRequest") String createCategoryRequestStr,
+			@RequestPart("file") MultipartFile categoryUploadedImage) throws Exception {
+		CreateCategoryRequest createCategoryRequest = new ObjectMapper().readValue(createCategoryRequestStr, CreateCategoryRequest.class);
+		CreateCategoryResponse createCategoryResponse = new CreateCategoryResponse();
+    	String fileName = "";
+    	if(categoryUploadedImage.getSize() != 0) {
+    		try{
+    			fileName = storageService.store(categoryUploadedImage);
+    			System.out.println("fileName "+fileName);
+    		}catch(StorageException se){
+    			System.out.println("StoreException occured, do wee need continue "+se);
+    			createCategoryResponse.setErrorMessage("Failed while storing image");
+    			createCategoryResponse.setStatus(false);
+    			return createCategoryResponse;
+    		}
+    	}
+		try {
+			MerchantStore merchantStore=merchantStoreService.getMerchantStore(MerchantStore.DEFAULT_STORE);
+			String categoryName = createCategoryRequest.getCategoryName();
+			String parentName = createCategoryRequest.getParentName();
+			categoryName = categoryName.replaceAll("_", " ");
+			parentName = parentName.replaceAll("_", " ");
+			Category category = categoryService.getByCategoryCode(categoryName);
+			Category categoryParent = categoryService.getByCategoryCode(parentName);
+			Language language = new Language();
+			language.setId(1);
+
+			if(category != null){
+				System.out.println("category already exists.");
+				createCategoryResponse.setStatus(false);
+				createCategoryResponse.setErrorMessage("category already exists.");
+			} else {
+				Category childCat = new Category();
+				childCat.setCode(categoryName);
+				childCat.setMerchantStore(merchantStore);
+				CategoryDescription categoryDescription = new CategoryDescription();
+				categoryDescription.setCategory(childCat);
+				categoryDescription.setName(categoryName);
+				categoryDescription.setDescription(categoryName);
+				categoryDescription.setSeUrl(fileName);
+				categoryDescription.setLanguage(language);
+				categoryDescription.setMetatagDescription(categoryName);
+				categoryDescription.setMetatagTitle(categoryName);
+				categoryDescription.setMetatagKeywords(categoryName);
+				List<CategoryDescription> descriptions = new ArrayList<CategoryDescription>();
+				descriptions.add(categoryDescription);
+				childCat.setDescriptions(descriptions);
+				//check parent
+				if(categoryParent == null) {
+						childCat.setParent(null);
+						childCat.setLineage("/");
+						childCat.setDepth(0);
+					} else {
+						categoryService.addChild(categoryParent, childCat);
+					}
+				
 				
 				categoryService.saveOrUpdate(childCat);
 				createCategoryResponse.setStatus(true);
