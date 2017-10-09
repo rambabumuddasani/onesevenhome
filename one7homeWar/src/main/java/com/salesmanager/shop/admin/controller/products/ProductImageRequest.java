@@ -1,12 +1,14 @@
 package com.salesmanager.shop.admin.controller.products;
 
 
+import java.io.Serializable;
 
+public class ProductImageRequest implements Serializable{
 
-public class ProductImageRequest {
-
+	private static final long serialVersionUID = 1L;
+	
 	Long productId;
-	boolean isDefaultImage;
+	String defaultImage;
 	
 	public Long getProductId() {
 		return productId;
@@ -14,11 +16,11 @@ public class ProductImageRequest {
 	public void setProductId(Long productId) {
 		this.productId = productId;
 	}
-	public boolean isDefaultImage() {
-		return isDefaultImage;
+	public String getDefaultImage() {
+		return defaultImage;
 	}
-	public void setDefaultImage(boolean isDefaultImage) {
-		this.isDefaultImage = isDefaultImage;
+	public void setDefaultImage(String defaultImage) {
+		this.defaultImage = defaultImage;
 	}
 	
 }

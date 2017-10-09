@@ -1778,7 +1778,7 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
 
 	@RequestMapping(value="/uploadProductImage", method = RequestMethod.POST)
 	@ResponseBody
-	public ProductImageResponse uploadProductImage(@RequestPart("productRequest") String productRequestStr,
+	public ProductImageResponse uploadProductImage(@RequestPart("productImageRequest") String productRequestStr,
 			@RequestPart("file") MultipartFile productUploadedImage) throws Exception {
 		ProductImageRequest productImageRequest = new ObjectMapper().readValue(productRequestStr, ProductImageRequest.class);
 		ProductImageResponse productImageResponse = new ProductImageResponse();
@@ -1810,7 +1810,10 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
         			return productImageResponse;
     			}
     			productImage.setProduct(dbProduct);
-    			productImage.setDefaultImage(productImageRequest.isDefaultImage());
+    			boolean isDefaultImage = false;
+    			if(productImageRequest.getDefaultImage() != null && productImageRequest.getDefaultImage().equals("1"))
+    				isDefaultImage = true;
+    			productImage.setDefaultImage(isDefaultImage);
     			productImage.setProductImageUrl(fileName);
     			images.add(productImage);
     			
@@ -1977,6 +1980,32 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
 	}catch (Exception e){
 		System.out.println("failed while updating product discount==="+e.getMessage());
 		createProductResponse.setErrorMsg("failed while updating product discount==="+e.getMessage());
+		return createProductResponse;
+	}
+	return createProductResponse;
+	
+	}
+  @RequestMapping(value="/deleteProduct", method = RequestMethod.POST, 
+          consumes = MediaType.APPLICATION_JSON_VALUE,
+          produces = MediaType.APPLICATION_JSON_VALUE)
+@ResponseBody
+public CreateProductResponse deleteProduct(@RequestBody ProductDiscountRequest productDiscountRequest) throws Exception {
+
+	System.out.println("deleteProduct:");
+	CreateProductResponse createProductResponse = new CreateProductResponse();
+	createProductResponse.setStatus(false);
+	try {
+			Product dbProduct = productService.getById(productDiscountRequest.getProductId());
+			if(dbProduct == null){
+				createProductResponse.setErrorMsg("No product available with product id : "+productDiscountRequest.getProductId());
+				return createProductResponse;
+			}
+			productService.delete(dbProduct);
+			createProductResponse.setStatus(true);
+			createProductResponse.setProductId(productDiscountRequest.getProductId());
+	}catch (Exception e){
+		System.out.println("failed while deleting product==="+e.getMessage());
+		createProductResponse.setErrorMsg("failed while deleting product==="+e.getMessage());
 		return createProductResponse;
 	}
 	return createProductResponse;
