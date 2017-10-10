@@ -759,7 +759,7 @@ public class CategoryController {
     	String fileName = "";
     	if(categoryUploadedImage.getSize() != 0) {
     		try{
-    			fileName = storageService.store(categoryUploadedImage);
+    			fileName = storageService.store(categoryUploadedImage,"category");
     			System.out.println("fileName "+fileName);
     		}catch(StorageException se){
     			System.out.println("StoreException occured, do wee need continue "+se);
@@ -780,9 +780,9 @@ public class CategoryController {
 			language.setId(1);
 
 			if(category != null){
-				System.out.println("category already exists.");
+				System.out.println("category already exists with code:"+categoryName);
 				createCategoryResponse.setStatus(false);
-				createCategoryResponse.setErrorMessage("category already exists.");
+				createCategoryResponse.setErrorMessage("category already exists with code:"+categoryName);
 			} else {
 				Category childCat = new Category();
 				childCat.setCode(categoryName);
@@ -816,9 +816,37 @@ public class CategoryController {
 			}
 		} catch (Exception e){
 			createCategoryResponse.setStatus(false);
-			createCategoryResponse.setErrorMessage("category already exists.");
+			createCategoryResponse.setErrorMessage("faile while creating category");
 		}
 		return createCategoryResponse;
 
 	}
+	@RequestMapping(value="/deleteCategory", method = RequestMethod.POST, 
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public CreateCategoryResponse deleteCategory(@RequestBody CreateCategoryRequest createCategoryRequest) throws Exception {
+		CreateCategoryResponse createCategoryResponse = new CreateCategoryResponse();
+		try {
+			String categoryName = createCategoryRequest.getCategoryName();
+			categoryName = categoryName.replaceAll("_", " ");
+			Category category = categoryService.getByCategoryCode(categoryName);
+			
+			if(category == null){
+				System.out.println("No category exists with category code:"+categoryName);
+				createCategoryResponse.setStatus(false);
+				createCategoryResponse.setErrorMessage("No category exists with category code:"+categoryName);
+			} else {
+				categoryService.delete(category);
+				createCategoryResponse.setStatus(true);
+				createCategoryResponse.setCategoryId(category.getId());
+			}
+		} catch (Exception e){
+			createCategoryResponse.setStatus(false);
+			createCategoryResponse.setErrorMessage("unable to delete the category");
+		}
+		return createCategoryResponse;
+
+	}
+	
 }

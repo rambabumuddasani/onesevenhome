@@ -13,6 +13,8 @@ public interface StorageService {
 
 	    String store(MultipartFile file);
 
+	    String store(MultipartFile file,String type);
+
 	    Stream<Path> loadAll();
 
 	    Path load(String filename);

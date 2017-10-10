@@ -1788,11 +1788,12 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
 			productImageResponse.setStatus(false);
 			return productImageResponse;
 		}
+		productImageResponse.setProductId(productImageRequest.getProductId());
     	// Store file into file sytem
     	String fileName = "";
     	if(productUploadedImage.getSize() != 0) {
     		try{
-    			fileName = storageService.store(productUploadedImage);
+    			fileName = storageService.store(productUploadedImage,"product");
     			System.out.println("fileName "+fileName);
     		}catch(StorageException se){
     			System.out.println("StoreException occured, do wee need continue "+se);
@@ -1827,7 +1828,6 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
     		}
     		productImageResponse.setStatus(true);
     		productImageResponse.setFileName(fileName);
-    		productImageResponse.setProductId(productImageRequest.getProductId());
     	}
 		
 		return productImageResponse;
