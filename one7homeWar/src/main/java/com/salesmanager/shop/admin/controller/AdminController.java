@@ -716,7 +716,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
    
  
     
-    // Admin can show a product under deal of day
+    // Admin can show a product under deal of day by updating start date,end date
     @RequestMapping(value="/admin/dealOfDay", method=RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -737,7 +737,8 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     	Product dbProduct = productService.getByProductId(productId);
     	System.out.println("dbProduct : "+dbProduct);
     	if(dbProduct==null) {
-    		adminDealOfDayResponse.setErrorMesg("Deal of Day product is not found");
+    		adminDealOfDayResponse.setErrorMesg("Deal Of Day product is not found");
+    		adminDealOfDayResponse.setStatus("false");
     		return adminDealOfDayResponse;
 	    }
     	
@@ -773,22 +774,25 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
 								List<Product> dodProducts = productService.getDealOfDay(startDate,endDate,adminDealOfDayReq.getStatus());
 								System.out.println(dodProducts);
 								if(dodProducts!=null && !(dodProducts.isEmpty())) {
-									adminDealOfDayResponse.setErrorMesg("Please provide diffrent date to set DealOfDay");
+									adminDealOfDayResponse.setErrorMesg("Please provide different date to set Deal Of Day");
+									adminDealOfDayResponse.setStatus("false");
 									return adminDealOfDayResponse;
 								}
 								else {
-							    // if no product is available in the specified date, then upadate the product in dealofday 
+							    // if no product is available in the specified date, then update the product in dealofday 
 								price.setDealOfDay("Y");
 								price.setProductPriceSpecialStartDate(adminDealOfDayReq.getProductPriceSpecialStartDate());
 								price.setProductPriceSpecialEndDate(adminDealOfDayReq.getProductPriceSpecialEndDate());
 								productPrice.saveOrUpdate(price);
-								adminDealOfDayResponse.setSuccessMsg("DealOfDay is set successfully");
+								adminDealOfDayResponse.setSuccessMsg("Deal Of Day is set successfully");
+								adminDealOfDayResponse.setStatus("true");
 								}
 							}
 							if(adminDealOfDayReq.getStatus().equals("N")) {
 								price.setDealOfDay("N");
 								productPrice.saveOrUpdate(price);
-								adminDealOfDayResponse.setSuccessMsg("Product is disabled from DealOfDay");
+								adminDealOfDayResponse.setSuccessMsg("Product is disabled from Deal Of Day");
+								adminDealOfDayResponse.setStatus("true");
 							}
 							
 						
