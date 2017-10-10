@@ -1525,7 +1525,7 @@ public class ProductController extends AbstractController {
 		ProductResponse productResponse = new ProductResponse();
 		
 		List<ProductResponse> prodRespList = new ArrayList<ProductResponse>();
-		List<Product> dbProducts = productService.getProduct("dealOfDay","Y");
+		List<Product> dbProducts = productService.getAllDealOfDay("dealOfDay","Y");
 		System.out.println("dbProducts=="+dbProducts);
 		for(Product product:dbProducts) {
 			productResponse = getProductDetails(product,true);

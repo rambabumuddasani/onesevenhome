@@ -384,4 +384,10 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 		return productRepository.getAdminTodaysDeals();
 	}
 
+	@Override
+	public List<Product> getAllDealOfDay(String columnName, String columnValue) {
+		// TODO Auto-generated method stub
+		return productRepository.getAllDealOfDay(columnName,columnValue);
+	}
+
 }

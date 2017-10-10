@@ -47,7 +47,7 @@ public interface ProductRepositoryCustom {
 		List<Product> getAdminTodaysDeals();
 		List<Product> getProductsListByCategory(String categoryCode);
 		List<Product> getDealOfDay();
-
+        List<Product> getAllDealOfDay(String columnName,String columnValue);
 		List<Product> getProduct(String columnName, String coulumnValue);
 		List<Product> getProductsListByFilters(@SuppressWarnings("rawtypes") Set filterIds);
 		List<Product> findProductsByFiltersAndPrice(String categoryCode,List<Long> filterIds, BigDecimal minPrice, BigDecimal maxPrice,Double productRating);
