@@ -28,7 +28,7 @@ public class ShoppingCartItem extends ShopEntity implements Serializable {
 	
 	private String subTotal;
 	private String discountPrice;
-	private long totalPriceOfEachItem;
+	//private long totalPriceOfEachItem;
 	
 	public String getDiscountPrice() {
 		return discountPrice;
@@ -117,10 +117,10 @@ public class ShoppingCartItem extends ShopEntity implements Serializable {
 		// TODO Auto-generated method stub
 		return customerId;
 	}
-	public long getTotalPriceOfEachItem() {
+	/*public long getTotalPriceOfEachItem() {
 		return totalPriceOfEachItem;
 	}
 	public void setTotalPriceOfEachItem(long totalPriceOfEachItem) {
 		this.totalPriceOfEachItem = totalPriceOfEachItem;
-	}
+	}*/
 }
