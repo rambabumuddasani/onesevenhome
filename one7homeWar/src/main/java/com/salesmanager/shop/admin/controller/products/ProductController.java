@@ -1098,7 +1098,7 @@ public class ProductController extends AbstractController {
 			productDetails.setProductImages(productImages);
 			
 			System.out.println("dbProduct.getProductDescription().getTitle() =="+dbProduct.getProductDescription().getTitle());
-
+			productDetails.setProductId(dbProduct.getId());
 			productDetails.setProductTitle(dbProduct.getProductDescription().getTitle());
 			productDetails.setProductDescription(dbProduct.getProductDescription().getDescription());
 			ProductAvailability productAvailability = null;
