@@ -5,10 +5,13 @@ import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.services.catalog.product.PricingService;
 import com.salesmanager.core.business.services.catalog.product.ProductService;
 import com.salesmanager.core.business.services.customer.CustomerService;
+import com.salesmanager.core.business.services.merchant.MerchantStoreService;
 import com.salesmanager.core.business.services.order.OrderService;
 import com.salesmanager.core.business.services.order.orderproduct.OrderProductDownloadService;
 import com.salesmanager.core.business.services.payments.PaymentService;
+import com.salesmanager.core.business.services.payments.TransactionService;
 import com.salesmanager.core.business.services.reference.country.CountryService;
+import com.salesmanager.core.business.services.reference.language.LanguageService;
 import com.salesmanager.core.business.services.reference.zone.ZoneService;
 import com.salesmanager.core.business.services.shipping.ShippingService;
 import com.salesmanager.core.business.services.shoppingcart.ShoppingCartService;
@@ -21,7 +24,9 @@ import com.salesmanager.core.model.order.OrderTotal;
 import com.salesmanager.core.model.order.OrderTotalSummary;
 import com.salesmanager.core.model.order.orderproduct.OrderProductDownload;
 import com.salesmanager.core.model.payments.PaymentMethod;
+import com.salesmanager.core.model.payments.PaymentType;
 import com.salesmanager.core.model.payments.Transaction;
+import com.salesmanager.core.model.payments.TransactionType;
 import com.salesmanager.core.model.reference.country.Country;
 import com.salesmanager.core.model.reference.language.Language;
 import com.salesmanager.core.model.reference.zone.Zone;
@@ -35,6 +40,7 @@ import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.model.customer.AnonymousCustomer;
 import com.salesmanager.shop.model.customer.PersistableCustomer;
 import com.salesmanager.shop.model.customer.ReadableDelivery;
+import com.salesmanager.shop.model.order.ReadableOrder;
 import com.salesmanager.shop.model.order.ReadableOrderTotal;
 import com.salesmanager.shop.model.order.ReadableShippingSummary;
 import com.salesmanager.shop.model.order.ReadableShopOrder;
@@ -70,6 +76,8 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+
+import java.math.BigDecimal;
 import java.util.*;
 
 
@@ -131,11 +139,20 @@ public class ShoppingOrderController extends AbstractController {
     private AuthenticationManager customerAuthenticationManager;
 	
 	@Inject
+	private TransactionService transactionService;
+	
+	@Inject
 	private EmailTemplatesUtils emailTemplatesUtils;
 	
 	@Inject
 	private OrderProductDownloadService orderProdctDownloadService;
 	
+    @Inject
+    MerchantStoreService merchantStoreService ;
+
+	@Inject
+	private LanguageService languageService;
+
 	@SuppressWarnings("unused")
 	@RequestMapping("/checkout.html")
 	public String displayCheckout(@CookieValue("cart") String cookie, Model model, HttpServletRequest request, HttpServletResponse response, Locale locale) throws Exception {
@@ -430,19 +447,16 @@ public class ShoppingOrderController extends AbstractController {
 	
 	
 	private Order commitOrder(ShopOrder order, HttpServletRequest request, Locale locale) throws Exception, ServiceException {
-		
-		
 			MerchantStore store = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
 			Language language = (Language)request.getAttribute("LANGUAGE");
 			
-			
-			String userName = null;
+/*			String userName = null;
 			String password = null;
-			
+*/			
 			PersistableCustomer customer = order.getCustomer();
 			
 	        /** set username and password to persistable object **/
-			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+/*			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 			Customer authCustomer = null;
         	if(auth != null &&
 	        		 request.isUserInRole("AUTH_CUSTOMER")) {
@@ -455,38 +469,39 @@ public class ShoppingOrderController extends AbstractController {
 	        	//set customer id to null
 	        	customer.setId(null);
 	        }
-		
+*/		
 	        //if the customer is new, generate a password
-	        if(customer.getId()==null || customer.getId()==0) {//new customer
+/*	        if(customer.getId()==null || customer.getId()==0) {//new customer
 	        	password = UserReset.generateRandomString();
 	        	String encodedPassword = passwordEncoder.encode(password);
 	        	customer.setEncodedPassword(encodedPassword);
 	        }
-	        
+*/	        
 	        if(order.isShipToBillingAdress()) {
 	        	customer.setDelivery(customer.getBilling());
 	        }
-	        
-
 
 			Customer modelCustomer = null;
 			try {//set groups
-				if(authCustomer==null) {//not authenticated, create a new volatile user
+				//if(authCustomer==null) {//not authenticated, create a new volatile user
 					modelCustomer = customerFacade.getCustomerModel(customer, store, language);
-					customerFacade.setCustomerModelDefaultProperties(modelCustomer, store);
-					userName = modelCustomer.getNick();
-					LOGGER.debug( "About to persist volatile customer to database." );
-			        customerService.saveOrUpdate( modelCustomer );
-				} else {//use existing customer
+					//customerFacade.setCustomerModelDefaultProperties(modelCustomer, store);
+					//userName = modelCustomer.getNick();
+					//LOGGER.debug( "About to persist volatile customer to database." );
+			        //customerService.saveOrUpdate( modelCustomer );
+				/*} else {//use existing customer
 					modelCustomer = customerFacade.populateCustomerModel(authCustomer, customer, store, language);
-				}
+				}*/
 			} catch(Exception e) {
 				throw new ServiceException(e);
 			}
-	        
-           
-	        
+	         
 	        Order modelOrder = null;
+			Transaction transaction = createTransaction();
+			transactionService.create(transaction);
+			
+			super.setSessionAttribute(Constants.INIT_TRANSACTION_KEY, transaction, request);
+
 	        Transaction initialTransaction = (Transaction)super.getSessionAttribute(Constants.INIT_TRANSACTION_KEY, request);
 	        if(initialTransaction!=null) {
 	        	modelOrder=orderFacade.processOrder(order, modelCustomer, initialTransaction, store, language);
@@ -520,9 +535,6 @@ public class ShoppingOrderController extends AbstractController {
 	        super.removeAttribute(Constants.SHIPPING_SUMMARY, request);
 	        super.removeAttribute(Constants.SHOPPING_CART, request);
 	        
-	        
-	        
-
 	        try {
 		        //refresh customer --
 	        	modelCustomer = customerFacade.getCustomerByUserName(modelCustomer.getNick(), store);
@@ -533,7 +545,7 @@ public class ShoppingOrderController extends AbstractController {
 	    		List<OrderProductDownload> orderProductDownloads = orderProdctDownloadService.getByOrderId(modelOrder.getId());
 	    		if(CollectionUtils.isNotEmpty(orderProductDownloads)) {
 
-		        	LOGGER.debug("Is user authenticated ? ",auth.isAuthenticated());
+/*		        	LOGGER.debug("Is user authenticated ? ",auth.isAuthenticated());
 		        	if(auth != null &&
 			        		 request.isUserInRole("AUTH_CUSTOMER")) {
 			        	//already authenticated
@@ -542,55 +554,65 @@ public class ShoppingOrderController extends AbstractController {
 				        customerFacade.authenticate(modelCustomer, userName, password);
 				        super.setSessionAttribute(Constants.CUSTOMER, modelCustomer, request);
 			        }
-		        	//send new user registration template
+*/		        	//send new user registration template
 					if(order.getCustomer().getId()==null || order.getCustomer().getId().longValue()==0) {
 						//send email for new customer
-						customer.setClearPassword(password);//set clear password for email
-						customer.setUserName(userName);
+						//customer.setClearPassword(password);//set clear password for email
+						//customer.setUserName(userName);
 						emailTemplatesUtils.sendRegistrationEmail( customer, store, locale, request.getContextPath() );
 					}
 	    		}
 	    		
 				//send order confirmation email to customer
 				emailTemplatesUtils.sendOrderEmail(modelCustomer.getEmailAddress(), modelCustomer, modelOrder, locale, language, store, request.getContextPath());
-		        
 		        if(orderService.hasDownloadFiles(modelOrder)) {
 		        	emailTemplatesUtils.sendOrderDownloadEmail(modelCustomer, modelOrder, store, locale, request.getContextPath());
 		
 		        }
-	    		
 				//send order confirmation email to merchant
 				emailTemplatesUtils.sendOrderEmail(store.getStoreEmailAddress(), modelCustomer, modelOrder, locale, language, store, request.getContextPath());
-		        
-	    		
-	    		
 	        } catch(Exception e) {
 	        	LOGGER.error("Error while post processing order",e);
 	        }
-
-
-			
-			
 	        return modelOrder;
-		
-		
+	}
+
+	private Transaction createTransaction(){
+		 BigDecimal amount = BigDecimal.ONE; // revisit here
+		 Transaction newTransaction = new Transaction();
+		 newTransaction.setAmount(amount);
+		 newTransaction.setTransactionDate(new Date());
+		 newTransaction.setTransactionType(TransactionType.INIT);
+		 newTransaction.setPaymentType(PaymentType.PAYPAL); // revist here
+		 //newTransaction.getTransactionDetails().put("TRANSACTIONID", refundTransactionResponse.getRefundTransactionID());
+		 //newTransaction.getTransactionDetails().put("CORRELATION", refundTransactionResponse.getCorrelationID());
+		//	transaction.getTransactionDetails().put("TOKEN", token);
+		//	transaction.getTransactionDetails().put("CORRELATION", correlationID);
+
+		return newTransaction;
 	}
 
 	
-
-	
 	@SuppressWarnings("unchecked")
-	@RequestMapping("/commitOrder.html")
-	public String commitOrder(@CookieValue("cart") String cookie, @Valid @ModelAttribute(value="order") ShopOrder order, BindingResult bindingResult, Model model, HttpServletRequest request, HttpServletResponse response, Locale locale) throws Exception {
-
+	@RequestMapping("/commitOrder")
+	public ReadableOrder commitOrder(HttpServletRequest request, HttpServletResponse response, Locale locale) throws Exception {
+		ReadableOrder readableOrder = new ReadableOrder();
+		ShopOrder shopOrder = new ShopOrder();
+		
+		Customer customer = getSessionAttribute(  Constants.CUSTOMER, request );
 		MerchantStore store = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
 		Language language = (Language)request.getAttribute("LANGUAGE");
+
+        /*MerchantStore store = merchantStoreService.getByCode("DEFAULT");  //i will come back here
+        Language language = super.getLanguage(request);*/
+        //Language language = languageService.getByCode( Constants.DEFAULT_LANGUAGE );
+        PersistableCustomer persistableCustomer = orderFacade.persistableCustomer(customer, store, language);
+		shopOrder.setCustomer(persistableCustomer);
+		
 		//validate if session has expired
 		
-		model.addAttribute("order", order);//TODO remove
-		
+		/*model.addAttribute("order", order);//TODO remove
 		Map<String, Object> configs = (Map<String, Object>) request.getAttribute(Constants.REQUEST_CONFIGS);
-		
 		if(configs!=null && configs.containsKey(Constants.DEBUG_MODE)) {
 			Boolean debugMode = (Boolean) configs.get(Constants.DEBUG_MODE);
 			if(debugMode) {
@@ -602,15 +624,13 @@ public class ShoppingOrderController extends AbstractController {
 					LOGGER.error(de.getMessage());
 				}
 			}
-		}
+		}*/
 			
 		try {
-				
-				
-				ShippingMetaData shippingMetaData = shippingService.getShippingMetaData(store);
-				model.addAttribute("shippingMetaData",shippingMetaData);
+				//ShippingMetaData shippingMetaData = shippingService.getShippingMetaData(store);
+				//model.addAttribute("shippingMetaData",shippingMetaData);
 				//basic stuff
-				String shoppingCartCode  = (String)request.getSession().getAttribute(Constants.SHOPPING_CART);
+/*				String shoppingCartCode  = (String)request.getSession().getAttribute(Constants.SHOPPING_CART);
 				if(shoppingCartCode==null) {
 					
 					if(cookie==null) {//session expired and cookie null, nothing to do
@@ -631,22 +651,24 @@ public class ShoppingOrderController extends AbstractController {
 					StringBuilder template = new StringBuilder().append(ControllerConstants.Tiles.Pages.timeout).append(".").append(store.getStoreTemplate());
 					return template.toString();	
 			    }
-			    cart = shoppingCartFacade.getShoppingCartModel(shoppingCartCode, store);
 			    
-				//readable shopping cart items for order summary box
-		        ShoppingCartData shoppingCart = shoppingCartFacade.getShoppingCartData(cart);
-		        model.addAttribute( "cart", shoppingCart );
+*/		 		
+				com.salesmanager.core.model.shoppingcart.ShoppingCart cart = getShoppingCartByCustomer(request); // get this cart from session
+				//readable shopping cart items for order summary box	
+		       // ShoppingCartData shoppingCart = null;//get this from session;
+		  //      ShoppingCartData shoppingCart = shoppingCartFacade.getShoppingCartData(cart);
+		 //       model.addAttribute( "cart", shoppingCart );
 
 				Set<ShoppingCartItem> items = cart.getLineItems();
 				List<ShoppingCartItem> cartItems = new ArrayList<ShoppingCartItem>(items);
-				order.setShoppingCartItems(cartItems);
+				shopOrder.setShoppingCartItems(cartItems);
 
 				//get payment methods
-				List<PaymentMethod> paymentMethods = paymentService.getAcceptedPaymentMethods(store);
-				boolean freeShoppingCart = shoppingCartService.isFreeShoppingCart(cart);
+				//List<PaymentMethod> paymentMethods = paymentService.getAcceptedPaymentMethods(store);
+				//boolean freeShoppingCart = shoppingCartService.isFreeShoppingCart(cart);
 
 				//not free and no payment methods
-				if(CollectionUtils.isEmpty(paymentMethods) && !freeShoppingCart) {
+/*				if(CollectionUtils.isEmpty(paymentMethods) && !freeShoppingCart) {
 					LOGGER.error("No payment method configured");
 					model.addAttribute("errorMessages", "No payments configured");
 				}
@@ -667,35 +689,23 @@ public class ShoppingOrderController extends AbstractController {
 					
 					
 				}
-				
-				ShippingQuote quote = orderFacade.getShippingQuote(order.getCustomer(), cart, order, store, language);
-				
-				
+*/				
+				ShippingQuote quote = orderFacade.getShippingQuote(shopOrder.getCustomer(), cart, shopOrder, store, language);
 				if(quote!=null) {
-					
-
 						//save quotes in HttpSession
-						List<ShippingOption> options = quote.getShippingOptions();
+/*						List<ShippingOption> options = quote.getShippingOptions();
 						request.getSession().setAttribute(Constants.SHIPPING_OPTIONS, options);
-						
 						if(!CollectionUtils.isEmpty(options)) {
-							
 							for(ShippingOption shipOption : options) {
-								
 								StringBuilder moduleName = new StringBuilder();
-								moduleName.append("module.shipping.").append(shipOption.getShippingModuleCode());
-										
-										
+								moduleName.append("module.shipping.").append(shipOption.getShippingModuleCode());	
 								String carrier = messages.getMessage(moduleName.toString(),locale);		
-										
 								shipOption.setDescription(carrier);
-								
 								//option name
 								if(!StringUtils.isBlank(shipOption.getOptionCode())) {
 									//try to get the translate
 									StringBuilder optionCodeBuilder = new StringBuilder();
 									try {
-										
 										optionCodeBuilder.append("module.shipping.").append(shipOption.getShippingModuleCode()).append(".").append(shipOption.getOptionCode());
 										String optionName = messages.getMessage(optionCodeBuilder.toString(),locale);
 										shipOption.setOptionName(optionName);
@@ -705,10 +715,9 @@ public class ShoppingOrderController extends AbstractController {
 								}
 
 							}
-						
 						}
-						
-						if(quote.getDeliveryAddress()!=null) {
+*/						
+/*						if(quote.getDeliveryAddress()!=null) {
 							ReadableCustomerDeliveryAddressPopulator addressPopulator = new ReadableCustomerDeliveryAddressPopulator();
 							addressPopulator.setCountryService(countryService);
 							addressPopulator.setZoneService(zoneService);
@@ -716,13 +725,13 @@ public class ShoppingOrderController extends AbstractController {
 							addressPopulator.populate(quote.getDeliveryAddress(), deliveryAddress,  store, language);
 							model.addAttribute("deliveryAddress", deliveryAddress);
 						}
-
+*/
 				}
 				
-				model.addAttribute("shippingQuote", quote);
-				model.addAttribute("paymentMethods", paymentMethods);
+				//model.addAttribute("shippingQuote", quote);
+				//model.addAttribute("paymentMethods", paymentMethods);
 				
-				if(quote!=null) {
+/*				if(quote!=null) {
 					List<Country> shippingCountriesList = orderFacade.getShipToCountry(store, language);
 					model.addAttribute("countries", shippingCountriesList);
 				} else {
@@ -730,9 +739,9 @@ public class ShoppingOrderController extends AbstractController {
 					List<Country> countries = countryService.getCountries(language);
 					model.addAttribute("countries", countries);
 				}
-				
+*/				
 				//set shipping summary
-				if(order.getSelectedShippingOption()!=null) {
+				if(shopOrder.getSelectedShippingOption()!=null) {
 					ShippingSummary summary = (ShippingSummary)request.getSession().getAttribute(Constants.SHIPPING_SUMMARY);
 					@SuppressWarnings("unchecked")
 					List<ShippingOption> options = (List<ShippingOption>)request.getSession().getAttribute(Constants.SHIPPING_OPTIONS);
@@ -757,7 +766,7 @@ public class ShoppingOrderController extends AbstractController {
 					
 						//get submitted shipping option
 						ShippingOption quoteOption = null;
-						ShippingOption selectedOption = order.getSelectedShippingOption();
+						ShippingOption selectedOption = shopOrder.getSelectedShippingOption();
 
 						//check if selectedOption exist
 						for(ShippingOption shipOption : options) {
@@ -777,79 +786,43 @@ public class ShoppingOrderController extends AbstractController {
 					
 					}
 
-					order.setShippingSummary(summary);
+					shopOrder.setShippingSummary(summary);
 				}
 				
 				OrderTotalSummary totalSummary = super.getSessionAttribute(Constants.ORDER_SUMMARY, request);
 				
 				if(totalSummary==null) {
-					totalSummary = orderFacade.calculateOrderTotal(store, order, language);
+					totalSummary = orderFacade.calculateOrderTotal(store, shopOrder, language);
 					super.setSessionAttribute(Constants.ORDER_SUMMARY, totalSummary, request);
 				}
-				
-				
-				order.setOrderTotalSummary(totalSummary);
-				
-			
-				orderFacade.validateOrder(order, bindingResult, new HashMap<String,String>(), store, locale);
-		        
-		        if ( bindingResult.hasErrors() )
+				shopOrder.setOrderTotalSummary(totalSummary);
+				//orderFacade.validateOrder(order, bindingResult, new HashMap<String,String>(), store, locale);
+/*		        if ( bindingResult.hasErrors() )
 		        {
 		            LOGGER.info( "found {} validation error while validating in customer registration ",
 		                         bindingResult.getErrorCount() );
 		    		StringBuilder template = new StringBuilder().append(ControllerConstants.Tiles.Checkout.checkout).append(".").append(store.getStoreTemplate());
 		    		return template.toString();
-	
 		        }
+*/		        
 		        
-		        @SuppressWarnings("unused")
-				Order modelOrder = this.commitOrder(order, request, locale);
-
-	        
+				Order modelOrder = this.commitOrder(shopOrder, request, locale);
+				readableOrder = orderFacade.getReadableOrderByOrder(modelOrder, store, language);
 			} catch(ServiceException se) {
-
-
-            	LOGGER.error("Error while creating an order ", se);
-            	
-            	String defaultMessage = messages.getMessage("message.error", locale);
-            	model.addAttribute("errorMessages", defaultMessage);
-            	
-            	if(se.getExceptionType()==ServiceException.EXCEPTION_VALIDATION) {
-            		if(!StringUtils.isBlank(se.getMessageCode())) {
-            			String messageLabel = messages.getMessage(se.getMessageCode(), locale, defaultMessage);
-            			model.addAttribute("errorMessages", messageLabel);
-            		}
-            	} else if(se.getExceptionType()==ServiceException.EXCEPTION_PAYMENT_DECLINED) {
-            		String paymentDeclinedMessage = messages.getMessage("message.payment.declined", locale);
-            		if(!StringUtils.isBlank(se.getMessageCode())) {
-            			String messageLabel = messages.getMessage(se.getMessageCode(), locale, paymentDeclinedMessage);
-            			model.addAttribute("errorMessages", messageLabel);
-            		} else {
-            			model.addAttribute("errorMessages", paymentDeclinedMessage);
-            		}
-            	}
-            	
-            	
-            	
-            	StringBuilder template = new StringBuilder().append(ControllerConstants.Tiles.Checkout.checkout).append(".").append(store.getStoreTemplate());
-	    		return template.toString();
 				
 			} catch(Exception e) {
-				LOGGER.error("Error while commiting order",e);
-				throw e;		
-				
+					
 			}
+		return readableOrder;
+		}
 
-	        //redirect to completd
-	        return "redirect:/shop/order/confirmation.html";
-	  
-			
-
-
-		
+	private com.salesmanager.core.model.shoppingcart.ShoppingCart getShoppingCartByCustomer(HttpServletRequest request) throws ServiceException {
+		Customer customer = getSessionAttribute(  Constants.CUSTOMER, request );
+		if(customer != null) {
+			return shoppingCartService.getByCustomer(customer);
+		}
+		return null;
 	}
-	
-	
 
 	
 	/**

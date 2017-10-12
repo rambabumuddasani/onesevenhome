@@ -162,6 +162,25 @@ public class CustomerFacadeImpl implements CustomerFacade
 
     }
 
+/*    @Override
+    public CustomerEntity getCustomerDataByCustomer( final Customer customer, final MerchantStore store, final Language language ) throws Exception
+    {
+        LOG.info( "Fetching customer with userName" +customer.getNick());
+        if(customer !=null){
+            LOG.info( "Found customer, converting to CustomerEntity");
+            try{
+            	CustomerEntityPopulator customerEntityPopulator=new CustomerEntityPopulator();
+            	return customerEntityPopulator.populate( customer, store, language ); //store, language
+            }
+            catch(ConversionException ex){
+                LOG.error( "Error while converting Customer to CustomerEntity", ex );
+                throw new Exception(ex);
+            }
+        }
+        return null;
+
+    }
+*/
 
     /* (non-Javadoc)
     *  @see com.salesmanager.web.shop.controller.customer.facade#mergeCart(final Customer customerModel, final String sessionShoppingCartId ,final MerchantStore store,final Language language)

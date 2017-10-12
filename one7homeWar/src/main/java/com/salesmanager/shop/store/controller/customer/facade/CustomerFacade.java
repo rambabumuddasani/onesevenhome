@@ -88,6 +88,9 @@ public interface CustomerFacade
 
 	void updateAddress(Customer customerModel, MerchantStore merchantStore, Address address, Language language)
 			throws Exception;
-		
+	
+/*	CustomerEntity getCustomerDataByCustomer(Customer customer, MerchantStore store, Language language)
+			throws Exception;
+*/		
 
 }

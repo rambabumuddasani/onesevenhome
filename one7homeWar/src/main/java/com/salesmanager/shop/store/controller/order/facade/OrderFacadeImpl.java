@@ -111,25 +111,18 @@ public class OrderFacadeImpl implements OrderFacade {
 	@Override
 	public ShopOrder initializeOrder(MerchantStore store, Customer customer,
 			ShoppingCart shoppingCart, Language language) throws Exception {
-
 		// assert not null shopping cart items
-		
 		ShopOrder order = new ShopOrder();
-		
 		OrderStatus orderStatus = OrderStatus.ORDERED;
 		order.setOrderStatus(orderStatus);
-		
 		if(customer==null) {
 				customer = this.initEmptyCustomer(store);
 		}
-		
 		PersistableCustomer persistableCustomer = persistableCustomer(customer, store, language);
 		order.setCustomer(persistableCustomer);
-
 		//keep list of shopping cart items for core price calculation
 		List<ShoppingCartItem> items = new ArrayList<ShoppingCartItem>(shoppingCart.getLineItems());
 		order.setShoppingCartItems(items);
-		
 		return order;
 	}
 	
@@ -138,8 +131,6 @@ public class OrderFacadeImpl implements OrderFacade {
 	@Override
 	public OrderTotalSummary calculateOrderTotal(MerchantStore store,
 			ShopOrder order, Language language) throws Exception {
-		
-
 		Customer customer = customerFacade.getCustomerModel(order.getCustomer(), store, language);
 		OrderTotalSummary summary = this.calculateOrderTotal(store, customer, order, language);
 		this.setOrderTotals(order, summary);
@@ -149,9 +140,7 @@ public class OrderFacadeImpl implements OrderFacade {
 	@Override
 	public OrderTotalSummary calculateOrderTotal(MerchantStore store,
 			PersistableOrder order, Language language) throws Exception {
-	
 		List<PersistableOrderProduct> orderProducts = order.getOrderProductItems();
-		
 		ShoppingCartItemPopulator populator = new ShoppingCartItemPopulator();
 		populator.setProductAttributeService(productAttributeService);
 		populator.setProductService(productService);
@@ -162,21 +151,14 @@ public class OrderFacadeImpl implements OrderFacade {
 			ShoppingCartItem item = populator.populate(orderProduct, new ShoppingCartItem(), store, language);
 			items.add(item);
 		}
-		
-
 		Customer customer = customer(order.getCustomer(), store, language);
-		
 		OrderTotalSummary summary = this.calculateOrderTotal(store, customer, order, language);
-
 		return summary;
 	}
 	
 	private OrderTotalSummary calculateOrderTotal(MerchantStore store, Customer customer, PersistableOrder order, Language language) throws Exception {
-		
 		OrderTotalSummary orderTotalSummary = null;
-		
 		OrderSummary summary = new OrderSummary();
-		
 		
 		if(order instanceof ShopOrder) {
 			ShopOrder o = (ShopOrder)order;
@@ -191,29 +173,23 @@ public class OrderFacadeImpl implements OrderFacade {
 			//PersistableOrder not implemented
 			throw new Exception("calculateOrderTotal not yet implemented for PersistableOrder");
 		}
-
 		return orderTotalSummary;
-		
 	}
 	
-	
-	private PersistableCustomer persistableCustomer(Customer customer, MerchantStore store, Language language) throws Exception {
-		
+	@Override	
+	public PersistableCustomer persistableCustomer(Customer customer, MerchantStore store, Language language) throws Exception {
 		PersistableCustomerPopulator customerPopulator = new PersistableCustomerPopulator();
 		PersistableCustomer persistableCustomer = customerPopulator.populate(customer, new PersistableCustomer(), store, language);
 		return persistableCustomer;
-		
 	}
 	
 	private Customer customer(PersistableCustomer customer, MerchantStore store, Language language) throws Exception {
 		CustomerPopulator customerPopulator = new CustomerPopulator();
 		Customer cust = customerPopulator.populate(customer, new Customer(), store, language);
 		return cust;
-		
 	}
 	
 	private void setOrderTotals(OrderEntity order, OrderTotalSummary summary) {
-		
 		List<OrderTotal> totals = new ArrayList<OrderTotal>();
 		List<com.salesmanager.core.model.order.OrderTotal> orderTotals = summary.getTotals();
 		for(com.salesmanager.core.model.order.OrderTotal t : orderTotals) {
@@ -223,9 +199,7 @@ public class OrderFacadeImpl implements OrderFacade {
 			total.setValue(t.getValue());
 			totals.add(total);
 		}
-		
 		order.setTotals(totals);
-		
 	}
 
 
@@ -235,17 +209,13 @@ public class OrderFacadeImpl implements OrderFacade {
 	@Override
 	public Order processOrder(ShopOrder order, Customer customer, MerchantStore store,
 			Language language) throws ServiceException {
-				
 		return this.processOrderModel(order, customer, null, store, language);
-
 	}
 	
 	@Override
 	public Order processOrder(ShopOrder order, Customer customer, Transaction transaction, MerchantStore store,
 			Language language) throws ServiceException {
-				
 		return this.processOrderModel(order, customer, transaction, store, language);
-
 	}
 	
 	private Order processOrderModel(ShopOrder order, Customer customer, Transaction transaction, MerchantStore store,
@@ -475,18 +445,12 @@ public class OrderFacadeImpl implements OrderFacade {
 	
 	@Override
 	public ShippingQuote getShippingQuote(PersistableCustomer persistableCustomer, ShoppingCart cart, ShopOrder order, MerchantStore store, Language language) throws Exception {
-		
-
 		//create shipping products
 		List<ShippingProduct> shippingProducts = shoppingCartService.createShippingProduct(cart);
-
 		if(CollectionUtils.isEmpty(shippingProducts)) {
 			return null;//products are virtual
 		}
-				
 		Customer customer = customerFacade.getCustomerModel(persistableCustomer, store, language);
-
-		
 		Delivery delivery = new Delivery();
 		
 		//adjust shipping and billing
@@ -963,4 +927,46 @@ public class OrderFacadeImpl implements OrderFacade {
 		return readableOrder;
 	}
 
+	@Override
+	public ReadableOrder getReadableOrderByOrder(Order modelOrder, MerchantStore store,
+			Language language) throws Exception {
+		//Order modelOrder = orderService.getById(orderId);
+		if(modelOrder==null) {
+			throw new Exception("Order not found with id " + modelOrder.getId());
+		}
+		
+		ReadableOrder readableOrder = new ReadableOrder();
+		
+		Long customerId = modelOrder.getCustomerId();
+		if(customerId != null) {
+			ReadableCustomer readableCustomer = customerFacade.getCustomerById(customerId, store, language);
+			if(readableCustomer==null) {
+				LOGGER.warn("Customer id " + customerId + " not found in order " + modelOrder.getId());
+			} else {
+				readableOrder.setCustomer(readableCustomer);
+			}
+		}
+		
+		ReadableOrderPopulator orderPopulator = new ReadableOrderPopulator();
+		orderPopulator.populate(modelOrder, readableOrder,  store, language);
+		
+		//order products
+		List<ReadableOrderProduct> orderProducts = new ArrayList<ReadableOrderProduct>();
+		for(OrderProduct p : modelOrder.getOrderProducts()) {
+			ReadableOrderProductPopulator orderProductPopulator = new ReadableOrderProductPopulator();
+			orderProductPopulator.setProductService(productService);
+			orderProductPopulator.setPricingService(pricingService);
+			orderProductPopulator.setimageUtils(imageUtils);
+			
+			ReadableOrderProduct orderProduct = new ReadableOrderProduct();
+			orderProductPopulator.populate(p, orderProduct, store, language);
+			orderProducts.add(orderProduct);
+		}
+		
+		readableOrder.setProducts(orderProducts);
+		
+		return readableOrder;
+	}
+
+	
 }

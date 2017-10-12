@@ -105,5 +105,8 @@ public interface OrderFacade {
 	 * @throws Exception
 	 */
 	ReadableOrderList getReadableOrderList(MerchantStore store, int start,
-			int maxCount, Language language) throws Exception;
+			int maxCount, Language language) throws Exception;	
+	PersistableCustomer persistableCustomer(Customer customer, MerchantStore store, Language language) throws Exception;
+	ReadableOrder getReadableOrderByOrder(Order modelOrder, MerchantStore store, Language language) throws Exception;
 }
+	

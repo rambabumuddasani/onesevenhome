@@ -83,19 +83,15 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
     
     @Override
     public Order processOrder(Order order, Customer customer, List<ShoppingCartItem> items, OrderTotalSummary summary, Payment payment, MerchantStore store) throws ServiceException {
-    	
     	return this.process(order, customer, items, summary, payment, null, store);
     }
     
     @Override
     public Order processOrder(Order order, Customer customer, List<ShoppingCartItem> items, OrderTotalSummary summary, Payment payment, Transaction transaction, MerchantStore store) throws ServiceException {
-    	
     	return this.process(order, customer, items, summary, payment, transaction, store);
     }
     
     private Order process(Order order, Customer customer, List<ShoppingCartItem> items, OrderTotalSummary summary, Payment payment, Transaction transaction, MerchantStore store) throws ServiceException {
-    	
-    	
     	Validate.notNull(order, "Order cannot be null");
     	Validate.notNull(customer, "Customer cannot be null (even if anonymous order)");
     	Validate.notEmpty(items, "ShoppingCart items cannot be null");
