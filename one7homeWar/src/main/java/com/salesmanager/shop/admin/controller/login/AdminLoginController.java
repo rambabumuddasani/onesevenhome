@@ -1,6 +1,7 @@
 package com.salesmanager.shop.admin.controller.login;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -171,7 +172,11 @@ public class AdminLoginController extends AbstractController {
 		adminLoginResponse.setStatus("true");
 		adminLoginResponse.setId(dbUser.getId());
 		adminLoginResponse.setAdminName(dbUser.getAdminName());
-
+		
+		dbUser.setLastAccess(dbUser.getLoginTime());
+		dbUser.setLoginTime(new Date());
+		System.out.println("Last access :"+dbUser.getLastAccess());
+		userService.saveOrUpdate(dbUser);
 		return adminLoginResponse;
 	}
 

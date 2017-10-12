@@ -51,6 +51,8 @@ import com.salesmanager.core.model.catalog.product.price.ProductPrice;
 import com.salesmanager.core.model.catalog.product.type.ProductType;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.product.vendor.VendorProduct;
+import com.salesmanager.core.model.reference.country.Country;
+import com.salesmanager.core.model.reference.country.CountryDescription;
 import com.salesmanager.core.model.user.User;
 import com.salesmanager.shop.admin.controller.products.PaginatedResponse;
 import com.salesmanager.shop.admin.controller.products.ProductResponse;
@@ -121,6 +123,7 @@ public class AdminController extends AbstractController {
 		} catch (ServiceException e) {
 			adminUpdateStoreResponse.setErrorMessage("Error in updating Store");
 			adminUpdateStoreResponse.setStatus("false");
+			return adminUpdateStoreResponse;
 		}
 		//update store
 	    merchantStore.setStorename(adminUpdateStoreRequest.getStoreName());
@@ -131,8 +134,17 @@ public class AdminController extends AbstractController {
 	    merchantStore.setStorecity(adminUpdateStoreRequest.getStoreCity());
 	    merchantStore.setStorestateprovince(adminUpdateStoreRequest.getStoreState());
 	    merchantStore.setStorepostalcode(adminUpdateStoreRequest.getStorePostalCode());
-	    //merchantStore.setCountry(adminUpdateStoreRequest.getStoreCountry());
-	    
+	   
+	    Country storeCountry = null;
+	    try {
+			Country country = countryService.getByCode(adminUpdateStoreRequest.getStoreCountry());
+			storeCountry = country;
+		} catch (ServiceException e1) {
+			adminUpdateStoreResponse.setErrorMessage("Error in updating Store");
+			adminUpdateStoreResponse.setStatus("false");
+			return adminUpdateStoreResponse;
+		}
+	    merchantStore.setCountry(storeCountry);
 	    System.out.println("adminUpdateStoreRequest.getStoreName()= "+adminUpdateStoreRequest.getStoreName());
 	    System.out.println("adminUpdateStoreRequest.getStoreCode()= "+adminUpdateStoreRequest.getStoreCode());
 	    System.out.println("adminUpdateStoreRequest.getStorePhone()= "+adminUpdateStoreRequest.getStorePhone());
@@ -175,9 +187,16 @@ public class AdminController extends AbstractController {
 	        storeInfo.setStoreCity(merchantStore.getStorecity());
 	        storeInfo.setStoreState(merchantStore.getStorestateprovince());
 	        storeInfo.setStorePostalCode(merchantStore.getStorepostalcode());
-	        storeInfo.setStoreCountry(merchantStore.getCountry().getIsoCode());
-	        storeInfo.setStoreCode(merchantStore.getCode());
 	        
+	        storeInfo.setStoreCode(merchantStore.getCode());
+	        Country country = countryService.getByCode(merchantStore.getCountry().getIsoCode());
+		    
+	        List<CountryDescription> countryDescription = country.getDescriptions();
+	        
+	        for(CountryDescription countryDesc:countryDescription){
+	        	String countryName = countryDesc.getName();
+	        	storeInfo.setStoreCountry(countryName);
+	        }
 	        System.out.println("merchantStore.getStorename()=="+merchantStore.getStorename());
 	        System.out.println("merchantStore.getStoreaddress()=="+merchantStore.getStoreaddress());
 	        System.out.println("merchantStore.getStoreEmailAddress()=="+merchantStore.getStoreEmailAddress());
