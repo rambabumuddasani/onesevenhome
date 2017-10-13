@@ -675,7 +675,7 @@ public class CustomerRegistrationController extends AbstractController {
     	vendorAttrs.setVendorExpLine(vendorRequest.getVendorExpLine());
     	vendorAttrs.setVendorMajorCust(vendorRequest.getVendorMajorCust());
     	vendorAttrs.setVendorTIN(vendorRequest.getVendorTIN());
-    	
+    	vendorAttrs.setVendorLicense(vendorRequest.getVendorLicense());
     	customer.setVendor(vendorAttrs);
         Language language = languageService.getByCode( Constants.DEFAULT_LANGUAGE );
         String userName = null;
