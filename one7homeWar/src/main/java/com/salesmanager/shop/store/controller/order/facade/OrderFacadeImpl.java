@@ -237,7 +237,7 @@ public class OrderFacadeImpl implements OrderFacade {
 			modelOrder.setBilling(customer.getBilling());
 			modelOrder.setDelivery(customer.getDelivery());
 			modelOrder.setPaymentModuleCode(order.getPaymentModule());
-			modelOrder.setPaymentType(PaymentType.valueOf(order.getPaymentMethodType()));
+			//modelOrder.setPaymentType(PaymentType.valueOf(order.getPaymentMethodType()));
 			modelOrder.setShippingModuleCode(order.getShippingModule());
 			modelOrder.setCustomerAgreement(order.isCustomerAgreed());
 			modelOrder.setLocale(LocaleUtils.getLocale(store));//set the store locale based on the country for order $ formatting
@@ -299,6 +299,7 @@ public class OrderFacadeImpl implements OrderFacade {
 			
 			String paymentType = order.getPaymentMethodType();
 			Payment payment = new Payment();
+			
 			payment.setPaymentType(PaymentType.valueOf(paymentType));
 			if(PaymentType.CREDITCARD.name().equals(paymentType)) {
 				

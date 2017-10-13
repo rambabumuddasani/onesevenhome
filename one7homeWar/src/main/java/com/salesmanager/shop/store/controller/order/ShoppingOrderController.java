@@ -37,6 +37,7 @@ import com.salesmanager.core.model.shipping.ShippingSummary;
 import com.salesmanager.core.model.shoppingcart.ShoppingCartItem;
 import com.salesmanager.shop.admin.model.userpassword.UserReset;
 import com.salesmanager.shop.constants.Constants;
+import com.salesmanager.shop.model.customer.Address;
 import com.salesmanager.shop.model.customer.AnonymousCustomer;
 import com.salesmanager.shop.model.customer.PersistableCustomer;
 import com.salesmanager.shop.model.customer.ReadableDelivery;
@@ -52,6 +53,8 @@ import com.salesmanager.shop.populator.order.ReadableShippingSummaryPopulator;
 import com.salesmanager.shop.populator.order.ReadableShopOrderPopulator;
 import com.salesmanager.shop.store.controller.AbstractController;
 import com.salesmanager.shop.store.controller.ControllerConstants;
+import com.salesmanager.shop.store.controller.customer.CustomerRequest;
+import com.salesmanager.shop.store.controller.customer.CustomerResponse;
 import com.salesmanager.shop.store.controller.customer.facade.CustomerFacade;
 import com.salesmanager.shop.store.controller.order.facade.OrderFacade;
 import com.salesmanager.shop.store.controller.shoppingCart.facade.ShoppingCartFacade;
@@ -63,6 +66,7 @@ import org.apache.commons.lang.Validate;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -593,12 +597,13 @@ public class ShoppingOrderController extends AbstractController {
 	}
 
 	
+    
 	@SuppressWarnings("unchecked")
-	@RequestMapping("/commitOrder")
-	public ReadableOrder commitOrder(HttpServletRequest request, HttpServletResponse response, Locale locale) throws Exception {
+	@RequestMapping(value="/commitOrder", method = RequestMethod.POST)
+	public ReadableOrder commitOrder(@RequestBody Address address,HttpServletRequest request, Locale locale) throws Exception {
 		ReadableOrder readableOrder = new ReadableOrder();
 		ShopOrder shopOrder = new ShopOrder();
-		
+		shopOrder.setPaymentType(PaymentType.PAYPAL);
 		Customer customer = getSessionAttribute(  Constants.CUSTOMER, request );
 		MerchantStore store = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
 		Language language = (Language)request.getAttribute("LANGUAGE");
