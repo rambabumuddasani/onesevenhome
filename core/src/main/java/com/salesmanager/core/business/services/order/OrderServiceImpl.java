@@ -100,7 +100,7 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
     	Validate.notNull(summary, "Order total Summary cannot be null");
     	
     	//first process payment
-    	Transaction processTransaction = paymentService.processPayment(customer, store, payment, items, order);
+    	//Transaction processTransaction = paymentService.processPayment(customer, store, payment, items, order);
     	//transactionService.save(processTransaction);
     	
     	if(order.getOrderHistory()==null || order.getOrderHistory().size()==0 || order.getStatus()==null) {
@@ -136,7 +136,7 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
     		}
     	}
     	
-    	if(processTransaction!=null) {
+/*    	if(processTransaction!=null) {
     		processTransaction.setOrder(order);
     		if(processTransaction.getId()==null || processTransaction.getId()==0) {
     			transactionService.create(processTransaction);
@@ -144,7 +144,7 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
     			transactionService.update(processTransaction);
     		}
     	}
-    	
+*/    	
     	return order;
     	
     	
@@ -216,7 +216,7 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
         }
         
         //only in order page, otherwise invokes too many processing
-        if(OrderSummaryType.ORDERTOTAL.name().equals(summary.getOrderSummaryType().name())) {
+/*        if(OrderSummaryType.ORDERTOTAL.name().equals(summary.getOrderSummaryType().name())) {
 
 	        //Post processing order total variation modules for sub total calculation - drools, custom modules
 	        //may affect the sub total
@@ -233,7 +233,7 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
 	        }
         
         }
-
+*/
 
         totalSummary.setSubTotal(subTotal);
         grandTotal=grandTotal.add(subTotal);
@@ -291,7 +291,7 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
         }
 
         //tax
-        List<TaxItem> taxes = taxService.calculateTax(summary, customer, store, language);
+/*        List<TaxItem> taxes = taxService.calculateTax(summary, customer, store, language);
         if(taxes!=null && taxes.size()>0) {
         	BigDecimal totalTaxes = new BigDecimal(0);
         	totalTaxes.setScale(2, RoundingMode.HALF_UP);
@@ -316,7 +316,7 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
             }
             grandTotal = grandTotal.add(totalTaxes);
             totalSummary.setTaxTotal(totalTaxes);
-        }
+        }*/
 
         // grand total
         OrderTotal orderTotal = new OrderTotal();

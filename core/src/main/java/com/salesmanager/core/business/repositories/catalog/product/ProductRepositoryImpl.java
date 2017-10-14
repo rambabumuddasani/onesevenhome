@@ -508,9 +508,9 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 
 
 				
-				List regionList = new ArrayList();
+				/*List regionList = new ArrayList();
 				regionList.add("*");
-				regionList.add(locale.getCountry());
+				*///regionList.add(locale.getCountry());
 				
 
 				StringBuilder qs = new StringBuilder();
@@ -539,8 +539,9 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 				qs.append("left join fetch p.type type ");
 				qs.append("left join fetch p.taxClass tx ");
 				
-				qs.append("where p.id=:pid and pa.region in (:lid) ");
-				qs.append("and pd.language.id=:lang and papd.language.id=:lang ");
+				//qs.append("where p.id=:pid and pa.region in (:lid) ");
+				qs.append("where p.id=:pid  ");
+				//qs.append("and pd.language.id=:lang and papd.language.id=:lang ");
 				qs.append("and p.available=true and p.dateAvailable<=:dt ");
 				//this cannot be done on child elements from left join
 				//qs.append("and pod.languageId=:lang and povd.languageId=:lang");
@@ -549,9 +550,9 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 				Query q = this.em.createQuery(hql);
 
 		    	q.setParameter("pid", productId);
-		    	q.setParameter("lid", regionList);
+		    	//q.setParameter("lid", regionList);
 		    	q.setParameter("dt", new Date());
-		    	q.setParameter("lang", language.getId());
+		    	//q.setParameter("lang", language.getId());
 
 		    	Product p = (Product)q.getSingleResult();
 

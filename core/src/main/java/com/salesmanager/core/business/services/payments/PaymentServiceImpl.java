@@ -323,10 +323,10 @@ public class PaymentServiceImpl implements PaymentService {
 		
 		IntegrationConfiguration configuration = modules.get(payment.getModuleName());
 		
-		if(configuration==null) {
+/*		if(configuration==null) {
 			throw new ServiceException("Payment module " + payment.getModuleName() + " is not configured");
 		}
-		
+*/		
 		if(!configuration.isActive()) {
 			throw new ServiceException("Payment module " + payment.getModuleName() + " is not active");
 		}

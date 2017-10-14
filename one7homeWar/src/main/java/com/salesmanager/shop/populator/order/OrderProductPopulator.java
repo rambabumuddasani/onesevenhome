@@ -70,10 +70,10 @@ public class OrderProductPopulator extends
 				throw new ConversionException("Cannot get product with id (productId) " + source.getProductId());
 			}
 			
-			if(modelProduct.getMerchantStore().getId().intValue()!=store.getId().intValue()) {
+/*			if(modelProduct.getMerchantStore().getId().intValue()!=store.getId().intValue()) {
 				throw new ConversionException("Invalid product id " + source.getProductId());
 			}
-
+*/
 			DigitalProduct digitalProduct = digitalProductService.getByProduct(store, modelProduct);
 			
 			if(digitalProduct!=null) {

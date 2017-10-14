@@ -650,6 +650,8 @@ public class CustomerRegistrationController extends AbstractController {
         }
     	
     	// Store file into file sytem
+    	Vendor vendorAttrs = new Vendor();
+
     	String certFileName = "";
     	if(vendorCertificate.getSize() != 0) {
     		try{
@@ -658,10 +660,8 @@ public class CustomerRegistrationController extends AbstractController {
     		}catch(StorageException se){
     			System.out.println("StoreException occured, do wee need continue "+se);
     		}
+        	vendorAttrs.setVendorAuthCert(certFileName);
     	}
-    	
-    	Vendor vendorAttrs = new Vendor();
-    	vendorAttrs.setVendorAuthCert(certFileName);
     	vendorAttrs.setVendorName(vendorRequest.getVendorName());
     	vendorAttrs.setVendorOfficeAddress(vendorRequest.getVendorOfficeAddress());
     	vendorAttrs.setVendorMobile(vendorRequest.getVendorMobile());
@@ -675,7 +675,7 @@ public class CustomerRegistrationController extends AbstractController {
     	vendorAttrs.setVendorExpLine(vendorRequest.getVendorExpLine());
     	vendorAttrs.setVendorMajorCust(vendorRequest.getVendorMajorCust());
     	vendorAttrs.setVendorTIN(vendorRequest.getVendorTIN());
-    	
+    	vendorAttrs.setVendorLicense(vendorRequest.getVendorLicense());
     	customer.setVendor(vendorAttrs);
         Language language = languageService.getByCode( Constants.DEFAULT_LANGUAGE );
         String userName = null;
@@ -1142,6 +1142,7 @@ public class CustomerRegistrationController extends AbstractController {
             }
             	
         }	
+        VendorAttributes vendorAttrs = customer.getVendorAttrs();
         String certFileName = "";
         if(vendorCertificate.getSize() != 0) {
         	try{
@@ -1150,9 +1151,9 @@ public class CustomerRegistrationController extends AbstractController {
         	}catch(StorageException se){
         		System.out.println("StoreException occured, do wee need continue "+se);
         	}
+            vendorAttrs.setVendorAuthCert(certFileName);
         }
         
-        VendorAttributes vendorAttrs = new VendorAttributes();
         vendorAttrs.setVendorOfficeAddress(vendorRequest.getVendorOfficeAddress());
         vendorAttrs.setVendorMobile(vendorRequest.getVendorMobile());
         vendorAttrs.setVendorTelephone(vendorRequest.getVendorTelephone());
@@ -1168,7 +1169,6 @@ public class CustomerRegistrationController extends AbstractController {
         vendorAttrs.setVendorLicense(vendorRequest.getVendorLicense());
         //vendorAttrs.setVendorAuthCert(vendorRequest.getVendorAuthCert());
         vendorAttrs.setVendorVatRegNo(vendorRequest.getVatRegNo());
-        vendorAttrs.setVendorAuthCert(certFileName);
         customer.setVendorAttrs(vendorAttrs);
         
         try {
