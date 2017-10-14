@@ -4,6 +4,7 @@ package com.salesmanager.shop.admin.controller.categories;
 public class CreateFilterResponse {
 	Long categoryId;
 	String filterName;
+	Long productId;
 	boolean status;
 	String errorMessage;
 	public Long getCategoryId() {
@@ -29,6 +30,12 @@ public class CreateFilterResponse {
 	}
 	public void setFilterName(String filterName) {
 		this.filterName = filterName;
+	}
+	public Long getProductId() {
+		return productId;
+	}
+	public void setProductId(Long productId) {
+		this.productId = productId;
 	}
 	
 }

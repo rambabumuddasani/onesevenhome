@@ -162,10 +162,11 @@ public class FilterController {
 			}
 			if(filterTypeRequest.getFilterTypes() != null){
 				FilterType filterType = null;
-				filterType.setFilter(filter);
+				
 				List<FilterType> filterTypesList = new ArrayList<FilterType>();
 				for(String filterTypeName:filterTypeRequest.getFilterTypes()) {
 					filterType = new FilterType();
+					filterType.setFilter(filter);
 					filterType.setFilterTypeName(filterTypeName);
 					filterTypesList.add(filterType);
 				}
@@ -185,9 +186,6 @@ public class FilterController {
 	@ResponseBody
 	public CreateFilterResponse addProductToFilter(@RequestBody CreateFilterTypeRequest filterTypeRequest) throws Exception {
     	CreateFilterResponse createFilterResponse = new CreateFilterResponse();
-		String categoryName = filterTypeRequest.getCategoryName();
-		categoryName = categoryName.replaceAll("_", " ");
-		Category category = categoryService.getByCategoryCode(categoryName);
 		
 		if(filterTypeRequest.getProductId() == null){
 			createFilterResponse.setStatus(false);
@@ -204,15 +202,16 @@ public class FilterController {
 			
 			if(filterTypeRequest.getFilterTypeIds() != null){
 				FilterType filterType = null;
-				filterType.setFilter(filter);
+				
 				Set<FilterType> filters = new HashSet<FilterType>();
 				for(Long filterId:filterTypeRequest.getFilterTypeIds()) {
 					filterType = filterTypeService.getById(filterId);
+					filterType.setFilter(filter);
 					filters.add(filterType);
 				}
 				dbProduct.setFilters(filters);
 				productService.update(dbProduct);
-				createFilterResponse.setCategoryId(category.getId());
+				createFilterResponse.setProductId(filterTypeRequest.getProductId());
 				createFilterResponse.setFilterName(filterTypeRequest.getFilterName());
 				createFilterResponse.setStatus(true);
 			}
