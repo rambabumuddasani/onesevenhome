@@ -18,6 +18,7 @@ import com.salesmanager.core.business.services.shoppingcart.ShoppingCartService;
 import com.salesmanager.core.business.utils.CreditCardUtils;
 import com.salesmanager.core.model.common.Billing;
 import com.salesmanager.core.model.common.Delivery;
+import com.salesmanager.core.model.common.SecondaryDelivery;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.order.Order;
@@ -222,23 +223,14 @@ public class OrderFacadeImpl implements OrderFacade {
 			Language language) throws ServiceException {
 		
 		try {
-			
-			if(order.isShipToBillingAdress()) {//customer shipping is billing
-				PersistableCustomer orderCustomer = order.getCustomer();
-				Address billing = orderCustomer.getBilling();
-				orderCustomer.setDelivery(billing);
-			}
-
- 
-
-			
+						
 			Order modelOrder = new Order();
 			modelOrder.setDatePurchased(new Date());
-			modelOrder.setBilling(customer.getBilling());
-			modelOrder.setDelivery(customer.getDelivery());
-			modelOrder.setPaymentModuleCode(order.getPaymentModule());
+			//modelOrder.setBilling(customer.getBilling());
+			//modelOrder.setDelivery(customer.getDelivery());
+			//modelOrder.setPaymentModuleCode(order.getPaymentModule());
 			//modelOrder.setPaymentType(PaymentType.valueOf(order.getPaymentMethodType()));
-			modelOrder.setShippingModuleCode(order.getShippingModule());
+			//modelOrder.setShippingModuleCode(order.getShippingModule());
 			modelOrder.setCustomerAgreement(order.isCustomerAgreed());
 			modelOrder.setLocale(LocaleUtils.getLocale(store));//set the store locale based on the country for order $ formatting
 	
@@ -290,18 +282,19 @@ public class OrderFacadeImpl implements OrderFacade {
 			
 			
 			//customer object
-			orderCustomer(customer, modelOrder, language);
+			orderCustomer(order,customer, modelOrder, language);
 			
 			//populate shipping information
 			if(!StringUtils.isBlank(order.getShippingModule())) {
 				modelOrder.setShippingModuleCode(order.getShippingModule());
 			}
-			
-			String paymentType = order.getPaymentMethodType();
+			modelOrder.setIpAddress(order.getIpAddress());
+			//String paymentType = order.getPaymentMethodType();
+			modelOrder.setPaymentType(PaymentType.CCAvenue);
 			Payment payment = new Payment();
 			
-			payment.setPaymentType(PaymentType.valueOf(paymentType));
-			if(PaymentType.CREDITCARD.name().equals(paymentType)) {
+			//payment.setPaymentType(PaymentType.valueOf(paymentType));
+/*			if(PaymentType.CREDITCARD.name().equals(paymentType)) {
 				
 				
 				
@@ -363,21 +356,17 @@ public class OrderFacadeImpl implements OrderFacade {
 				
 				
 			}
-			
+*/			
 
-			modelOrder.setPaymentModuleCode(order.getPaymentModule());
-			payment.setModuleName(order.getPaymentModule());
+			//modelOrder.setPaymentModuleCode(order.getPaymentModule());
+			//payment.setModuleName(order.getPaymentModule());
 
-			if(transaction!=null) {
+			//if(transaction!=null) {
 				orderService.processOrder(modelOrder, customer, order.getShoppingCartItems(), summary, payment, store);
-			} else {
-				orderService.processOrder(modelOrder, customer, order.getShoppingCartItems(), summary, payment, transaction, store);
-			}
-			
-
-			
+			//} else {
+				//orderService.processOrder(modelOrder, customer, order.getShoppingCartItems(), summary, payment, transaction, store);
+			//}
 			return modelOrder;
-		
 		} catch(ServiceException se) {//may be invalid credit card
 			throw se;
 		} catch(Exception e) {
@@ -386,18 +375,95 @@ public class OrderFacadeImpl implements OrderFacade {
 		
 	}
 	
-	private void orderCustomer(Customer customer, Order order, Language language) throws Exception {
+	private void orderCustomer(ShopOrder shopOrder,Customer customer, Order order, Language language) throws Exception {
 
 		//populate customer
 		order.setBilling(customer.getBilling());
-		order.setDelivery(customer.getDelivery());
+		if(shopOrder.getPreferedShippingAddress() == 1){
+			order.setDelivery(customer.getDelivery());
+		}else if(shopOrder.getPreferedShippingAddress() == 2){
+			order.setDelivery(populateSecondaryDeliveryAddressAsDeliveryAddress(customer.getSecondaryDelivery()));			
+		}else{
+			order.setDelivery(populateBillingAddressAsDeliveryAddress(customer.getBilling()));
+		}
 		order.setCustomerEmailAddress(customer.getEmailAddress());
 		order.setCustomerId(customer.getId());
-
-		
-		
 	}
+	
+	private Delivery populateBillingAddressAsDeliveryAddress(Billing billing){
+        Delivery delivery=new Delivery();
+        delivery.setFirstName( billing.getFirstName()) ;
+        delivery.setLastName( billing.getLastName() );
+        
+        if(StringUtils.isNotBlank( billing.getAddress())){
+            delivery.setAddress( billing.getAddress() ); 
+        }
+        
+        if(StringUtils.isNotBlank( billing.getCity())){
+            delivery.setCity( billing.getCity() );
+        }
+        
+        if(StringUtils.isNotBlank( billing.getCompany())){
+            delivery.setCompany( billing.getCompany() );
+        }
+        
+        if(StringUtils.isNotBlank( billing.getTelephone())){
+            delivery.setTelephone( billing.getTelephone());
+        }
+        
+        if(StringUtils.isNotBlank( billing.getPostalCode())){
+            delivery.setPostalCode( billing.getPostalCode());
+        }
+        
+        if(StringUtils.isNotBlank( billing.getState())){
+            delivery.setState(billing.getState());
+        }
+        
+     //   target.setSecondaryDelivery( delivery );
+        
+/*        if(StringUtils.isNotBlank( billing.getArea())){
+      	  target.setArea( billing.getArea());
+        }
+*/		return delivery;
+        }
 
+	private Delivery populateSecondaryDeliveryAddressAsDeliveryAddress(SecondaryDelivery sDelivryAddr){
+        Delivery delivery=new Delivery();
+        delivery.setFirstName( sDelivryAddr.getFirstName()) ;
+        delivery.setLastName( sDelivryAddr.getLastName() );
+        
+        if(StringUtils.isNotBlank( sDelivryAddr.getAddress())){
+            delivery.setAddress( sDelivryAddr.getAddress() ); 
+        }
+        
+        if(StringUtils.isNotBlank( sDelivryAddr.getCity())){
+            delivery.setCity( sDelivryAddr.getCity() );
+        }
+        
+        if(StringUtils.isNotBlank( sDelivryAddr.getCompany())){
+            delivery.setCompany( sDelivryAddr.getCompany() );
+        }
+        
+        if(StringUtils.isNotBlank( sDelivryAddr.getTelephone())){
+            delivery.setTelephone( sDelivryAddr.getTelephone());
+        }
+        
+        if(StringUtils.isNotBlank( sDelivryAddr.getPostalCode())){
+            delivery.setPostalCode( sDelivryAddr.getPostalCode());
+        }
+        
+        if(StringUtils.isNotBlank( sDelivryAddr.getState())){
+            delivery.setState(sDelivryAddr.getState());
+        }
+        
+     //   target.setSecondaryDelivery( delivery );
+        
+/*        if(StringUtils.isNotBlank( billing.getArea())){
+      	  target.setArea( billing.getArea());
+        }
+*/		return delivery;
+        }
+	
 
 
 	@Override
@@ -947,7 +1013,9 @@ public class OrderFacadeImpl implements OrderFacade {
 				readableOrder.setCustomer(readableCustomer);
 			}
 		}
-		
+		readableOrder.setPaymentType(modelOrder.getPaymentType());
+		readableOrder.setCustomerAgreed(true);
+		readableOrder.setConfirmedAddress(true);
 		ReadableOrderPopulator orderPopulator = new ReadableOrderPopulator();
 		orderPopulator.populate(modelOrder, readableOrder,  store, language);
 		

@@ -93,7 +93,7 @@ public class EmailTemplatesUtils {
 		    	   
 		    	   Map<String,Zone> zones = zoneService.getZones(language);
 		    	   
-		    	   Map<String,Country> countries = countryService.getCountriesMap(language);
+		    	  // Map<String,Country> countries = countryService.getCountriesMap(language);
 		    	   
 		    	   //format Billing address
 		    	   StringBuilder billing = new StringBuilder();
@@ -115,10 +115,10 @@ public class EmailTemplatesUtils {
 		    	   } else if(!StringUtils.isBlank(order.getBilling().getState())) {
 		    		   billing.append(order.getBilling().getState()).append(LINE_BREAK); 
 		    	   }
-		    	   Country country = countries.get(order.getBilling().getCountry().getIsoCode());
-		    	   if(country!=null) {
-		    		   billing.append(country.getName()).append(" ");
-		    	   }
+		    	   //Country country = countries.get(order.getBilling().getCountry().getIsoCode());
+		    	   //if(country!=null) {
+		    		   billing.append("India").append(" ");
+		    	   //}
 		    	   billing.append(order.getBilling().getPostalCode());
 		    	   
 		    	   
@@ -144,10 +144,10 @@ public class EmailTemplatesUtils {
 			    	   } else if(!StringUtils.isBlank(order.getDelivery().getState())) {
 			    		   shipping.append(order.getDelivery().getState()).append(LINE_BREAK); 
 			    	   }
-			    	   Country deliveryCountry = countries.get(order.getDelivery().getCountry().getIsoCode());
-			    	   if(country!=null) {
-			    		   shipping.append(deliveryCountry.getName()).append(" ");
-			    	   }
+			    	  // Country deliveryCountry = countries.get(order.getDelivery().getCountry().getIsoCode());
+			    	  // if(country!=null) {
+			    		   shipping.append("India").append(" ");
+			    	   //}
 			    	   shipping.append(order.getDelivery().getPostalCode());
 		    	   }
 		    	   

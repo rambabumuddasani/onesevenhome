@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.salesmanager.core.model.order.orderstatus.OrderStatus;
 import com.salesmanager.core.model.order.payment.CreditCard;
 import com.salesmanager.core.model.payments.PaymentType;
@@ -15,12 +16,15 @@ public class OrderEntity extends Order implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	private List<OrderTotal> totals;
-	
+
 	private PaymentType paymentType;
+	@JsonIgnore
 	private String paymentModule;
+	@JsonIgnore
 	private String shippingModule;
 	private List<OrderStatus> previousOrderStatus;
 	private OrderStatus orderStatus;
+	@JsonIgnore
 	private CreditCard creditCard;
 	private Date datePurchased;
 	private String currency;

@@ -1,5 +1,6 @@
 package com.salesmanager.shop.model.order;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.salesmanager.core.model.reference.currency.Currency;
 import com.salesmanager.shop.model.customer.Address;
 import com.salesmanager.shop.model.customer.ReadableCustomer;
@@ -17,6 +18,7 @@ public class ReadableOrder extends OrderEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private ReadableCustomer customer;
 	private List<ReadableOrderProduct> products;
+	@JsonIgnore
 	private Currency currencyModel;
 	
 	private Address billing;

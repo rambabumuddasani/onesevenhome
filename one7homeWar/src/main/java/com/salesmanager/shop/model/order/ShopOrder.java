@@ -8,6 +8,7 @@ import com.salesmanager.core.model.order.OrderTotalSummary;
 import com.salesmanager.core.model.shipping.ShippingOption;
 import com.salesmanager.core.model.shipping.ShippingSummary;
 import com.salesmanager.core.model.shoppingcart.ShoppingCartItem;
+import com.salesmanager.shop.model.customer.Address;
 
 
 /**
@@ -36,7 +37,9 @@ public class ShopOrder extends PersistableOrder implements Serializable {
 	private Map<String,String> payment;//user payment information
 	
 	private String errorMessage = null;
-
+	//private Address deliveryAddress = null;
+	private Integer preferedShippingAddress;
+	private String ipAddress;
 	
 	public void setShoppingCartItems(List<ShoppingCartItem> shoppingCartItems) {
 		this.shoppingCartItems = shoppingCartItems;
@@ -87,6 +90,24 @@ public class ShopOrder extends PersistableOrder implements Serializable {
 	}
 	public void setDefaultPaymentMethodCode(String defaultPaymentMethodCode) {
 		this.defaultPaymentMethodCode = defaultPaymentMethodCode;
+	}
+	/*public Address getDeliveryAddress() {
+		return deliveryAddress;
+	}
+	public void setDeliveryAddress(Address deliveryAddress) {
+		this.deliveryAddress = deliveryAddress;
+	}*/
+	public String getIpAddress() {
+		return ipAddress;
+	}
+	public void setIpAddress(String ipAddress) {
+		this.ipAddress = ipAddress;
+	}
+	public Integer getPreferedShippingAddress() {
+		return preferedShippingAddress;
+	}
+	public void setPreferedShippingAddress(Integer preferedShippingAddress) {
+		this.preferedShippingAddress = preferedShippingAddress;
 	}
 
 
