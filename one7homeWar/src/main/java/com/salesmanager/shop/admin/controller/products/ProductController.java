@@ -1250,7 +1250,7 @@ public class ProductController extends AbstractController {
 			}
 			else
 				productResponse.setProductPrice(productPrice.getProductPriceAmount());
-				
+			productResponse.setProductDescription(dbProduct.getProductDescription().getDescription());	
 			productResponse.setProductName(dbProduct.getProductDescription().getName());
 			//productResponse.setVendorName(dbProduct.getManufacturer().getCode());
 			

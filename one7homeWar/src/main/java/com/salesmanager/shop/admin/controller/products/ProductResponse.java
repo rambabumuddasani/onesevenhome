@@ -22,6 +22,13 @@ public class ProductResponse {
 	private Timestamp productPriceSpecialEndTime;
 	private Double productRating;
 	private Date productPriceSpecialStartDate;
+	private String productDescription;
+	public String getProductDescription() {
+		return productDescription;
+	}
+	public void setProductDescription(String productDescription) {
+		this.productDescription = productDescription;
+	}
 	public Long getProductId() {
 		return productId;
 	}
