@@ -614,8 +614,10 @@ public class ShoppingOrderController extends AbstractController {
 	// url/allOrderDetails?userId=1
 	@RequestMapping(value="/allOrderDetails", method = RequestMethod.POST)
 	@ResponseBody
-	public List<ReadableOrder> getAllCustomerOrders(@PathVariable Long customerId,HttpServletRequest request, Locale locale) throws Exception {
+	public List<ReadableOrder> getAllCustomerOrders(HttpServletRequest request, Locale locale) throws Exception {
 		MerchantStore store = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
+	    Customer customer = getSessionAttribute(  Constants.CUSTOMER, request );
+	    Long customerId = customer.getId();
 		Language language = (Language)request.getAttribute("LANGUAGE");
 		List<Order> orders = orderService.findOrdersByCustomer(customerId);
 		List<ReadableOrder> allOrders = new ArrayList<ReadableOrder>();
