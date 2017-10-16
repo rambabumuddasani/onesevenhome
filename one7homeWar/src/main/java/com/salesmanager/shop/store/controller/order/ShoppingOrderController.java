@@ -578,14 +578,13 @@ public class ShoppingOrderController extends AbstractController {
 	@RequestMapping(value="/commitOrder/{preferedShippingAddress}", method = RequestMethod.POST)
 	@ResponseBody
 	public ReadableOrder commitOrder(@PathVariable Integer preferedShippingAddress,HttpServletRequest request, Locale locale) throws Exception {
-		ReadableOrder readableOrder = new ReadableOrder();
-		String shoppingCartCode  = (String)request.getSession().getAttribute(Constants.SHOPPING_CART);
-		Customer customer = getSessionAttribute(  Constants.CUSTOMER, request );
-		MerchantStore store = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
-		Language language = (Language)request.getAttribute("LANGUAGE");
-
-		com.salesmanager.core.model.shoppingcart.ShoppingCart cart = shoppingCartFacade.getShoppingCartModel(shoppingCartCode, store);
-		ShopOrder shopOrder =  super.getSessionAttribute(Constants.ORDER, request);;
+		 ReadableOrder readableOrder = new ReadableOrder();
+		 String shoppingCartCode  = (String)request.getSession().getAttribute(Constants.SHOPPING_CART);
+		 Customer customer = getSessionAttribute(  Constants.CUSTOMER, request );
+		 MerchantStore store = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
+		 Language language = (Language)request.getAttribute("LANGUAGE");
+		 com.salesmanager.core.model.shoppingcart.ShoppingCart cart = shoppingCartFacade.getShoppingCartModel(shoppingCartCode, store);
+		 ShopOrder shopOrder =  super.getSessionAttribute(Constants.ORDER, request);;
 	     if(shopOrder==null) {
 	    	 shopOrder = orderFacade.initializeOrder(store, customer, cart, language);
 			 super.setSessionAttribute(Constants.ORDER, shopOrder, request);
@@ -600,28 +599,31 @@ public class ShoppingOrderController extends AbstractController {
 			super.setSessionAttribute(Constants.ORDER_SUMMARY, totalSummary, request);
 		 }
 		 shopOrder.setOrderTotalSummary(totalSummary);
-				//sorderFacade.validateOrder(shopOrder, null, new HashMap<String,String>(), store, locale);
-/*		        if ( bindingResult.hasErrors() )
-		        {
-		            LOGGER.info( "found {} validation error while validating in customer registration ",
-		                         bindingResult.getErrorCount() );
-		    		StringBuilder template = new StringBuilder().append(ControllerConstants.Tiles.Checkout.checkout).append(".").append(store.getStoreTemplate());
-		    		return template.toString();
-		        }
-*/		        
-				Order modelOrder = this.commitOrder(shopOrder, request, locale);
-				readableOrder = orderFacade.getReadableOrderByOrder(modelOrder, store, language);
-				return readableOrder;
-		}
-
-	private com.salesmanager.core.model.shoppingcart.ShoppingCart getShoppingCartByCustomer(HttpServletRequest request) throws ServiceException {
-		Customer customer = getSessionAttribute(  Constants.CUSTOMER, request );
-		if(customer != null) {
-			return shoppingCartService.getByCustomer(customer);
-		}
-		return null;
+		 Order modelOrder = this.commitOrder(shopOrder, request, locale);
+		 readableOrder = orderFacade.getReadableOrderByOrder(modelOrder, store, language);
+		return readableOrder;
 	}
-
+	// url/orderDetails/1?userId=1
+	@RequestMapping(value="/orderDetails/{orderId}", method = RequestMethod.POST)
+	@ResponseBody
+	public ReadableOrder getOrderDetails(@PathVariable Long orderId,HttpServletRequest request, Locale locale) throws Exception {
+		MerchantStore store = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
+		Language language = (Language)request.getAttribute("LANGUAGE");
+		return orderFacade.getReadableOrder(orderId, store, language);
+	}
+	// url/allOrderDetails?userId=1
+	@RequestMapping(value="/allOrderDetails", method = RequestMethod.POST)
+	@ResponseBody
+	public List<ReadableOrder> getAllCustomerOrders(@PathVariable Long customerId,HttpServletRequest request, Locale locale) throws Exception {
+		MerchantStore store = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
+		Language language = (Language)request.getAttribute("LANGUAGE");
+		List<Order> orders = orderService.findOrdersByCustomer(customerId);
+		List<ReadableOrder> allOrders = new ArrayList<ReadableOrder>();
+		for(Order o : orders){
+			allOrders.add(orderFacade.getReadableOrderByOrder(o, store, language));
+		}
+		return allOrders;
+	}
 	
 	/**
 	 * Recalculates shipping and tax following a change in country or province

@@ -115,14 +115,13 @@ public class Order extends SalesManagerEntity<Long, Order> {
 
 	@Embedded
 	private Delivery delivery = null;
-	
+
 	@Valid
 	@Embedded
 	private Billing billing = null;
 	
 	@Embedded
 	private CreditCard creditCard = null;
-
 	
 	@ManyToOne(targetEntity = Currency.class)
 	@JoinColumn(name = "CURRENCY_ID")
@@ -131,8 +130,6 @@ public class Order extends SalesManagerEntity<Long, Order> {
 	@Type(type="locale")  
 	@Column (name ="LOCALE")
 	private Locale locale; 
-	
-
 
 	@ManyToOne(targetEntity = MerchantStore.class)
 	@JoinColumn(name="MERCHANTID")

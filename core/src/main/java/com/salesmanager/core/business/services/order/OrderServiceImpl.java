@@ -82,20 +82,20 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
     }
     
     @Override
-    public Order processOrder(Order order, Customer customer, List<ShoppingCartItem> items, OrderTotalSummary summary, Payment payment, MerchantStore store) throws ServiceException {
-    	return this.process(order, customer, items, summary, payment, null, store);
+    public Order processOrder(Order order, Customer customer, List<ShoppingCartItem> items, OrderTotalSummary summary, MerchantStore store) throws ServiceException {
+    	return this.process(order, customer, items, summary, null, store);
     }
     
     @Override
-    public Order processOrder(Order order, Customer customer, List<ShoppingCartItem> items, OrderTotalSummary summary, Payment payment, Transaction transaction, MerchantStore store) throws ServiceException {
-    	return this.process(order, customer, items, summary, payment, transaction, store);
+    public Order processOrder(Order order, Customer customer, List<ShoppingCartItem> items, OrderTotalSummary summary,  Transaction transaction, MerchantStore store) throws ServiceException {
+    	return this.process(order, customer, items, summary,  transaction, store);
     }
     
-    private Order process(Order order, Customer customer, List<ShoppingCartItem> items, OrderTotalSummary summary, Payment payment, Transaction transaction, MerchantStore store) throws ServiceException {
+    private Order process(Order order, Customer customer, List<ShoppingCartItem> items, OrderTotalSummary summary,  Transaction transaction, MerchantStore store) throws ServiceException {
     	Validate.notNull(order, "Order cannot be null");
     	Validate.notNull(customer, "Customer cannot be null (even if anonymous order)");
     	Validate.notEmpty(items, "ShoppingCart items cannot be null");
-    	Validate.notNull(payment, "Payment cannot be null");
+    	//Validate.notNull(payment, "Payment cannot be null");
     	Validate.notNull(store, "MerchantStore cannot be null");
     	Validate.notNull(summary, "Order total Summary cannot be null");
     	
@@ -506,6 +506,11 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
 			}
 		}
 		return hasDownloads;
+	}
+
+	@Override
+	public List<Order> findOrdersByCustomer(Long id) {
+		return orderRepository.findOrdersByCustomer(id);	
 	}
 
 

@@ -94,11 +94,11 @@ public interface OrderService extends SalesManagerEntityService<Long, Order> {
 
 	Order processOrder(Order order, Customer customer,
 			List<ShoppingCartItem> items, OrderTotalSummary summary,
-			Payment payment, MerchantStore store) throws ServiceException;
+			MerchantStore store) throws ServiceException;
 
 	Order processOrder(Order order, Customer customer,
 			List<ShoppingCartItem> items, OrderTotalSummary summary,
-			Payment payment, Transaction transaction, MerchantStore store)
+			Transaction transaction, MerchantStore store)
 			throws ServiceException;
 
 
@@ -112,4 +112,5 @@ public interface OrderService extends SalesManagerEntityService<Long, Order> {
 	 */
 	boolean hasDownloadFiles(Order order) throws ServiceException;
 
+	List<Order> findOrdersByCustomer(Long id);
 }

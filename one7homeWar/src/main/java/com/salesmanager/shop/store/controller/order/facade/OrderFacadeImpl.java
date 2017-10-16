@@ -226,11 +226,6 @@ public class OrderFacadeImpl implements OrderFacade {
 						
 			Order modelOrder = new Order();
 			modelOrder.setDatePurchased(new Date());
-			//modelOrder.setBilling(customer.getBilling());
-			//modelOrder.setDelivery(customer.getDelivery());
-			//modelOrder.setPaymentModuleCode(order.getPaymentModule());
-			//modelOrder.setPaymentType(PaymentType.valueOf(order.getPaymentMethodType()));
-			//modelOrder.setShippingModuleCode(order.getShippingModule());
 			modelOrder.setCustomerAgreement(order.isCustomerAgreed());
 			modelOrder.setLocale(LocaleUtils.getLocale(store));//set the store locale based on the country for order $ formatting
 	
@@ -248,9 +243,7 @@ public class OrderFacadeImpl implements OrderFacade {
 				orderProduct.setOrder(modelOrder);
 				orderProducts.add(orderProduct);
 			}
-			
 			modelOrder.setOrderProducts(orderProducts);
-			
 			OrderTotalSummary summary = order.getOrderTotalSummary();
 			List<com.salesmanager.core.model.order.OrderTotal> totals = summary.getTotals();
 
@@ -274,16 +267,11 @@ public class OrderFacadeImpl implements OrderFacade {
 			
 			modelOrder.setOrderTotal(modelTotals);
 			modelOrder.setTotal(order.getOrderTotalSummary().getTotal());
-	
 			//order misc objects
 			modelOrder.setCurrency(store.getCurrency());
 			modelOrder.setMerchant(store);
-
-			
-			
 			//customer object
 			orderCustomer(order,customer, modelOrder, language);
-			
 			//populate shipping information
 			if(!StringUtils.isBlank(order.getShippingModule())) {
 				modelOrder.setShippingModuleCode(order.getShippingModule());
@@ -291,92 +279,17 @@ public class OrderFacadeImpl implements OrderFacade {
 			modelOrder.setIpAddress(order.getIpAddress());
 			//String paymentType = order.getPaymentMethodType();
 			modelOrder.setPaymentType(PaymentType.CCAvenue);
-			Payment payment = new Payment();
-			
-			//payment.setPaymentType(PaymentType.valueOf(paymentType));
-/*			if(PaymentType.CREDITCARD.name().equals(paymentType)) {
-				
-				
-				
-				payment = new CreditCardPayment();
-				((CreditCardPayment)payment).setCardOwner(order.getPayment().get("creditcard_card_holder"));
-				((CreditCardPayment)payment).setCredidCardValidationNumber(order.getPayment().get("creditcard_card_cvv"));
-				((CreditCardPayment)payment).setCreditCardNumber(order.getPayment().get("creditcard_card_number"));
-				((CreditCardPayment)payment).setExpirationMonth(order.getPayment().get("creditcard_card_expirationmonth"));
-				((CreditCardPayment)payment).setExpirationYear(order.getPayment().get("creditcard_card_expirationyear"));
-				
-				
-				Map<String,String> paymentMetaData = order.getPayment();
-				payment.setPaymentMetaData(paymentMetaData);
-				
-
-				
-				CreditCardType creditCardType =null;
-				String cardType = order.getPayment().get("creditcard_card_type");
-				
-				if(cardType.equalsIgnoreCase(CreditCardType.AMEX.name())) {
-					creditCardType = CreditCardType.AMEX;
-				} else if(cardType.equalsIgnoreCase(CreditCardType.VISA.name())) {
-					creditCardType = CreditCardType.VISA;
-				} else if(cardType.equalsIgnoreCase(CreditCardType.MASTERCARD.name())) {
-					creditCardType = CreditCardType.MASTERCARD;
-				} else if(cardType.equalsIgnoreCase(CreditCardType.DINERS.name())) {
-					creditCardType = CreditCardType.DINERS;
-				} else if(cardType.equalsIgnoreCase(CreditCardType.DISCOVERY.name())) {
-					creditCardType = CreditCardType.DISCOVERY;
-				}
-	
-				((CreditCardPayment)payment).setCreditCard(creditCardType);
-			
-				CreditCard cc = new CreditCard();
-				cc.setCardType(creditCardType);
-				cc.setCcCvv(((CreditCardPayment)payment).getCredidCardValidationNumber());
-				cc.setCcOwner(((CreditCardPayment)payment).getCardOwner());
-				cc.setCcExpires(((CreditCardPayment)payment).getExpirationMonth() + "-" + ((CreditCardPayment)payment).getExpirationYear());
-			
-				//hash credit card number
-				String maskedNumber = CreditCardUtils.maskCardNumber(order.getPayment().get("creditcard_card_number"));
-				cc.setCcNumber(maskedNumber);
-				modelOrder.setCreditCard(cc);
-				
-
-			}
-			
-			if(PaymentType.PAYPAL.name().equals(paymentType)) {
-				
-				//check for previous transaction
-				if(transaction==null) {
-					throw new ServiceException("payment.error");
-				}
-				
-				payment = new com.salesmanager.core.model.payments.PaypalPayment();
-				
-				((com.salesmanager.core.model.payments.PaypalPayment)payment).setPayerId(transaction.getTransactionDetails().get("PAYERID"));
-				((com.salesmanager.core.model.payments.PaypalPayment)payment).setPaymentToken(transaction.getTransactionDetails().get("TOKEN"));
-				
-				
-			}
-*/			
-
-			//modelOrder.setPaymentModuleCode(order.getPaymentModule());
-			//payment.setModuleName(order.getPaymentModule());
-
-			//if(transaction!=null) {
-				orderService.processOrder(modelOrder, customer, order.getShoppingCartItems(), summary, payment, store);
-			//} else {
-				//orderService.processOrder(modelOrder, customer, order.getShoppingCartItems(), summary, payment, transaction, store);
-			//}
+			//Payment payment = new Payment();
+			orderService.processOrder(modelOrder, customer, order.getShoppingCartItems(), summary,  store);
 			return modelOrder;
 		} catch(ServiceException se) {//may be invalid credit card
 			throw se;
 		} catch(Exception e) {
 			throw new ServiceException(e);
 		}
-		
 	}
 	
 	private void orderCustomer(ShopOrder shopOrder,Customer customer, Order order, Language language) throws Exception {
-
 		//populate customer
 		order.setBilling(customer.getBilling());
 		if(shopOrder.getPreferedShippingAddress() == 1){
@@ -548,7 +461,6 @@ public class OrderFacadeImpl implements OrderFacade {
 	}
 	
 	private String validatePostalCode(String postalCode) {
-		
 		String patternString = "__";//this one is set in the template
 		if(postalCode.contains(patternString)) {
 			postalCode = null;
@@ -558,10 +470,8 @@ public class OrderFacadeImpl implements OrderFacade {
 	
 	@Override
 	public List<Country> getShipToCountry(MerchantStore store, Language language) throws Exception {
-		
 		List<Country> shippingCountriesList = shippingService.getShipToCountryList(store, language);
 		return shippingCountriesList;
-		
 	}
 	
 
@@ -603,14 +513,8 @@ public class OrderFacadeImpl implements OrderFacade {
 
 	@Override
 	public void validateOrder(ShopOrder order, BindingResult bindingResult, Map<String,String> messagesResult, MerchantStore store,  Locale locale) throws ServiceException {
-
-
 		Validate.notNull(messagesResult,"messagesResult should not be null");
-	
-	
 		try {
-	
-
 			//Language language = (Language)request.getAttribute("LANGUAGE");
 
 			//validate order shipping and billing
@@ -769,25 +673,16 @@ public class OrderFacadeImpl implements OrderFacade {
 				} else if(cardType.equalsIgnoreCase(CreditCardType.DISCOVERY.name())) {
 					creditCardType = CreditCardType.DISCOVERY;
 				}
-				
 				if(creditCardType==null) {
 					ServiceException serviceException = new ServiceException(ServiceException.EXCEPTION_VALIDATION,"cc.type");
 					throw serviceException;
 				}
 
 			}
-			
-			
-			
-
-      
-	        
-        
 		} catch(ServiceException se) {
 			LOGGER.error("Error while commiting order",se);
 			throw se;
 		}
-
 }
 
 
@@ -817,11 +712,7 @@ public class OrderFacadeImpl implements OrderFacade {
 		if(CollectionUtils.isEmpty(shippingProducts)) {
 			return null;//products are virtual
 		}
-				
-
-		
 		Delivery delivery = new Delivery();
-		
 		//adjust shipping and billing
 		if(order.isShipToBillingAdress()) {
 			Billing billing = customer.getBilling();
@@ -862,18 +753,13 @@ public class OrderFacadeImpl implements OrderFacade {
         List<ReadableOrder> readableOrders = new ArrayList<ReadableOrder>();
         for (Order order : orders) {
             ReadableOrder readableOrder = new ReadableOrder();
-            try
-            {
+            try {
                 orderPopulator.populate(order,readableOrder,store,language);
                 setOrderProductList(order,locale,store,language,readableOrder);
-            }
-            catch ( ConversionException ex )
-            {
+            } catch ( ConversionException ex ) {
                 LOGGER.error( "Error while converting order to order data", ex );
-                
             }
             readableOrders.add(readableOrder);
-            
         }
         
         returnList.setTotal(orderList.getTotalCount());
@@ -892,16 +778,10 @@ public class OrderFacadeImpl implements OrderFacade {
             orderProductPopulator.setimageUtils(imageUtils);
             ReadableOrderProduct orderProduct = new ReadableOrderProduct();
             orderProductPopulator.populate(p, orderProduct, store, language);
-            
             //image
-            
             //attributes
-            
-
-
             orderProducts.add(orderProduct);
         }
-        
         readableOrder.setProducts(orderProducts);
     }
 
@@ -940,11 +820,9 @@ public class OrderFacadeImpl implements OrderFacade {
 	@Override
 	public ReadableOrderList getReadableOrderList(MerchantStore store,
 			int start, int maxCount, Language language) throws Exception {
-		
 		OrderCriteria criteria = new OrderCriteria();
 		criteria.setStartIndex(start);
 		criteria.setMaxCount(maxCount);
-
 		return this.getReadableOrderList(criteria, store, language);
 	}
 
@@ -999,7 +877,7 @@ public class OrderFacadeImpl implements OrderFacade {
 			Language language) throws Exception {
 		//Order modelOrder = orderService.getById(orderId);
 		if(modelOrder==null) {
-			throw new Exception("Order not found with id " + modelOrder.getId());
+			throw new Exception("Order not found with id " + modelOrder);
 		}
 		
 		ReadableOrder readableOrder = new ReadableOrder();
