@@ -84,19 +84,19 @@ public class InitializationLoader {
 			
 			if (initializationDatabase.isEmpty()) {
 
-                File permissionXML=resourceLoader.getResource("classpath:/permission/permission.json").getFile();
+               /* File permissionXML=resourceLoader.getResource("classpath:/permission/permission.json").getFile();
                 StreamSource xmlSource = new StreamSource(permissionXML);
                 //Permissions permissions= (Permissions) jaxb2Marshaller.unmarshal(xmlSource);
 
                 Permissions permissions= jacksonObjectMapper.readValue(permissionXML,Permissions.class);
 
 				//All default data to be created
+				*/
+				LOGGER.info(String.format("%s : Shopizer database is empty, populate it....", "OneSevenHome"));
+			
+				 initializationDatabase.populate("OneSevenHome");
 				
-				LOGGER.info(String.format("%s : Shopizer database is empty, populate it....", "sm-shop"));
-		
-				 initializationDatabase.populate("sm-shop");
-				
-				 MerchantStore store = merchantService.getByCode(MerchantStore.DEFAULT_STORE);
+				/* MerchantStore store = merchantService.getByCode(MerchantStore.DEFAULT_STORE);
 				
 				 //security groups and permissions
 
@@ -133,7 +133,7 @@ public class InitializationLoader {
 				  merchantConfigurationService.saveMerchantConfig(config, store);
 
 				  loadData();
-
+				  */
 			}
 			
 		} catch (Exception e) {

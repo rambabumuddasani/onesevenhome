@@ -90,8 +90,8 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 		createCountries();
 		createZones();
 		createCurrencies();
-		createSubReferences();
-		createModules();
+		//createSubReferences();
+		//createModules();
 		createMerchant();
 
 
@@ -194,9 +194,9 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 		Date date = new Date(System.currentTimeMillis());
 		
 		Language en = languageService.getByCode("en");
-		Country ca = countryService.getByCode("CA");
-		Currency currency = currencyService.getByCode("CAD");
-		Zone qc = zoneService.getByCode("QC");
+		Country ca = countryService.getByCode("IN");
+		Currency currency = currencyService.getByCode("INR");
+		Zone qc = zoneService.getByCode("HYD");
 		
 		List<Language> supportedLanguages = new ArrayList<Language>();
 		supportedLanguages.add(en);
@@ -208,15 +208,15 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 		store.setDefaultLanguage(en);
 		store.setInBusinessSince(date);
 		store.setZone(qc);
-		store.setStorename("Default store");
+		store.setStorename("OneSevenHome");
 		store.setStorephone("888-888-8888");
 		store.setCode(MerchantStore.DEFAULT_STORE);
-		store.setStorecity("My city");
-		store.setStoreaddress("1234 Street address");
-		store.setStorepostalcode("H2H-2H2");
-		store.setStoreEmailAddress("test@test.com");
-		store.setDomainName("localhost:8080");
-		store.setStoreTemplate("bootstrap");
+		store.setStorecity("Hyderabad");
+		store.setStoreaddress("Somajiguda");
+		store.setStorepostalcode("500082");
+		store.setStoreEmailAddress("osh@admin.com");
+		store.setDomainName("onsevenhome.com");
+		//store.setStoreTemplate("bootstrap");
 		store.setLanguages(supportedLanguages);
 		
 		merchantService.create(store);

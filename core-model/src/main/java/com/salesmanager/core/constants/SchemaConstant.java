@@ -12,7 +12,7 @@ public class SchemaConstant {
 	 * Languages iso codes
 	 * 
 	 */
-	public static final String[] LANGUAGE_ISO_CODE = {"en", "fr"};
+	public static final String[] LANGUAGE_ISO_CODE = {"en"};
 	
 	/**
 	 * All regions
@@ -22,7 +22,7 @@ public class SchemaConstant {
 	/**
 	 * Country iso codes
 	 */
-	public static final String[] COUNTRY_ISO_CODE = { "AF","AX","AL","DZ",
+/*	public static final String[] COUNTRY_ISO_CODE = { "AF","AX","AL","DZ",
 		"AS","AD","AO","AI","AQ","AG","AR","AM","AW","AU","AT","AZ","BS","BH",
 		"BD","BB","BY","BE","BZ","BJ","BM","BT","BO","BA","BW","BV","BR","IO",
 		"BN","BG","BF","BI","KH","CM","CA","CV","KY","CF","TD","CL","CN","CX",
@@ -41,7 +41,9 @@ public class SchemaConstant {
 		"TZ","TH","TL","TG","TK","TO","TT","TN","TR","TM","TC","TV","UG","UA",
 		"AE","GB","US","UM","UY","UZ","VU","VE","VN","VG","VI","WF","EH",
 	    "YE","ZM","ZW" };
-
+*/
+	public static final String[] COUNTRY_ISO_CODE = {"IN"};
+	
 	/**
 	 * Locale per country iso codes
 	 */
@@ -59,7 +61,8 @@ public class SchemaConstant {
 	public static final HashMap<String, String> CURRENCY_MAP = new HashMap<String, String>();
 	
 	static {
-		CURRENCY_MAP.put("AFN", "Afghani");
+		CURRENCY_MAP.put("INR", "Indian Rupee");
+/*		CURRENCY_MAP.put("AFN", "Afghani");
 		CURRENCY_MAP.put("EUR", "Euro");
 		CURRENCY_MAP.put("ALL", "Lek");
 		CURRENCY_MAP.put("DZD", "Algerian Dinar");
@@ -80,7 +83,6 @@ public class SchemaConstant {
 		CURRENCY_MAP.put("XOF", "CFA Franc BCEAO");
 		CURRENCY_MAP.put("BMD", "Bermudian Dollar");
 		CURRENCY_MAP.put("BTN", "Ngultrum");
-		CURRENCY_MAP.put("INR", "Indian Rupee");
 		CURRENCY_MAP.put("BOB", "Boliviano");
 		CURRENCY_MAP.put("BOV", "Mvdol");
 		CURRENCY_MAP.put("BAM", "Convertible Mark");
@@ -267,7 +269,7 @@ public class SchemaConstant {
 		CURRENCY_MAP.put("YER", "Yemeni Rial");
 		CURRENCY_MAP.put("ZMK", "Zambian Kwacha");
 		//CURRENCY_MAP.put("ZWL", "Zimbabwe Dollar");
-		
+*/		
 
 
 	}
