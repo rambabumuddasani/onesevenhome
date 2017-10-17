@@ -575,15 +575,18 @@ public class ShoppingOrderController extends AbstractController {
      * 								  2 -> secondary delivery address
      */
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value="/commitOrder/{preferedShippingAddress}", method = RequestMethod.POST)
+	@RequestMapping(value="/commitOrder/{cartCode}/{preferedShippingAddress}", method = RequestMethod.POST)
 	@ResponseBody
-	public ReadableOrder commitOrder(@PathVariable Integer preferedShippingAddress,HttpServletRequest request, Locale locale) throws Exception {
+	public ReadableOrder commitOrder(@PathVariable Integer preferedShippingAddress,@PathVariable String cartCode,HttpServletRequest request, Locale locale) throws Exception {
 		 ReadableOrder readableOrder = new ReadableOrder();
-		 String shoppingCartCode  = (String)request.getSession().getAttribute(Constants.SHOPPING_CART);
+		 System.out.println("preferedShippingAddress : "+preferedShippingAddress);
+		 System.out.println("cartCode : "+cartCode);
+		 //String shoppingCartCode  = (String)request.getSession().getAttribute(Constants.SHOPPING_CART);
 		 Customer customer = getSessionAttribute(  Constants.CUSTOMER, request );
 		 MerchantStore store = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
 		 Language language = (Language)request.getAttribute("LANGUAGE");
-		 com.salesmanager.core.model.shoppingcart.ShoppingCart cart = shoppingCartFacade.getShoppingCartModel(shoppingCartCode, store);
+		 com.salesmanager.core.model.shoppingcart.ShoppingCart cart = shoppingCartFacade.getShoppingCartModel(cartCode, store);
+		 System.out.println("Cart Items "+cart.getLineItems());
 		 ShopOrder shopOrder =  super.getSessionAttribute(Constants.ORDER, request);;
 	     if(shopOrder==null) {
 	    	 shopOrder = orderFacade.initializeOrder(store, customer, cart, language);
