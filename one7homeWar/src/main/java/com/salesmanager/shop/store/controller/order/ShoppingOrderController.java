@@ -577,7 +577,7 @@ public class ShoppingOrderController extends AbstractController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value="/commitOrder/{cartCode}/{preferedShippingAddress}", method = RequestMethod.POST)
 	@ResponseBody
-	public ReadableOrder commitOrder(@PathVariable Integer preferedShippingAddress,@PathVariable String cartCode,HttpServletRequest request, Locale locale) throws Exception {
+	public ReadableOrder commitOrder(@PathVariable("cartCode") String cartCode,@PathVariable("preferedShippingAddress") Integer preferedShippingAddress,HttpServletRequest request, Locale locale) throws Exception {
 		 ReadableOrder readableOrder = new ReadableOrder();
 		 System.out.println("preferedShippingAddress : "+preferedShippingAddress);
 		 System.out.println("cartCode : "+cartCode);
