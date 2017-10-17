@@ -9,8 +9,8 @@ public class VendorProductVO {
 	private String vendorName;
 	private Long productId;
 	private String productName;
-	@JsonIgnore
-	private String description;
+	private String imageURL;
+	private String productDescription;
 	public Long getVendorId() {
 		return vendorId;
 	}
@@ -41,11 +41,17 @@ public class VendorProductVO {
 	public Long getVendorProductId() {
 		return vendorProductId;
 	}
-	public String getDescription() {
-		return description;
+	public String getImageURL() {
+		return imageURL;
 	}
-	public void setDescription(String description) {
-		this.description = description;
+	public void setImageURL(String imageURL) {
+		this.imageURL = imageURL;
+	}
+	public String getProductDescription() {
+		return productDescription;
+	}
+	public void setProductDescription(String productDescription) {
+		this.productDescription = productDescription;
 	}
 	
 }

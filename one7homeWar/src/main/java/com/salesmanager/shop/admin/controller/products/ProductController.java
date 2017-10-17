@@ -1517,11 +1517,11 @@ public class ProductController extends AbstractController {
 	@RequestMapping(value="/getAllDealOfDay", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public AdminDealOfDay getAllDealOfDay() throws Exception {
+	public PaginatedResponse getAllDealOfDay(@RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
 		// List all dealofday products
 		System.out.println("getDealOfDay ==");
 		AdminDealOfDay adminDealOfDay = new AdminDealOfDay();
-		
+		PaginatedResponse paginatedResponse = new PaginatedResponse();
 		ProductResponse productResponse = new ProductResponse();
 		
 		List<ProductResponse> prodRespList = new ArrayList<ProductResponse>();
@@ -1532,8 +1532,16 @@ public class ProductController extends AbstractController {
 			prodRespList.add(productResponse);
 			
 		}
-		adminDealOfDay.setAdminDealOfDay(prodRespList);
-		return adminDealOfDay;
+		PaginationData paginaionData=createPaginaionData(page,size);
+    	calculatePaginaionData(paginaionData,size, prodRespList.size());
+    	paginatedResponse.setPaginationData(paginaionData);
+		if(prodRespList == null || prodRespList.isEmpty() || prodRespList.size() < paginaionData.getCountByPage()){
+			paginatedResponse.setResponseData(prodRespList);
+			return paginatedResponse;
+		}
+    	List<ProductResponse> paginatedResponses = prodRespList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+    	paginatedResponse.setResponseData(paginatedResponses);
+		return paginatedResponse;
 		
 	}
 	

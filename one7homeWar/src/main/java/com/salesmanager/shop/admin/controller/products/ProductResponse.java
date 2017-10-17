@@ -23,12 +23,6 @@ public class ProductResponse {
 	private Double productRating;
 	private Date productPriceSpecialStartDate;
 	private String productDescription;
-	public String getProductDescription() {
-		return productDescription;
-	}
-	public void setProductDescription(String productDescription) {
-		this.productDescription = productDescription;
-	}
 	public Long getProductId() {
 		return productId;
 	}
@@ -107,6 +101,12 @@ public class ProductResponse {
 	}
 	public void setProductPriceSpecialStartDate(Date productPriceSpecialStartDate) {
 		this.productPriceSpecialStartDate = productPriceSpecialStartDate;
+	}
+	public String getProductDescription() {
+		return productDescription;
+	}
+	public void setProductDescription(String productDescription) {
+		this.productDescription = productDescription;
 	}
 	
 }

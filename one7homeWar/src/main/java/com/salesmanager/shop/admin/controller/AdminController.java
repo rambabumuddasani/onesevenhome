@@ -427,10 +427,11 @@ public class AdminController extends AbstractController {
 	@RequestMapping(value="/admin/categories/{categoryCode}/{title}", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public List<AdminProductResponse> getProduct(@PathVariable String categoryCode,@PathVariable String title) throws Exception {
-		System.out.println("getProduct : ");
+	public PaginatedResponse getProductForCatAndTitle(@PathVariable String categoryCode,@PathVariable String title,
+			@RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+		System.out.println("getProductForCatAndTitle : ");
 		AdminProductResponse adminProductResponse = new AdminProductResponse();
-
+		PaginatedResponse paginatedResponse = new PaginatedResponse();
 		categoryCode = categoryCode.replaceAll("_", " ");
 		Category category = categoryService.getByCategoryCode(categoryCode);
 		List<AdminProductResponse> responses = new ArrayList<AdminProductResponse>();
@@ -443,9 +444,20 @@ public class AdminController extends AbstractController {
 			
 			for(Category childCat:childCatList){
 				responses = invokeProductsData(todaysDealsMap, childCat.getCode(),responses,adminProductResponse,tdProducts,title);
+				break;
 			}
 		}
-		return responses;
+		PaginationData paginaionData=createPaginaionData(page,size);
+    	calculatePaginaionData(paginaionData,size, responses.size());
+    	paginatedResponse.setPaginationData(paginaionData);
+		if(responses == null || responses.isEmpty() || responses.size() < paginaionData.getCountByPage()){
+			paginatedResponse.setResponseData(responses);
+			return paginatedResponse;
+		}
+    	List<AdminProductResponse> paginatedResponses = responses.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+    	paginatedResponse.setResponseData(paginatedResponses);
+		return paginatedResponse;
+		
 	}
 
 	public List<AdminProductResponse> invokeProductsData(Map<Long,Product> todaysDealsMap,
@@ -574,7 +586,8 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
 			}
 			else
 				adminProductResponse.setProductPrice(productPrice.getProductPriceAmount());
-				
+			
+			adminProductResponse.setProductDescription(dbProduct.getProductDescription().getDescription());
 			adminProductResponse.setProductName(dbProduct.getProductDescription().getName());
 			//productResponse.setVendorName(dbProduct.getManufacturer().getCode());
 			
@@ -687,6 +700,8 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     		}
     		vendorProductVO.setProductId(vendorProduct.getProduct().getId());
     		vendorProductVO.setProductName(vendorProduct.getProduct().getProductDescription().getName());
+    		vendorProductVO.setProductDescription(vendorProduct.getProduct().getProductDescription().getDescription());
+    		vendorProductVO.setImageURL(vendorProduct.getProduct().getProductImage().getProductImageUrl());
     		//vendorProductVO.setDescription(vendorProduct.getProduct().getProductDescription().getDescription());
     		vproductList.add(vendorProductVO);
     	}

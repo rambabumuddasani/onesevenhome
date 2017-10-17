@@ -33,6 +33,13 @@ public class AdminProductResponse {
     private String recommendedProduct;
     private String recentBought;
     private String dealOfDay;
+    private String productDescription;
+	public String getProductDescription() {
+		return productDescription;
+	}
+	public void setProductDescription(String productDescription) {
+		this.productDescription = productDescription;
+	}
 	public Long getProductId() {
 		return productId;
 	}
