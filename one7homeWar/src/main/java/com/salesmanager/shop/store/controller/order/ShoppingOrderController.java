@@ -535,37 +535,22 @@ public class ShoppingOrderController extends AbstractController {
 						//send email for new customer
 						//customer.setClearPassword(password);//set clear password for email
 						//customer.setUserName(userName);
-						emailTemplatesUtils.sendRegistrationEmail( customer, store, locale, request.getContextPath() );
+						//emailTemplatesUtils.sendRegistrationEmail( customer, store, locale, request.getContextPath() );
 					}
 	    		}
 	    		
 				//send order confirmation email to customer
-				emailTemplatesUtils.sendOrderEmail(modelCustomer.getEmailAddress(), modelCustomer, modelOrder, locale, language, store, request.getContextPath());
-		        if(orderService.hasDownloadFiles(modelOrder)) {
+				//emailTemplatesUtils.sendOrderEmail(modelCustomer.getEmailAddress(), modelCustomer, modelOrder, locale, language, store, request.getContextPath());
+		/*        if(orderService.hasDownloadFiles(modelOrder)) {
 		        	emailTemplatesUtils.sendOrderDownloadEmail(modelCustomer, modelOrder, store, locale, request.getContextPath());
 		
-		        }
+		        }*/
 				//send order confirmation email to merchant
-				emailTemplatesUtils.sendOrderEmail(store.getStoreEmailAddress(), modelCustomer, modelOrder, locale, language, store, request.getContextPath());
+				//emailTemplatesUtils.sendOrderEmail(store.getStoreEmailAddress(), modelCustomer, modelOrder, locale, language, store, request.getContextPath());
 	        } catch(Exception e) {
 	        	LOGGER.error("Error while post processing order",e);
 	        }
 	        return modelOrder;
-	}
-
-	private Transaction createTransaction(){
-		 BigDecimal amount = BigDecimal.ONE; // revisit here
-		 Transaction newTransaction = new Transaction();
-		 newTransaction.setAmount(amount);
-		 newTransaction.setTransactionDate(new Date());
-		 newTransaction.setTransactionType(TransactionType.INIT);
-		 newTransaction.setPaymentType(PaymentType.PAYPAL); // revist here
-		 //newTransaction.getTransactionDetails().put("TRANSACTIONID", refundTransactionResponse.getRefundTransactionID());
-		 //newTransaction.getTransactionDetails().put("CORRELATION", refundTransactionResponse.getCorrelationID());
-		//	transaction.getTransactionDetails().put("TOKEN", token);
-		//	transaction.getTransactionDetails().put("CORRELATION", correlationID);
-
-		return newTransaction;
 	}
 
 	
