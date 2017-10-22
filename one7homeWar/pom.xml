@@ -79,6 +79,7 @@
 			<artifactId>spring-mobile-device</artifactId>
 		</dependency>
 		
+		
 		<!-- Add Apache Tiles into the mix -->
         <dependency>
             <groupId>org.apache.tiles</groupId>
@@ -152,6 +153,11 @@
 			</exclusions>
 		</dependency>
 
+		<dependency>
+	    	 <groupId>com.ccavenue.security</groupId>
+	    	 <artifactId>ccavenue</artifactId>
+	    	 <version>1.0</version>
+		</dependency>
 		
 		<!-- https://mvnrepository.com/artifact/javax/javaee-api -->
 		<!--
@@ -166,7 +172,26 @@
 	</dependencies>
 	
 
+<!-- 
+install CCAvenu jar in maven path, put the ccavenue jar in f drive and excute the 
+fallowing mvn command.
 
+
+mvn install:install-file -Dfile="F:\ccavutil.jar" 
+-DgroupId=com.ccavenue.security 
+-DartifactId=ccavenue 
+-Dversion=1.0 -Dpackaging=jar
+
+this dependency already added in this pom.xl file
+
+		<dependency>
+	    	 <groupId>com.ccavenue.security</groupId>
+	    	 <artifactId>ccavenue</artifactId>
+	    	 <version>1.0</version>
+		</dependency>
+
+
+ -->
 
 
 </project>

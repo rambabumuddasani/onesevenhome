@@ -1,5 +1,37 @@
 package com.salesmanager.shop.store.controller.order;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.ccavenue.security.AesCryptUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.services.catalog.product.PricingService;
@@ -16,29 +48,24 @@ import com.salesmanager.core.business.services.reference.zone.ZoneService;
 import com.salesmanager.core.business.services.shipping.ShippingService;
 import com.salesmanager.core.business.services.shoppingcart.ShoppingCartService;
 import com.salesmanager.core.model.catalog.product.Product;
-import com.salesmanager.core.model.common.Billing;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.order.Order;
 import com.salesmanager.core.model.order.OrderTotal;
 import com.salesmanager.core.model.order.OrderTotalSummary;
 import com.salesmanager.core.model.order.orderproduct.OrderProductDownload;
+import com.salesmanager.core.model.order.orderstatus.OrderStatus;
+import com.salesmanager.core.model.order.orderstatus.OrderStatusHistory;
 import com.salesmanager.core.model.payments.PaymentMethod;
 import com.salesmanager.core.model.payments.PaymentType;
-import com.salesmanager.core.model.payments.Transaction;
-import com.salesmanager.core.model.payments.TransactionType;
 import com.salesmanager.core.model.reference.country.Country;
 import com.salesmanager.core.model.reference.language.Language;
-import com.salesmanager.core.model.reference.zone.Zone;
 import com.salesmanager.core.model.shipping.ShippingMetaData;
 import com.salesmanager.core.model.shipping.ShippingOption;
 import com.salesmanager.core.model.shipping.ShippingQuote;
 import com.salesmanager.core.model.shipping.ShippingSummary;
 import com.salesmanager.core.model.shoppingcart.ShoppingCartItem;
-import com.salesmanager.shop.admin.model.userpassword.UserReset;
 import com.salesmanager.shop.constants.Constants;
-import com.salesmanager.shop.model.customer.Address;
-import com.salesmanager.shop.model.customer.AnonymousCustomer;
 import com.salesmanager.shop.model.customer.PersistableCustomer;
 import com.salesmanager.shop.model.customer.ReadableDelivery;
 import com.salesmanager.shop.model.order.ReadableOrder;
@@ -53,36 +80,11 @@ import com.salesmanager.shop.populator.order.ReadableShippingSummaryPopulator;
 import com.salesmanager.shop.populator.order.ReadableShopOrderPopulator;
 import com.salesmanager.shop.store.controller.AbstractController;
 import com.salesmanager.shop.store.controller.ControllerConstants;
-import com.salesmanager.shop.store.controller.customer.CustomerRequest;
-import com.salesmanager.shop.store.controller.customer.CustomerResponse;
 import com.salesmanager.shop.store.controller.customer.facade.CustomerFacade;
 import com.salesmanager.shop.store.controller.order.facade.OrderFacade;
 import com.salesmanager.shop.store.controller.shoppingCart.facade.ShoppingCartFacade;
 import com.salesmanager.shop.utils.EmailTemplatesUtils;
 import com.salesmanager.shop.utils.LabelUtils;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang.Validate;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.MediaType;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
-import java.math.BigDecimal;
-import java.util.*;
 
 
 /**
@@ -91,7 +93,7 @@ import java.util.*;
  *
  */
 @Controller
-@RequestMapping(Constants.SHOP_URI+"/order")
+@RequestMapping("/order")
 public class ShoppingOrderController extends AbstractController {
 	
 	private static final Logger LOGGER = LoggerFactory
@@ -151,12 +153,16 @@ public class ShoppingOrderController extends AbstractController {
 	@Inject
 	private OrderProductDownloadService orderProdctDownloadService;
 	
-    @Inject
-    MerchantStoreService merchantStoreService ;
+    //@Inject
+    //private MerchantStoreService merchantStoreService ;
+
+	//@Inject
+	//private LanguageService languageService;
 
 	@Inject
-	private LanguageService languageService;
-
+	private CCAvenuePaymentConfiguration cCAvenuePaymentConfiguration;
+	
+	
 	@SuppressWarnings("unused")
 	@RequestMapping("/checkout.html")
 	public String displayCheckout(@CookieValue("cart") String cookie, Model model, HttpServletRequest request, HttpServletResponse response, Locale locale) throws Exception {
@@ -552,18 +558,21 @@ public class ShoppingOrderController extends AbstractController {
 	        }
 	        return modelOrder;
 	}
-
 	
     /*
      * preferedShippingAddress can be 0 -> default billing address
      * 								  1 -> delivery address
      * 								  2 -> secondary delivery address
      */
+	
+	/// appURL/order/commitOrder/1234/2
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value="/commitOrder/{cartCode}/{preferedShippingAddress}", method = RequestMethod.POST)
-	@ResponseBody
-	public ReadableOrder commitOrder(@PathVariable("cartCode") String cartCode,@PathVariable("preferedShippingAddress") Integer preferedShippingAddress,HttpServletRequest request, Locale locale) throws Exception {
-		 ReadableOrder readableOrder = new ReadableOrder();
+	@RequestMapping(value="/commitOrder/{cartCode}/{preferedShippingAddress}")
+	//@ResponseBody
+	//public ReadableOrder commitOrder(@PathVariable("cartCode") String cartCode,@PathVariable("preferedShippingAddress") Integer preferedShippingAddress,HttpServletRequest request, Locale locale) throws Exception {
+	public String commitOrder(@PathVariable("cartCode") String cartCode,@PathVariable("preferedShippingAddress") Integer preferedShippingAddress,
+			HttpServletRequest request, Locale locale,Map<String, Object> model) throws Exception {
+		 //ReadableOrder readableOrder = new ReadableOrder();
 		 System.out.println("preferedShippingAddress : "+preferedShippingAddress);
 		 System.out.println("cartCode : "+cartCode);
 		 //String shoppingCartCode  = (String)request.getSession().getAttribute(Constants.SHOPPING_CART);
@@ -588,9 +597,90 @@ public class ShoppingOrderController extends AbstractController {
 		 }
 		 shopOrder.setOrderTotalSummary(totalSummary);
 		 Order modelOrder = this.commitOrder(shopOrder, request, locale);
-		 readableOrder = orderFacade.getReadableOrderByOrder(modelOrder, store, language);
-		return readableOrder;
+		 //readableOrder = orderFacade.getReadableOrderByOrder(modelOrder, store, language);
+		 String orderId = modelOrder.getId().toString();
+		 String amount = modelOrder.getTotal().toString();
+		 ccAvenuPaymenteRequestData(model, amount, orderId);
+		 return "payment";
 	}
+	
+	private void ccAvenuPaymenteRequestData(Map<String, Object> model,String amt,String orderId) throws UnsupportedEncodingException{
+		String accessCode = cCAvenuePaymentConfiguration.getAccessCode();
+		String currency = cCAvenuePaymentConfiguration.getCurrency();
+		String workingKey = cCAvenuePaymentConfiguration.getWorkingKey();
+		String merchantId = cCAvenuePaymentConfiguration.getMerchantID();
+		String cancelUrl = cCAvenuePaymentConfiguration.getCancelUrl()+orderId;
+		String redirectUrl = cCAvenuePaymentConfiguration.getRedirectUrl()+orderId;
+/*		String accessCode = "AVHD01EJ26AZ97DHZA";
+		String currency = "INR";
+		String workingKey = "3851071924D585DD8AE59B9C17489B26";
+		String merchantId = "150486";
+		String cancelUrl = "http://localhost:8080/order/cancelOrder/"+orderId;
+		String redirectUrl = "http://localhost:8080/order/cancelOrder/"+orderId;
+*/		StringBuilder ccaRequest = new StringBuilder();
+		Map<String,String> reqParams  = new HashMap<String,String>();
+		reqParams.put("merchant_id", merchantId);
+		reqParams.put("currency", currency);
+		reqParams.put("redirect_url", redirectUrl);
+		reqParams.put("cancel_url", cancelUrl);
+		reqParams.put("language", "EN");
+		reqParams.put("amount", amt);
+		reqParams.put("order_id", orderId);
+/*		reqParams.put("billing_name", "Ram");
+		reqParams.put("billing_address", "Santacruz");
+		reqParams.put("billing_city", "Mumbai");
+		reqParams.put("billing_state", "MH");	
+		reqParams.put("billing_zip", "400054");
+		reqParams.put("billing_country", "India");
+		reqParams.put("billing_tel", "0229874789");
+		reqParams.put("billing_email", "testing@domain.com");
+		reqParams.put("delivery_name", "Ram");
+		reqParams.put("delivery_address", "Vile Parle");
+		reqParams.put("delivery_city", "Mumbai");
+		reqParams.put("delivery_state", "Maharashtra");
+		reqParams.put("delivery_zip", "400038");
+		reqParams.put("delivery_country", "India");
+		reqParams.put("delivery_tel", "0221234321");
+		reqParams.put("merchant_param1", "additional Info.");
+*/		
+		for(Map.Entry<String, String> eachEntry : reqParams.entrySet()){
+		      ccaRequest.append(eachEntry.getKey()).append( "=").append( URLEncoder.encode(eachEntry.getValue(),"UTF-8")).append( "&");
+		}
+		AesCryptUtil aesUtil=new AesCryptUtil(workingKey);
+		String encRequest = aesUtil.encrypt(ccaRequest.toString());
+		model.put("encRequest", encRequest);
+		model.put("access_code", accessCode);
+	}
+	
+	@RequestMapping(value="/cancelOrder/{orderId}", method = RequestMethod.POST)
+	@ResponseBody
+	public String cancelOrder(@PathVariable Long orderId,HttpServletRequest request, Locale locale) throws Exception {
+		Order order = orderService.getById(orderId);
+		OrderStatusHistory orderHistory = new OrderStatusHistory();
+		orderHistory.setOrder(order);
+		orderHistory.setStatus(OrderStatus.CANCELED);
+		orderHistory.setDateAdded(new Date());
+		orderService.addOrderStatusHistory(order, orderHistory);
+		order.setStatus(OrderStatus.CANCELED);
+		orderService.saveOrUpdate(order);
+		return "Order canceled "+orderId;
+	}
+	
+	@RequestMapping(value="/completeOrder/{orderId}", method = RequestMethod.POST)
+	@ResponseBody
+	public String completeOrder(@PathVariable Long orderId,HttpServletRequest request, Locale locale) throws Exception {
+		Order order = orderService.getById(orderId);
+		OrderStatusHistory orderHistory = new OrderStatusHistory();
+		orderHistory.setOrder(order);
+		orderHistory.setStatus(OrderStatus.ORDERED);
+		orderHistory.setDateAdded(new Date());
+		orderService.addOrderStatusHistory(order, orderHistory);
+		order.setStatus(OrderStatus.ORDERED);
+		orderService.saveOrUpdate(order);
+		return "Order completed "+orderId;
+	}
+
+	
 	// url/orderDetails/1?userId=1
 	@RequestMapping(value="/orderDetails/{orderId}", method = RequestMethod.POST)
 	@ResponseBody

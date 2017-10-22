@@ -2,6 +2,7 @@ package com.salesmanager.core.model.order.orderstatus;
 
 public enum OrderStatus {
 	
+	INITIALIZED("initialized"),
 	ORDERED("ordered"),
 	PROCESSED("processed"),
 	DELIVERED("delivered"),

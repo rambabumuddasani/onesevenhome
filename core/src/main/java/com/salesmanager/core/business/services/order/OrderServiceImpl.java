@@ -106,7 +106,7 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
     	if(order.getOrderHistory()==null || order.getOrderHistory().size()==0 || order.getStatus()==null) {
     		OrderStatus status = order.getStatus();
     		if(status==null) {
-    			status = OrderStatus.ORDERED;
+    			status = OrderStatus.INITIALIZED;
     			order.setStatus(status);
     		}
     		Set<OrderStatusHistory> statusHistorySet = new HashSet<OrderStatusHistory>();
