@@ -53,10 +53,12 @@ import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.product.vendor.VendorProduct;
 import com.salesmanager.core.model.reference.country.Country;
 import com.salesmanager.core.model.reference.country.CountryDescription;
+import com.salesmanager.core.model.reference.language.Language;
 import com.salesmanager.core.model.user.User;
 import com.salesmanager.shop.admin.controller.products.PaginatedResponse;
 import com.salesmanager.shop.admin.controller.products.ProductResponse;
 import com.salesmanager.shop.admin.controller.products.TodaysDeals;
+import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.controller.AbstractController;
 import com.salesmanager.shop.store.controller.customer.CustomerAccountController;
 import com.salesmanager.shop.store.model.paging.PaginationData;
@@ -65,7 +67,7 @@ import com.salesmanager.shop.utils.DateUtil;
 @Controller
 @CrossOrigin
 public class AdminController extends AbstractController {
-	
+	private static final Logger LOGGER = LoggerFactory.getLogger(AdminController.class);
 	@Inject
 	private MerchantStoreService merchantStoreService;
 	
@@ -111,7 +113,9 @@ public class AdminController extends AbstractController {
 			produces = MediaType.APPLICATION_JSON_VALUE,consumes=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public AdminUpdateStoreResponse updateMerchantStore(@RequestBody AdminUpdateStoreRequest adminUpdateStoreRequest) {
-	    AdminUpdateStoreResponse adminUpdateStoreResponse=new AdminUpdateStoreResponse();
+	    
+		LOGGER.info("Entered updateMerchantStore method");
+		AdminUpdateStoreResponse adminUpdateStoreResponse=new AdminUpdateStoreResponse();
 	    MerchantStore merchantStore=null;
 		try {
 			merchantStore = merchantStoreService.getByCode(adminUpdateStoreRequest.getStoreCode());
@@ -137,7 +141,8 @@ public class AdminController extends AbstractController {
 	   
 	    Country storeCountry = null;
 	    try {
-			Country country = countryService.getByCode(adminUpdateStoreRequest.getStoreCountry());
+	    	Language language = languageService.getByCode( Constants.DEFAULT_LANGUAGE );
+			Country country = countryService.getCountryByCodeAndLang(adminUpdateStoreRequest.getStoreCountry(), language.getId());
 			storeCountry = country;
 		} catch (ServiceException e1) {
 			adminUpdateStoreResponse.setErrorMessage("Error in updating Store");
@@ -161,8 +166,10 @@ public class AdminController extends AbstractController {
 			adminUpdateStoreResponse.setStatus("false");
 			return adminUpdateStoreResponse;
 		}
+	        LOGGER.info("Store updated Successfully");;
 	        adminUpdateStoreResponse.setSuccessMessage("Store updated successfully");
 	        adminUpdateStoreResponse.setStatus("true");
+	        LOGGER.info("Ended updateMerchantStore method");
 	        return adminUpdateStoreResponse;
 	    
     }
@@ -172,7 +179,7 @@ public class AdminController extends AbstractController {
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public StoreInfoResponse getStoreInfo(HttpServletRequest request) {
-		System.out.println("getStoreInfo: ");
+		LOGGER.info("Entered getStoreInfo method");
 		StoreInfoResponse storeInfoResponse=new StoreInfoResponse();
 		try {
 			//getting store
@@ -189,11 +196,14 @@ public class AdminController extends AbstractController {
 	        storeInfo.setStorePostalCode(merchantStore.getStorepostalcode());
 	        
 	        storeInfo.setStoreCode(merchantStore.getCode());
-	        Country country = countryService.getByCode(merchantStore.getCountry().getIsoCode());
+	        Language language = languageService.getByCode( Constants.DEFAULT_LANGUAGE );
+	        Country country = countryService.getCountryByCodeAndLang(merchantStore.getCountry().getIsoCode(), language.getId() );
 		    
 	        List<CountryDescription> countryDescription = country.getDescriptions();
 	        
 	        for(CountryDescription countryDesc:countryDescription){
+	        	System.out.println("countryDesc.getLanguage().getId()"+countryDesc.getLanguage().getId());
+	        	System.out.println("merchantStore.getDefaultLanguage().getId()"+merchantStore.getDefaultLanguage().getId());
 	        	String countryName = countryDesc.getName();
 	        	storeInfo.setStoreCountry(countryName);
 	        }
@@ -217,7 +227,7 @@ public class AdminController extends AbstractController {
 		} catch (ServiceException e) {
 			e.printStackTrace();
 		}
-		  
+		LOGGER.info("Ended getStoreInfo method");
 		    return storeInfoResponse;
 		
 	}
@@ -429,6 +439,7 @@ public class AdminController extends AbstractController {
 	@ResponseBody
 	public PaginatedResponse getProductForCatAndTitle(@PathVariable String categoryCode,@PathVariable String title,
 			@RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+		LOGGER.info("Entered getProductForCatAndTitle method ");
 		System.out.println("getProductForCatAndTitle : ");
 		AdminProductResponse adminProductResponse = new AdminProductResponse();
 		PaginatedResponse paginatedResponse = new PaginatedResponse();
@@ -452,6 +463,7 @@ public class AdminController extends AbstractController {
     	paginatedResponse.setPaginationData(paginaionData);
 		if(responses == null || responses.isEmpty() || responses.size() < paginaionData.getCountByPage()){
 			paginatedResponse.setResponseData(responses);
+			LOGGER.info("Ended getProductForCatAndTitle method ");
 			return paginatedResponse;
 		}
     	List<AdminProductResponse> paginatedResponses = responses.subList(paginaionData.getOffset(), paginaionData.getCountByPage());

@@ -10,7 +10,7 @@ import com.salesmanager.shop.admin.controller.products.Category;
 
 public class AdminProductResponse {
 	private Long productId;
-	@JsonIgnore
+	
 	private String imageURL;
 	private String productName;
 	private BigDecimal productPrice;

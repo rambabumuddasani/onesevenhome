@@ -119,5 +119,11 @@ public class CountryServiceImpl extends SalesManagerEntityServiceImpl<Integer, C
 		
 	}
 
+	@Override
+	public Country getCountryByCodeAndLang(String storeCountry, Integer id) throws ServiceException {
+		// TODO Auto-generated method stub
+		return countryRepository.findCountryByCodeAndLang(storeCountry, id);
+	}
+
 
 }

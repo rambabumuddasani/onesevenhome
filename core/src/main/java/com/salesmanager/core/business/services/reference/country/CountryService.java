@@ -22,4 +22,7 @@ public interface CountryService extends SalesManagerEntityService<Integer, Count
 
 	List<Country> getCountries(List<String> isoCodes, Language language)
 			throws ServiceException;
+
+	public Country getCountryByCodeAndLang(String storeCountry, Integer id)
+	        throws ServiceException;
 }
