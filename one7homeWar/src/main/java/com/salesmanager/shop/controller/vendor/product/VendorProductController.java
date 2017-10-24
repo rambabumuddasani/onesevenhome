@@ -30,6 +30,7 @@ import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.product.vendor.VendorProduct;
 import com.salesmanager.shop.constants.EmailConstants;
+import com.salesmanager.shop.store.controller.customer.VendorResponse;
 import com.salesmanager.shop.utils.EmailUtils;
 import com.salesmanager.shop.utils.LabelUtils;
 
@@ -244,4 +245,46 @@ public class VendorProductController {
 		return vendorProductList;
 	}
 
+	@RequestMapping(value={"/vendors/{productId}"},  method = { RequestMethod.GET })
+	@ResponseBody	
+	public VendorsList getProductVendors(@PathVariable Long productId){
+		VendorsList vendorsList = new VendorsList();
+		List<VendorResponse> vendorsDataForProduct = new ArrayList<VendorResponse>();
+		try {
+		List<VendorProduct> dbVendorProductList = vendorProductService.findProductVendors(productId);
+		System.out.println("dbVendorProductList size=="+dbVendorProductList.size());
+		for(VendorProduct vendorProduct : dbVendorProductList){
+			VendorResponse vendorResponse = new VendorResponse();
+			System.out.println("customer --vendor=="+vendorProduct.getCustomer().getEmailAddress());
+			if(vendorProduct.getCustomer() != null) {
+				vendorResponse.setEmail(vendorProduct.getCustomer().getEmailAddress());
+				vendorResponse.setVendorName(vendorProduct.getCustomer().getVendorAttrs().getVendorName());
+				vendorResponse.setVendorOfficeAddress(vendorProduct.getCustomer().getVendorAttrs().getVendorOfficeAddress());
+				vendorResponse.setVendorMobile(vendorProduct.getCustomer().getVendorAttrs().getVendorMobile());
+				vendorResponse.setVendorTelephone(vendorProduct.getCustomer().getVendorAttrs().getVendorTelephone());
+				vendorResponse.setVendorFax(vendorProduct.getCustomer().getVendorAttrs().getVendorFax());
+				vendorResponse.setVendorConstFirm(vendorProduct.getCustomer().getVendorAttrs().getVendorConstFirm());
+				vendorResponse.setVendorCompanyNature(vendorProduct.getCustomer().getVendorAttrs().getVendorCompanyNature());
+				vendorResponse.setVendorRegistrationNo(vendorProduct.getCustomer().getVendorAttrs().getVendorRegistrationNo());
+				vendorResponse.setVendorPAN(vendorProduct.getCustomer().getVendorAttrs().getVendorPAN());
+				vendorResponse.setVendorLicense(vendorProduct.getCustomer().getVendorAttrs().getVendorLicense());
+				vendorResponse.setVendorExpLine(vendorProduct.getCustomer().getVendorAttrs().getVendorExpLine());
+				vendorResponse.setVendorMajorCust(vendorProduct.getCustomer().getVendorAttrs().getVendorMajorCust());
+				vendorResponse.setVatRegNo(vendorProduct.getCustomer().getVendorAttrs().getVendorVatRegNo());
+				vendorResponse.setVendorTIN(vendorProduct.getCustomer().getVendorAttrs().getVendorTinNumber());
+				vendorResponse.setVendorImageURL(vendorProduct.getCustomer().getVendorAttrs().getVendorAuthCert());
+				vendorResponse.setAuthCertURL(vendorProduct.getCustomer().getVendorAttrs().getVendorAuthCert());
+				
+				vendorsDataForProduct.add(vendorResponse);
+			}
+			
+		}
+		vendorsList.setVendorsDataForProduct(vendorsDataForProduct);
+		
+		}catch(Exception e){
+			System.out.println("error occured while retrieving vendors based on product id ="+productId+"---"+e.getMessage());
+			e.printStackTrace(System.out);
+		}
+		return vendorsList;
+	}
 }

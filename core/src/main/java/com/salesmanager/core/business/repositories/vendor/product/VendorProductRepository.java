@@ -32,7 +32,11 @@ public interface VendorProductRepository extends JpaRepository<VendorProduct, Lo
 			+ " join fetch pd.descriptions descriptions join fetch vp.customer customer where vp.adminActivated = FALSE ")
 	public List<VendorProduct> findVendorProducts();
 
-/*	@Query("select vp from VendorProduct vp where vp.id=?1")
+	@Query("select distinct vp from VendorProduct vp join fetch vp.product pd join fetch vp.customer customer"
+			+ " where vp.adminActivated = TRUE and pd.id=?1 ")
+	public List<VendorProduct> findProductVendors(Long productId);
+
+	/*	@Query("select vp from VendorProduct vp where vp.id=?1")
 	public VendorProduct findVendorProductById(Long vendorProductId);
 */
 	

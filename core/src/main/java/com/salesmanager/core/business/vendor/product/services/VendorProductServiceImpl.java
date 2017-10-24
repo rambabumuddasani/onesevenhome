@@ -52,6 +52,10 @@ public class VendorProductServiceImpl extends SalesManagerEntityServiceImpl<Long
 		// TODO Auto-generated method stub
 		return vendorProductRepository.findOne(vendorProductId);
 	}
-
+	
+	@Override
+	public List<VendorProduct> findProductVendors(Long productId) {
+		return vendorProductRepository.findProductVendors(productId);
+	}
 	
 }

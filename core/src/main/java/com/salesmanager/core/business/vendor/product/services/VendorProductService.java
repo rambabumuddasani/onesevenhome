@@ -14,4 +14,5 @@ public interface VendorProductService extends SalesManagerEntityService<Long, Ve
 	List<VendorProduct> findProductWishListByVendor(Long vendorId);
 	List<VendorProduct> getVendorProducts();
 	VendorProduct getVendorProductById(Long vendorProductId);
+	List<VendorProduct> findProductVendors(Long productId);
 }
