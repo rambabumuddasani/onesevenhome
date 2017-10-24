@@ -99,6 +99,10 @@ public class Customer extends SalesManagerEntity<Long, Customer> {
 	@Column(name="OFID", length=50)
 	private String ofid;
 
+	@Column (name ="USER_PROFILE", length=200)
+	private String userProfile;
+
+	
 	@ManyToOne(fetch = FetchType.LAZY, targetEntity = Language.class)
 	@JoinColumn(name = "LANGUAGE_ID", nullable=false)
 	private Language defaultLanguage;
@@ -397,6 +401,14 @@ public class Customer extends SalesManagerEntity<Long, Customer> {
 
 	public void setSecondaryDelivery(SecondaryDelivery delivery2) {
 		this.secondaryDelivery = delivery2;
+	}
+
+	public String getUserProfile() {
+		return userProfile;
+	}
+
+	public void setUserProfile(String userProfile) {
+		this.userProfile = userProfile;
 	}
 
 	
