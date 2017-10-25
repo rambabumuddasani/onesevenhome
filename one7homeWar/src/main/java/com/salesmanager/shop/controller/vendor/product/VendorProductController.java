@@ -272,7 +272,7 @@ public class VendorProductController {
 				vendorResponse.setVendorMajorCust(vendorProduct.getCustomer().getVendorAttrs().getVendorMajorCust());
 				vendorResponse.setVatRegNo(vendorProduct.getCustomer().getVendorAttrs().getVendorVatRegNo());
 				vendorResponse.setVendorTIN(vendorProduct.getCustomer().getVendorAttrs().getVendorTinNumber());
-				vendorResponse.setVendorImageURL(vendorProduct.getCustomer().getVendorAttrs().getVendorAuthCert());
+				vendorResponse.setVendorImageURL(vendorProduct.getCustomer().getUserProfile());
 				vendorResponse.setAuthCertURL(vendorProduct.getCustomer().getVendorAttrs().getVendorAuthCert());
 				
 				vendorsDataForProduct.add(vendorResponse);
