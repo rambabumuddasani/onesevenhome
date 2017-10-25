@@ -1928,11 +1928,139 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
 		
 	}
     
-  @RequestMapping(value="/updateProductDiscount", method = RequestMethod.POST, 
+  @RequestMapping(value="/updateProduct", method = RequestMethod.POST, 
            consumes = MediaType.APPLICATION_JSON_VALUE,
            produces = MediaType.APPLICATION_JSON_VALUE)
  @ResponseBody
- public CreateProductResponse updateProductDiscount(@RequestBody ProductDiscountRequest productDiscountRequest) throws Exception {
+ public CreateProductResponse updateProduct(@RequestBody CreateProductRequest createProductRequest) throws Exception {
+
+	System.out.println("updateProduct:");
+	CreateProductResponse createProductResponse = new CreateProductResponse();
+	createProductResponse.setStatus(false);
+	try {
+			Product dbProduct = productService.getById(createProductRequest.getProductId());
+			if(dbProduct == null){
+				createProductResponse.setErrorMsg("No product available with product id : "+createProductRequest.getProductId());
+				return createProductResponse;
+			}
+			Product newProduct = new Product();
+			Set<ProductDescription> descriptions = new HashSet<ProductDescription>();
+			ProductDescription productDescription = null;
+			if(dbProduct.getProductDescription() != null){
+				productDescription = dbProduct.getProductDescription();
+			} else {
+				productDescription = new ProductDescription();
+			}
+			
+			Set<ProductAvailability> availabilities = dbProduct.getAvailabilities();
+			ProductAvailability productAvailability = null;
+			ProductPrice productPrice = null;
+			Set<ProductPrice> prices = null;
+			
+			if(availabilities!=null && availabilities.size()>0) {
+				
+				for(ProductAvailability availability : availabilities) {
+					if(availability.getRegion().equals(com.salesmanager.core.business.constants.Constants.ALL_REGIONS)) {
+						productAvailability = availability;
+						prices = availability.getPrices();
+						for(ProductPrice price : prices) {
+							if(price.isDefaultPrice()) {
+								productPrice = price;
+							}
+						}
+					}
+				}
+			}
+			else {
+				productAvailability = new ProductAvailability();
+			}
+			if(productPrice == null) {
+				productPrice = new ProductPrice();
+				prices = new HashSet<ProductPrice>();
+			}
+			
+			System.out.println("createProductRequest.getSku() =="+createProductRequest.getSku());
+			System.out.println("createProductRequest.getDescription() =="+createProductRequest.getDescription());
+			System.out.println("createProductRequest.getProductName() =="+createProductRequest.getProductName());
+			System.out.println("createProductRequest.getTitle() =="+createProductRequest.getTitle());
+			System.out.println("createProductRequest.getShortDesc() =="+createProductRequest.getShortDesc());
+			System.out.println("createProductRequest.getProductDescTitle() =="+createProductRequest.getProductDescTitle());
+			System.out.println("createProductRequest.getProductPrice() =="+createProductRequest.getProductPrice());
+			
+			productDescription.setName(createProductRequest.getProductName());
+			productDescription.setDescription(createProductRequest.getDescription());
+			productDescription.setTitle(createProductRequest.getTitle());
+			productDescription.setMetatagDescription(createProductRequest.getShortDesc());
+			productDescription.setMetatagTitle(createProductRequest.getProductDescTitle());
+			Language language = new Language();
+			language.setId(1);
+			productDescription.setLanguage(language);
+			productDescription.setProduct(dbProduct);
+			descriptions.add(productDescription);
+			
+			//availability
+			productAvailability.setRegion("*");
+			productAvailability.setProductQuantity(0);
+		
+			//price
+			productPrice.setDefaultPrice(true);
+			productPrice.setProductPriceAmount(createProductRequest.getProductPrice());
+			productPrice.setProductAvailability(productAvailability);
+			prices.add(productPrice);
+			
+			productAvailability.setPrices(prices);
+			productAvailability.setProduct(dbProduct);
+			
+			availabilities.add(productAvailability);
+			
+			
+			dbProduct.setSku(createProductRequest.getSku());
+			dbProduct.setDescriptions(descriptions);
+			dbProduct.setAvailabilities(availabilities);
+			productService.update(dbProduct);
+			System.out.println("updated ..");
+			createProductResponse.setStatus(true);
+			createProductResponse.setProductId(dbProduct.getId());
+
+	}catch (Exception e){
+		System.out.println("failed while updating product discount==="+e.getMessage());
+		createProductResponse.setErrorMsg("failed while updating product discount==="+e.getMessage());
+		return createProductResponse;
+	}
+	return createProductResponse;
+	
+	}
+  @RequestMapping(value="/deleteProduct", method = RequestMethod.POST, 
+          consumes = MediaType.APPLICATION_JSON_VALUE,
+          produces = MediaType.APPLICATION_JSON_VALUE)
+@ResponseBody
+public CreateProductResponse deleteProduct(@RequestBody ProductDiscountRequest productDiscountRequest) throws Exception {
+
+	System.out.println("deleteProduct:");
+	CreateProductResponse createProductResponse = new CreateProductResponse();
+	createProductResponse.setStatus(false);
+	try {
+			Product dbProduct = productService.getById(productDiscountRequest.getProductId());
+			if(dbProduct == null){
+				createProductResponse.setErrorMsg("No product available with product id : "+productDiscountRequest.getProductId());
+				return createProductResponse;
+			}
+			productService.delete(dbProduct);
+			createProductResponse.setStatus(true);
+			createProductResponse.setProductId(productDiscountRequest.getProductId());
+	}catch (Exception e){
+		System.out.println("failed while deleting product==="+e.getMessage());
+		createProductResponse.setErrorMsg("failed while deleting product==="+e.getMessage());
+		return createProductResponse;
+	}
+	return createProductResponse;
+	
+	}
+  @RequestMapping(value="/updateProductDiscount", method = RequestMethod.POST, 
+          consumes = MediaType.APPLICATION_JSON_VALUE,
+          produces = MediaType.APPLICATION_JSON_VALUE)
+@ResponseBody
+public CreateProductResponse updateProductDiscount(@RequestBody ProductDiscountRequest productDiscountRequest) throws Exception {
 
 	System.out.println("updateProductDiscount:");
 	CreateProductResponse createProductResponse = new CreateProductResponse();
@@ -1988,32 +2116,6 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
 	}catch (Exception e){
 		System.out.println("failed while updating product discount==="+e.getMessage());
 		createProductResponse.setErrorMsg("failed while updating product discount==="+e.getMessage());
-		return createProductResponse;
-	}
-	return createProductResponse;
-	
-	}
-  @RequestMapping(value="/deleteProduct", method = RequestMethod.POST, 
-          consumes = MediaType.APPLICATION_JSON_VALUE,
-          produces = MediaType.APPLICATION_JSON_VALUE)
-@ResponseBody
-public CreateProductResponse deleteProduct(@RequestBody ProductDiscountRequest productDiscountRequest) throws Exception {
-
-	System.out.println("deleteProduct:");
-	CreateProductResponse createProductResponse = new CreateProductResponse();
-	createProductResponse.setStatus(false);
-	try {
-			Product dbProduct = productService.getById(productDiscountRequest.getProductId());
-			if(dbProduct == null){
-				createProductResponse.setErrorMsg("No product available with product id : "+productDiscountRequest.getProductId());
-				return createProductResponse;
-			}
-			productService.delete(dbProduct);
-			createProductResponse.setStatus(true);
-			createProductResponse.setProductId(productDiscountRequest.getProductId());
-	}catch (Exception e){
-		System.out.println("failed while deleting product==="+e.getMessage());
-		createProductResponse.setErrorMsg("failed while deleting product==="+e.getMessage());
 		return createProductResponse;
 	}
 	return createProductResponse;

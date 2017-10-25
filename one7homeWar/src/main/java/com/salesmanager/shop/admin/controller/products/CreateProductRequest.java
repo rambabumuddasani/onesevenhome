@@ -9,6 +9,7 @@ import java.util.List;
 
 public class CreateProductRequest {
 
+	Long productId;
 	String sku;
 	String description;
 	String title;
@@ -19,6 +20,12 @@ public class CreateProductRequest {
 	BigDecimal productPrice;
 	String category;
 	
+	public Long getProductId() {
+		return productId;
+	}
+	public void setProductId(Long productId) {
+		this.productId = productId;
+	}
 	public String getSku() {
 		return sku;
 	}
