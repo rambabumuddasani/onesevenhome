@@ -18,6 +18,7 @@ public class ProductDetails {
 	String discountPercentage;
 	String defaultImage;
 	List<String> productImages;
+	List<ProductFilterType> productFilterTypeList;
 	
 	public String getDefaultImage() {
 		return defaultImage;
@@ -67,6 +68,12 @@ public class ProductDetails {
 	public void setProductImages(List<String> productImages) {
 		this.productImages = productImages;
 	}
-	
+	public List<ProductFilterType> getProductFilterTypeList() {
+		return productFilterTypeList;
+	}
+	public void setProductFilterTypeList(
+			List<ProductFilterType> productFilterTypeList) {
+		this.productFilterTypeList = productFilterTypeList;
+	}
 	
 }
