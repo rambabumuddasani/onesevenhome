@@ -332,6 +332,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 			qs.append("left join fetch manuf.descriptions manufd ");
 			qs.append("left join fetch p.type type ");
 			qs.append("left join fetch p.taxClass tx ");
+			qs.append("left join fetch p.filters pf ");
 			
 			qs.append("where p.id=:pid");
 	

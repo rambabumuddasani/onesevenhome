@@ -17,6 +17,7 @@ import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.catalog.product.attribute.ProductAttribute;
 import com.salesmanager.core.model.catalog.product.availability.ProductAvailability;
 import com.salesmanager.core.model.catalog.product.description.ProductDescription;
+import com.salesmanager.core.model.catalog.product.filter.FilterType;
 import com.salesmanager.core.model.catalog.product.image.ProductImage;
 import com.salesmanager.core.model.catalog.product.image.ProductImageDescription;
 import com.salesmanager.core.model.catalog.product.manufacturer.Manufacturer;
@@ -1131,6 +1132,17 @@ public class ProductController extends AbstractController {
 			productDetails.setProductOriginalPrice(productPrice.getProductPriceAmount());
 			productDetails.setProductDiscountPrice(productPrice.getProductPriceSpecialAmount());
 			productDetails.setDiscountPercentage(getDiscountPercentage(productPrice));
+			
+			//adding filters
+			Set<FilterType> filters = dbProduct.getFilters();
+			ProductFilterType productFilterType = new ProductFilterType();
+			List<ProductFilterType> productFilterTypeList = new ArrayList<ProductFilterType>();
+			for(FilterType filter:filters) {
+				productFilterType.setFilterId(filter.getId());
+				productFilterType.setFilterTypeName(filter.getFilterTypeName());
+				productFilterTypeList.add(productFilterType);
+			}
+			productDetails.setProductFilterTypeList(productFilterTypeList);
 		}
 		return productDetails;
 	}
