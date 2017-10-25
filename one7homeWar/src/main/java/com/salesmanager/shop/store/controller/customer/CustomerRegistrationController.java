@@ -1151,48 +1151,26 @@ public class CustomerRegistrationController extends AbstractController {
 		String certFileName = "";
 
         VendorAttributes vendorAttrs = customer.getVendorAttrs();
-        for(MultipartFile 	file : uploadedFiles){
-        		if (file.isEmpty()) {
-        			continue; //next pls
-        		}
-        		String fileName = file.getOriginalFilename();
-            	try{
-            		if(fileName.startsWith(USER_PROFILE_PIC)){
-                		String path = new StringBuilder("vendor").append(File.separator).append("profiles").toString(); // give file directory path
-            			userProfile = storageService.store(file,path);
-            			customer.setUserProfile(userProfile);
-            		}else{
-                		String path = new StringBuilder("vendor").append(File.separator).append("certificates").toString(); // give file directory path
-                		//String path = new StringBuilder(VENDOR_CERFIFICATES).toString();
-            			certFileName = storageService.store(file,path);
-            			vendorAttrs.setVendorAuthCert(certFileName);
-            		}
-            	}catch(StorageException se){
-            		System.out.println("StoreException occured, do wee need continue "+se);
-            	}
-        }
- /*       MultipartFile 	file ;
-        if(vendorCertificate.getSize() != 0) {
-            String certFileName = "";
-        	try{
-        		certFileName = storageService.store(vendorCertificate);
-        		System.out.println("certFileName "+certFileName);
-        	}catch(StorageException se){
-        		System.out.println("StoreException occured, do wee need continue "+se);
-        	}
-            vendorAttrs.setVendorAuthCert(certFileName);
-        }
-        
-        if(vendorCertificate.getSize() != 0) {
-        	try{
-        		certFileName = storageService.store(vendorCertificate);
-        		System.out.println("certFileName "+certFileName);
-        	}catch(StorageException se){
-        		System.out.println("StoreException occured, do wee need continue "+se);
-        	}
-            vendorAttrs.setVendorAuthCert(certFileName);
-        }
- */       
+        /**
+         * I assume, we always get only two MultipartFile
+         * 1st object always represent user profile picture
+         * 2nd object always represent vendor certificate.
+         * 
+         */
+        MultipartFile 	profilePicFile = uploadedFiles[0];
+        MultipartFile 	vendorCertificateFile = uploadedFiles[1];
+		String tempVendorProfilePicPath = new StringBuilder("vendor").append(File.separator).append("profiles").toString(); // give file directory path
+		String tempVendorCertificatePath = new StringBuilder("vendor").append(File.separator).append("certificates").toString(); // give file directory path
+        //for(MultipartFile 	file : uploadedFiles){
+        userProfile = storeFile(profilePicFile, tempVendorProfilePicPath);
+    	customer.setUserProfile(userProfile);
+
+    	certFileName = storeFile(vendorCertificateFile, tempVendorCertificatePath);
+    	customer.setUserProfile(certFileName);
+
+  		vendorAttrs.setVendorAuthCert(certFileName);
+        customer.setUserProfile(userProfile);			
+       
         vendorAttrs.setVendorOfficeAddress(vendorRequest.getVendorOfficeAddress());
         vendorAttrs.setVendorMobile(vendorRequest.getVendorMobile());
         vendorAttrs.setVendorTelephone(vendorRequest.getVendorTelephone());
@@ -1222,6 +1200,21 @@ public class CustomerRegistrationController extends AbstractController {
         customerResponse.setSuccessMessage("Vendor profile updated successfully");
         customerResponse.setStatus(TRUE);
         return customerResponse; 
+	}
+
+	private String storeFile(MultipartFile file, String tempPath) {
+		String filePath = ""; 
+		if (!file.isEmpty()) {
+			String fileName = file.getOriginalFilename();
+			System.out.println("fileName "+fileName);
+			try {	
+				filePath = storageService.store(file,tempPath);
+			}catch(StorageException se){
+				System.out.println("StoreException occured, do wee need continue "+se);
+				throw se;
+			}
+		}
+		return filePath;
 	}
 
 	

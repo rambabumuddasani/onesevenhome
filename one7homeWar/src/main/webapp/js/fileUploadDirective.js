@@ -7,7 +7,7 @@ app.directive('uploadFiles', function () {
                 //iterate files since 'multiple' may be specified on the element
                 for (var i = 0; i < files.length; i++) {
                     //emit event upward
-                    scope.$emit("seletedFile", { file: files[i] });
+                    scope.$emit("seletedFile", { file: files[i],event: event });
                 }
             });
         }
