@@ -1,5 +1,6 @@
 package com.salesmanager.shop.fileupload.services;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
@@ -44,22 +45,30 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
-    public String store(MultipartFile file,String type) {
-    	StringBuilder filePath = new StringBuilder();
-    	if(type != null)
-    		this.rootLocation = Paths.get("/opt/img/"+type);
-    	filePath.append(rootLocation+java.io.File.separator);
-    	try {
-            if (file.isEmpty()) {
-                throw new StorageException("Failed to store empty file " + file.getOriginalFilename());
-            }
-            filePath.append(getUniqFileName(file.getOriginalFilename())); // do we need to give orginal file name or form certificate name based on customer information.
+    public String store(MultipartFile file,String dirPath) {
+    		StringBuilder filePath = new StringBuilder();
+/*    		if(dirName != null)
+    			this.rootLocation = Paths.get("/opt/img/"+dirName);*/
+    		filePath.append(rootLocation+java.io.File.separator+dirPath);
+    		try {
+    			if (file.isEmpty()) {
+    				throw new StorageException("Failed to store empty file " + file.getOriginalFilename());
+    			}
+    		createDirectoryIfNotExist(filePath);
+    		filePath.append(java.io.File.separator).append(getUniqFileName(file.getOriginalFilename())); // do we need to give orginal file name or form certificate name based on customer information.
             Files.copy(file.getInputStream(), this.rootLocation.resolve(filePath.toString()));
             return filePath.toString();        // /opt/img/vendor/cert1.jpg
         } catch (IOException e) {
             throw new StorageException("Failed to store file " + file.getOriginalFilename(), e);
         }
     }
+
+	private void createDirectoryIfNotExist(StringBuilder filePath) {
+		File dir = new File(filePath.toString());
+		if(!dir.exists()){
+			dir.mkdirs();
+		}
+	}
 
     private String getUniqFileName(String orgFileName){
     	return Calendar.getInstance().getTimeInMillis()+"_"+orgFileName;

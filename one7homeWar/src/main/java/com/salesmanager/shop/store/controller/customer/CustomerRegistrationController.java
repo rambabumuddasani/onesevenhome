@@ -1,5 +1,6 @@
 package com.salesmanager.shop.store.controller.customer;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -16,6 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -92,6 +94,9 @@ import com.salesmanager.shop.utils.LabelUtils;
 @CrossOrigin
 public class CustomerRegistrationController extends AbstractController {
 
+	private static final String VENDOR_CERFIFICATES = "vendorCerfificates";
+	private static final String SLASH = "/";
+	private static final String USER_PROFILE_PIC = "userProfilePic";
 	private static final String TRUE = "true";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CustomerRegistrationController.class);
     
@@ -149,6 +154,7 @@ public class CustomerRegistrationController extends AbstractController {
 
 	@Inject
 	private CustomerFacade customerFacade;
+	
 	
 	private final static String RESET_PASSWORD_TPL = "email_template_password_reset_user.ftl";	
 	private final static String NEW_USER_TMPL = "email_template_new_user.ftl";
@@ -1115,8 +1121,7 @@ public class CustomerRegistrationController extends AbstractController {
 	@RequestMapping(value="/vendor/update", method = RequestMethod.POST)
 	@ResponseBody
 	public CustomerResponse updateVendor(@RequestPart("vendorRequest") String vendorRequestStr,
-    		@RequestPart("file") MultipartFile vendorCertificate) throws Exception {
-		
+    		@RequestPart("file") MultipartFile[] uploadedFiles) throws Exception {
 		System.out.println("customer ");
 		VendorRequest vendorRequest = new ObjectMapper().readValue(vendorRequestStr, VendorRequest.class);
     	CustomerResponse customerResponse = new CustomerResponse();
@@ -1142,9 +1147,33 @@ public class CustomerRegistrationController extends AbstractController {
             }
             	
         }	
+		String userProfile = "";
+		String certFileName = "";
+
         VendorAttributes vendorAttrs = customer.getVendorAttrs();
-        String certFileName = "";
+        for(MultipartFile 	file : uploadedFiles){
+        		if (file.isEmpty()) {
+        			continue; //next pls
+        		}
+        		String fileName = file.getOriginalFilename();
+            	try{
+            		if(fileName.startsWith(USER_PROFILE_PIC)){
+                		String path = new StringBuilder("vendor").append(File.separator).append("profiles").toString(); // give file directory path
+            			userProfile = storageService.store(file,path);
+            			customer.setUserProfile(userProfile);
+            		}else{
+                		String path = new StringBuilder("vendor").append(File.separator).append("certificates").toString(); // give file directory path
+                		//String path = new StringBuilder(VENDOR_CERFIFICATES).toString();
+            			certFileName = storageService.store(file,path);
+            			vendorAttrs.setVendorAuthCert(certFileName);
+            		}
+            	}catch(StorageException se){
+            		System.out.println("StoreException occured, do wee need continue "+se);
+            	}
+        }
+ /*       MultipartFile 	file ;
         if(vendorCertificate.getSize() != 0) {
+            String certFileName = "";
         	try{
         		certFileName = storageService.store(vendorCertificate);
         		System.out.println("certFileName "+certFileName);
@@ -1154,6 +1183,16 @@ public class CustomerRegistrationController extends AbstractController {
             vendorAttrs.setVendorAuthCert(certFileName);
         }
         
+        if(vendorCertificate.getSize() != 0) {
+        	try{
+        		certFileName = storageService.store(vendorCertificate);
+        		System.out.println("certFileName "+certFileName);
+        	}catch(StorageException se){
+        		System.out.println("StoreException occured, do wee need continue "+se);
+        	}
+            vendorAttrs.setVendorAuthCert(certFileName);
+        }
+ */       
         vendorAttrs.setVendorOfficeAddress(vendorRequest.getVendorOfficeAddress());
         vendorAttrs.setVendorMobile(vendorRequest.getVendorMobile());
         vendorAttrs.setVendorTelephone(vendorRequest.getVendorTelephone());
@@ -1175,14 +1214,15 @@ public class CustomerRegistrationController extends AbstractController {
         customerFacade.updateCustomer(customer);
         }catch(Exception e) {
         	storageService.deleteFile(certFileName);
+        	storageService.deleteFile(userProfile);
             LOGGER.error( "Error while updating customer.. ", e);
             customerResponse.setErrorMessage(e.getMessage());
             return customerResponse;
         }
-        
         customerResponse.setSuccessMessage("Vendor profile updated successfully");
         customerResponse.setStatus(TRUE);
         return customerResponse; 
 	}
+
 	
 }

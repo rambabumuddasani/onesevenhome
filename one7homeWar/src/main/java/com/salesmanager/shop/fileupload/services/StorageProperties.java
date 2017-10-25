@@ -1,5 +1,6 @@
 package com.salesmanager.shop.fileupload.services;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 
@@ -7,12 +8,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class StorageProperties {
 	
+
 	/**
      * Folder location for storing files
      */
    // private String location = "upload-dir";
-	//private String location = "F:\\cores\\";	// in Windows
-	private String location = "/opt/img/vendor/certificate"; // in UNIX 
+	private String location = "F:\\cores\\";	// in Windows
+	//@Value("uploadFileSystemPath")
+	//private String location; // in UNIX 
+	//private String location = "/opt/img/vendor/certificate"; // in UNIX 
 	
 	public String getLocation() {
         return location;
