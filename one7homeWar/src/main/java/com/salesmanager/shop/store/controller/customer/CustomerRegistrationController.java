@@ -981,6 +981,7 @@ public class CustomerRegistrationController extends AbstractController {
 			vendorDetails.setVendorMajorCust(customer.getVendorAttrs().getVendorMajorCust());
 			vendorDetails.setVatRegNo(customer.getVendorAttrs().getVendorVatRegNo());
 			vendorDetails.setVendorTIN(customer.getVendorAttrs().getVendorTinNumber());
+			vendorDetails.setUserProfile(customer.getUserProfile());
 			customerDetailsResponse.setVendorDetails(vendorDetails);
 			return customerDetailsResponse;
 		}

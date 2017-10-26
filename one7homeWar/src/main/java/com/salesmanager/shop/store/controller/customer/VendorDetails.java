@@ -21,6 +21,7 @@ public class VendorDetails {
 	//private String vendorTerms;
 	private String activationURL;
 	private String vendorTIN;
+	private String userProfile;
 	public String getEmail() {
 		return email;
 	}
@@ -135,5 +136,12 @@ public class VendorDetails {
 	public void setVendorTIN(String vendorTIN) {
 		this.vendorTIN = vendorTIN;
 	}
+	public String getUserProfile() {
+		return userProfile;
+	}
+	public void setUserProfile(String userProfile) {
+		this.userProfile = userProfile;
+	}
+	
 	
 }
