@@ -43,6 +43,7 @@ import com.salesmanager.core.model.generic.SalesManagerEntity;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.product.vendor.VendorProduct;
 import com.salesmanager.core.model.reference.language.Language;
+import com.salesmanager.core.model.services.Services;
 import com.salesmanager.core.model.user.Group;
 import com.salesmanager.core.utils.CloneUtils;
 
@@ -145,6 +146,22 @@ public class Customer extends SalesManagerEntity<Long, Customer> {
 	})
 	private List<Group> groups = new ArrayList<Group>();
 	
+	@ManyToMany(fetch=FetchType.LAZY, cascade = {CascadeType.REFRESH})
+	@JoinTable(name = "CUSTOMER_SERVICES", schema=SchemaConstant.SALESMANAGER_SCHEMA, joinColumns = { 
+			@JoinColumn(name = "CUSTOMER_ID", nullable = false, updatable = false) }
+			, 
+			inverseJoinColumns = { @JoinColumn(name = "ID", 
+					nullable = false, updatable = false) }
+	)
+	@Cascade({
+		org.hibernate.annotations.CascadeType.DETACH,
+		org.hibernate.annotations.CascadeType.LOCK,
+		org.hibernate.annotations.CascadeType.REFRESH,
+		org.hibernate.annotations.CascadeType.REPLICATE
+		
+	})
+	private List<Services> services = new ArrayList<Services>();
+
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "customer")
 	private Set<VendorProduct> vendorProduct = new HashSet<VendorProduct>();
 
@@ -411,7 +428,12 @@ public class Customer extends SalesManagerEntity<Long, Customer> {
 		this.userProfile = userProfile;
 	}
 
-	
+	public List<Services> getServices() {
+		return services;
+	}
 
+	public void setServices(List<Services> services) {
+		this.services = services;
+	}
 	
 }

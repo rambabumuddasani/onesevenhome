@@ -1,11 +1,14 @@
 package com.salesmanager.shop.model.customer;
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.validation.Valid;
 
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
+
+import com.salesmanager.core.model.services.Services;
 
 
 public class CustomerEntity extends Customer implements Serializable {
@@ -37,6 +40,7 @@ public class CustomerEntity extends Customer implements Serializable {
 	private String activated;
 	private String area;
 	private String dob;
+	private List<Services> services;
 	
 	@NotEmpty(message="{NotEmpty.customer.userName}")
 	private String userName;
@@ -171,6 +175,14 @@ public class CustomerEntity extends Customer implements Serializable {
 
 	public void setDob(String dob) {
 		this.dob = dob;
+	}
+
+	public List<Services> getServices() {
+		return services;
+	}
+
+	public void setServices(List<Services> services) {
+		this.services = services;
 	}
 
 }

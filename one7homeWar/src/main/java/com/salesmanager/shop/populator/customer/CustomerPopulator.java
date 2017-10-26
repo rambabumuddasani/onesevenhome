@@ -244,6 +244,9 @@ public class CustomerPopulator extends
 			if(source.getActivated() != null){
 				target.setActivated(source.getActivated());
 			}
+			if(source.getServices() != null){
+				target.setServices(source.getServices());
+			}
 		
 		} catch (Exception e) {
 			throw new ConversionException(e);
