@@ -986,6 +986,7 @@ public class CustomerRegistrationController extends AbstractController {
 			vendorDetails.setVendorMajorCust(customer.getVendorAttrs().getVendorMajorCust());
 			vendorDetails.setVatRegNo(customer.getVendorAttrs().getVendorVatRegNo());
 			vendorDetails.setVendorTIN(customer.getVendorAttrs().getVendorTinNumber());
+			vendorDetails.setUserProfile(customer.getUserProfile());
 			customerDetailsResponse.setVendorDetails(vendorDetails);
 			return customerDetailsResponse;
 		}
@@ -1167,15 +1168,20 @@ public class CustomerRegistrationController extends AbstractController {
 		String tempVendorProfilePicPath = new StringBuilder("vendor").append(File.separator).append("profiles").toString(); // give file directory path
 		String tempVendorCertificatePath = new StringBuilder("vendor").append(File.separator).append("certificates").toString(); // give file directory path
         //for(MultipartFile 	file : uploadedFiles){
-        userProfile = storeFile(profilePicFile, tempVendorProfilePicPath);
-    	customer.setUserProfile(userProfile);
-
+        
+		userProfile = storeFile(profilePicFile, tempVendorProfilePicPath);
+        if(!StringUtils.isEmpty(userProfile)){
+        	customer.setUserProfile(userProfile);
+        }
+        
     	certFileName = storeFile(vendorCertificateFile, tempVendorCertificatePath);
-    	customer.setUserProfile(certFileName);
-
-  		vendorAttrs.setVendorAuthCert(certFileName);
+        if(!StringUtils.isEmpty(certFileName)){
+      		vendorAttrs.setVendorAuthCert(certFileName);
+        }
+        
+/*  		vendorAttrs.setVendorAuthCert(certFileName);
         customer.setUserProfile(userProfile);			
-       
+*/       
         vendorAttrs.setVendorOfficeAddress(vendorRequest.getVendorOfficeAddress());
         vendorAttrs.setVendorMobile(vendorRequest.getVendorMobile());
         vendorAttrs.setVendorTelephone(vendorRequest.getVendorTelephone());
