@@ -1832,18 +1832,34 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
     			return productImageResponse;
     		}
     		try {
-    			ProductImage productImage = new ProductImage();
-    			Set<ProductImage> images = new HashSet<ProductImage>();
+    			boolean isDefaultImageExists = false;
+    			boolean isDefaultImage = false;
+    			if(productImageRequest.getDefaultImage() != null && productImageRequest.getDefaultImage().equals("1"))
+    				isDefaultImage = true;
+
     			Product dbProduct = productService.getById(productImageRequest.getProductId());
     			if(dbProduct == null){
         			productImageResponse.setErrorMsg("No product available with product id : "+productImageRequest.getProductId());
         			productImageResponse.setStatus(false);
         			return productImageResponse;
     			}
+    			ProductImage productImage = null;
+    			Set<ProductImage> images = new HashSet<ProductImage>();
+
+    			if(dbProduct.getImages() != null)
+    			{
+    				for(ProductImage image:dbProduct.getImages()) {
+    					if(image.isDefaultImage() && isDefaultImage){
+    						isDefaultImageExists = true;
+    						productImage = image;
+    						break;
+    					}
+    				}
+    			}
+				if(!isDefaultImageExists){
+					productImage = new ProductImage();
+				}
     			productImage.setProduct(dbProduct);
-    			boolean isDefaultImage = false;
-    			if(productImageRequest.getDefaultImage() != null && productImageRequest.getDefaultImage().equals("1"))
-    				isDefaultImage = true;
     			productImage.setDefaultImage(isDefaultImage);
     			productImage.setProductImageUrl(fileName);
     			images.add(productImage);
@@ -1862,11 +1878,12 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
 		
 		return productImageResponse;
 	}
-	      @RequestMapping(value="/createProduct", method = RequestMethod.POST, 
-			               consumes = MediaType.APPLICATION_JSON_VALUE,
-			               produces = MediaType.APPLICATION_JSON_VALUE)
-	      @ResponseBody
-	      public CreateProductResponse createProduct(@RequestBody CreateProductRequest createProductRequest) throws Exception {
+	
+      @RequestMapping(value="/createProduct", method = RequestMethod.POST, 
+		               consumes = MediaType.APPLICATION_JSON_VALUE,
+		               produces = MediaType.APPLICATION_JSON_VALUE)
+      @ResponseBody
+      public CreateProductResponse createProduct(@RequestBody CreateProductRequest createProductRequest) throws Exception {
 		
 		System.out.println("createProduct:");
 		/*{"sku":"1234"
@@ -2143,5 +2160,4 @@ public CreateProductResponse updateProductDiscount(@RequestBody ProductDiscountR
 	return createProductResponse;
 	
 	}
-
 }
