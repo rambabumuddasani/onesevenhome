@@ -1,6 +1,8 @@
 package com.salesmanager.core.business.services.customer;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -9,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.salesmanager.core.business.exception.ServiceException;
+import com.salesmanager.core.business.modules.services.ServicesWorkerVO;
+import com.salesmanager.core.business.modules.services.WorkerServiceResponse;
 import com.salesmanager.core.business.repositories.customer.CustomerRepository;
 import com.salesmanager.core.business.services.common.generic.SalesManagerEntityServiceImpl;
 import com.salesmanager.core.business.services.customer.attribute.CustomerAttributeService;
@@ -18,6 +22,7 @@ import com.salesmanager.core.model.customer.CustomerCriteria;
 import com.salesmanager.core.model.customer.CustomerList;
 import com.salesmanager.core.model.customer.attribute.CustomerAttribute;
 import com.salesmanager.core.model.merchant.MerchantStore;
+import com.salesmanager.core.model.services.CompanyService;
 import com.salesmanager.core.modules.utils.GeoLocation;
 
 
@@ -111,6 +116,40 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 
 	}
 
+	@Override
+	public List<Customer> findByServiceId(Integer serviceId) {
+		return customerRepository.findByServiceId(serviceId);
+	}
+	
+	@Override
+	public WorkerServiceResponse findByServiceType(String serviceType) {
+		WorkerServiceResponse response = new WorkerServiceResponse();
+		List<Customer> customer = customerRepository.findByServiceType(serviceType);
+		Set<ServicesWorkerVO> servicesWorkerVOSet= new HashSet<ServicesWorkerVO>();
+		for(Customer eachWorker : customer){
+			int avgRating = 0;
+			int totalRating= 0;
+			ServicesWorkerVO servicesWorkerVO = new ServicesWorkerVO();
+			servicesWorkerVO.setId(new Integer(String.valueOf((eachWorker.getId()))));
+			servicesWorkerVO.setCompanyName(eachWorker.getVendorAttrs().getVendorName());
+			servicesWorkerVO.setHouseNumber(eachWorker.getVendorAttrs().getVendorOfficeAddress());
+			servicesWorkerVO.setStreet(eachWorker.getBilling().getAddress());
+			servicesWorkerVO.setArea(eachWorker.getArea());
+			servicesWorkerVO.setCity(eachWorker.getBilling().getCity());
+			servicesWorkerVO.setState(eachWorker.getBilling().getState());
+			servicesWorkerVO.setPinCode(eachWorker.getBilling().getPostalCode());
+			servicesWorkerVO.setContactNumber(eachWorker.getBilling().getTelephone());
+			servicesWorkerVO.setImageUrl(eachWorker.getVendorAttrs().getVendorAuthCert());
+			servicesWorkerVO.setCountry(eachWorker.getBilling().getCountry().getName());
+			servicesWorkerVO.setAvgRating(avgRating);
+			servicesWorkerVO.setTotalRating(totalRating);
+			servicesWorkerVOSet.add(servicesWorkerVO);
+		}
+		//response.setWorkers(serviceWorker);
+		response.setWorkers(servicesWorkerVOSet);
+		//response.setServiceCompanies(servicesWorkerVOSet);
+		return response;
+	}
 	
 	
 

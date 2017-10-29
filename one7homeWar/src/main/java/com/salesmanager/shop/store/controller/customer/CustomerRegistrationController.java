@@ -1250,6 +1250,7 @@ public class CustomerRegistrationController extends AbstractController {
     	customer.setLastName(servicesRequest.getEmail());
     	customer.setUserName(servicesRequest.getEmail());
     	customer.setStoreCode("DEFAULT");
+    	customer.setArea(servicesRequest.getArea());
     	Address billing = new Address();
     	billing.setFirstName(servicesRequest.getEmail());
     	billing.setLastName(servicesRequest.getEmail());

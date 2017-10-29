@@ -18,8 +18,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.salesmanager.core.business.modules.services.ServicesResponse;
 import com.salesmanager.core.business.modules.services.WorkerRatingResponse;
 import com.salesmanager.core.business.modules.services.WorkerServiceResponse;
+import com.salesmanager.core.business.services.customer.CustomerService;
 import com.salesmanager.core.business.services.services.ServicesService;
 import com.salesmanager.core.business.services.services.WorkerService;
+import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.services.Services;
 import com.salesmanager.core.model.services.CompanyService;
 
@@ -38,6 +40,8 @@ public class ServicesController {
 	@Inject
 	WorkerService workerService;
 
+	@Inject
+    private CustomerService customerService;
 
 	@RequestMapping(value="/services", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
@@ -63,15 +67,19 @@ public class ServicesController {
 	@RequestMapping(value="/services/{serviceid}", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody	
-	public Set<CompanyService> getWorkerByService(@PathVariable Integer serviceid) {		
-		return workerService.getWorkerByService(serviceid);
+	public List<Customer> getWorkerByService(@PathVariable Integer serviceid) {		
+		//public Set<CompanyService> getWorkerByService(@PathVariable Integer serviceid) {		
+		//return workerService.getWorkerByService(serviceid);
+		return customerService.findByServiceId(serviceid);
 	}
 
 	@RequestMapping(value="/services/{type}/workers", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody	
+	//public List<Customer> getWorkerByService(@PathVariable String type) {		
 	public WorkerServiceResponse getWorkerByService(@PathVariable String type) {		
-			return workerService.getWorkerByServiceType(type);
+			//return workerService.getWorkerByServiceType(type);
+		return customerService.findByServiceType(type);
 			//return null;
 	}
 
