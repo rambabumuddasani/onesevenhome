@@ -11,26 +11,35 @@ import com.salesmanager.core.model.catalog.product.image.ProductImage;
 public class ProductDetails {
 
 	Long productId;
+	String productName;
+	String sku;
 	String productTitle;
 	String productDescription;
+	String shortDesc;
+	String productDescTitle;
 	BigDecimal productOriginalPrice;
 	BigDecimal productDiscountPrice;
 	String discountPercentage;
 	String defaultImage;
 	List<String> productImages;
 	List<ProductFilterType> productFilterTypeList;
-	
-	public String getDefaultImage() {
-		return defaultImage;
-	}
-	public void setDefaultImage(String defaultImage) {
-		this.defaultImage = defaultImage;
-	}
 	public Long getProductId() {
 		return productId;
 	}
 	public void setProductId(Long productId) {
 		this.productId = productId;
+	}
+	public String getProductName() {
+		return productName;
+	}
+	public void setProductName(String productName) {
+		this.productName = productName;
+	}
+	public String getSku() {
+		return sku;
+	}
+	public void setSku(String sku) {
+		this.sku = sku;
 	}
 	public String getProductTitle() {
 		return productTitle;
@@ -43,6 +52,18 @@ public class ProductDetails {
 	}
 	public void setProductDescription(String productDescription) {
 		this.productDescription = productDescription;
+	}
+	public String getShortDesc() {
+		return shortDesc;
+	}
+	public void setShortDesc(String shortDesc) {
+		this.shortDesc = shortDesc;
+	}
+	public String getProductDescTitle() {
+		return productDescTitle;
+	}
+	public void setProductDescTitle(String productDescTitle) {
+		this.productDescTitle = productDescTitle;
 	}
 	public BigDecimal getProductOriginalPrice() {
 		return productOriginalPrice;
@@ -61,6 +82,12 @@ public class ProductDetails {
 	}
 	public void setDiscountPercentage(String discountPercentage) {
 		this.discountPercentage = discountPercentage;
+	}
+	public String getDefaultImage() {
+		return defaultImage;
+	}
+	public void setDefaultImage(String defaultImage) {
+		this.defaultImage = defaultImage;
 	}
 	public List<String> getProductImages() {
 		return productImages;

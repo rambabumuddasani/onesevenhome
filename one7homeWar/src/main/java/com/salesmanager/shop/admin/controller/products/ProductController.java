@@ -1089,6 +1089,9 @@ public class ProductController extends AbstractController {
 		List<String> productImages = new ArrayList<String>();
 		if(dbProduct != null) {
 			System.out.println("product id =="+dbProduct.getId());
+			productDetails.setProductId(productId);
+			productDetails.setSku(dbProduct.getSku());
+			productDetails.setProductName(dbProduct.getProductDescription().getName());
 			for(ProductImage image : dbProduct.getImages()) {
 				if(image.isDefaultImage()) {
 					productDetails.setDefaultImage(image.getProductImageUrl());
@@ -1100,8 +1103,12 @@ public class ProductController extends AbstractController {
 			
 			System.out.println("dbProduct.getProductDescription().getTitle() =="+dbProduct.getProductDescription().getTitle());
 			productDetails.setProductId(dbProduct.getId());
-			productDetails.setProductTitle(dbProduct.getProductDescription().getTitle());
-			productDetails.setProductDescription(dbProduct.getProductDescription().getDescription());
+			if(dbProduct.getProductDescription() != null) {
+				productDetails.setProductTitle(dbProduct.getProductDescription().getTitle());
+				productDetails.setProductDescription(dbProduct.getProductDescription().getDescription());
+				productDetails.setShortDesc(dbProduct.getProductDescription().getMetatagDescription());
+				productDetails.setProductDescTitle(dbProduct.getProductDescription().getMetatagTitle());
+			}
 			ProductAvailability productAvailability = null;
 			ProductPrice productPrice = null;
 			
@@ -1129,9 +1136,12 @@ public class ProductController extends AbstractController {
 				productPrice = new ProductPrice();
 			}
 			
-			productDetails.setProductOriginalPrice(productPrice.getProductPriceAmount());
-			productDetails.setProductDiscountPrice(productPrice.getProductPriceSpecialAmount());
-			productDetails.setDiscountPercentage(getDiscountPercentage(productPrice));
+			if(productPrice.getProductPriceAmount() != null)
+				productDetails.setProductOriginalPrice(productPrice.getProductPriceAmount());
+			if(productPrice.getProductPriceSpecialAmount() != null) {
+				productDetails.setProductDiscountPrice(productPrice.getProductPriceSpecialAmount());
+				productDetails.setDiscountPercentage(getDiscountPercentage(productPrice));
+			}
 			
 			//adding filters
 			Set<FilterType> filters = dbProduct.getFilters();
