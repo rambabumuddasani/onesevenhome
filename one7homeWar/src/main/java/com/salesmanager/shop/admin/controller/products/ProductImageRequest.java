@@ -9,6 +9,7 @@ public class ProductImageRequest implements Serializable{
 	
 	Long productId;
 	String defaultImage;
+	String imageURL;
 	
 	public Long getProductId() {
 		return productId;
@@ -21,6 +22,12 @@ public class ProductImageRequest implements Serializable{
 	}
 	public void setDefaultImage(String defaultImage) {
 		this.defaultImage = defaultImage;
+	}
+	public String getImageURL() {
+		return imageURL;
+	}
+	public void setImageURL(String imageURL) {
+		this.imageURL = imageURL;
 	}
 	
 }

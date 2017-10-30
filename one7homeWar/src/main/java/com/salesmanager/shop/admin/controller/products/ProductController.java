@@ -73,6 +73,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -1832,7 +1833,7 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
     			return productImageResponse;
     		}
     		try {
-    			boolean isDefaultImageExists = false;
+    			boolean isImageExists = false;
     			boolean isDefaultImage = false;
     			if(productImageRequest.getDefaultImage() != null && productImageRequest.getDefaultImage().equals("1"))
     				isDefaultImage = true;
@@ -1849,14 +1850,14 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
     			if(dbProduct.getImages() != null)
     			{
     				for(ProductImage image:dbProduct.getImages()) {
-    					if(image.isDefaultImage() && isDefaultImage){
-    						isDefaultImageExists = true;
+    					if(image.getProductImageUrl() != null && productImageRequest.getImageURL() != null && (image.getProductImageUrl().equals(productImageRequest.getImageURL()))){
+    						isImageExists = true;
     						productImage = image;
     						break;
     					}
     				}
     			}
-				if(!isDefaultImageExists){
+				if(!isImageExists){
 					productImage = new ProductImage();
 				}
     			productImage.setProduct(dbProduct);
@@ -2160,4 +2161,64 @@ public CreateProductResponse updateProductDiscount(@RequestBody ProductDiscountR
 	return createProductResponse;
 	
 	}
+  
+	 @RequestMapping(value="/deleteProductImage", method = RequestMethod.POST, 
+     consumes = MediaType.APPLICATION_JSON_VALUE,
+     produces = MediaType.APPLICATION_JSON_VALUE)
+	 @ResponseBody
+	public ProductImageResponse deleteProductImage(@RequestBody ProductImageRequest productImageRequest) throws Exception {
+		ProductImageResponse productImageResponse = new ProductImageResponse();
+		
+		if(productImageRequest.getProductId() == null){
+			productImageResponse.setErrorMsg("ProductId can not be null");
+			productImageResponse.setStatus(false);
+			return productImageResponse;
+		}
+		productImageResponse.setProductId(productImageRequest.getProductId());
+  		try {
+  			boolean isImageExists = false;
+
+  			Product dbProduct = productService.getById(productImageRequest.getProductId());
+  			if(dbProduct == null){
+      			productImageResponse.setErrorMsg("No product available with product id : "+productImageRequest.getProductId());
+      			productImageResponse.setStatus(false);
+      			return productImageResponse;
+  			}
+  			ProductImage productImage = null;
+  			Set<ProductImage> images = new HashSet<ProductImage>();
+
+  			if(dbProduct.getImages() != null)
+  			{
+  				for(ProductImage image:dbProduct.getImages()) {
+  					if(image.getProductImageUrl() != null && productImageRequest.getImageURL() != null && (image.getProductImageUrl().equals(productImageRequest.getImageURL()))){
+  						isImageExists = true;
+  						productImage = image;
+  						break;
+  					}
+  				}
+  			}
+			if(!isImageExists){
+      			productImageResponse.setErrorMsg("Image URL :"+productImageRequest.getImageURL()+" provided is not available with product id : "+productImageRequest.getProductId());
+      			productImageResponse.setStatus(false);
+      			return productImageResponse;
+			} else {
+				//deleting image from the location
+				File imageFile = new File(productImageRequest.getImageURL());
+				if(imageFile.exists()){
+					imageFile.delete();
+				}
+	  			productImage.setProduct(dbProduct);
+	  			productImageService.delete(productImage);
+			}
+  			
+  		}catch(Exception e){
+  			productImageResponse.setErrorMsg("Failed while deleting image details in database for product id : "+productImageRequest.getProductId());
+  			productImageResponse.setStatus(false);
+  			return productImageResponse;
+  		}
+  		productImageResponse.setStatus(true);
+  		productImageResponse.setFileName(productImageRequest.getImageURL());
+  		return productImageResponse;
+  	}
+		
 }
