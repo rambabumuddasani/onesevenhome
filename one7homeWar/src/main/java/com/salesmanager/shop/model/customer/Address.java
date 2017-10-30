@@ -28,7 +28,7 @@ public class Address implements Serializable {
 	private String area;
 	private String stateProvince;
 	private boolean billingAddress;
-
+	
 	private boolean deliveryAddress;
 	private boolean secondaryDeliveryAddress;
 	

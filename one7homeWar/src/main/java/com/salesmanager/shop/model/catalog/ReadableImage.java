@@ -2,6 +2,7 @@ package com.salesmanager.shop.model.catalog;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.salesmanager.shop.model.Entity;
 
 public class ReadableImage extends Entity implements Serializable {
@@ -12,8 +13,11 @@ public class ReadableImage extends Entity implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private String imageName;
 	private String imageUrl;
+	@JsonIgnore
 	private String externalUrl;
+	@JsonIgnore
 	private String videoUrl;
+	@JsonIgnore
 	private int imageType;
 	public void setImageName(String imageName) {
 		this.imageName = imageName;

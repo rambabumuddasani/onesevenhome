@@ -8,6 +8,7 @@ import javax.validation.Valid;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.salesmanager.core.model.services.Services;
 
 
@@ -32,14 +33,19 @@ public class CustomerEntity extends Customer implements Serializable {
 	private String firstName;
 	private String lastName;
 	
+	@JsonIgnore
 	private String encodedPassword = null;
+	@JsonIgnore
 	private String clearPassword = null;
-	
+	@JsonIgnore
 	private String storeCode;
+	@JsonIgnore
 	private String customerType;
+	@JsonIgnore
 	private String activated;
 	private String area;
 	private String dob;
+	@JsonIgnore
 	private List<Services> services;
 	
 	@NotEmpty(message="{NotEmpty.customer.userName}")

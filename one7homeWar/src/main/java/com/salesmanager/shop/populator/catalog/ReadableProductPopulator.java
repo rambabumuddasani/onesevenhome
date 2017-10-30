@@ -83,7 +83,7 @@ public class ReadableProductPopulator extends
 			target.setProductWidth(source.getProductWidth());
 			target.setPreOrder(source.isPreOrder());
 			target.setRefSku(source.getRefSku());
-			target.setSortOrder(source.getSortOrder());
+			//target.setSortOrder(source.getSortOrder());
 			
 			if(source.getProductReviewAvg()!=null) {
 				double avg = source.getProductReviewAvg().doubleValue();
