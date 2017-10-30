@@ -3,6 +3,8 @@ package com.salesmanager.shop.model.catalog.product;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 /**
  * A product entity is used by services API
@@ -19,22 +21,35 @@ public class ProductEntity extends Product implements Serializable {
 	private BigDecimal price;
 	private int quantity = 0;
 	private String sku;
+	@JsonIgnore
 	private boolean productShipeable = false;
+	@JsonIgnore
 	private boolean preOrder = false;
+	@JsonIgnore
 	private boolean productVirtual = false;
+	@JsonIgnore
 	private int quantityOrderMaximum =-1;//default unlimited
+	@JsonIgnore
 	private int quantityOrderMinimum = 1;//default 1
+	@JsonIgnore
 	private boolean productIsFree;
+	@JsonIgnore
 	private boolean available;
+	@JsonIgnore
 	private boolean visible;
+	@JsonIgnore
 	private BigDecimal productLength;
+	@JsonIgnore
 	private BigDecimal productWidth;
+	@JsonIgnore
 	private BigDecimal productHeight;
+	@JsonIgnore
 	private BigDecimal productWeight;
 	private Double rating = 0D;
 	private int ratingCount;
 	private int sortOrder;
 	private String dateAvailable;
+	@JsonIgnore
 	private String refSku;
 
 	

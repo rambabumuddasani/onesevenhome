@@ -3,6 +3,7 @@ package com.salesmanager.shop.model.order;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.salesmanager.shop.model.Entity;
 
 
@@ -12,10 +13,15 @@ public class OrderTotal extends Entity implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	@JsonIgnore
 	private String title;
+	@JsonIgnore
     private String text;
 	private String code;
+	@JsonIgnore
 	private int order;
+	
+	
 	private String module;
 	private BigDecimal value;
 	

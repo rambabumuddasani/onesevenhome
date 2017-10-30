@@ -2,6 +2,7 @@ package com.salesmanager.shop.model.catalog;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.salesmanager.shop.model.ShopEntity;
 
 
@@ -13,10 +14,15 @@ public abstract class CatalogEntity extends ShopEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private String name;
 	private String description;
+	@JsonIgnore
 	private String friendlyUrl;
+	@JsonIgnore
 	private String keyWords;
+	@JsonIgnore
 	private String highlights;
+	@JsonIgnore
 	private String metaDescription;
+	@JsonIgnore
 	private String title;
 	public String getName() {
 		return name;

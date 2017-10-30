@@ -22,13 +22,17 @@ public class OrderEntity extends Order implements Serializable {
 	private String paymentModule;
 	@JsonIgnore
 	private String shippingModule;
+	@JsonIgnore
 	private List<OrderStatus> previousOrderStatus;
 	private OrderStatus orderStatus;
 	@JsonIgnore
 	private CreditCard creditCard;
 	private Date datePurchased;
 	private String currency;
+	@JsonIgnore
 	private boolean customerAgreed;
+	
+	@JsonIgnore
 	private boolean confirmedAddress;
 	
 	public void setTotals(List<OrderTotal> totals) {

@@ -3,6 +3,8 @@ package com.salesmanager.shop.model.order;
 import java.io.Serializable;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class ReadableOrderProduct extends OrderProductEntity implements
 		Serializable {
 
@@ -13,7 +15,8 @@ public class ReadableOrderProduct extends OrderProductEntity implements
 	private String productName;
 	private String price;
 	private String subTotal;
-	
+
+	@JsonIgnore
 	private List<ReadableOrderProductAttribute> attributes = null;
 	
 	private String sku;
