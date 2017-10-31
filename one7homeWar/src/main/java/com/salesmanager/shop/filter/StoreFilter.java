@@ -64,13 +64,10 @@ public class StoreFilter extends HandlerInterceptorAdapter {
 	            Object handler) throws Exception {
 
 			//request.setCharacterEncoding("UTF-8");
-			
 			/**
 			 * if url contains /services
 			 * exit from here 
 			 */
-			//System.out.println("****** " + request.getRequestURL().toString());
-			//System.out.println("****** " + request.getRequestURI().toString());
 			if(request.getRequestURL().toString().toLowerCase().contains(SERVICES_URL_PATTERN)
 				|| request.getRequestURL().toString().toLowerCase().contains(REFERENCE_URL_PATTERN)	
 			) {
@@ -80,7 +77,6 @@ public class StoreFilter extends HandlerInterceptorAdapter {
 			try {
 				/** merchant store **/
 				MerchantStore store = (MerchantStore)request.getSession().getAttribute(Constants.MERCHANT_STORE);
-
 				String storeCode = request.getParameter(STORE_REQUEST_PARAMETER);
 				
 				//remove link set from controllers for declaring active - inactive links
@@ -95,11 +91,9 @@ public class StoreFilter extends HandlerInterceptorAdapter {
 						store = setMerchantStoreInSession(request, storeCode);
 					}
 				}
-
 				if(store==null) {
 					store = setMerchantStoreInSession(request, MerchantStore.DEFAULT_STORE);
 				}
-				
 				request.setAttribute(Constants.MERCHANT_STORE, store);
 				
 				/** customer **/
@@ -116,7 +110,6 @@ public class StoreFilter extends HandlerInterceptorAdapter {
 					} 	
 					request.setAttribute(Constants.CUSTOMER, customer);
 				} */
-				
 				if(customer==null) {					
 /*					Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		        	if(auth != null &&
@@ -143,12 +136,13 @@ public class StoreFilter extends HandlerInterceptorAdapter {
 				Locale locale = languageService.toLocale(language);
 				LocaleContextHolder.setLocale(locale);				
 				
-				/******* Shopping Cart *********/
-				
-				String shoppingCarCode = (String)request.getSession().getAttribute(Constants.SHOPPING_CART);
+				/*				
+				 *
+				 * String shoppingCarCode = (String)request.getSession().getAttribute(Constants.SHOPPING_CART);
 				if(!isEmpty(shoppingCarCode)) {
 					request.setAttribute(Constants.REQUEST_SHOPPING_CART, shoppingCarCode);
-				}			
+				}							
+				*/
 			} catch (Exception e) {
 				LOGGER.error("Error in StoreFilter",e);
 			}
