@@ -124,7 +124,7 @@ public class ReadableProductPopulator extends
 			ProductImage image = source.getProductImage();
 			if(image!=null) {
 				ReadableImage rimg = new ReadableImage();
-				rimg.setImageName(image.getProductImage());
+				rimg.setImageName(image.getProductImageUrl());
 				
 				String contextPath = imageUtils.getContextPath();
 				StringBuilder imagePath = new StringBuilder();
