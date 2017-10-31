@@ -197,8 +197,12 @@ public class ReadableProductPopulator extends
 			for(ProductAvailability availability : source.getAvailabilities()) {
 				if(availability.getRegion().equals(Constants.ALL_REGIONS)) {//TODO REL 2.1 accept a region
 					target.setQuantity(availability.getProductQuantity());
-					target.setQuantityOrderMaximum(availability.getProductQuantityOrderMax());
-					target.setQuantityOrderMinimum(availability.getProductQuantityOrderMin());
+					if(!org.springframework.util.StringUtils.isEmpty(availability.getProductQuantityOrderMax())){
+						target.setQuantityOrderMaximum(availability.getProductQuantityOrderMax());
+					}
+					if(!org.springframework.util.StringUtils.isEmpty(availability.getProductQuantityOrderMin())){
+						target.setQuantityOrderMinimum(availability.getProductQuantityOrderMin());
+					}
 					if(availability.getProductQuantity().intValue() > 0 && target.isAvailable()) {
 							target.setCanBePurchased(true);
 					}

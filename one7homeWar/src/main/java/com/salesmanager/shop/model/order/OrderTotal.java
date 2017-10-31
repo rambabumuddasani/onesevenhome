@@ -20,8 +20,6 @@ public class OrderTotal extends Entity implements Serializable {
 	private String code;
 	@JsonIgnore
 	private int order;
-	
-	
 	private String module;
 	private BigDecimal value;
 	

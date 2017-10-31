@@ -103,18 +103,19 @@ public class StoreFilter extends HandlerInterceptorAdapter {
 				request.setAttribute(Constants.MERCHANT_STORE, store);
 				
 				/** customer **/
-				Customer customer = (Customer)request.getSession().getAttribute(Constants.CUSTOMER);
-				if(customer != null) {
+				Customer customer = null;
+				/*
+				 * if(customer != null) {
 					if(customer.getMerchantStore().getId().intValue() != store.getId().intValue()) {
 						request.getSession().removeAttribute(Constants.CUSTOMER);
 					}
-					/*	if(!customer.isAnonymous()) {
+						if(!customer.isAnonymous()) {
 			        	if(!request.isUserInRole("AUTH_CUSTOMER")) {
 			        			request.removeAttribute(Constants.CUSTOMER);
 				        }
-					} */	
+					} 	
 					request.setAttribute(Constants.CUSTOMER, customer);
-				} 
+				} */
 				
 				if(customer==null) {					
 /*					Authentication auth = SecurityContextHolder.getContext().getAuthentication();

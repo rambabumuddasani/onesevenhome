@@ -16,6 +16,7 @@ public class ReadableOrder extends OrderEntity implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	@JsonIgnore
 	private ReadableCustomer customer;
 	private List<ReadableOrderProduct> products;
 	@JsonIgnore
