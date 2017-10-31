@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 public class Address implements Serializable {
 	
@@ -17,6 +19,7 @@ public class Address implements Serializable {
 	
 	//@NotEmpty(message="{NotEmpty.customer.lastName}")
 	private String lastName;
+	@JsonIgnore
 	private String bilstateOther;
 
 	private String company;
@@ -31,10 +34,11 @@ public class Address implements Serializable {
 	
 	private boolean deliveryAddress;
 	private boolean secondaryDeliveryAddress;
-	
+	@JsonIgnore
 	private String latitude;
+	@JsonIgnore
 	private String longitude;
-	
+	@JsonIgnore
 	private String zone;//code
 	
 	//@NotEmpty(message="{NotEmpty.customer.billing.country}")

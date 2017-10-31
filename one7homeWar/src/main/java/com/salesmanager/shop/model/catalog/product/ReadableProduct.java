@@ -3,6 +3,7 @@ package com.salesmanager.shop.model.catalog.product;
 import java.io.Serializable;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.salesmanager.shop.model.catalog.ReadableImage;
 import com.salesmanager.shop.model.catalog.manufacturer.ReadableManufacturer;
 import com.salesmanager.shop.model.catalog.product.attribute.ReadableProductAttribute;
@@ -21,7 +22,9 @@ public class ReadableProduct extends ProductEntity implements Serializable {
 	private ReadableImage image;
 	private List<ReadableImage> images;
 	private ReadableManufacturer manufacturer;
+	@JsonIgnore
 	private List<ReadableProductAttribute> attributes;
+	@JsonIgnore
 	private boolean canBePurchased = false;
 	
 		
