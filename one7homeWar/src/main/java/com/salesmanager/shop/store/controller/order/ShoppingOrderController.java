@@ -37,17 +37,16 @@ import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.services.catalog.product.PricingService;
 import com.salesmanager.core.business.services.catalog.product.ProductService;
 import com.salesmanager.core.business.services.customer.CustomerService;
-import com.salesmanager.core.business.services.merchant.MerchantStoreService;
 import com.salesmanager.core.business.services.order.OrderService;
 import com.salesmanager.core.business.services.order.orderproduct.OrderProductDownloadService;
 import com.salesmanager.core.business.services.payments.PaymentService;
 import com.salesmanager.core.business.services.payments.TransactionService;
 import com.salesmanager.core.business.services.reference.country.CountryService;
-import com.salesmanager.core.business.services.reference.language.LanguageService;
 import com.salesmanager.core.business.services.reference.zone.ZoneService;
 import com.salesmanager.core.business.services.shipping.ShippingService;
 import com.salesmanager.core.business.services.shoppingcart.ShoppingCartService;
 import com.salesmanager.core.model.catalog.product.Product;
+import com.salesmanager.core.model.common.Billing;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.order.Order;
@@ -499,6 +498,7 @@ public class ShoppingOrderController extends AbstractController {
 	        
 			//get cart
 			String cartCode = super.getSessionAttribute(Constants.SHOPPING_CART, request);
+			System.out.println("before remvoing Cart object, cartCode "+cartCode);
 			if(StringUtils.isNotBlank(cartCode)) {
 				try {
 					shoppingCartFacade.deleteShoppingCart(cartCode, store);
@@ -546,13 +546,13 @@ public class ShoppingOrderController extends AbstractController {
 	    		}
 	    		
 				//send order confirmation email to customer
-				//emailTemplatesUtils.sendOrderEmail(modelCustomer.getEmailAddress(), modelCustomer, modelOrder, locale, language, store, request.getContextPath());
+				emailTemplatesUtils.sendOrderEmail(modelCustomer.getEmailAddress(), modelCustomer, modelOrder, locale, language, store, request.getContextPath());
 		/*        if(orderService.hasDownloadFiles(modelOrder)) {
 		        	emailTemplatesUtils.sendOrderDownloadEmail(modelCustomer, modelOrder, store, locale, request.getContextPath());
 		
 		        }*/
 				//send order confirmation email to merchant
-				//emailTemplatesUtils.sendOrderEmail(store.getStoreEmailAddress(), modelCustomer, modelOrder, locale, language, store, request.getContextPath());
+				emailTemplatesUtils.sendOrderEmail("rambabu0006@gmail.com", modelCustomer, modelOrder, locale, language, store, request.getContextPath());
 	        } catch(Exception e) {
 	        	LOGGER.error("Error while post processing order",e);
 	        }
@@ -575,6 +575,7 @@ public class ShoppingOrderController extends AbstractController {
 		 //ReadableOrder readableOrder = new ReadableOrder();
 		 System.out.println("preferedShippingAddress : "+preferedShippingAddress);
 		 System.out.println("cartCode : "+cartCode);
+		 request.getSession().setAttribute(Constants.SHOPPING_CART, cartCode);
 		 //String shoppingCartCode  = (String)request.getSession().getAttribute(Constants.SHOPPING_CART);
 		 Customer customer = getSessionAttribute(  Constants.CUSTOMER, request );
 		 MerchantStore store = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
@@ -600,11 +601,12 @@ public class ShoppingOrderController extends AbstractController {
 		 //readableOrder = orderFacade.getReadableOrderByOrder(modelOrder, store, language);
 		 String orderId = modelOrder.getId().toString();
 		 String amount = modelOrder.getTotal().toString();
-		 ccAvenuPaymenteRequestData(model, amount, orderId);
+		 System.out.println("Order Id "+orderId+" amount is "+amount);
+		 ccAvenuPaymenteRequestData(model, amount, orderId,customer);
 		 return "payment";
 	}
 	
-	private void ccAvenuPaymenteRequestData(Map<String, Object> model,String amt,String orderId) throws UnsupportedEncodingException{
+	private void ccAvenuPaymenteRequestData(Map<String, Object> model,String amt,String orderId,Customer customer) throws UnsupportedEncodingException{
 		String accessCode = cCAvenuePaymentConfiguration.getAccessCode();
 		String currency = cCAvenuePaymentConfiguration.getCurrency();
 		String workingKey = cCAvenuePaymentConfiguration.getWorkingKey();
@@ -626,15 +628,15 @@ public class ShoppingOrderController extends AbstractController {
 		reqParams.put("language", "EN");
 		reqParams.put("amount", amt);
 		reqParams.put("order_id", orderId);
-/*		reqParams.put("billing_name", "Ram");
-		reqParams.put("billing_address", "Santacruz");
-		reqParams.put("billing_city", "Mumbai");
-		reqParams.put("billing_state", "MH");	
-		reqParams.put("billing_zip", "400054");
-		reqParams.put("billing_country", "India");
-		reqParams.put("billing_tel", "0229874789");
-		reqParams.put("billing_email", "testing@domain.com");
-		reqParams.put("delivery_name", "Ram");
+		reqParams.put("billing_name",customer.getNick() );
+		reqParams.put("billing_address",customer.getBilling().getAddress());
+		reqParams.put("billing_city", customer.getBilling().getCity());
+		reqParams.put("billing_state", customer.getBilling().getState());	
+		reqParams.put("billing_zip", customer.getBilling().getPostalCode());
+		reqParams.put("billing_country", customer.getBilling().getCountry().getIsoCode());
+		reqParams.put("billing_tel", customer.getBilling().getTelephone());
+		reqParams.put("billing_email", customer.getEmailAddress());
+/*		reqParams.put("delivery_name", "Ram");
 		reqParams.put("delivery_address", "Vile Parle");
 		reqParams.put("delivery_city", "Mumbai");
 		reqParams.put("delivery_state", "Maharashtra");
@@ -642,7 +644,7 @@ public class ShoppingOrderController extends AbstractController {
 		reqParams.put("delivery_country", "India");
 		reqParams.put("delivery_tel", "0221234321");
 		reqParams.put("merchant_param1", "additional Info.");
-*/		
+*/		System.out.println("reqParams "+reqParams);
 		for(Map.Entry<String, String> eachEntry : reqParams.entrySet()){
 		      ccaRequest.append(eachEntry.getKey()).append( "=").append( URLEncoder.encode(eachEntry.getValue(),"UTF-8")).append( "&");
 		}
