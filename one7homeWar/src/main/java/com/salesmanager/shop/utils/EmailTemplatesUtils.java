@@ -124,11 +124,11 @@ public class EmailTemplatesUtils {
 		    	   
 		    	   //format shipping address
 		    	   StringBuilder shipping = null;
-		    	   if(order.getDelivery()!=null && !StringUtils.isBlank(order.getDelivery().getFirstName())) {
+		    	   if(order.getDelivery()!=null && !StringUtils.isBlank(order.getBilling().getFirstName())) {
 		    		   shipping = new StringBuilder();
 			    	   if(StringUtils.isBlank(order.getDelivery().getCompany())) {
-			    		   shipping.append(order.getDelivery().getFirstName()).append(" ")
-			    		   .append(order.getDelivery().getLastName()).append(LINE_BREAK);
+			    		   shipping.append(order.getBilling().getFirstName()).append(" ")
+			    		   .append(order.getBilling().getLastName()).append(LINE_BREAK);
 			    	   } else {
 			    		   shipping.append(order.getDelivery().getCompany()).append(LINE_BREAK);
 			    	   }
