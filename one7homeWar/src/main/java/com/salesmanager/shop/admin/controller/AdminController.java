@@ -9,13 +9,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -27,10 +27,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.services.catalog.category.CategoryService;
+import com.salesmanager.core.business.services.catalog.category.SubCategoryService;
 import com.salesmanager.core.business.services.catalog.product.ProductService;
 import com.salesmanager.core.business.services.catalog.product.price.ProductPriceService;
 import com.salesmanager.core.business.services.catalog.product.type.ProductTypeService;
@@ -42,11 +46,11 @@ import com.salesmanager.core.business.services.user.UserService;
 import com.salesmanager.core.business.utils.ProductPriceUtils;
 import com.salesmanager.core.business.vendor.product.services.VendorProductService;
 import com.salesmanager.core.model.catalog.category.Category;
+import com.salesmanager.core.model.catalog.category.SubCategoryImage;
 import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.catalog.product.availability.ProductAvailability;
 import com.salesmanager.core.model.catalog.product.description.ProductDescription;
 import com.salesmanager.core.model.catalog.product.image.ProductImage;
-import com.salesmanager.core.model.catalog.product.manufacturer.ManufacturerDescription;
 import com.salesmanager.core.model.catalog.product.price.ProductPrice;
 import com.salesmanager.core.model.catalog.product.type.ProductType;
 import com.salesmanager.core.model.merchant.MerchantStore;
@@ -56,11 +60,10 @@ import com.salesmanager.core.model.reference.country.CountryDescription;
 import com.salesmanager.core.model.reference.language.Language;
 import com.salesmanager.core.model.user.User;
 import com.salesmanager.shop.admin.controller.products.PaginatedResponse;
-import com.salesmanager.shop.admin.controller.products.ProductResponse;
-import com.salesmanager.shop.admin.controller.products.TodaysDeals;
 import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.controller.AbstractController;
-import com.salesmanager.shop.store.controller.customer.CustomerAccountController;
+import com.salesmanager.shop.fileupload.services.StorageException;
+import com.salesmanager.shop.fileupload.services.StorageService;
 import com.salesmanager.shop.store.model.paging.PaginationData;
 import com.salesmanager.shop.utils.DateUtil;
 
@@ -107,6 +110,12 @@ public class AdminController extends AbstractController {
     
     @Inject
     private CustomerService customerService;
+    
+    @Inject
+    private StorageService storageService;
+    
+    @Inject
+    private SubCategoryService subCategoryService;
     
     // Admin update store address
 	@RequestMapping(value="/admin/updatestore", method = RequestMethod.POST, 
@@ -1036,4 +1045,138 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
      return dealUpdateOrRemoveResponse;
 
 }
+    @RequestMapping(value="/uploadSubCatImage", method = RequestMethod.POST)
+	@ResponseBody
+	public SubCatImageResponse uploadSubCatImage(@RequestPart("subCatImageRequest") String subCatImageRequestStr,
+			@RequestPart("file") MultipartFile subCatImage) throws Exception {
+    	System.out.println("Entered uploadSubCatImage");
+    	SubCatImageRequest subCatImageRequest = new ObjectMapper().readValue(subCatImageRequestStr, SubCatImageRequest.class);
+    	SubCatImageResponse subCatImageResponse = new SubCatImageResponse();
+    	Category subCategory = categoryService.getByCategoryCode(subCatImageRequest.getSubCategoryName());
+    	String fileName = "";
+    	// Storing uploaded img 
+    	if(subCatImage.getSize() != 0) {
+    		try{
+    			fileName = storageService.store(subCatImage,"subcategoryimg");
+    			System.out.println("fileName "+fileName);
+    		}catch(StorageException se){
+    			System.out.println("StoreException occured, do wee need continue "+se);
+    			subCatImageResponse.setErrorMessage("Failed while storing image");
+    			subCatImageResponse.setStatus("false");
+    			return subCatImageResponse;
+    		}
+    	}
+    		try {	
+				SubCategoryImage subCategoryImage = new SubCategoryImage();
+				subCategoryImage.setSubCategoryImageURL(fileName);
+				subCategoryImage.setCategory(subCategory);
+				System.out.println("Sub category image url::"+fileName);
+				System.out.println("sub category id::"+subCategory.getId());
+				
+				subCategoryService.save(subCategoryImage);
+				
+				subCatImageResponse.setSubCategoryId(subCategory.getId());
+				subCatImageResponse.setSubCatImgURL(fileName);
+				subCatImageResponse.setSuccessMessage("SubCategory Image uploaded successfully");
+				subCatImageResponse.setStatus("true");
+					
+    		}
+		catch(Exception e){
+			e.printStackTrace();
+			subCatImageResponse.setStatus("false");
+			subCatImageResponse.setErrorMessage("Error while storing sub category image");
+		}
+    
+		return subCatImageResponse;
+    }
+    @RequestMapping(value="/getAllSubCatImages", method = RequestMethod.GET, 
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public AdminSubCatImgResponse getAllSubCatImages() throws Exception {
+		System.out.println("Entered getAllSubCatImages");
+    	AdminSubCatImgResponse adminSubCatImgResponse = new AdminSubCatImgResponse();    	
+		Map<String,List<SubCategoryImageVO>> parentMap = new HashMap<String, List<SubCategoryImageVO>>();
+
+    	//Getting subCategoryImages
+        List<SubCategoryImage> subCategoryImages = subCategoryService.getAllSubCategoryImage();
+        for(SubCategoryImage subCategoryImage:subCategoryImages) {
+        	String name = subCategoryImage.getCategory().getDescription().getName();
+        	List<SubCategoryImageVO> subCategoryImageVOList = null;
+        	// Checking subcatimg contains parent, if it contains parent then adding  the parent name
+        	// and subcat name, imageurl to list and pushing the info into parentMap
+        	if(subCategoryImage.getCategory().getParent() != null) {
+        		 Category parentCategoryFullObj = categoryService.getById(subCategoryImage.getCategory().getParent().getId());
+        		 String parentCatName = parentCategoryFullObj.getDescription().getName();
+				if(parentMap.containsKey(parentCatName)) {
+					subCategoryImageVOList = parentMap.get(parentCatName);
+	            	SubCategoryImageVO subcategoryImageVO = new SubCategoryImageVO();
+		        	subcategoryImageVO.setSubCategoryName(name);
+		        	subcategoryImageVO.setSubCategoryId(subCategoryImage.getCategory().getId());
+		        	subcategoryImageVO.setSubCategoryImageURL(subCategoryImage.getSubCategoryImageURL());
+		        	subCategoryImageVOList.add(subcategoryImageVO);
+				}
+				else
+				{
+					subCategoryImageVOList = new ArrayList<SubCategoryImageVO>();
+	            	SubCategoryImageVO subcategoryImageVO = new SubCategoryImageVO();
+		        	subcategoryImageVO.setSubCategoryName(name);
+		        	subcategoryImageVO.setSubCategoryId(subCategoryImage.getCategory().getId());
+		        	subcategoryImageVO.setSubCategoryImageURL(subCategoryImage.getSubCategoryImageURL());
+		        	subCategoryImageVOList.add(subcategoryImageVO);
+
+				}
+				parentMap.put(parentCatName, subCategoryImageVOList);	
+        	}	
+ 	    }
+        // setting subcatimges to response
+        adminSubCatImgResponse.setSubCatagoryImgsObjByCatagory(parentMap);
+    	return adminSubCatImgResponse;
+    }
+    @RequestMapping(value="/updateSubCatImage", method = RequestMethod.POST)
+	@ResponseBody
+	public SubCatImageResponse upateSubCatImage(@RequestPart("subCatImageRequest") String subCatImageRequestStr,
+			@RequestPart("file") MultipartFile subCatImage) throws Exception {
+				
+    	SubCatImageRequest subCatImageRequest = new ObjectMapper().readValue(subCatImageRequestStr, SubCatImageRequest.class);
+    	SubCatImageResponse subCatImageResponse = new SubCatImageResponse();
+    	Category subCategory = categoryService.getByCategoryCode(subCatImageRequest.getSubCategoryName());
+    	String fileName = "";
+    	// Storing uploaded img 
+    	if(subCatImage.getSize() != 0) {
+    		try{
+    			fileName = storageService.store(subCatImage,"subcategoryimg");
+    			System.out.println("fileName "+fileName);
+    		}catch(StorageException se){
+    			System.out.println("StoreException occured, do wee need continue "+se);
+    			subCatImageResponse.setErrorMessage("Failed while storing image");
+    			subCatImageResponse.setStatus("false");
+    			return subCatImageResponse;
+    		}
+    	}
+    		try {	
+    			SubCategoryImage subCategoryImage = subCategoryService.getByCategoryId(subCategory.getId());
+				subCategoryImage.setSubCategoryImageURL(fileName);
+				subCategoryImage.setCategory(subCategory);
+				System.out.println("Sub category image url::"+fileName);
+				System.out.println("sub category id::"+subCategory.getId());
+				
+				subCategoryService.update(subCategoryImage);
+				
+				subCatImageResponse.setSubCategoryId(subCategory.getId());
+				subCatImageResponse.setSubCatImgURL(fileName);
+				subCatImageResponse.setSuccessMessage("SubCategory Image updated successfully");
+				subCatImageResponse.setStatus("true");
+					
+    		}
+		catch(Exception e){
+			e.printStackTrace();
+			subCatImageResponse.setStatus("false");
+			subCatImageResponse.setErrorMessage("Error while storing udating sub category image");
+		}
+    
+		return subCatImageResponse;
+    	
+    }
 }
+ 
+

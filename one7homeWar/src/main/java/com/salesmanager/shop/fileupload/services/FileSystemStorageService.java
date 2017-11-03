@@ -32,12 +32,14 @@ public class FileSystemStorageService implements StorageService {
     	StringBuilder filePath = new StringBuilder();
     	//filePath.append(rootLocation+"\\"); // assumption output will be /opt/imp/vendor
     	filePath.append(rootLocation+java.io.File.separator);
+    	System.out.println("filePath"+filePath);
     	try {
             if (file.isEmpty()) {
                 throw new StorageException("Failed to store empty file " + file.getOriginalFilename());
             }
             filePath.append(getUniqFileName(file.getOriginalFilename())); // do we need to give orginal file name or form certificate name based on customer information.
             Files.copy(file.getInputStream(), this.rootLocation.resolve(filePath.toString()));
+            System.out.println("filePath.toString()"+filePath.toString());
             return filePath.toString();        // /opt/img/vendor/cert1.jpg
         } catch (IOException e) {
             throw new StorageException("Failed to store file " + file.getOriginalFilename(), e);
@@ -50,6 +52,7 @@ public class FileSystemStorageService implements StorageService {
 /*    		if(dirName != null)
     			this.rootLocation = Paths.get("/opt/img/"+dirName);*/
     		filePath.append(rootLocation+java.io.File.separator+dirPath);
+    		System.out.println("filePath"+filePath);
     		try {
     			if (file.isEmpty()) {
     				throw new StorageException("Failed to store empty file " + file.getOriginalFilename());
@@ -57,6 +60,7 @@ public class FileSystemStorageService implements StorageService {
     		createDirectoryIfNotExist(filePath);
     		filePath.append(java.io.File.separator).append(getUniqFileName(file.getOriginalFilename())); // do we need to give orginal file name or form certificate name based on customer information.
             Files.copy(file.getInputStream(), this.rootLocation.resolve(filePath.toString()));
+            System.out.println("filePath.toString()"+filePath.toString());
             return filePath.toString();        // /opt/img/vendor/cert1.jpg
         } catch (IOException e) {
             throw new StorageException("Failed to store file " + file.getOriginalFilename(), e);
