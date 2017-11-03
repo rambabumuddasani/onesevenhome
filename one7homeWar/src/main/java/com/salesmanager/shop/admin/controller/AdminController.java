@@ -60,6 +60,8 @@ import com.salesmanager.core.model.reference.country.CountryDescription;
 import com.salesmanager.core.model.reference.language.Language;
 import com.salesmanager.core.model.user.User;
 import com.salesmanager.shop.admin.controller.products.PaginatedResponse;
+import com.salesmanager.shop.admin.controller.products.ProductImageRequest;
+import com.salesmanager.shop.admin.controller.products.ProductImageResponse;
 import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.controller.AbstractController;
 import com.salesmanager.shop.fileupload.services.StorageException;
@@ -1134,7 +1136,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     }
     @RequestMapping(value="/updateSubCatImage", method = RequestMethod.POST)
 	@ResponseBody
-	public SubCatImageResponse upateSubCatImage(@RequestPart("subCatImageRequest") String subCatImageRequestStr,
+	public SubCatImageResponse updateSubCatImage(@RequestPart("subCatImageRequest") String subCatImageRequestStr,
 			@RequestPart("file") MultipartFile subCatImage) throws Exception {
 				
     	SubCatImageRequest subCatImageRequest = new ObjectMapper().readValue(subCatImageRequestStr, SubCatImageRequest.class);
@@ -1155,6 +1157,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	}
     		try {	
     			SubCategoryImage subCategoryImage = subCategoryService.getByCategoryId(subCategory.getId());
+    			System.out.println("subCategoryImage id::"+subCategoryImage.getCategory().getId());
 				subCategoryImage.setSubCategoryImageURL(fileName);
 				subCategoryImage.setCategory(subCategory);
 				System.out.println("Sub category image url::"+fileName);
@@ -1171,10 +1174,28 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		catch(Exception e){
 			e.printStackTrace();
 			subCatImageResponse.setStatus("false");
-			subCatImageResponse.setErrorMessage("Error while storing udating sub category image");
+			subCatImageResponse.setErrorMessage("Error while storing updating sub category image");
 		}
     
 		return subCatImageResponse;
+    	
+    }
+    @RequestMapping(value="/deleteSubCatImage/{subCategoryId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public DeleteSubCatImgResponse deleteSubCatImage(@PathVariable String subCategoryId) throws Exception {
+		System.out.println("Entered deleteSubCatImage");
+		DeleteSubCatImgResponse deleteSubCatImgResponse = new DeleteSubCatImgResponse();
+    	Long subCategoryIdLong = new Long(subCategoryId);
+    	SubCategoryImage subCategoryImage = subCategoryService.getByCategoryId(subCategoryIdLong);
+    	if(subCategoryImage ==null) {
+    		deleteSubCatImgResponse.setErrorMesssage("Subcategory image not exist");
+    		deleteSubCatImgResponse.setStatus("false");
+    		return deleteSubCatImgResponse;
+    	}
+    	subCategoryService.delete(subCategoryImage);
+    	deleteSubCatImgResponse.setSuccessMessage("SubCategoryImage with id "+subCategoryIdLong+" deleted successfully");
+    	deleteSubCatImgResponse.setStatus("true");
+    	return deleteSubCatImgResponse;
     	
     }
 }
