@@ -220,19 +220,19 @@ public class EmailTemplatesUtils {
 		           templateTokens.put(EmailConstants.PAYMENT_METHOD_TITLE, messages.getMessage("label.order.paymentmode",customerLocale));
 		           templateTokens.put(EmailConstants.PAYMENT_METHOD_DETAILS, messages.getMessage(new StringBuilder().append("payment.type.").append(order.getPaymentType().name()).toString(),customerLocale,order.getPaymentType().name()));
 		           
-		           if(StringUtils.isNotBlank(order.getShippingModuleCode())) {
-		        	   templateTokens.put(EmailConstants.SHIPPING_METHOD_DETAILS, messages.getMessage(new StringBuilder().append("module.shipping.").append(order.getShippingModuleCode()).toString(),customerLocale,order.getShippingModuleCode()));
+		         //  if(StringUtils.isNotBlank(order.getShippingModuleCode())) {
+		        //	   templateTokens.put(EmailConstants.SHIPPING_METHOD_DETAILS, messages.getMessage(new StringBuilder().append("module.shipping.").append(order.getShippingModuleCode()).toString(),customerLocale,order.getShippingModuleCode()));
 		        	   templateTokens.put(EmailConstants.ADDRESS_SHIPPING_TITLE, messages.getMessage("label.order.shippingmethod",customerLocale));
 		        	   templateTokens.put(EmailConstants.ADDRESS_DELIVERY_TITLE, messages.getMessage("label.customer.shippinginformation",customerLocale));
 		        	   templateTokens.put(EmailConstants.SHIPPING_METHOD_TITLE, messages.getMessage("label.customer.shippinginformation",customerLocale));
 		        	   templateTokens.put(EmailConstants.ADDRESS_DELIVERY, shipping.toString());
-		           } else {
+		          /* } else {
 		        	   templateTokens.put(EmailConstants.SHIPPING_METHOD_DETAILS, "");
 		        	   templateTokens.put(EmailConstants.ADDRESS_SHIPPING_TITLE, "");
 		        	   templateTokens.put(EmailConstants.ADDRESS_DELIVERY_TITLE, "");
 		        	   templateTokens.put(EmailConstants.SHIPPING_METHOD_TITLE, "");
 		        	   templateTokens.put(EmailConstants.ADDRESS_DELIVERY, "");
-		           }
+		           }*/
 		           
 			       String status = messages.getMessage("label.order." + order.getStatus().name(), customerLocale, order.getStatus().name());
 			       String[] statusMessage = {DateUtil.formatDate(order.getDatePurchased()),status};
