@@ -72,7 +72,11 @@ import com.salesmanager.shop.utils.DateUtil;
 @Controller
 @CrossOrigin
 public class AdminController extends AbstractController {
+	
+	private static final String TRUE = "true";
+	private static final String FALSE = "false";
 	private static final Logger LOGGER = LoggerFactory.getLogger(AdminController.class);
+	
 	@Inject
 	private MerchantStoreService merchantStoreService;
 	
@@ -132,12 +136,12 @@ public class AdminController extends AbstractController {
 			merchantStore = merchantStoreService.getByCode(adminUpdateStoreRequest.getStoreCode());
 			if(merchantStore==null) {
 				adminUpdateStoreResponse.setErrorMessage("Store is not found,unable to update");
-				adminUpdateStoreResponse.setStatus("false");
+				adminUpdateStoreResponse.setStatus(FALSE);
 				return adminUpdateStoreResponse;
 			}
 		} catch (ServiceException e) {
 			adminUpdateStoreResponse.setErrorMessage("Error in updating Store");
-			adminUpdateStoreResponse.setStatus("false");
+			adminUpdateStoreResponse.setStatus(FALSE);
 			return adminUpdateStoreResponse;
 		}
 		//update store
@@ -157,7 +161,7 @@ public class AdminController extends AbstractController {
 			storeCountry = country;
 		} catch (ServiceException e1) {
 			adminUpdateStoreResponse.setErrorMessage("Error in updating Store");
-			adminUpdateStoreResponse.setStatus("false");
+			adminUpdateStoreResponse.setStatus(FALSE);
 			return adminUpdateStoreResponse;
 		}
 	    merchantStore.setCountry(storeCountry);
@@ -174,12 +178,12 @@ public class AdminController extends AbstractController {
 		} catch (ServiceException e) {
 			e.printStackTrace();
 			adminUpdateStoreResponse.setErrorMessage("Error in updating store");
-			adminUpdateStoreResponse.setStatus("false");
+			adminUpdateStoreResponse.setStatus(FALSE);
 			return adminUpdateStoreResponse;
 		}
 	        LOGGER.info("Store updated Successfully");;
 	        adminUpdateStoreResponse.setSuccessMessage("Store updated successfully");
-	        adminUpdateStoreResponse.setStatus("true");
+	        adminUpdateStoreResponse.setStatus(TRUE);
 	        LOGGER.info("Ended updateMerchantStore method");
 	        return adminUpdateStoreResponse;
 	    
@@ -258,7 +262,7 @@ public class AdminController extends AbstractController {
 			// Checing admin null
 			if(dbUser==null) {
 				editUserAdminResponse.setErrorMessage("Admin is null for this id: "+longId);
-				editUserAdminResponse.setSucessMessage("false");
+				editUserAdminResponse.setSucessMessage(FALSE);
 				return editUserAdminResponse;
 			}
 			// Update admin details
@@ -274,7 +278,7 @@ public class AdminController extends AbstractController {
 			userService.saveOrUpdate(dbUser);
 			
 			editUserAdminResponse.setSucessMessage("Admin profile updated successfully");
-			editUserAdminResponse.setStatus("true");
+			editUserAdminResponse.setStatus(TRUE);
 			
 	        return editUserAdminResponse;
 		
@@ -321,7 +325,7 @@ public class AdminController extends AbstractController {
 		User dbUser = userService.getByEmail(updatePasswordReq.getEmailAddress());
 		if(dbUser==null) {
 			updatePasswordResp.setErrorMessage("Admin is not exist for this emailaddress: "+updatePasswordReq.getEmailAddress());
-			updatePasswordResp.setStatus("false");
+			updatePasswordResp.setStatus(FALSE);
 			return updatePasswordResp;
 		}
 		//encoding password and update password
@@ -329,7 +333,7 @@ public class AdminController extends AbstractController {
 		dbUser.setAdminPassword(pass);
 		userService.update(dbUser);	
 		updatePasswordResp.setSuccessMessage("Password updated successfully");
-		updatePasswordResp.setStatus("true");
+		updatePasswordResp.setStatus(TRUE);
 		return updatePasswordResp;
 	}
 	
@@ -1047,7 +1051,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
      return dealUpdateOrRemoveResponse;
 
 }
-    @RequestMapping(value="/uploadSubCatImage", method = RequestMethod.POST)
+    /*@RequestMapping(value="/uploadSubCatImage", method = RequestMethod.POST)
 	@ResponseBody
 	public SubCatImageResponse uploadSubCatImage(@RequestPart("subCatImageRequest") String subCatImageRequestStr,
 			@RequestPart("file") MultipartFile subCatImage) throws Exception {
@@ -1090,7 +1094,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		}
     
 		return subCatImageResponse;
-    }
+    }*/
     @RequestMapping(value="/getAllSubCatImages", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -1134,7 +1138,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
         adminSubCatImgResponse.setSubCatagoryImgsObjByCatagory(parentMap);
     	return adminSubCatImgResponse;
     }
-    @RequestMapping(value="/updateSubCatImage", method = RequestMethod.POST)
+   /* @RequestMapping(value="/updateSubCatImage", method = RequestMethod.POST)
 	@ResponseBody
 	public SubCatImageResponse updateSubCatImage(@RequestPart("subCatImageRequest") String subCatImageRequestStr,
 			@RequestPart("file") MultipartFile subCatImage) throws Exception {
@@ -1179,7 +1183,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     
 		return subCatImageResponse;
     	
-    }
+    }*/
     @RequestMapping(value="/deleteSubCatImage/{subCategoryId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public DeleteSubCatImgResponse deleteSubCatImage(@PathVariable String subCategoryId) throws Exception {
@@ -1189,14 +1193,74 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	SubCategoryImage subCategoryImage = subCategoryService.getByCategoryId(subCategoryIdLong);
     	if(subCategoryImage ==null) {
     		deleteSubCatImgResponse.setErrorMesssage("Subcategory image not exist");
-    		deleteSubCatImgResponse.setStatus("false");
+    		deleteSubCatImgResponse.setStatus(FALSE);
     		return deleteSubCatImgResponse;
     	}
     	subCategoryService.delete(subCategoryImage);
     	deleteSubCatImgResponse.setSuccessMessage("SubCategoryImage with id "+subCategoryIdLong+" deleted successfully");
-    	deleteSubCatImgResponse.setStatus("true");
+    	deleteSubCatImgResponse.setStatus(TRUE);
     	return deleteSubCatImgResponse;
     	
+    }
+    @RequestMapping(value="/uploadOrUpdateSubCatImage", method = RequestMethod.POST)
+	@ResponseBody
+	public SubCatImageResponse uploadOrUpdateSubCatImage(@RequestPart("subCatImageRequest") String subCatImageRequestStr,
+			@RequestPart("file") MultipartFile subCatImage) throws Exception {
+    	System.out.println("Entered uploadOrUpdateSubCatImage");
+    	SubCatImageRequest subCatImageRequest = new ObjectMapper().readValue(subCatImageRequestStr, SubCatImageRequest.class);
+    	SubCatImageResponse subCatImageResponse = new SubCatImageResponse();
+    	Category subCategory = categoryService.getByCategoryCode(subCatImageRequest.getSubCategoryName());
+    	String fileName = "";
+    	// Storing uploaded or updated image 
+    	if(subCatImage.getSize() != 0) {
+    		try{
+    			fileName = storageService.store(subCatImage,"subcategoryimg");
+    			System.out.println("fileName "+fileName);
+    		}catch(StorageException se){
+    			System.out.println("StoreException occured, do wee need continue "+se);
+    			subCatImageResponse.setErrorMessage("Failed while storing image");
+    			subCatImageResponse.setStatus(FALSE);
+    			return subCatImageResponse;
+    		}
+    	}
+    	  /**  If we update the sub category image that already exist,then updating
+           *  the sub category image with newly added image otherwise saving the
+           *  sub category image
+           */ 
+    		try { 
+    			SubCategoryImage subCategoryImage = subCategoryService.getByCategoryId(subCategory.getId());
+    			if(subCategoryImage==null) {
+				SubCategoryImage subCategoryImageObj = new SubCategoryImage();
+				subCategoryImageObj.setSubCategoryImageURL(fileName);
+				subCategoryImageObj.setCategory(subCategory);
+				System.out.println("Sub category image url::"+fileName);
+				System.out.println("sub category id::"+subCategory.getId());
+    			
+				subCategoryService.save(subCategoryImageObj);
+				
+				subCatImageResponse.setSubCategoryId(subCategory.getId());
+				subCatImageResponse.setSubCatImgURL(fileName);
+				subCatImageResponse.setSuccessMessage("SubCategory Image uploaded successfully");
+			    subCatImageResponse.setStatus(TRUE);
+    			}else {
+    				subCategoryImage.setSubCategoryImageURL(fileName);
+    				subCategoryImage.setCategory(subCategory);
+    				
+    				subCategoryService.update(subCategoryImage);
+    			
+				    subCatImageResponse.setSubCategoryId(subCategory.getId());
+				    subCatImageResponse.setSubCatImgURL(fileName);
+				    subCatImageResponse.setSuccessMessage("SubCategory Image updated successfully");
+				    subCatImageResponse.setStatus(TRUE);
+    			}	
+    		}
+		catch(Exception e){
+			e.printStackTrace();
+			subCatImageResponse.setStatus(FALSE);
+			subCatImageResponse.setErrorMessage("Error while storing sub category image");
+		}
+    
+		return subCatImageResponse;
     }
 }
  
