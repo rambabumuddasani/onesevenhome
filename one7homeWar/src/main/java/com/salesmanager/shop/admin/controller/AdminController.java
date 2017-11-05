@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -1196,6 +1197,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     		deleteSubCatImgResponse.setStatus(FALSE);
     		return deleteSubCatImgResponse;
     	}
+    	storageService.deleteFile(subCategoryImage.getSubCategoryImageURL()); // delete image
     	subCategoryService.delete(subCategoryImage);
     	deleteSubCatImgResponse.setSuccessMessage("SubCategoryImage with id "+subCategoryIdLong+" deleted successfully");
     	deleteSubCatImgResponse.setStatus(TRUE);
@@ -1256,6 +1258,9 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     		}
 		catch(Exception e){
 			e.printStackTrace();
+			if(StringUtils.isEmpty(fileName)){
+				storageService.deleteFile(fileName); // delete image
+			}
 			subCatImageResponse.setStatus(FALSE);
 			subCatImageResponse.setErrorMessage("Error while storing sub category image");
 		}
