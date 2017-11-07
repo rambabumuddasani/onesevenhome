@@ -1272,7 +1272,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     }
    
     
-    @RequestMapping(value="/testmonial/save", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value="/testimonial/save", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
   	@ResponseBody
   	public TestimonialResponse saveTestimonialReview(@RequestBody TestimonialRequest testimonialRequest) throws Exception {
     	System.out.println("Entered saveTestmonialReview");
@@ -1307,6 +1307,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     		customerTestimonialVO.setEmailAddress(testmonial.getCustomer().getEmailAddress());
     		customerTestimonialVO.setDescription(testmonial.getDescription());
     		customerTestimonialVO.setTestimonialId(testmonial.getId());
+    		customerTestimonialVO.setEnable(testmonial.isEnable());
     		customerTestimonialVOList.add(customerTestimonialVO);
     	}
     	adminTestimonialResponse.setCustomerTestimonials(customerTestimonialVOList);
