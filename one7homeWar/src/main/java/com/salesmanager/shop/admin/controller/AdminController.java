@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -40,6 +39,7 @@ import com.salesmanager.core.business.services.catalog.product.ProductService;
 import com.salesmanager.core.business.services.catalog.product.price.ProductPriceService;
 import com.salesmanager.core.business.services.catalog.product.type.ProductTypeService;
 import com.salesmanager.core.business.services.customer.CustomerService;
+import com.salesmanager.core.business.services.customer.testmonial.review.CustomerTestmonialService;
 import com.salesmanager.core.business.services.merchant.MerchantStoreService;
 import com.salesmanager.core.business.services.reference.country.CountryService;
 import com.salesmanager.core.business.services.reference.language.LanguageService;
@@ -54,6 +54,8 @@ import com.salesmanager.core.model.catalog.product.description.ProductDescriptio
 import com.salesmanager.core.model.catalog.product.image.ProductImage;
 import com.salesmanager.core.model.catalog.product.price.ProductPrice;
 import com.salesmanager.core.model.catalog.product.type.ProductType;
+import com.salesmanager.core.model.customer.Customer;
+import com.salesmanager.core.model.customer.CustomerTestimonial;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.product.vendor.VendorProduct;
 import com.salesmanager.core.model.reference.country.Country;
@@ -61,8 +63,6 @@ import com.salesmanager.core.model.reference.country.CountryDescription;
 import com.salesmanager.core.model.reference.language.Language;
 import com.salesmanager.core.model.user.User;
 import com.salesmanager.shop.admin.controller.products.PaginatedResponse;
-import com.salesmanager.shop.admin.controller.products.ProductImageRequest;
-import com.salesmanager.shop.admin.controller.products.ProductImageResponse;
 import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.controller.AbstractController;
 import com.salesmanager.shop.fileupload.services.StorageException;
@@ -123,6 +123,9 @@ public class AdminController extends AbstractController {
     
     @Inject
     private SubCategoryService subCategoryService;
+    
+    @Inject
+    private CustomerTestmonialService customerTestmonialService;
     
     // Admin update store address
 	@RequestMapping(value="/admin/updatestore", method = RequestMethod.POST, 
@@ -1267,6 +1270,76 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     
 		return subCatImageResponse;
     }
+   
+    
+    @RequestMapping(value="/testmonial/save", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
+  	@ResponseBody
+  	public TestimonialResponse saveTestimonialReview(@RequestBody TestimonialRequest testimonialRequest) throws Exception {
+    	System.out.println("Entered saveTestmonialReview");
+    	TestimonialResponse testimonialResponse = new TestimonialResponse();
+    	if(StringUtils.isEmpty(testimonialRequest.getTestmonialDescription())){
+    		testimonialResponse.setErrorMessage("Feedback cannot be empty");
+    		testimonialResponse.setStatus(FALSE);
+    		return testimonialResponse;
+    	}
+    	
+    	Customer customer = customerService.getById(testimonialRequest.getCustomerId());
+    	CustomerTestimonial customerTestimonial = new CustomerTestimonial();
+    	customerTestimonial.setCustomer(customer);
+    	customerTestimonial.setDescription(testimonialRequest.getTestmonialDescription());
+    	customerTestimonial.setEnable(false);
+    	customerTestmonialService.save(customerTestimonial);
+    	testimonialResponse.setSuccessMessage("Feedback Saved successfully");
+    	testimonialResponse.setStatus(TRUE);
+    	return testimonialResponse;
+    }
+    @RequestMapping(value="/getAllTestimonials", method = RequestMethod.GET, 
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public AdminTestimonialResponse getAllTestimonials() throws Exception {
+    	AdminTestimonialResponse adminTestimonialResponse = new AdminTestimonialResponse();
+    	List<CustomerTestimonialVO>  customerTestimonialVOList = new ArrayList<CustomerTestimonialVO>();
+    	List<CustomerTestimonial> customerTestimonials = customerTestmonialService.getAllTestimonials();
+    	for(CustomerTestimonial testmonial : customerTestimonials) {
+    		CustomerTestimonialVO customerTestimonialVO = new CustomerTestimonialVO();
+    		customerTestimonialVO.setCustomerId(testmonial.getCustomer().getId());
+    		customerTestimonialVO.setCustomerName(testmonial.getCustomer().getBilling().getFirstName());
+    		customerTestimonialVO.setEmailAddress(testmonial.getCustomer().getEmailAddress());
+    		customerTestimonialVO.setDescription(testmonial.getDescription());
+    		customerTestimonialVO.setTestimonialId(testmonial.getId());
+    		customerTestimonialVOList.add(customerTestimonialVO);
+    	}
+    	adminTestimonialResponse.setCustomerTestimonials(customerTestimonialVOList);
+    	return adminTestimonialResponse;
+    	
+    }
+    @RequestMapping(value="/approve/testimonial", method = RequestMethod.POST, 
+			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public ApproveTestimonialResponse approveTestimonial(@RequestBody ApproveTestimonialRequest approveTestimonialRequest) throws Exception {
+		System.out.println("Entered UpdateTestimonial");
+		ApproveTestimonialResponse approveTestimonialResponse = new ApproveTestimonialResponse();
+		Long testimonialIdLong = approveTestimonialRequest.getTestimonialId();
+		CustomerTestimonial customerTestimonial = customerTestmonialService.getTestimonialById(testimonialIdLong);
+		if(approveTestimonialRequest.isEnable()==true) {
+			customerTestimonial.setEnable(true);
+		}
+		else {
+			customerTestimonial.setEnable(false);
+		}
+		try {
+			customerTestmonialService.update(customerTestimonial);
+			approveTestimonialResponse.setSuccessMessage("Testimonial updated successfully");
+			approveTestimonialResponse.setStatus(TRUE);
+		} catch (Exception e) {
+			e.printStackTrace();
+			approveTestimonialResponse.setErrorMessage("Error in updating Testimonial");
+			approveTestimonialResponse.setStatus(FALSE);
+			return approveTestimonialResponse;
+		}
+    	return approveTestimonialResponse;
+    } 
 }
+    
  
 
