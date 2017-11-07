@@ -8,7 +8,7 @@ public enum OrderStatus {
 	DELIVERED("delivered"),
 	REFUNDED("refunded"),
 	CANCELED("canceled"),
-	;
+	FAILURE("failure");
 	
 	private String value;
 	

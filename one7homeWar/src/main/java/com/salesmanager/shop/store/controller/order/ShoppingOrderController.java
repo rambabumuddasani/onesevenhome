@@ -1,7 +1,6 @@
 package com.salesmanager.shop.store.controller.order;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -10,6 +9,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -46,7 +46,6 @@ import com.salesmanager.core.business.services.reference.zone.ZoneService;
 import com.salesmanager.core.business.services.shipping.ShippingService;
 import com.salesmanager.core.business.services.shoppingcart.ShoppingCartService;
 import com.salesmanager.core.model.catalog.product.Product;
-import com.salesmanager.core.model.common.Billing;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.order.Order;
@@ -646,7 +645,8 @@ public class ShoppingOrderController extends AbstractController {
 		reqParams.put("merchant_param1", "additional Info.");
 */		System.out.println("reqParams "+reqParams);
 		for(Map.Entry<String, String> eachEntry : reqParams.entrySet()){
-		      ccaRequest.append(eachEntry.getKey()).append( "=").append( URLEncoder.encode(eachEntry.getValue(),"UTF-8")).append( "&");
+		      //ccaRequest.append(eachEntry.getKey()).append( "=").append( URLEncoder.encode(eachEntry.getValue(),"UTF-8")).append( "&");
+		      ccaRequest.append(eachEntry.getKey()).append( "=").append( eachEntry.getValue()).append( "&");
 		}
 		AesCryptUtil aesUtil=new AesCryptUtil(workingKey);
 		String encRequest = aesUtil.encrypt(ccaRequest.toString());
@@ -667,21 +667,77 @@ public class ShoppingOrderController extends AbstractController {
 		orderService.saveOrUpdate(order);
 		return "Order canceled "+orderId;
 	}
-	
+
 	@RequestMapping(value="/completeOrder/{orderId}", method = RequestMethod.POST)
 	@ResponseBody
 	public String completeOrder(@PathVariable Long orderId,HttpServletRequest request, Locale locale) throws Exception {
 		Order order = orderService.getById(orderId);
 		OrderStatusHistory orderHistory = new OrderStatusHistory();
 		orderHistory.setOrder(order);
-		orderHistory.setStatus(OrderStatus.ORDERED);
+		Set<String> reqParams = new HashSet<String>();
+		reqParams.add("order_status");
+		reqParams.add("tracking_id");
+		reqParams.add("status_message");
+		reqParams.add("trans_date");
+		Map<String,String> data = new HashMap();
+		decryptRequiredResponse(request, reqParams, data);
+		OrderStatus status = null;
+		if("Success".equals(data.get("order_status"))){
+			status = OrderStatus.ORDERED;
+		}else {
+			status = OrderStatus.FAILURE;
+		}
+		orderHistory.setStatus(status);
 		orderHistory.setDateAdded(new Date());
 		orderService.addOrderStatusHistory(order, orderHistory);
-		order.setStatus(OrderStatus.ORDERED);
+		order.setStatus(status);
 		orderService.saveOrUpdate(order);
 		return "Order completed "+orderId;
 	}
 
+	@RequestMapping(value="/orderFailure/{orderId}", method = RequestMethod.POST)
+	@ResponseBody
+	public String orderFailure(@PathVariable Long orderId,HttpServletRequest request, Locale locale) throws Exception {
+		Order order = orderService.getById(orderId);
+		OrderStatusHistory orderHistory = new OrderStatusHistory();
+		orderHistory.setOrder(order);
+		orderHistory.setStatus(OrderStatus.FAILURE);
+		orderHistory.setDateAdded(new Date());
+		orderService.addOrderStatusHistory(order, orderHistory);
+		order.setStatus(OrderStatus.FAILURE);
+		orderService.saveOrUpdate(order);
+		return "Order canceled "+orderId;
+	}
+
+	private void decryptRequiredResponse(HttpServletRequest request,Set<String> reqData,Map<String,String> data){
+		String workingKey = cCAvenuePaymentConfiguration.getWorkingKey();
+        String encResp= request.getParameter("encResp");
+        AesCryptUtil aesUtil=new AesCryptUtil(workingKey);
+        String decResp = aesUtil.decrypt(encResp);
+        System.out.println(" decResp "+decResp);
+        StringTokenizer tokenizer = new StringTokenizer(decResp, "&");
+        Map<String,String> reqMao=new HashMap<String,String>();
+        String pair=null, pname=null, pvalue=null;
+        while (tokenizer.hasMoreTokens()) {
+                pair = (String)tokenizer.nextToken();
+                if(pair!=null) {
+                        StringTokenizer strTok=new StringTokenizer(pair, "=");
+                        pname=""; pvalue="";
+                        if(strTok.hasMoreTokens()) {
+                                pname=(String)strTok.nextToken();
+                                if(strTok.hasMoreTokens())
+                                        pvalue=(String)strTok.nextToken();
+                                reqMao.put(pname, pvalue);
+                        }
+                }
+        }
+        for(String reqParams : reqData){
+        	if(reqMao.containsKey(reqParams)){
+        		data.put(reqParams,reqMao.get(reqParams));
+        	}
+        }
+		}
+	
 	
 	// url/orderDetails/1?userId=1
 	@RequestMapping(value="/orderDetails/{orderId}", method = RequestMethod.POST)
