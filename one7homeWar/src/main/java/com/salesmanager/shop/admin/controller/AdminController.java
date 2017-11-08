@@ -169,14 +169,7 @@ public class AdminController extends AbstractController {
 			return adminUpdateStoreResponse;
 		}
 	    merchantStore.setCountry(storeCountry);
-	    System.out.println("adminUpdateStoreRequest.getStoreName()= "+adminUpdateStoreRequest.getStoreName());
-	    System.out.println("adminUpdateStoreRequest.getStoreCode()= "+adminUpdateStoreRequest.getStoreCode());
-	    System.out.println("adminUpdateStoreRequest.getStorePhone()= "+adminUpdateStoreRequest.getStorePhone());
-	    System.out.println("adminUpdateStoreRequest.getEmailAddress()= "+adminUpdateStoreRequest.getEmailAddress());
-	    System.out.println("adminUpdateStoreRequest.getStoreAddress()= "+adminUpdateStoreRequest.getStoreAddress());
-	    System.out.println("adminUpdateStoreRequest.getStoreCity()= "+adminUpdateStoreRequest.getStoreCity());
-	    System.out.println("adminUpdateStoreRequest.getStoreState()= "+adminUpdateStoreRequest.getStoreState());
-	    System.out.println("adminUpdateStoreRequest.getStorePostalCode()= "+adminUpdateStoreRequest.getStorePostalCode());
+	  
 	    try {
 			merchantStoreService.update(merchantStore);
 		} catch (ServiceException e) {
@@ -221,22 +214,9 @@ public class AdminController extends AbstractController {
 	        List<CountryDescription> countryDescription = country.getDescriptions();
 	        
 	        for(CountryDescription countryDesc:countryDescription){
-	        	System.out.println("countryDesc.getLanguage().getId()"+countryDesc.getLanguage().getId());
-	        	System.out.println("merchantStore.getDefaultLanguage().getId()"+merchantStore.getDefaultLanguage().getId());
 	        	String countryName = countryDesc.getName();
 	        	storeInfo.setStoreCountry(countryName);
 	        }
-	        System.out.println("merchantStore.getStorename()=="+merchantStore.getStorename());
-	        System.out.println("merchantStore.getStoreaddress()=="+merchantStore.getStoreaddress());
-	        System.out.println("merchantStore.getStoreEmailAddress()=="+merchantStore.getStoreEmailAddress());
-	        System.out.println("merchantStore.getStorephone()=="+merchantStore.getStorephone());
-	        System.out.println("merchantStore.getStorecity()=="+merchantStore.getStorecity());
-	        System.out.println("merchantStore.getStorestateprovince()=="+merchantStore.getStorestateprovince());
-	        System.out.println("merchantStore.getStorepostalcode()=="+merchantStore.getStorepostalcode());
-	        System.out.println("merchantStore.getCountry().getIsoCode()=="+merchantStore.getCountry().getIsoCode());
-	        System.out.println("merchantStore.getCode()=="+merchantStore.getCode());
-	        
-	        System.out.println("StoreInfo=  "+storeInfo);
 	        
 	        User user = userService.getById(1l);
 	        storeInfo.setAdminName(user.getAdminName());
@@ -257,13 +237,12 @@ public class AdminController extends AbstractController {
     public EditUserAdminResponse updateAdmin(@RequestBody EditUserAdminRequest editUserAdminRequest)
         throws Exception {
 		
-		    System.out.println("editUserAdmin :");
 		    EditUserAdminResponse editUserAdminResponse = new EditUserAdminResponse();
 		    String stringId = editUserAdminRequest.getId();
 		    Long longId = Long.parseLong(stringId);
 		    //Getting admin by id
 			User dbUser = userService.getById(longId);
-			// Checing admin null
+			// Checking admin null
 			if(dbUser==null) {
 				editUserAdminResponse.setErrorMessage("Admin is null for this id: "+longId);
 				editUserAdminResponse.setSucessMessage(FALSE);
@@ -307,10 +286,10 @@ public class AdminController extends AbstractController {
 	       userVO.setFirstName(user.getFirstName());
 	       userVO.setLastName(user.getLastName());
 	       //userVO.setDefaultLang(user.getDefaultLanguage());
-	       System.out.println("userVO: "+userVO);
+	     
 	       userList.add(userVO);
 	    }
-	    System.out.println("userList :"+userList);
+	   
 	    adminListResponse.setAdminList(userList);
 		return adminListResponse;
 		
@@ -321,7 +300,7 @@ public class AdminController extends AbstractController {
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public UpdatePasswordResp changePassword(@RequestBody UpdatePasswordReq updatePasswordReq) throws Exception {
-		System.out.println("changePassword: ");
+		
 		UpdatePasswordResp updatePasswordResp = new UpdatePasswordResp();
 		String stringId = updatePasswordReq.getId();
 		Long longId = Long.parseLong(stringId);
@@ -346,7 +325,7 @@ public class AdminController extends AbstractController {
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public AddProductResp addProducts(@RequestBody AddProductReq addProductReq) throws Exception {
-		System.out.println("addProducts: ");
+		
 		AddProductResp addProductResp = new AddProductResp();
 		String productId = addProductReq.getProductId();
 		Long longId = Long.parseLong(productId);
@@ -459,7 +438,7 @@ public class AdminController extends AbstractController {
 	public PaginatedResponse getProductForCatAndTitle(@PathVariable String categoryCode,@PathVariable String title,
 			@RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
 		LOGGER.info("Entered getProductForCatAndTitle method ");
-		System.out.println("getProductForCatAndTitle : ");
+		
 		AdminProductResponse adminProductResponse = new AdminProductResponse();
 		PaginatedResponse paginatedResponse = new PaginatedResponse();
 		categoryCode = categoryCode.replaceAll("_", " ");
@@ -510,8 +489,6 @@ public class AdminController extends AbstractController {
 		return responses;
 	}
 public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecial,String title) throws Exception {
-		
-		System.out.println("merchantStoreService =="+merchantStoreService);
 		
 		AdminProductResponse adminProductResponse = new AdminProductResponse();
 		adminProductResponse.setProductId(dbProduct.getId());
@@ -651,7 +628,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public AdminVendorProductResponse getAdminVendorProducts(@PathVariable String vendorId) throws Exception {
-    	System.out.println("Inside getAdminVendorProducts: ");
+    	
     	AdminVendorProductResponse adminVendorProductResponse = new AdminVendorProductResponse();
     	Long  vId = Long.parseLong(vendorId);
     	List<VendorProduct> vendorProducts = vendorProductService.findProductsByVendor(vId);
@@ -659,7 +636,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     		adminVendorProductResponse.setErrorMsg("Vendor products not found");
     		return adminVendorProductResponse;
     	}
-    	System.out.println("VendorProducts: "+vendorProducts);
+    	
     	List<VendorProductVO> vproductList = new ArrayList<VendorProductVO>();
     	for(VendorProduct vendorProduct : vendorProducts) {
     		VendorProductVO vendorProductVO = new VendorProductVO();
@@ -669,7 +646,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     		vendorProductVO.setProductName(vendorProduct.getProduct().getProductDescription().getName());
     		vproductList.add(vendorProductVO);
     	}
-    	System.out.println("Vendor productList: "+vproductList);
+    	
     	adminVendorProductResponse.setVendorProducts(vproductList);
     	return adminVendorProductResponse;
     	
@@ -711,21 +688,21 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
 	@ResponseBody
 	public PaginatedResponse getVendorProductsPagination(@RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
     	PaginatedResponse paginatedResponse = new PaginatedResponse();
-    	System.out.println("Inside getVendorProducts: ");
+
     	// Get vendor products are added by vendors to product list
     	List<VendorProduct> vendorProducts = vendorProductService.getVendorProducts();
     	if(vendorProducts==null) {
     		paginatedResponse.setErrorMsg("Vendor products not found");
     		return paginatedResponse;
     	}
-    	System.out.println("VendorProducts: "+vendorProducts);
+    	
     	List<VendorProductVO> vproductList = new ArrayList<VendorProductVO>();
     	for(VendorProduct vendorProduct : vendorProducts) {
     		System.out.println("vendorProduct :"+vendorProduct);
     		VendorProductVO vendorProductVO = new VendorProductVO();
     		vendorProductVO.setVendorProductId(vendorProduct.getId());
     		vendorProductVO.setVendorId(vendorProduct.getCustomer().getId());
-    		System.out.println("vendorProduct.getCustomer().getId()"+vendorProduct.getCustomer().getId());
+    		
     		if (!(vendorProduct.getCustomer().getVendorAttrs().getVendorName().equals(null))){
     		vendorProductVO.setVendorName(vendorProduct.getCustomer().getVendorAttrs().getVendorName());
     		}
@@ -736,7 +713,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     		//vendorProductVO.setDescription(vendorProduct.getProduct().getProductDescription().getDescription());
     		vproductList.add(vendorProductVO);
     	}
-    	System.out.println("Vendor productList: "+vproductList);
+    	
     	//Pagination
     	PaginationData paginaionData=createPaginaionData(page,size);
     	calculatePaginaionData(paginaionData,size, vproductList.size());
@@ -754,10 +731,10 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     @RequestMapping(value="/admin/products/activate", method = RequestMethod.POST)
 	@ResponseBody
 	public ActivateProductResponse adminApproveProducts(@RequestBody ActivateProductRequest activateProductRequest) throws Exception {
-    	System.out.println("Inside adminApproveProducts:");
+    	
     	ActivateProductResponse activateProductResponse = new ActivateProductResponse();
     	Long vendorProductId = activateProductRequest.getVendorProductId();
-    	System.out.println("vendorProductId : "+vendorProductId);
+    	
     	//getting vendor product to be approved by by admin
 	    VendorProduct vendorProduct = vendorProductService.getVendorProductById(vendorProductId);
     	if(vendorProduct==null) {
@@ -786,7 +763,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public AdminDealOfDayResponse adminDealOfDay(@RequestBody AdminDealOfDayRequest adminDealOfDayReq) throws Exception {
-    	System.out.println("adminDealOfDay: ");
+    	
     	AdminDealOfDayResponse adminDealOfDayResponse = new AdminDealOfDayResponse();
     	
     	// Get the product details based on the AdminDeal of the day request 
@@ -800,7 +777,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     	
     	//Get the complete product details.
     	Product dbProduct = productService.getByProductId(productId);
-    	System.out.println("dbProduct : "+dbProduct);
+    	
     	if(dbProduct==null) {
     		adminDealOfDayResponse.setErrorMesg("Deal Of Day product is not found");
     		adminDealOfDayResponse.setStatus("false");
@@ -837,7 +814,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
 							if(adminDealOfDayReq.getStatus().equals("Y")) {
 								//Checking DealOfDay product which is available in the given date  
 								List<Product> dodProducts = productService.getDealOfDay(startDate,endDate,adminDealOfDayReq.getStatus());
-								System.out.println(dodProducts);
+								
 								if(dodProducts!=null && !(dodProducts.isEmpty())) {
 									adminDealOfDayResponse.setErrorMesg("Please provide different date to set Deal Of Day");
 									adminDealOfDayResponse.setStatus("false");
@@ -858,10 +835,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
 								productPrice.saveOrUpdate(price);
 								adminDealOfDayResponse.setSuccessMsg("Product is disabled from Deal Of Day");
 								adminDealOfDayResponse.setStatus("true");
-							}
-							
-						
-						
+							}		
 				}
 			}
 		}
@@ -877,7 +851,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
 	@ResponseBody
 	public AdminTodaysDeals getDeals(@RequestBody AdminDealRequest adminDealRequest, @RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
 		
-		System.out.println("getDeals ==");
+		
 		
 		AdminTodaysDeals todaysDeals = new AdminTodaysDeals();
 		AdminDealProductResponse productResponse = new AdminDealProductResponse();
@@ -890,14 +864,14 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     		todaysDeals.setErrorMesg("No Deals found");
     		return todaysDeals;
     	}
-		System.out.println("dbProducts"+dbProducts);
+		
 		tdProducts = dbProducts;
         }else {
         	DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         	String cunvertCurrentDate = adminDealRequest.getStatus();
         	Date date = new Date();
         	date = df.parse(cunvertCurrentDate);
-        	System.out.println("Date :" +cunvertCurrentDate); 
+        	
         	//Retrieves Deals for the particular date
         	List<Product> dbProducts = productService.getTodaysDeals(date);
         	// If no products found from db for particular date returning messsage
@@ -930,7 +904,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
    
 public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSpecial) throws Exception {
 		
-		System.out.println("merchantStoreService =="+merchantStoreService);
+		
 		
 		AdminDealProductResponse productResponse = new AdminDealProductResponse();
 		try {
@@ -973,16 +947,12 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 			product.setPrice(productPrice);
 			product.setDescriptions(descriptions);
 			
-			product.setDateAvailable(DateUtil.formatDate(dbProduct.getDateAvailable()));
-			
-			System.out.println("product id =="+product);
-			System.out.println("product id =="+product.getProduct().getId());
-			System.out.println("product id =="+dbProduct.getProductDescription().getName());
-				
+			product.setDateAvailable(DateUtil.formatDate(dbProduct.getDateAvailable()));	
 			productResponse.setProductName(dbProduct.getProductDescription().getName());
 			
 		}catch(Exception e){
-			System.out.println("product details ::"+e.getMessage());
+			//System.out.println("product details ::"+e.getMessage());
+			productResponse.setErrorMesg("Error while getting product details"+e.getMessage());
 		}
 		return productResponse;
 	}
@@ -993,13 +963,13 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     @RequestMapping(value="/admin/deals/updateorremove", method = RequestMethod.POST)
     @ResponseBody
     public DealUpdateOrRemoveResponse adminDealUpdateOrRemove(@RequestBody DealUpdateOrRemoveRequest dealUpdateOrRemoveRequest) throws Exception {
-    System.out.println("Entered adminDealUpdateOrRemove===");
+    
 	DealUpdateOrRemoveResponse dealUpdateOrRemoveResponse = new DealUpdateOrRemoveResponse();
 	Long productId = dealUpdateOrRemoveRequest.getProductId();
 	
     // getting product from db
     Product dbProduct = productService.getByProductId(productId);
-	System.out.println("dbProduct : "+dbProduct);
+	
 	if(dbProduct==null) {
 		dealUpdateOrRemoveResponse.setErrorMesg("Product is not found");
 		dealUpdateOrRemoveResponse.setStatus("false");
@@ -1033,9 +1003,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 					price.setProductPriceSpecialStartDate(startDate);
 					price.setProductPriceSpecialEndDate(endDate);
 					productPrice.saveOrUpdate(price);
-					System.out.println("Product Id == "+dbProduct.getId());
-					System.out.println("ProductPriceSpecialStartDate == "+price.getProductPriceSpecialStartDate());
-					System.out.println("ProductPriceSpecialEndDate==="+price.getProductPriceSpecialEndDate());
+					
 					dealUpdateOrRemoveResponse.setSuccessMsg("Deal Updated successfully");
 					dealUpdateOrRemoveResponse.setStatus("true");
 					}
@@ -1103,7 +1071,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public AdminSubCatImgResponse getAllSubCatImages() throws Exception {
-		System.out.println("Entered getAllSubCatImages");
+		
     	AdminSubCatImgResponse adminSubCatImgResponse = new AdminSubCatImgResponse();    	
 		Map<String,List<SubCategoryImageVO>> parentMap = new HashMap<String, List<SubCategoryImageVO>>();
 
@@ -1188,10 +1156,11 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		return subCatImageResponse;
     	
     }*/
+    // Remove sub category image
     @RequestMapping(value="/deleteSubCatImage/{subCategoryId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public DeleteSubCatImgResponse deleteSubCatImage(@PathVariable String subCategoryId) throws Exception {
-		System.out.println("Entered deleteSubCatImage");
+		
 		DeleteSubCatImgResponse deleteSubCatImgResponse = new DeleteSubCatImgResponse();
     	Long subCategoryIdLong = new Long(subCategoryId);
     	SubCategoryImage subCategoryImage = subCategoryService.getByCategoryId(subCategoryIdLong);
@@ -1207,11 +1176,12 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	return deleteSubCatImgResponse;
     	
     }
+    // Upload or update sub category image
     @RequestMapping(value="/uploadOrUpdateSubCatImage", method = RequestMethod.POST)
 	@ResponseBody
 	public SubCatImageResponse uploadOrUpdateSubCatImage(@RequestPart("subCatImageRequest") String subCatImageRequestStr,
 			@RequestPart("file") MultipartFile subCatImage) throws Exception {
-    	System.out.println("Entered uploadOrUpdateSubCatImage");
+    	
     	SubCatImageRequest subCatImageRequest = new ObjectMapper().readValue(subCatImageRequestStr, SubCatImageRequest.class);
     	SubCatImageResponse subCatImageResponse = new SubCatImageResponse();
     	Category subCategory = categoryService.getByCategoryCode(subCatImageRequest.getSubCategoryName());
@@ -1238,9 +1208,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 				SubCategoryImage subCategoryImageObj = new SubCategoryImage();
 				subCategoryImageObj.setSubCategoryImageURL(fileName);
 				subCategoryImageObj.setCategory(subCategory);
-				System.out.println("Sub category image url::"+fileName);
-				System.out.println("sub category id::"+subCategory.getId());
-    			
+			
 				subCategoryService.save(subCategoryImageObj);
 				
 				subCatImageResponse.setSubCategoryId(subCategory.getId());
@@ -1271,11 +1239,11 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		return subCatImageResponse;
     }
    
-    
+    // Save Testimonial
     @RequestMapping(value="/testimonial/save", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
   	@ResponseBody
   	public TestimonialResponse saveTestimonialReview(@RequestBody TestimonialRequest testimonialRequest) throws Exception {
-    	System.out.println("Entered saveTestmonialReview");
+    	
     	TestimonialResponse testimonialResponse = new TestimonialResponse();
     	if(StringUtils.isEmpty(testimonialRequest.getTestmonialDescription())){
     		testimonialResponse.setErrorMessage("Feedback cannot be empty");
@@ -1314,11 +1282,12 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	return adminTestimonialResponse;
     	
     }
+    // Approve customer testimonials
     @RequestMapping(value="/approve/testimonial", method = RequestMethod.POST, 
 			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ApproveTestimonialResponse approveTestimonial(@RequestBody ApproveTestimonialRequest approveTestimonialRequest) throws Exception {
-		System.out.println("Entered UpdateTestimonial");
+		
 		ApproveTestimonialResponse approveTestimonialResponse = new ApproveTestimonialResponse();
 		Long testimonialIdLong = approveTestimonialRequest.getTestimonialId();
 		CustomerTestimonial customerTestimonial = customerTestmonialService.getTestimonialById(testimonialIdLong);
@@ -1340,6 +1309,27 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		}
     	return approveTestimonialResponse;
     } 
+    // Retrieve Admin Approved customer testimonials
+    @RequestMapping(value="/getApprovedTestimonials", method = RequestMethod.GET, 
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public AdminApproveTestimonialResponse getAdminApproveTestimonials() {
+    	AdminApproveTestimonialResponse adminApproveTestimonialResponse = new AdminApproveTestimonialResponse();
+    	List<AdminApproveTestimonialVO> adminApproveTestimonialVOList = new ArrayList<AdminApproveTestimonialVO>();
+    	List<CustomerTestimonial> approvedTestimonials = customerTestmonialService.getApprovedTestimonial();
+    	for(CustomerTestimonial approvedTestimonial : approvedTestimonials) {
+    		AdminApproveTestimonialVO adminApproveTestimonialVO = new AdminApproveTestimonialVO();
+    		adminApproveTestimonialVO.setCustomerId(approvedTestimonial.getCustomer().getId());
+    		adminApproveTestimonialVO.setCustomerName(approvedTestimonial.getCustomer().getBilling().getFirstName());
+    		adminApproveTestimonialVO.setEmailAddress(approvedTestimonial.getCustomer().getEmailAddress());
+    		adminApproveTestimonialVO.setDescription(approvedTestimonial.getDescription());
+    		adminApproveTestimonialVO.setEnable(approvedTestimonial.isEnable());
+    		adminApproveTestimonialVO.setTestimonialId(approvedTestimonial.getId());
+    		adminApproveTestimonialVOList.add(adminApproveTestimonialVO);
+    	}
+    	adminApproveTestimonialResponse.setApprovedTestimonials(adminApproveTestimonialVOList);
+    	return adminApproveTestimonialResponse;	
+    }
 }
     
  

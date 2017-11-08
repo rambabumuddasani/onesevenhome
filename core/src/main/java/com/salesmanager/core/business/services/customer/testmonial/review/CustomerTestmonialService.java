@@ -11,5 +11,7 @@ public interface CustomerTestmonialService extends SalesManagerEntityService<Lon
 
 	CustomerTestimonial getTestimonialById(Long customerIdLong);
 
+	List<CustomerTestimonial> getApprovedTestimonial();
+
 	
 }

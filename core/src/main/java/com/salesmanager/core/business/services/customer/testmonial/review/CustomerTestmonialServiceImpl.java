@@ -33,4 +33,10 @@ public class CustomerTestmonialServiceImpl extends SalesManagerEntityServiceImpl
 		
 		return customerTestimonialRepository.getTestimonialById(testimonialIdLong);
 	}
+
+	@Override
+	public List<CustomerTestimonial> getApprovedTestimonial() {
+		// TODO Auto-generated method stub
+		return customerTestimonialRepository.getApprovedTestimonial();
+	}
 }
