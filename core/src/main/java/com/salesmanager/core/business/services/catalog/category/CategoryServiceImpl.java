@@ -9,6 +9,8 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -25,6 +27,8 @@ import com.salesmanager.core.model.reference.language.Language;
 
 @Service("categoryService")
 public class CategoryServiceImpl extends SalesManagerEntityServiceImpl<Long, Category> implements CategoryService {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(CategoryServiceImpl.class);
 	
 	 private CategoryRepository categoryRepository;
 	
@@ -89,7 +93,7 @@ public class CategoryServiceImpl extends SalesManagerEntityServiceImpl<Long, Cat
 	@Override
 	public void saveOrUpdate(Category category) throws ServiceException {
 		
-		
+		LOGGER.debug("creating category");
 		//save or update (persist and attach entities
 		if(category.getId()!=null && category.getId()>0) {
 
@@ -145,10 +149,11 @@ public class CategoryServiceImpl extends SalesManagerEntityServiceImpl<Long, Cat
 	
 	@Override
 	public Category getByCode(MerchantStore store, String code) throws ServiceException {
-		
+		LOGGER.debug("fetching category by store and code");
 		try {
 			return categoryRepository.findByCode(store.getId(), code);
 		} catch (Exception e) {
+			LOGGER.error("Error while fetching category by code");
 			throw new ServiceException(e);
 		}
 		
@@ -156,7 +161,7 @@ public class CategoryServiceImpl extends SalesManagerEntityServiceImpl<Long, Cat
 	
 	@Override
 	public Category getByCode(String storeCode, String code) throws ServiceException {
-		
+		LOGGER.debug("fetching catgory by storecode and category cdoe");
 		try {
 			return categoryRepository.findByCode(storeCode, code);
 		} catch (Exception e) {
@@ -179,7 +184,7 @@ public class CategoryServiceImpl extends SalesManagerEntityServiceImpl<Long, Cat
 	
 	@Override
 	public Category getById(Long id) {
-
+            LOGGER.debug("Fetching category by id");
 			return categoryRepository.findOne(id);
 		
 	}
@@ -235,7 +240,7 @@ public class CategoryServiceImpl extends SalesManagerEntityServiceImpl<Long, Cat
 	
 	//@Override
 	public void delete(Category category) throws ServiceException {
-		
+		LOGGER.debug("Deleting category");
 		//get category with lineage (subcategories)
 		StringBuilder lineage = new StringBuilder();
 		lineage.append(category.getLineage()).append(category.getId()).append(Constants.SLASH);
@@ -296,7 +301,7 @@ public class CategoryServiceImpl extends SalesManagerEntityServiceImpl<Long, Cat
 	@Override
 	public CategoryDescription getDescription(Category category, Language language) {
 		
-		
+		LOGGER.debug("fetching category description");
 		for (CategoryDescription description : category.getDescriptions()) {
 			if (description.getLanguage().equals(language)) {
 				return description;
@@ -375,10 +380,11 @@ public class CategoryServiceImpl extends SalesManagerEntityServiceImpl<Long, Cat
 
 	@Override
 	public List<Category> getByName(MerchantStore store, String name, Language language) throws ServiceException {
-		
+		LOGGER.debug("Fetching category by name");
 		try {
 			return categoryRepository.findByName(store.getId(), name, language.getId());
 		} catch (Exception e) {
+			LOGGER.error("Error while Fetching category by name");
 			throw new ServiceException(e);
 		}
 		
@@ -390,10 +396,11 @@ public class CategoryServiceImpl extends SalesManagerEntityServiceImpl<Long, Cat
 	@Override
 	public List<Category> listByStore(MerchantStore store)
 			throws ServiceException {
-
+        LOGGER.debug("Fetching categories by store");
 		try {
 			return categoryRepository.findByStore(store.getId());
 		} catch (Exception e) {
+			LOGGER.error("Error while fetching categories by store");
 			throw new ServiceException(e);
 		}
 	}
@@ -426,8 +433,10 @@ public class CategoryServiceImpl extends SalesManagerEntityServiceImpl<Long, Cat
 			throws ServiceException {
 
 		try {
+			LOGGER.debug("Fetctching all categories");
 			return categoryRepository.getAllCategories();
 		} catch (Exception e) {
+			LOGGER.error("Error while fetching all categories");
 			throw new ServiceException(e);
 		}
 	}

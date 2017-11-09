@@ -1081,12 +1081,13 @@ public class ProductController extends AbstractController {
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ProductDetails getProduct(@PathVariable String prodId) throws Exception {
+		LOGGER.debug("Entered getProduct");
 		ProductDetails productDetails = new ProductDetails();
 		Long productId = new Long(prodId);
 		System.out.println("String prodId =="+prodId);
 		System.out.println("productId =="+productId);
 		Product dbProduct = productService.getByProductId(productId);
-		System.out.println("dbProduct =="+dbProduct);
+		
 		List<String> productImages = new ArrayList<String>();
 		if(dbProduct != null) {
 			System.out.println("product id =="+dbProduct.getId());
@@ -1155,11 +1156,12 @@ public class ProductController extends AbstractController {
 			}
 			productDetails.setProductFilterTypeList(productFilterTypeList);
 		}
+		LOGGER.debug("Ended getProduct");
 		return productDetails;
 	}
 	
 	public ProductResponse getProductDetails(Product dbProduct,boolean isSpecial) throws Exception {
-		
+		LOGGER.debug("Entered getProductDetails ");
 		System.out.println("merchantStoreService =="+merchantStoreService);
 		
 		ProductResponse productResponse = new ProductResponse();
@@ -1283,8 +1285,9 @@ public class ProductController extends AbstractController {
 				productResponse.setVendorLocation(description.getTitle());
 			}
 		}catch(Exception e){
-			System.out.println("product details ::"+e.getMessage());
+			LOGGER.error("Error while getting product details::"+e.getMessage());
 		}
+		LOGGER.debug("Ended getProductDetails");
 		return productResponse;
 	}
 
@@ -1329,7 +1332,7 @@ public class ProductController extends AbstractController {
 	@ResponseBody
 	public TodaysDeals getTodaysDeals(@RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
 		
-		System.out.println("getTodaysDeals ==");
+		LOGGER.debug("Entered getTodaysDeals");
 		
 		TodaysDeals todaysDeals = new TodaysDeals();
 		ProductResponse productResponse = new ProductResponse();
@@ -1364,6 +1367,7 @@ public class ProductController extends AbstractController {
     	todaysDeals.setPaginationData(paginaionData);
 		List<ProductResponse> paginatedProdResponses = responses.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
 		todaysDeals.setTodaysDealsData(paginatedProdResponses);
+		LOGGER.debug("Ended getTodaysDeals");
 		return todaysDeals;
 	}
 
@@ -1404,7 +1408,7 @@ public class ProductController extends AbstractController {
 	@ResponseBody
 	public FilteredProducts getProductsByFilters(@RequestParam(value="pageNumber", defaultValue = "1") int page ,@RequestParam(value="pageSize", defaultValue="15") int size, @RequestBody FiltersRequest filtersRequest) throws Exception {
 		
-		System.out.println("getProductsByFilters ==");
+		LOGGER.debug("Entered getProductsByFilters");
 		
 		List<Long> filterIds = filtersRequest.getFilterIds();
 		
@@ -1439,6 +1443,7 @@ public class ProductController extends AbstractController {
     	filteredProducts.setPaginationData(paginaionData);
 		List<ProductResponse> paginatedProdResponses = responses.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
 		filteredProducts.setFilteredProducts(paginatedProdResponses);
+		LOGGER.debug("Ended getProductsByFilters");
 		return filteredProducts;
 	}
 	
@@ -1449,7 +1454,7 @@ public class ProductController extends AbstractController {
 	public PaginatedResponse getProductForCat(@PathVariable String categoryId,
 				@RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
 		
-		System.out.println("getProductForCat ==");
+		LOGGER.debug("Entered getProductForCat");
 		PaginatedResponse paginatedResponse = new PaginatedResponse();
 		ProductResponse productResponse = new ProductResponse();
 		
@@ -1478,6 +1483,7 @@ public class ProductController extends AbstractController {
 		}
     	List<ProductResponse> paginatedResponses = responses.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
     	paginatedResponse.setResponseData(paginatedResponses);
+    	LOGGER.debug("Ended getProductForCat");
 		return paginatedResponse;
 		
 	} 
@@ -1485,6 +1491,7 @@ public class ProductController extends AbstractController {
 	public List<ProductResponse> invokeProductsData(Map<Long,Product> todaysDealsMap,
 			String categoryId,List<ProductResponse> responses,
 			ProductResponse productResponse,List<Product> tdProducts) throws Exception {
+		LOGGER.debug("Entered invokeProductsData");
 		todaysDealsMap = new HashMap<Long, Product>();
 		List<Product> dbProducts = productService.getProductsListByCategory(categoryId);
 		for(Product tdproduct:tdProducts){
@@ -1500,6 +1507,7 @@ public class ProductController extends AbstractController {
 			}
 			responses.add(productResponse);
 		}
+		LOGGER.debug("Ended invokeProductsData");
 		return responses;
 	}
 	
@@ -1508,7 +1516,7 @@ public class ProductController extends AbstractController {
 	@ResponseBody
 	public DealOfDay getDealOfDay() throws Exception {
 		//Get dealofday 
-		System.out.println("getDealOfDay ==");
+		LOGGER.debug("Entered getDealOfDay ");
 		
 		DealOfDay dealOfDay = new DealOfDay();
 		ProductResponse productResponse = new ProductResponse();
@@ -1519,9 +1527,11 @@ public class ProductController extends AbstractController {
 			productResponse = getProductDetails(product,true);
 			dealOfDay.setDealOfDay(productResponse);
 		}
+		LOGGER.debug("Ended getDealOfDay");
 		return dealOfDay;
 	}
 	private String getDiscountPercentage(ProductPrice productPrice){
+		LOGGER.debug("Entered getDiscountPercentage");
 		BigDecimal discount = new BigDecimal(0);
 		DecimalFormat df = new DecimalFormat();
 		df.setMaximumFractionDigits(2); //Sets the maximum number of digits after the decimal point
@@ -1531,6 +1541,7 @@ public class ProductController extends AbstractController {
 			discount = productPrice.getProductPriceAmount().subtract(productPrice.getProductPriceSpecialAmount());
 			discount = discount.multiply(new BigDecimal(100));
 			discount = discount.divide(productPrice.getProductPriceAmount(),2,4);
+			LOGGER.debug("Ended getDiscountPercentage");
 			return df.format(discount);
 		}
 		return df.format(discount);
@@ -1542,14 +1553,14 @@ public class ProductController extends AbstractController {
 	@ResponseBody
 	public PaginatedResponse getAllDealOfDay(@RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
 		// List all dealofday products
-		System.out.println("getDealOfDay ==");
+		LOGGER.debug("Entered getAllDealOfDay");
 		AdminDealOfDay adminDealOfDay = new AdminDealOfDay();
 		PaginatedResponse paginatedResponse = new PaginatedResponse();
 		ProductResponse productResponse = new ProductResponse();
 		
 		List<ProductResponse> prodRespList = new ArrayList<ProductResponse>();
 		List<Product> dbProducts = productService.getAllDealOfDay("dealOfDay","Y");
-		System.out.println("dbProducts=="+dbProducts);
+		
 		for(Product product:dbProducts) {
 			productResponse = getProductDetails(product,true);
 			prodRespList.add(productResponse);
@@ -1564,6 +1575,7 @@ public class ProductController extends AbstractController {
 		}
     	List<ProductResponse> paginatedResponses = prodRespList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
     	paginatedResponse.setResponseData(paginatedResponses);
+    	LOGGER.debug("Ended getAllDealOfDay");
 		return paginatedResponse;
 		
 	}
@@ -1573,7 +1585,7 @@ public class ProductController extends AbstractController {
 	@ResponseBody
 	public NewProducts getNewProduct() throws Exception {
 		
-		System.out.println("getNewProduct:");
+		LOGGER.debug("Entered getNewProduct ");
 		
 		NewProducts newProducts = new NewProducts();
 		ProductResponse productResponse = new ProductResponse();
@@ -1585,6 +1597,7 @@ public class ProductController extends AbstractController {
 		    productResponseList.add(productResponse);   
 		}
 		newProducts.setNewProducts(productResponseList);
+		LOGGER.debug("Ended getNewProduct");
 		return newProducts;
 	}
 	
@@ -1593,7 +1606,7 @@ public class ProductController extends AbstractController {
 	@ResponseBody
 	public FeatureProduct getfeatureProduct() throws Exception {
 		
-		System.out.println("getFeatureProduct:");
+		LOGGER.debug("Entered getfeatureProduct");
 		
 		FeatureProduct featureProduct = new FeatureProduct();
 		ProductResponse productResponse = new ProductResponse();
@@ -1605,6 +1618,7 @@ public class ProductController extends AbstractController {
 			productResponseList.add(productResponse);
 		}
 		featureProduct.setFeaureProducts(productResponseList);
+		LOGGER.debug("Ended getfeatureProduct");
 		return featureProduct;
 	}
 	
@@ -1613,7 +1627,7 @@ public class ProductController extends AbstractController {
 	@ResponseBody
 	public RecommendedProduct getRecommendedProduct() throws Exception {
 		
-		System.out.println("getRecommendedProduct:");
+		LOGGER.debug("Entered getRecommendedProduct");
 		
 		RecommendedProduct recommendedProduct = new RecommendedProduct();
 		ProductResponse productResponse = new ProductResponse();
@@ -1625,6 +1639,7 @@ public class ProductController extends AbstractController {
 			productResponseList.add(productResponse);
 		}
 		recommendedProduct.setRecommendedProducts(productResponseList);
+		LOGGER.debug("Ended getRecommendedProduct");
 		return recommendedProduct;
 	}
 	
@@ -1633,7 +1648,7 @@ public class ProductController extends AbstractController {
 	@ResponseBody
 	public RecentlyBought getRecentBought() throws Exception {
 		
-		System.out.println("getRecentProduct:");
+		LOGGER.debug("Entered getRecentBought");
 		
 		RecentlyBought recentlyBought = new RecentlyBought();
 		ProductResponse productResponse = new ProductResponse();
@@ -1645,6 +1660,7 @@ public class ProductController extends AbstractController {
 			productResponseList.add(productResponse);
 		}
 		recentlyBought.setRecentlyBought(productResponseList);
+		LOGGER.debug("Ended getRecentBought");
 		return recentlyBought;
 	}
 	
@@ -1657,7 +1673,7 @@ public class ProductController extends AbstractController {
 	@ResponseBody
 	public FilteredProducts getProductsByFiltersAndPrice(@RequestParam(value="pageNumber", defaultValue = "1") int page ,@RequestParam(value="pageSize", defaultValue="15") int size, @RequestBody FiltersRequest filtersRequest) throws Exception {
 		
-		System.out.println("getProductsByFiltersAndPrice ==");
+		LOGGER.debug("Entered getProductsByFiltersAndPrice");
 		
 		List<Long> filterIds = null;
 		if(filtersRequest.getFilterIds() != null) {
@@ -1710,14 +1726,15 @@ public class ProductController extends AbstractController {
 		List<ProductResponse> paginatedProdResponses = responses.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
 		filteredProducts.setFilteredProducts(paginatedProdResponses);
 		}catch(Exception e){
-			System.out.println("error occured=="+e.getMessage());
+			LOGGER.error("Error occured in filtering::"+e.getMessage());
 			e.printStackTrace(System.out);
 		}
+		LOGGER.debug("Ended getProductsByFiltersAndPrice");
 		return filteredProducts;
 	}
 public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpecial,String minPrice,String maxPrice) throws Exception {
 		
-		System.out.println("merchantStoreService =="+merchantStoreService);
+		LOGGER.debug("Entered getProductDetailsAndPrice");
 		
 		ProductResponse productResponse = new ProductResponse();
 		try {
@@ -1802,8 +1819,9 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
 			}*/	
 			productResponse.setProductRating((dbProduct.getProductReviewAvg()).doubleValue());
 		}catch(Exception e){
-			System.out.println("product details ::"+e.getMessage());
+			LOGGER.error("Error in getting product details::"+e.getMessage());
 		}
+		LOGGER.debug("Ended getProductDetailsAndPrice");
 		return productResponse;
 	}
 
@@ -1811,6 +1829,7 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
 	@ResponseBody
 	public ProductImageResponse uploadProductImage(@RequestPart("productImageRequest") String productRequestStr,
 			@RequestPart("file") MultipartFile productUploadedImage) throws Exception {
+		LOGGER.debug("Entered uploadProductImage");
 		ProductImageRequest productImageRequest = new ObjectMapper().readValue(productRequestStr, ProductImageRequest.class);
 		ProductImageResponse productImageResponse = new ProductImageResponse();
 		
@@ -1820,14 +1839,15 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
 			return productImageResponse;
 		}
 		productImageResponse.setProductId(productImageRequest.getProductId());
-    	// Store file into file sytem
+    	// Store file into file system
     	String fileName = "";
     	if(productUploadedImage.getSize() != 0) {
     		try{
     			fileName = storageService.store(productUploadedImage,"product");
     			System.out.println("fileName "+fileName);
     		}catch(StorageException se){
-    			System.out.println("StoreException occured, do wee need continue "+se);
+    			
+    			LOGGER.error("Failed while storing image");
     			productImageResponse.setErrorMsg("Failed while storing image");
     			productImageResponse.setStatus(false);
     			return productImageResponse;
@@ -1840,6 +1860,7 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
 
     			Product dbProduct = productService.getById(productImageRequest.getProductId());
     			if(dbProduct == null){
+    				LOGGER.debug("No product available with product id : "+productImageRequest.getProductId());
         			productImageResponse.setErrorMsg("No product available with product id : "+productImageRequest.getProductId());
         			productImageResponse.setStatus(false);
         			return productImageResponse;
@@ -1869,6 +1890,7 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
     			productService.update(dbProduct);
     			
     		}catch(Exception e){
+    			LOGGER.error("Failed while saving image details in database for product id : "+productImageRequest.getProductId());
     			productImageResponse.setErrorMsg("Failed while saving image details in database for product id : "+productImageRequest.getProductId());
     			productImageResponse.setStatus(false);
     			return productImageResponse;
@@ -1876,7 +1898,7 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
     		productImageResponse.setStatus(true);
     		productImageResponse.setFileName(fileName);
     	}
-		
+		LOGGER.debug("Ended uploadProductImage");
 		return productImageResponse;
 	}
 	
@@ -1886,7 +1908,7 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
       @ResponseBody
       public CreateProductResponse createProduct(@RequestBody CreateProductRequest createProductRequest) throws Exception {
 		
-		System.out.println("createProduct:");
+		LOGGER.debug("Entered createProduct");
 		/*{"sku":"1234"
 	"description":""
 	"name":""
@@ -1958,12 +1980,14 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
 		categories.add(category);
 		newProduct.setCategories(categories);
 		productService.save(newProduct);
-		System.out.println("created ..");
+		LOGGER.debug("Created product");
 		createProductResponse.setStatus(true);
 		createProductResponse.setProductId(newProduct.getId());
 		}catch (Exception e){
-			System.out.println("failed while creating product ==="+e.getMessage());
+			
+			LOGGER.error("failed while creating product::"+e.getMessage());
 		}
+		LOGGER.debug("Ended createProduct");
 		return createProductResponse;
 		
 	}
@@ -1974,12 +1998,13 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
  @ResponseBody
  public CreateProductResponse updateProduct(@RequestBody CreateProductRequest createProductRequest) throws Exception {
 
-	System.out.println("updateProduct:");
+	LOGGER.debug("Entered updateProduct");
 	CreateProductResponse createProductResponse = new CreateProductResponse();
 	createProductResponse.setStatus(false);
 	try {
 			Product dbProduct = productService.getById(createProductRequest.getProductId());
 			if(dbProduct == null){
+				LOGGER.debug("No product available with product id : "+createProductRequest.getProductId());
 				createProductResponse.setErrorMsg("No product available with product id : "+createProductRequest.getProductId());
 				return createProductResponse;
 			}
@@ -2058,15 +2083,16 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
 			dbProduct.setDescriptions(descriptions);
 			dbProduct.setAvailabilities(availabilities);
 			productService.update(dbProduct);
-			System.out.println("updated ..");
+			LOGGER.debug("Product Updated");
 			createProductResponse.setStatus(true);
 			createProductResponse.setProductId(dbProduct.getId());
 
 	}catch (Exception e){
-		System.out.println("failed while updating product discount==="+e.getMessage());
+		LOGGER.error("failed while updating product discount==="+e.getMessage());
 		createProductResponse.setErrorMsg("failed while updating product discount==="+e.getMessage());
 		return createProductResponse;
 	}
+	LOGGER.debug("Ended updateProduct");
 	return createProductResponse;
 	
 	}
@@ -2076,12 +2102,13 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
 @ResponseBody
 public CreateProductResponse deleteProduct(@RequestBody ProductDiscountRequest productDiscountRequest) throws Exception {
 
-	System.out.println("deleteProduct:");
+	LOGGER.debug("Entered deleteProduct");
 	CreateProductResponse createProductResponse = new CreateProductResponse();
 	createProductResponse.setStatus(false);
 	try {
 			Product dbProduct = productService.getById(productDiscountRequest.getProductId());
 			if(dbProduct == null){
+				LOGGER.debug("No product available with product id : "+productDiscountRequest.getProductId());
 				createProductResponse.setErrorMsg("No product available with product id : "+productDiscountRequest.getProductId());
 				return createProductResponse;
 			}
@@ -2089,10 +2116,11 @@ public CreateProductResponse deleteProduct(@RequestBody ProductDiscountRequest p
 			createProductResponse.setStatus(true);
 			createProductResponse.setProductId(productDiscountRequest.getProductId());
 	}catch (Exception e){
-		System.out.println("failed while deleting product==="+e.getMessage());
+		LOGGER.error("failed while deleting product==="+e.getMessage());
 		createProductResponse.setErrorMsg("failed while deleting product==="+e.getMessage());
 		return createProductResponse;
 	}
+	LOGGER.debug("Ended deleteProduct");
 	return createProductResponse;
 	
 	}
@@ -2102,12 +2130,13 @@ public CreateProductResponse deleteProduct(@RequestBody ProductDiscountRequest p
 @ResponseBody
 public CreateProductResponse updateProductDiscount(@RequestBody ProductDiscountRequest productDiscountRequest) throws Exception {
 
-	System.out.println("updateProductDiscount:");
+	LOGGER.debug("Entered updateProductDiscount");
 	CreateProductResponse createProductResponse = new CreateProductResponse();
 	createProductResponse.setStatus(false);
 	try {
 			Product dbProduct = productService.getById(productDiscountRequest.getProductId());
 			if(dbProduct == null){
+				LOGGER.debug("No product available with product id : "+productDiscountRequest.getProductId());
 				createProductResponse.setErrorMsg("No product available with product id : "+productDiscountRequest.getProductId());
 				return createProductResponse;
 			}
@@ -2138,7 +2167,7 @@ public CreateProductResponse updateProductDiscount(@RequestBody ProductDiscountR
 				}
 				if(prices == null)
 				{
-					System.out.println("Price object not found for this product id");
+					LOGGER.debug("Price object not found for this product id");
 					createProductResponse.setErrorMsg("Price object not found for this product id");
 					return createProductResponse;
 				}
@@ -2147,6 +2176,7 @@ public CreateProductResponse updateProductDiscount(@RequestBody ProductDiscountR
 				availabilities.add(productAvailability);
 				dbProduct.setAvailabilities(availabilities);
 				productService.update(dbProduct);
+				LOGGER.debug("Updated Product discount");
 				createProductResponse.setStatus(true);
 				createProductResponse.setProductId(productDiscountRequest.getProductId());
 
@@ -2154,10 +2184,11 @@ public CreateProductResponse updateProductDiscount(@RequestBody ProductDiscountR
 		
 
 	}catch (Exception e){
-		System.out.println("failed while updating product discount==="+e.getMessage());
+		LOGGER.debug("failed while updating product discount==="+e.getMessage());
 		createProductResponse.setErrorMsg("failed while updating product discount==="+e.getMessage());
 		return createProductResponse;
 	}
+	LOGGER.debug("Ended updateProductDiscount");
 	return createProductResponse;
 	
 	}
@@ -2167,9 +2198,12 @@ public CreateProductResponse updateProductDiscount(@RequestBody ProductDiscountR
      produces = MediaType.APPLICATION_JSON_VALUE)
 	 @ResponseBody
 	public ProductImageResponse deleteProductImage(@RequestBody ProductImageRequest productImageRequest) throws Exception {
-		ProductImageResponse productImageResponse = new ProductImageResponse();
+		
+		 LOGGER.debug("Entered deleteProductImage");
+		 ProductImageResponse productImageResponse = new ProductImageResponse();
 		
 		if(productImageRequest.getProductId() == null){
+			LOGGER.debug("ProductId can not be null");
 			productImageResponse.setErrorMsg("ProductId can not be null");
 			productImageResponse.setStatus(false);
 			return productImageResponse;
@@ -2180,6 +2214,7 @@ public CreateProductResponse updateProductDiscount(@RequestBody ProductDiscountR
 
   			Product dbProduct = productService.getById(productImageRequest.getProductId());
   			if(dbProduct == null){
+  				LOGGER.debug("No product available with product id : "+productImageRequest.getProductId());
       			productImageResponse.setErrorMsg("No product available with product id : "+productImageRequest.getProductId());
       			productImageResponse.setStatus(false);
       			return productImageResponse;
@@ -2212,12 +2247,15 @@ public CreateProductResponse updateProductDiscount(@RequestBody ProductDiscountR
 			}
   			
   		}catch(Exception e){
+  			LOGGER.error("Failed while deleting image details in database for product id : "+productImageRequest.getProductId());
   			productImageResponse.setErrorMsg("Failed while deleting image details in database for product id : "+productImageRequest.getProductId());
   			productImageResponse.setStatus(false);
   			return productImageResponse;
   		}
+  		LOGGER.debug("Deleted Product Image");
   		productImageResponse.setStatus(true);
   		productImageResponse.setFileName(productImageRequest.getImageURL());
+  		LOGGER.debug("Ended deleteProductImage");
   		return productImageResponse;
   	}
 		

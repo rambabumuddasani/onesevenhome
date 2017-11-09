@@ -11,6 +11,8 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service("storageService")
 public class FileSystemStorageService implements StorageService {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(FileSystemStorageService.class);
 	
 	private Path rootLocation;
 
@@ -35,6 +39,7 @@ public class FileSystemStorageService implements StorageService {
     	System.out.println("filePath"+filePath);
     	try {
             if (file.isEmpty()) {
+            	LOGGER.debug("Failed to empty file");
                 throw new StorageException("Failed to store empty file " + file.getOriginalFilename());
             }
             filePath.append(getUniqFileName(file.getOriginalFilename())); // do we need to give orginal file name or form certificate name based on customer information.
@@ -42,6 +47,7 @@ public class FileSystemStorageService implements StorageService {
             System.out.println("filePath.toString()"+filePath.toString());
             return filePath.toString();        // /opt/img/vendor/cert1.jpg
         } catch (IOException e) {
+        	LOGGER.error("Failed to store file " + file.getOriginalFilename());
             throw new StorageException("Failed to store file " + file.getOriginalFilename(), e);
         }
     }
@@ -55,6 +61,7 @@ public class FileSystemStorageService implements StorageService {
     		System.out.println("filePath"+filePath);
     		try {
     			if (file.isEmpty()) {
+    				LOGGER.debug("Failed to store empty file " + file.getOriginalFilename());
     				throw new StorageException("Failed to store empty file " + file.getOriginalFilename());
     			}
     		createDirectoryIfNotExist(filePath);
@@ -63,6 +70,7 @@ public class FileSystemStorageService implements StorageService {
             System.out.println("filePath.toString()"+filePath.toString());
             return filePath.toString();        // /opt/img/vendor/cert1.jpg
         } catch (IOException e) {
+        	LOGGER.error("Failed to store file " + file.getOriginalFilename());
             throw new StorageException("Failed to store file " + file.getOriginalFilename(), e);
         }
     }
@@ -127,12 +135,13 @@ public class FileSystemStorageService implements StorageService {
 
 	@Override
 	public void deleteFile(String fileName){
+		LOGGER.debug("Deleting file");
 		try {
 			Files.delete(Paths.get(fileName)); // fileName (i.e. filePath+fileName)
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			System.out.println("failed to delete the file");
-			e.printStackTrace();
+			LOGGER.error("Error while deleting file"+e.getMessage());
+			
 		}
 	}
 	

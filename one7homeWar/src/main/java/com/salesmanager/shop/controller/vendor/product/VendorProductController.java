@@ -8,6 +8,8 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -62,7 +64,8 @@ public class VendorProductController {
 	@Inject
 	private PricingService pricingService;
 
-
+	private static final Logger LOGGER = LoggerFactory.getLogger(VendorProductController.class);
+	
 	private final static String VENDOR_ADD_PRODUCTS_TPL = "email_template_vendor_add_products.ftl";
 	
 	
@@ -70,13 +73,12 @@ public class VendorProductController {
 	@ResponseBody
 	public VendorProductResponse addVendorProducts(@RequestBody VendorProductRequest vendorProductRequest ) throws Exception {
 	   
-		System.out.println("Entered addVendorProducts:");
+		LOGGER.debug("Entered addVendorProducts:");
 		String vendorId = vendorProductRequest.getVendorId();
 		System.out.println(vendorId);
 		Customer customer = customerService.getById(Long.parseLong(vendorId));
-		System.out.println("Customer:"+customer);
+		
 		List<String> productIds = vendorProductRequest.getProductId();
-		System.out.println(productIds);
 		
 		VendorProductResponse vendorProductResponse = new VendorProductResponse(); 
 		
@@ -96,8 +98,9 @@ public class VendorProductController {
 			vpList.add(vendorProduct);
 			vList.add(productsInfo);
 		}
-		System.out.println("vpList:"+vpList.size());
+		LOGGER.debug("vpList:"+vpList.size());
 		vendorProductService.save(vpList);
+		LOGGER.debug("Added products");
 		vendorProductResponse.setVenderId(vendorId);
 		vendorProductResponse.setVendorProducts(vList);
 		
@@ -123,7 +126,7 @@ public class VendorProductController {
 		
 		emailService.sendHtmlEmail(merchantStore, email);
 
-		
+		LOGGER.debug("Ended addVendorProducts");
 		return vendorProductResponse;
 	}
 	
@@ -131,13 +134,12 @@ public class VendorProductController {
 	@ResponseBody
 	public VendorProductResponse addVendorWishListProducts(@RequestBody VendorProductRequest vendorProductRequest ) throws Exception {
 	   
-		System.out.println("Entered addVendorProducts:");
+		LOGGER.debug("Entered addVendorWishListProducts:");
 		String vendorId = vendorProductRequest.getVendorId();
 		System.out.println(vendorId);
 		Customer customer = customerService.getById(Long.parseLong(vendorId));
-		System.out.println("Customer:"+customer);
+	
 		List<String> productIds = vendorProductRequest.getProductId();
-		System.out.println(productIds);
 		
 		VendorProductResponse vendorProductResponse = new VendorProductResponse(); 
 		
@@ -160,6 +162,7 @@ public class VendorProductController {
 		
 		System.out.println("vpList:"+vpList.size());
 		vendorProductService.save(vpList);
+		LOGGER.debug("Products added to wishList");
 		vendorProductResponse.setVenderId(vendorId);
 		vendorProductResponse.setVendorProducts(vList);
 		
@@ -182,12 +185,16 @@ public class VendorProductController {
 		email.setTemplateName(VENDOR_ADD_PRODUCTS_TPL);
 		email.setTemplateTokens(templateTokens);
 		emailService.sendHtmlEmail(merchantStore, email);
+		
+		
+		LOGGER.debug("Ended addVendorWishListProducts:");
 		return vendorProductResponse;
 	}
 	
 	@RequestMapping(value={"/wishlist/{vendorId}"},  method = { RequestMethod.GET })
 	@ResponseBody	
 	public VendortProductList getWishListProducts(@PathVariable Long vendorId){
+		LOGGER.debug("Entered getWishListProducts");
 		VendortProductList vendorProductList = new VendortProductList();
 		List<VendorProductData> vendorProductData = new ArrayList<VendorProductData>();
 		List<VendorProduct> dbVendorProductList = vendorProductService.findProductWishListByVendor(vendorId);
@@ -206,18 +213,20 @@ public class VendorProductController {
                 try {
 					vpData.setProductPrice(pricingService.calculateProductPrice(product).getOriginalPrice().toString());
 				} catch (ServiceException e) {
-					e.printStackTrace();
+					LOGGER.error("Error while getting WishListProducts");
 				}
 				vendorProductData.add(vpData);
 			}
 		}
 		vendorProductList.setVendorProductData(vendorProductData);
+		LOGGER.debug("Ended getWishListProducts");
 		return vendorProductList;
 	}
 
 	@RequestMapping(value={"/productList/{vendorId}"},  method = { RequestMethod.GET })
 	@ResponseBody	
 	public VendortProductList getVendorProductList(@PathVariable Long vendorId){
+		LOGGER.debug("Entered getVendorProductList");
 		VendortProductList vendorProductList = new VendortProductList();
 		List<VendorProductData> vendorProductData = new ArrayList<VendorProductData>();
 		List<VendorProduct> dbVendorProductList = vendorProductService.findProductsByVendor(vendorId);
@@ -236,26 +245,28 @@ public class VendorProductController {
                 try {
 					vpData.setProductPrice(pricingService.calculateProductPrice(product).getOriginalPrice().toString());
 				} catch (ServiceException e) {
-					e.printStackTrace();
+					LOGGER.error("Error while getting Productlist");
 				}
 				vendorProductData.add(vpData);
 			}
 		}
 		vendorProductList.setVendorProductData(vendorProductData);
+		LOGGER.debug("Ended getVendorProductList");
 		return vendorProductList;
 	}
 
 	@RequestMapping(value={"/vendors/{productId}"},  method = { RequestMethod.GET })
 	@ResponseBody	
 	public VendorsList getProductVendors(@PathVariable Long productId){
+		LOGGER.debug("Entered getProductVendors");
 		VendorsList vendorsList = new VendorsList();
 		List<VendorResponse> vendorsDataForProduct = new ArrayList<VendorResponse>();
 		try {
 		List<VendorProduct> dbVendorProductList = vendorProductService.findProductVendors(productId);
-		System.out.println("dbVendorProductList size=="+dbVendorProductList.size());
+		LOGGER.debug("dbVendorProductList size=="+dbVendorProductList.size());
 		for(VendorProduct vendorProduct : dbVendorProductList){
 			VendorResponse vendorResponse = new VendorResponse();
-			System.out.println("customer --vendor=="+vendorProduct.getCustomer().getEmailAddress());
+			LOGGER.debug("customer --vendor=="+vendorProduct.getCustomer().getEmailAddress());
 			if(vendorProduct.getCustomer() != null) {
 				vendorResponse.setEmail(vendorProduct.getCustomer().getEmailAddress());
 				vendorResponse.setVendorName(vendorProduct.getCustomer().getVendorAttrs().getVendorName());
@@ -282,9 +293,10 @@ public class VendorProductController {
 		vendorsList.setVendorsDataForProduct(vendorsDataForProduct);
 		
 		}catch(Exception e){
-			System.out.println("error occured while retrieving vendors based on product id ="+productId+"---"+e.getMessage());
+			LOGGER.error("error occured while retrieving vendors based on product id ="+productId+"---"+e.getMessage());
 			e.printStackTrace(System.out);
 		}
+		LOGGER.error("getProductVendors");
 		return vendorsList;
 	}
 }

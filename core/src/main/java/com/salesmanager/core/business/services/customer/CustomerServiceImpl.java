@@ -22,7 +22,6 @@ import com.salesmanager.core.model.customer.CustomerCriteria;
 import com.salesmanager.core.model.customer.CustomerList;
 import com.salesmanager.core.model.customer.attribute.CustomerAttribute;
 import com.salesmanager.core.model.merchant.MerchantStore;
-import com.salesmanager.core.model.services.CompanyService;
 import com.salesmanager.core.modules.utils.GeoLocation;
 
 
@@ -74,6 +73,7 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 	
 	@Override
 	public CustomerList listByStore(MerchantStore store, CustomerCriteria criteria) {
+		LOGGER.debug("Getting customer list by store");
 		return customerRepository.listByStore(store,criteria);
 	}
 	
@@ -104,7 +104,7 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 
 	public void delete(Customer customer) throws ServiceException {
 		customer = getById(customer.getId());
-		
+		LOGGER.debug("Deleting customer");
 		//delete attributes
 		List<CustomerAttribute> attributes =customerAttributeService.getByCustomer(customer.getMerchantStore(), customer);
 		if(attributes!=null) {
@@ -118,11 +118,13 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 
 	@Override
 	public List<Customer> findByServiceId(Integer serviceId) {
+		LOGGER.debug("Invoking findByServiceId repository");
 		return customerRepository.findByServiceId(serviceId);
 	}
 	
 	@Override
 	public WorkerServiceResponse findByServiceType(String serviceType) {
+		LOGGER.debug("Entered findByServiceType");
 		WorkerServiceResponse response = new WorkerServiceResponse();
 		List<Customer> customer = customerRepository.findByServiceType(serviceType);
 		Set<ServicesWorkerVO> servicesWorkerVOSet= new HashSet<ServicesWorkerVO>();
@@ -148,6 +150,7 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 		//response.setWorkers(serviceWorker);
 		response.setWorkers(servicesWorkerVOSet);
 		//response.setServiceCompanies(servicesWorkerVOSet);
+		LOGGER.debug("Ended findByServiceType");
 		return response;
 	}
 	

@@ -48,26 +48,26 @@ public class ServicesController {
 	@ResponseBody
 	public ServicesResponse getAllServices() {
 		//response.setJoin_url("https://zoom.us/j/123456789");
+		LOGGER.debug("Entered getAllServices");
 		ServicesResponse servicesResponse = new ServicesResponse();
 		try
 		{
-			System.out.println("inside getServices");
+			
 			List<Services> services = servicesService.getAllServices();
-
-			System.out.println("services =="+services);
 			servicesResponse.setServices(services);
 
 		}catch(Exception e){
-			System.out.println(e.getMessage());
-			e.printStackTrace(System.out);
+			LOGGER.error("Error while getting services");
 		}
+		LOGGER.debug("Ended getAllServices");
 		return servicesResponse;
 	}
 
 	@RequestMapping(value="/services/{serviceid}", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody	
-	public List<Customer> getWorkerByService(@PathVariable Integer serviceid) {		
+	public List<Customer> getWorkerByService(@PathVariable Integer serviceid) {
+		LOGGER.debug("Entered getWorkerByService by Id");
 		//public Set<CompanyService> getWorkerByService(@PathVariable Integer serviceid) {		
 		//return workerService.getWorkerByService(serviceid);
 		return customerService.findByServiceId(serviceid);
@@ -77,20 +77,18 @@ public class ServicesController {
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody	
 	//public List<Customer> getWorkerByService(@PathVariable String type) {		
-	public WorkerServiceResponse getWorkerByService(@PathVariable String type) {		
+	public WorkerServiceResponse getWorkerByService(@PathVariable String type) {
+		LOGGER.debug("Entered getWorkerByService by type");
 			//return workerService.getWorkerByServiceType(type);
 		return customerService.findByServiceType(type);
 			//return null;
 	}
 
-
-
-
 	@RequestMapping(value="/services/{type}/workers/{workerId}/rating", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody	
 	public WorkerRatingResponse  getWorkerByServiceType(@PathVariable Integer workerId) {
-		
+		LOGGER.debug("Entered getWorkerRating ");
 		return workerService.getWorkrRatingdByWorker(workerId);
 	}
 

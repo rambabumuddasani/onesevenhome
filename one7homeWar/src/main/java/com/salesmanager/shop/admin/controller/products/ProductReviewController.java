@@ -90,7 +90,7 @@ public class ProductReviewController {
 	@RequestMapping(value="/products/{productId}/reviews", method=RequestMethod.GET,produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ProductReviewResponse productReviews(@PathVariable Long productId) {
-         System.out.println("Entered productReviews method");
+		LOGGER.debug("Entered productReviews method");
 		//String sProductId = request.getParameter("productId");
 		ProductReviewResponse productReviewResponse = new ProductReviewResponse();
 		List<ProductReviewVO> productReviewResponseList =new ArrayList<ProductReviewVO>();		
@@ -99,8 +99,6 @@ public class ProductReviewController {
 
 			List<ProductReview> reviews = productReviewService.getByProductId(productId);
 			
-            System.out.println("Reviews"+reviews);
-            
 			for(ProductReview review : reviews) {
 				ProductReviewVO productReviewVO = new ProductReviewVO();
 				//productReviewVO.setId(productId);
@@ -127,13 +125,14 @@ public class ProductReviewController {
 			productService.update(dbProduct);*/
 			//productReviewResponse.setStatus(1);
 		} catch (Exception e) {			
-		    System.out.println("Error in retrieving Product Reviews");
-		}		
+		    LOGGER.error("Error in retrieving Product Reviews");
+		}	
+		LOGGER.debug("Ended productReviews method");
 		return productReviewResponse;
 	}
 	
     public Long getTotalRatingCount(List<ProductReview> reviews) {
-	
+	LOGGER.debug("Entered getTotalRatingCount");
 	Long totalRatingCount = 0l;
 	
 	Map<Double,Integer> ratingMap = new HashMap<Double , Integer> (5);
@@ -154,26 +153,26 @@ public class ProductReviewController {
 	 * avgRating = ((5*ratingMap.get(5))+(4*ratingMap.get(4))+(3*ratingMap.get(3))+(2*ratingMap.get(2))+(1*ratingMap.get(1))/(ratingMap.get(5)+ratingMap.get(4)+ratingMap.get(3)+ratingMap.get(2)+ratingMap.get(1));
 	 */
 	Set<Map.Entry<Double, Integer>> entrySet = ratingMap.entrySet();
-	System.out.println("ratingMap "+ratingMap);
+	
 	Double totalNumarater = 0d;
 	Long totalDenaminator = 0l;
 	for(Map.Entry<Double, Integer> eachEntry : entrySet){
 		totalNumarater += (eachEntry.getKey()*eachEntry.getValue());
 		totalDenaminator += eachEntry.getValue();
 	}
-	System.out.println(" totalNumarater "+totalNumarater);
-	System.out.println("totalDenaminator "+totalDenaminator);
+	
 	if(totalDenaminator == 0l){
 		return 0l;
 	}
     totalRatingCount = totalDenaminator;
+    LOGGER.debug("Ended getTotalRatingCount");
 	return totalRatingCount;
 	}
 
 
 
      public Double getAvgReview(List<ProductReview> reviews) {
-		
+		LOGGER.debug("Entered getAvgReview");
 		Double avgReview = 0d;
 		Map<Double,Integer> ratingMap = new HashMap<Double , Integer> (5);
 		
@@ -188,7 +187,7 @@ public class ProductReviewController {
 		}
 		
 		Set<Map.Entry<Double, Integer>> entrySet = ratingMap.entrySet();
-		System.out.println("ratingMap "+ratingMap);
+	
 		Double totalNumarater = 0d;
 		Double totalDenaminator = 0d;
 		for(Map.Entry<Double, Integer> eachEntry : entrySet){
@@ -201,6 +200,7 @@ public class ProductReviewController {
 			return 0d;
 		}
 	    avgReview = totalNumarater/totalDenaminator;
+	    LOGGER.debug("Entered getAvgReview");
 		return avgReview;
 	}
 
@@ -346,7 +346,7 @@ public class ProductReviewController {
 	@RequestMapping(value="/products/reviews/save", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ProductReviewSaveResponse saveProductReview(@RequestBody ProductReviewRequest productReviewReq) {
-		
+		LOGGER.debug("Saving product review");
 		ProductReviewSaveResponse  productReviewSaveResponse = new ProductReviewSaveResponse();
 		
 		try {
@@ -376,16 +376,17 @@ public class ProductReviewController {
 			productReview.setCustomer(customer);
 			productReviewService.save(productReview);
 			if(productReview.getId() == null) {
+				LOGGER.debug("Error in saving the Product review");
 				productReviewSaveResponse.setStatus("false");
 				productReviewSaveResponse.setMessage("Error in saving the Product review");		
 				return productReviewSaveResponse;
 			}
-			
+			LOGGER.debug("Product Review saved successfully");
 			productReviewSaveResponse.setStatus("true");
 		    productReviewSaveResponse.setMessage("Product Review saved successfully");		     
 		    //return  productReviewSaveResponse;
 		} catch (Exception e) {			
-			LOGGER.error("Error while saving productReview", e);
+			LOGGER.error("Error while saving productReview", e.getMessage());
 			productReviewSaveResponse.setStatus("false");
 			productReviewSaveResponse.setMessage("Error in saving the Product review");
 			return productReviewSaveResponse;

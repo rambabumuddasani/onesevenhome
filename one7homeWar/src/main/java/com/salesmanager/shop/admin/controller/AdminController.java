@@ -133,17 +133,19 @@ public class AdminController extends AbstractController {
 	@ResponseBody
 	public AdminUpdateStoreResponse updateMerchantStore(@RequestBody AdminUpdateStoreRequest adminUpdateStoreRequest) {
 	    
-		LOGGER.info("Entered updateMerchantStore method");
+		LOGGER.debug("Entered updateMerchantStore method");
 		AdminUpdateStoreResponse adminUpdateStoreResponse=new AdminUpdateStoreResponse();
 	    MerchantStore merchantStore=null;
 		try {
 			merchantStore = merchantStoreService.getByCode(adminUpdateStoreRequest.getStoreCode());
 			if(merchantStore==null) {
+				LOGGER.debug("Store is not found,unable to update");
 				adminUpdateStoreResponse.setErrorMessage("Store is not found,unable to update");
 				adminUpdateStoreResponse.setStatus(FALSE);
 				return adminUpdateStoreResponse;
 			}
 		} catch (ServiceException e) {
+			LOGGER.debug("Error in updating Store");
 			adminUpdateStoreResponse.setErrorMessage("Error in updating Store");
 			adminUpdateStoreResponse.setStatus(FALSE);
 			return adminUpdateStoreResponse;
@@ -164,6 +166,7 @@ public class AdminController extends AbstractController {
 			Country country = countryService.getCountryByCodeAndLang(adminUpdateStoreRequest.getStoreCountry(), language.getId());
 			storeCountry = country;
 		} catch (ServiceException e1) {
+			LOGGER.debug("Error in updating Store");
 			adminUpdateStoreResponse.setErrorMessage("Error in updating Store");
 			adminUpdateStoreResponse.setStatus(FALSE);
 			return adminUpdateStoreResponse;
@@ -173,15 +176,16 @@ public class AdminController extends AbstractController {
 	    try {
 			merchantStoreService.update(merchantStore);
 		} catch (ServiceException e) {
+			LOGGER.debug("Error in updating store");
 			e.printStackTrace();
 			adminUpdateStoreResponse.setErrorMessage("Error in updating store");
 			adminUpdateStoreResponse.setStatus(FALSE);
 			return adminUpdateStoreResponse;
 		}
-	        LOGGER.info("Store updated Successfully");;
+	        LOGGER.debug("Store updated");;
 	        adminUpdateStoreResponse.setSuccessMessage("Store updated successfully");
 	        adminUpdateStoreResponse.setStatus(TRUE);
-	        LOGGER.info("Ended updateMerchantStore method");
+	        LOGGER.debug("Ended updateMerchantStore method");
 	        return adminUpdateStoreResponse;
 	    
     }
@@ -191,7 +195,7 @@ public class AdminController extends AbstractController {
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public StoreInfoResponse getStoreInfo(HttpServletRequest request) {
-		LOGGER.info("Entered getStoreInfo method");
+		LOGGER.debug("Entered getStoreInfo method");
 		StoreInfoResponse storeInfoResponse=new StoreInfoResponse();
 		try {
 			//getting store
@@ -224,7 +228,8 @@ public class AdminController extends AbstractController {
 	        storeInfoResponse.setStoreInfo(storeInfo);
 	        
 		} catch (ServiceException e) {
-			e.printStackTrace();
+			LOGGER.error("Error while getting store info"+e.getMessage());
+		
 		}
 		LOGGER.info("Ended getStoreInfo method");
 		    return storeInfoResponse;
@@ -236,7 +241,7 @@ public class AdminController extends AbstractController {
 	@ResponseBody
     public EditUserAdminResponse updateAdmin(@RequestBody EditUserAdminRequest editUserAdminRequest)
         throws Exception {
-		
+		    LOGGER.debug("Entered updateAdmin");
 		    EditUserAdminResponse editUserAdminResponse = new EditUserAdminResponse();
 		    String stringId = editUserAdminRequest.getId();
 		    Long longId = Long.parseLong(stringId);
@@ -244,6 +249,7 @@ public class AdminController extends AbstractController {
 			User dbUser = userService.getById(longId);
 			// Checking admin null
 			if(dbUser==null) {
+				LOGGER.debug("Admin is null for this id: "+longId);
 				editUserAdminResponse.setErrorMessage("Admin is null for this id: "+longId);
 				editUserAdminResponse.setSucessMessage(FALSE);
 				return editUserAdminResponse;
@@ -259,7 +265,7 @@ public class AdminController extends AbstractController {
 			dbUser.setMerchantStore(store);
 			// Saving admin details
 			userService.saveOrUpdate(dbUser);
-			
+			LOGGER.debug("Admin profile updated");
 			editUserAdminResponse.setSucessMessage("Admin profile updated successfully");
 			editUserAdminResponse.setStatus(TRUE);
 			
@@ -272,6 +278,7 @@ public class AdminController extends AbstractController {
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public AdminListResponse getAdminList() throws Exception {
+		LOGGER.debug("Entered getAdminList");
 		AdminListResponse  adminListResponse = new AdminListResponse();
 		List<UserVO> userList = new ArrayList<UserVO>();
 		MerchantStore store = merchantStoreService.getByCode(MerchantStore.DEFAULT_STORE);
@@ -291,6 +298,7 @@ public class AdminController extends AbstractController {
 	    }
 	   
 	    adminListResponse.setAdminList(userList);
+	    LOGGER.debug("Ended getAdminList");
 		return adminListResponse;
 		
 	}
@@ -300,13 +308,14 @@ public class AdminController extends AbstractController {
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public UpdatePasswordResp changePassword(@RequestBody UpdatePasswordReq updatePasswordReq) throws Exception {
-		
+		LOGGER.info("Entered changePassword");
 		UpdatePasswordResp updatePasswordResp = new UpdatePasswordResp();
 		String stringId = updatePasswordReq.getId();
 		Long longId = Long.parseLong(stringId);
 		//User dbUser = userService.getById(longId);
 		User dbUser = userService.getByEmail(updatePasswordReq.getEmailAddress());
 		if(dbUser==null) {
+			LOGGER.debug("Admin is not exist for this emailaddress: "+updatePasswordReq.getEmailAddress());
 			updatePasswordResp.setErrorMessage("Admin is not exist for this emailaddress: "+updatePasswordReq.getEmailAddress());
 			updatePasswordResp.setStatus(FALSE);
 			return updatePasswordResp;
@@ -315,6 +324,7 @@ public class AdminController extends AbstractController {
 		String pass = passwordEncoder.encode(updatePasswordReq.getNewPassword());
 		dbUser.setAdminPassword(pass);
 		userService.update(dbUser);	
+		LOGGER.debug("Password updated");
 		updatePasswordResp.setSuccessMessage("Password updated successfully");
 		updatePasswordResp.setStatus(TRUE);
 		return updatePasswordResp;
@@ -324,13 +334,14 @@ public class AdminController extends AbstractController {
 	@RequestMapping(value="/admin/addOrRemove", method=RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public AddProductResp addProducts(@RequestBody AddProductReq addProductReq) throws Exception {
-		
+	public AddProductResp addOrRemoveProducts(@RequestBody AddProductReq addProductReq) throws Exception {
+		LOGGER.debug("Entered addOrRemoveProducts");
 		AddProductResp addProductResp = new AddProductResp();
 		String productId = addProductReq.getProductId();
 		Long longId = Long.parseLong(productId);
 	    Product dbProduct = productService.getByProductId(longId);
 	    if(dbProduct==null) {
+	    	LOGGER.debug("Product not found");
 	    	addProductResp.setErrorMessage("Product is not present");
 	    }
 	    MerchantStore store=merchantStoreService.getMerchantStore(MerchantStore.DEFAULT_STORE);
@@ -420,6 +431,7 @@ public class AdminController extends AbstractController {
 		}
 		
 	  }
+	    LOGGER.debug("Ended addOrRemoveProducts");
 	    return addProductResp;
 	}
 	
@@ -437,7 +449,7 @@ public class AdminController extends AbstractController {
 	@ResponseBody
 	public PaginatedResponse getProductForCatAndTitle(@PathVariable String categoryCode,@PathVariable String title,
 			@RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
-		LOGGER.info("Entered getProductForCatAndTitle method ");
+		LOGGER.debug("Entered getProductForCatAndTitle method ");
 		
 		AdminProductResponse adminProductResponse = new AdminProductResponse();
 		PaginatedResponse paginatedResponse = new PaginatedResponse();
@@ -461,7 +473,7 @@ public class AdminController extends AbstractController {
     	paginatedResponse.setPaginationData(paginaionData);
 		if(responses == null || responses.isEmpty() || responses.size() < paginaionData.getCountByPage()){
 			paginatedResponse.setResponseData(responses);
-			LOGGER.info("Ended getProductForCatAndTitle method ");
+			LOGGER.debug("Ended getProductForCatAndTitle method ");
 			return paginatedResponse;
 		}
     	List<AdminProductResponse> paginatedResponses = responses.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
@@ -473,6 +485,7 @@ public class AdminController extends AbstractController {
 	public List<AdminProductResponse> invokeProductsData(Map<Long,Product> todaysDealsMap,
 			String categoryId,List<AdminProductResponse> responses,
 			AdminProductResponse adminProductResponse,List<Product> tdProducts,String title) throws Exception {
+		LOGGER.debug("Entered invokeProductsData");
 		todaysDealsMap = new HashMap<Long, Product>();
 		List<Product> dbProducts = productService.getProductsListByCategory(categoryId);
 		for(Product tdproduct:tdProducts){
@@ -486,10 +499,11 @@ public class AdminController extends AbstractController {
 			}
 			responses.add(adminProductResponse);
 		}
+		LOGGER.debug("Ended invokeProductsData");
 		return responses;
 	}
 public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecial,String title) throws Exception {
-		
+		LOGGER.debug("Entered getProductDetails");
 		AdminProductResponse adminProductResponse = new AdminProductResponse();
 		adminProductResponse.setProductId(dbProduct.getId());
 		MerchantStore store=merchantStoreService.getMerchantStore(MerchantStore.DEFAULT_STORE);
@@ -604,11 +618,12 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
 				adminProductResponse.setVendorName(description.getName());
 				adminProductResponse.setVendorLocation(description.getTitle());
 			}*/
-			
+		LOGGER.debug("Ended getProductDetails");	
 		return adminProductResponse;
 	}
 
     private String getDiscountPercentage(ProductPrice productPrice){
+    LOGGER.debug("Entered getDiscountPercentage");
 	BigDecimal discount = new BigDecimal(0);
 	DecimalFormat df = new DecimalFormat();
 	df.setMaximumFractionDigits(2); //Sets the maximum number of digits after the decimal point
@@ -628,7 +643,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public AdminVendorProductResponse getAdminVendorProducts(@PathVariable String vendorId) throws Exception {
-    	
+    	LOGGER.debug("Entered getAdminVendorProducts");
     	AdminVendorProductResponse adminVendorProductResponse = new AdminVendorProductResponse();
     	Long  vId = Long.parseLong(vendorId);
     	List<VendorProduct> vendorProducts = vendorProductService.findProductsByVendor(vId);
@@ -648,6 +663,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     	}
     	
     	adminVendorProductResponse.setVendorProducts(vproductList);
+    	LOGGER.debug("Ended getAdminVendorProducts");
     	return adminVendorProductResponse;
     	
     }
@@ -686,7 +702,8 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     // get vendor products with pagination
     @RequestMapping(value="/admin/vendor/products", method = RequestMethod.GET)
 	@ResponseBody
-	public PaginatedResponse getVendorProductsPagination(@RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+	public PaginatedResponse getVendorProducts(@RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+    	LOGGER.debug("Entered getVendorProducts");
     	PaginatedResponse paginatedResponse = new PaginatedResponse();
 
     	// Get vendor products are added by vendors to product list
@@ -724,6 +741,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
 		}
     	List<VendorProductVO> paginatedResponses = vproductList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
     	paginatedResponse.setResponseData(paginatedResponses);
+    	LOGGER.debug("Ended getVendorProducts");
 		return paginatedResponse;
     }
     
@@ -731,7 +749,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     @RequestMapping(value="/admin/products/activate", method = RequestMethod.POST)
 	@ResponseBody
 	public ActivateProductResponse adminApproveProducts(@RequestBody ActivateProductRequest activateProductRequest) throws Exception {
-    	
+    	LOGGER.debug("Entered adminApproveProducts");
     	ActivateProductResponse activateProductResponse = new ActivateProductResponse();
     	Long vendorProductId = activateProductRequest.getVendorProductId();
     	
@@ -752,6 +770,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     		activateProductResponse.setErrorMesg("Declined");
     		activateProductResponse.setStatus("false");
     	}
+    	LOGGER.debug("Ended adminApproveProducts");
 	    return activateProductResponse;
     	
     }
@@ -763,7 +782,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public AdminDealOfDayResponse adminDealOfDay(@RequestBody AdminDealOfDayRequest adminDealOfDayReq) throws Exception {
-    	
+    	LOGGER.debug("Entered adminDealOfDay");
     	AdminDealOfDayResponse adminDealOfDayResponse = new AdminDealOfDayResponse();
     	
     	// Get the product details based on the AdminDeal of the day request 
@@ -779,6 +798,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     	Product dbProduct = productService.getByProductId(productId);
     	
     	if(dbProduct==null) {
+    		LOGGER.debug("Deal Of Day product is not found");
     		adminDealOfDayResponse.setErrorMesg("Deal Of Day product is not found");
     		adminDealOfDayResponse.setStatus("false");
     		return adminDealOfDayResponse;
@@ -841,6 +861,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
 		}
 			
      }
+	    LOGGER.debug("Ended adminDealOfDay");
 		return adminDealOfDayResponse;
   }
     
@@ -851,7 +872,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
 	@ResponseBody
 	public AdminTodaysDeals getDeals(@RequestBody AdminDealRequest adminDealRequest, @RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
 		
-		
+		LOGGER.debug("Entered getDeals");
 		
 		AdminTodaysDeals todaysDeals = new AdminTodaysDeals();
 		AdminDealProductResponse productResponse = new AdminDealProductResponse();
@@ -897,14 +918,14 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     	todaysDeals.setPaginationData(paginaionData);
 		List<AdminDealProductResponse> paginatedProdResponses = responses.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
 		todaysDeals.setTodaysDealsData(paginatedProdResponses);
-		
+		LOGGER.debug("Ended getDeals");
         return todaysDeals;
     }   
 	
    
 public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSpecial) throws Exception {
 		
-		
+		LOGGER.debug("Entered getProductDetails");
 		
 		AdminDealProductResponse productResponse = new AdminDealProductResponse();
 		try {
@@ -951,9 +972,10 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 			productResponse.setProductName(dbProduct.getProductDescription().getName());
 			
 		}catch(Exception e){
-			//System.out.println("product details ::"+e.getMessage());
+			LOGGER.error("Error while getting product details"+e.getMessage());
 			productResponse.setErrorMesg("Error while getting product details"+e.getMessage());
 		}
+		LOGGER.debug("Ended getProductDetails");
 		return productResponse;
 	}
     /*
@@ -963,7 +985,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     @RequestMapping(value="/admin/deals/updateorremove", method = RequestMethod.POST)
     @ResponseBody
     public DealUpdateOrRemoveResponse adminDealUpdateOrRemove(@RequestBody DealUpdateOrRemoveRequest dealUpdateOrRemoveRequest) throws Exception {
-    
+    LOGGER.debug("Entered adminDealUpdateOrRemove");
 	DealUpdateOrRemoveResponse dealUpdateOrRemoveResponse = new DealUpdateOrRemoveResponse();
 	Long productId = dealUpdateOrRemoveRequest.getProductId();
 	
@@ -1020,6 +1042,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	}
 		
  }
+    LOGGER.debug("Ended adminDealUpdateOrRemove");
      return dealUpdateOrRemoveResponse;
 
 }
@@ -1071,7 +1094,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public AdminSubCatImgResponse getAllSubCatImages() throws Exception {
-		
+		LOGGER.debug("Entered getAllSubCatImages");
     	AdminSubCatImgResponse adminSubCatImgResponse = new AdminSubCatImgResponse();    	
 		Map<String,List<SubCategoryImageVO>> parentMap = new HashMap<String, List<SubCategoryImageVO>>();
 
@@ -1108,6 +1131,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
  	    }
         // setting subcatimges to response
         adminSubCatImgResponse.setSubCatagoryImgsObjByCatagory(parentMap);
+        LOGGER.debug("Entered getAllSubCatImages");
     	return adminSubCatImgResponse;
     }
    /* @RequestMapping(value="/updateSubCatImage", method = RequestMethod.POST)
@@ -1160,7 +1184,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     @RequestMapping(value="/deleteSubCatImage/{subCategoryId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public DeleteSubCatImgResponse deleteSubCatImage(@PathVariable String subCategoryId) throws Exception {
-		
+		LOGGER.debug("Entered deleteSubCatImage");
 		DeleteSubCatImgResponse deleteSubCatImgResponse = new DeleteSubCatImgResponse();
     	Long subCategoryIdLong = new Long(subCategoryId);
     	SubCategoryImage subCategoryImage = subCategoryService.getByCategoryId(subCategoryIdLong);
@@ -1171,8 +1195,10 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	}
     	storageService.deleteFile(subCategoryImage.getSubCategoryImageURL()); // delete image
     	subCategoryService.delete(subCategoryImage);
+    	LOGGER.debug("Sub category image deleted");
     	deleteSubCatImgResponse.setSuccessMessage("SubCategoryImage with id "+subCategoryIdLong+" deleted successfully");
     	deleteSubCatImgResponse.setStatus(TRUE);
+    	LOGGER.debug("Ended deleteSubCatImage");
     	return deleteSubCatImgResponse;
     	
     }
@@ -1181,7 +1207,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	@ResponseBody
 	public SubCatImageResponse uploadOrUpdateSubCatImage(@RequestPart("subCatImageRequest") String subCatImageRequestStr,
 			@RequestPart("file") MultipartFile subCatImage) throws Exception {
-    	
+    	LOGGER.debug("Entered uploadOrUpdateSubCatImage ");
     	SubCatImageRequest subCatImageRequest = new ObjectMapper().readValue(subCatImageRequestStr, SubCatImageRequest.class);
     	SubCatImageResponse subCatImageResponse = new SubCatImageResponse();
     	Category subCategory = categoryService.getByCategoryCode(subCatImageRequest.getSubCategoryName());
@@ -1189,10 +1215,11 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	// Storing uploaded or updated image 
     	if(subCatImage.getSize() != 0) {
     		try{
+    			LOGGER.debug("Storing Sub category image");
     			fileName = storageService.store(subCatImage,"subcategoryimg");
     			System.out.println("fileName "+fileName);
     		}catch(StorageException se){
-    			System.out.println("StoreException occured, do wee need continue "+se);
+    			LOGGER.error("StoreException occured"+se.getMessage());
     			subCatImageResponse.setErrorMessage("Failed while storing image");
     			subCatImageResponse.setStatus(FALSE);
     			return subCatImageResponse;
@@ -1210,7 +1237,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 				subCategoryImageObj.setCategory(subCategory);
 			
 				subCategoryService.save(subCategoryImageObj);
-				
+				LOGGER.debug("SubCategory Image uploaded");
 				subCatImageResponse.setSubCategoryId(subCategory.getId());
 				subCatImageResponse.setSubCatImgURL(fileName);
 				subCatImageResponse.setSuccessMessage("SubCategory Image uploaded successfully");
@@ -1220,7 +1247,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     				subCategoryImage.setCategory(subCategory);
     				
     				subCategoryService.update(subCategoryImage);
-    			
+    			    LOGGER.debug("SubCategory Image updated");
 				    subCatImageResponse.setSubCategoryId(subCategory.getId());
 				    subCatImageResponse.setSubCatImgURL(fileName);
 				    subCatImageResponse.setSuccessMessage("SubCategory Image updated successfully");
@@ -1228,22 +1255,22 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     			}	
     		}
 		catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("Error while storing sub category image");
 			if(StringUtils.isEmpty(fileName)){
 				storageService.deleteFile(fileName); // delete image
 			}
 			subCatImageResponse.setStatus(FALSE);
 			subCatImageResponse.setErrorMessage("Error while storing sub category image");
 		}
-    
+        LOGGER.debug("Ended uploadOrUpdateSubCatImage");
 		return subCatImageResponse;
     }
    
     // Save Testimonial
     @RequestMapping(value="/testimonial/save", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
   	@ResponseBody
-  	public TestimonialResponse saveTestimonialReview(@RequestBody TestimonialRequest testimonialRequest) throws Exception {
-    	
+  	public TestimonialResponse saveTestimonial(@RequestBody TestimonialRequest testimonialRequest) throws Exception {
+    	LOGGER.debug("Entered saveTestimonial");
     	TestimonialResponse testimonialResponse = new TestimonialResponse();
     	if(StringUtils.isEmpty(testimonialRequest.getTestmonialDescription())){
     		testimonialResponse.setErrorMessage("Feedback cannot be empty");
@@ -1258,13 +1285,16 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	customerTestimonial.setEnable(false);
     	customerTestmonialService.save(customerTestimonial);
     	testimonialResponse.setSuccessMessage("Feedback Saved successfully");
+    	LOGGER.debug("Testimonial saved");
     	testimonialResponse.setStatus(TRUE);
+    	LOGGER.debug("Ended saveTestimonial");
     	return testimonialResponse;
     }
     @RequestMapping(value="/getAllTestimonials", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public AdminTestimonialResponse getAllTestimonials() throws Exception {
+    	LOGGER.debug("Entered getAllTestimonials");
     	AdminTestimonialResponse adminTestimonialResponse = new AdminTestimonialResponse();
     	List<CustomerTestimonialVO>  customerTestimonialVOList = new ArrayList<CustomerTestimonialVO>();
     	List<CustomerTestimonial> customerTestimonials = customerTestmonialService.getAllTestimonials();
@@ -1279,6 +1309,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     		customerTestimonialVOList.add(customerTestimonialVO);
     	}
     	adminTestimonialResponse.setCustomerTestimonials(customerTestimonialVOList);
+    	LOGGER.debug("Ended getAllTestimonials");
     	return adminTestimonialResponse;
     	
     }
@@ -1287,7 +1318,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ApproveTestimonialResponse approveTestimonial(@RequestBody ApproveTestimonialRequest approveTestimonialRequest) throws Exception {
-		
+		LOGGER.debug("Entered approveTestimonial");
 		ApproveTestimonialResponse approveTestimonialResponse = new ApproveTestimonialResponse();
 		Long testimonialIdLong = approveTestimonialRequest.getTestimonialId();
 		CustomerTestimonial customerTestimonial = customerTestmonialService.getTestimonialById(testimonialIdLong);
@@ -1299,14 +1330,16 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		}
 		try {
 			customerTestmonialService.update(customerTestimonial);
-			approveTestimonialResponse.setSuccessMessage("Testimonial updated successfully");
+			LOGGER.debug("Testimonial approved");
+			approveTestimonialResponse.setSuccessMessage("Testimonial approved successfully");
 			approveTestimonialResponse.setStatus(TRUE);
 		} catch (Exception e) {
-			e.printStackTrace();
-			approveTestimonialResponse.setErrorMessage("Error in updating Testimonial");
+			LOGGER.error("Error in updating Testimonial");
+			approveTestimonialResponse.setErrorMessage("Error in approving Testimonial");
 			approveTestimonialResponse.setStatus(FALSE);
 			return approveTestimonialResponse;
 		}
+		LOGGER.debug("Ended approveTestimonial");
     	return approveTestimonialResponse;
     } 
     // Retrieve Admin Approved customer testimonials
@@ -1314,6 +1347,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public AdminApproveTestimonialResponse getAdminApproveTestimonials() {
+    	LOGGER.debug("Entered getAdminApproveTestimonials");
     	AdminApproveTestimonialResponse adminApproveTestimonialResponse = new AdminApproveTestimonialResponse();
     	List<AdminApproveTestimonialVO> adminApproveTestimonialVOList = new ArrayList<AdminApproveTestimonialVO>();
     	List<CustomerTestimonial> approvedTestimonials = customerTestmonialService.getApprovedTestimonial();
@@ -1328,6 +1362,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     		adminApproveTestimonialVOList.add(adminApproveTestimonialVO);
     	}
     	adminApproveTestimonialResponse.setApprovedTestimonials(adminApproveTestimonialVOList);
+    	LOGGER.debug("Ended getAdminApproveTestimonials");
     	return adminApproveTestimonialResponse;	
     }
 }

@@ -488,7 +488,7 @@ public class CustomerRegistrationController extends AbstractController {
     public CustomerResponse updateCustomer(@RequestBody CustomerRequest customerRequest)
         throws Exception
     {	
-		System.out.println("customer ");
+		LOGGER.debug("Entered updateCustomer ");
     	CustomerResponse customerResponse = new CustomerResponse();
         MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");  //i will come back here
 
@@ -529,9 +529,10 @@ public class CustomerRegistrationController extends AbstractController {
         }
         Language language = languageService.getByCode( Constants.DEFAULT_LANGUAGE );
         customerFacade.updateAddress(customer, merchantStore, address, language);
-      
+        LOGGER.debug("Customer profile updated successfully");
         customerResponse.setSuccessMessage("Customer profile updated successfully");
         customerResponse.setStatus(TRUE);
+        LOGGER.debug("Ended updateCustomer");
         return customerResponse;         
     }
 	
@@ -598,11 +599,12 @@ public class CustomerRegistrationController extends AbstractController {
    // public CustomerResponse registerCustomer(@RequestBody VendorRequest vendorRequest) throws Exception {
     public CustomerResponse registerVendor(@RequestPart("vendorRequest") String vendorRequestStr,
     		@RequestPart("file") MultipartFile vendorCertificate) throws Exception {
-
+        LOGGER.debug("Entered registerVendor");
 		VendorRequest vendorRequest = new ObjectMapper().readValue(vendorRequestStr, VendorRequest.class);
     	CustomerResponse customerResponse = new CustomerResponse();
         customerResponse.setStatus("false");
         if(!isTermsAndConditionsAccepted(vendorRequest.getTermsAndConditions())){
+        	LOGGER.debug("Accept terms and conditions");
             customerResponse.setErrorMessage("Please accept Terms & Conditions ");
             return customerResponse;        	
         }
@@ -666,10 +668,11 @@ public class CustomerRegistrationController extends AbstractController {
     	String certFileName = "";
     	if(vendorCertificate.getSize() != 0) {
     		try{
+    			LOGGER.debug("Storing vendor certificate");
     			certFileName = storageService.store(vendorCertificate);
     			System.out.println("certFileName "+certFileName);
     		}catch(StorageException se){
-    			System.out.println("StoreException occured, do wee need continue "+se);
+    			LOGGER.error("StoreException occured"+se.getMessage());
     		}
         	vendorAttrs.setVendorAuthCert(certFileName);
     	}
@@ -760,6 +763,7 @@ public class CustomerRegistrationController extends AbstractController {
 
 		
 		emailService.sendHtmlEmail(merchantStore, email);
+		LOGGER.debug("Ended registerVendor");
 		return customerResponse;         
     }
 
@@ -772,20 +776,22 @@ public class CustomerRegistrationController extends AbstractController {
     public CustomerResponse acvitateUser(@RequestBody CustomerRequest customerRequest)
         throws Exception
     {	
-		System.out.println("customer activate");
+		LOGGER.debug("Entered Customer activate");
 		CustomerResponse customerResponse = new CustomerResponse();
 		MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT"); 
 		final Locale locale  = new Locale("en");
         Customer customer = customerFacade.getCustomerByUserName(customerRequest.getEmail(), merchantStore );
         if ( customer == null )
         {
+        	LOGGER.debug("User not available");
         	customerResponse.setErrorMessage("User not available");
         	return customerResponse;
         }
 		customer.setActivated("1");
 		customerFacade.updateCustomer(customer);
+		LOGGER.debug("User activated");
 		customerResponse.setSuccessMessage("User activated");
-		
+		LOGGER.debug("Ended Customer activate");
 		return customerResponse;
     }
 
@@ -796,9 +802,10 @@ public class CustomerRegistrationController extends AbstractController {
     public ForgotPwdResponse resetPassword(@RequestBody ForgotPwdRequest forgotPwdRequest)
         throws Exception
     {	
-		System.out.println("customer activate");
+		LOGGER.debug("Entered resetPassword");
 		ForgotPwdResponse forgotPwdResponse = new ForgotPwdResponse();
 		if(("").equals(forgotPwdRequest.getForgotPwdURL())){
+			LOGGER.debug("Forgot password link not available");
         	forgotPwdResponse.setErrorMessage("Forgot password link not available");
         	return forgotPwdResponse;
 		}
@@ -807,6 +814,7 @@ public class CustomerRegistrationController extends AbstractController {
         Customer customer = customerFacade.getCustomerByUserName(forgotPwdRequest.getEmail(), merchantStore );
         if ( customer == null )
         {
+        	LOGGER.debug("Email not available");
         	forgotPwdResponse.setErrorMessage("Email not available");
         	return forgotPwdResponse;
         }
@@ -841,9 +849,9 @@ public class CustomerRegistrationController extends AbstractController {
 
 		
 		emailService.sendHtmlEmail(merchantStore, email);
-		
+		LOGGER.debug("Reset password email sent to the user");
 		forgotPwdResponse.setSuccessMessage("Reset password email sent to the user");
-
+   
 		return forgotPwdResponse;
     }
 
@@ -853,9 +861,10 @@ public class CustomerRegistrationController extends AbstractController {
     public ForgotPwdResponse updatePassword(@RequestBody ForgotPwdRequest forgotPwdRequest)
         throws Exception
     {	
-		System.out.println("customer activate");
+		LOGGER.debug("Entered updatePassword");
 		ForgotPwdResponse forgotPwdResponse = new ForgotPwdResponse();
 		if(("").equals(forgotPwdRequest.getOfid())){
+			LOGGER.debug("Invalid update password request");
         	forgotPwdResponse.setErrorMessage("Invalid update password request");
         	return forgotPwdResponse;
 		}
@@ -864,18 +873,21 @@ public class CustomerRegistrationController extends AbstractController {
         Customer customer = customerFacade.getCustomerByUserName(forgotPwdRequest.getEmail(), merchantStore );
         if ( customer == null )
         {
+        	LOGGER.debug("Email not available");
         	forgotPwdResponse.setErrorMessage("Email not available");
         	return forgotPwdResponse;
         }
         
         if ( !forgotPwdRequest.getOfid().equals(customer.getOfid()) )
         {
+        	LOGGER.debug("Invalid update password request");
         	forgotPwdResponse.setErrorMessage("Invalid update password request");
         	return forgotPwdResponse;
         }
 
         if ( !forgotPwdRequest.getNewPassword().equals(forgotPwdRequest.getConfirmPassword()) )
         {
+        	LOGGER.debug("New and Confirm passwords are not matching");
         	forgotPwdResponse.setErrorMessage("New and Confirm passwords are not matching");
         	return forgotPwdResponse;
         }
@@ -905,7 +917,7 @@ public class CustomerRegistrationController extends AbstractController {
 
 		
 		emailService.sendHtmlEmail(merchantStore, email);
-		
+		LOGGER.debug("Password update success. Update password email sent to the user");
 		forgotPwdResponse.setSuccessMessage("Password update success. Update password email sent to the user");
 
 		return forgotPwdResponse;
@@ -914,7 +926,7 @@ public class CustomerRegistrationController extends AbstractController {
 	@RequestMapping(value="/getUser/{customerId}", method = RequestMethod.GET,produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public CustomerDetailsResponse getUser(@PathVariable String customerId) {
-		
+		LOGGER.debug("Entered getUser");
 		Customer customer = customerService.getById(Long.parseLong(customerId));
 		CustomerDetailsResponse customerDetailsResponse = new CustomerDetailsResponse();
 		
@@ -966,6 +978,7 @@ public class CustomerRegistrationController extends AbstractController {
 			}
 
 		    customerDetailsResponse.setCustomerDetails(custDetails);
+		    LOGGER.debug("Retrieved customer details");
 		    return customerDetailsResponse;
 	}
 		else {
@@ -988,6 +1001,7 @@ public class CustomerRegistrationController extends AbstractController {
 			vendorDetails.setVendorTIN(customer.getVendorAttrs().getVendorTinNumber());
 			vendorDetails.setUserProfile(customer.getUserProfile());
 			customerDetailsResponse.setVendorDetails(vendorDetails);
+			LOGGER.debug("Retrieved vendor details");
 			return customerDetailsResponse;
 		}
 		//return customeDetailsResponse;
@@ -1000,7 +1014,7 @@ public class CustomerRegistrationController extends AbstractController {
     public CustomerResponse registerCustomer(@RequestBody CustomerRequest customerRequest)
         throws Exception
     {	
-		System.out.println("customer ");
+		LOGGER.debug("Entered registerCustomer");
     	CustomerResponse customerResponse = new CustomerResponse();
     	SecuredShopPersistableCustomer customer = new SecuredShopPersistableCustomer();
     	customer.setEmailAddress(customerRequest.getEmail());
@@ -1039,9 +1053,9 @@ public class CustomerRegistrationController extends AbstractController {
     	customer.setCustomerType("0");
     	
     	final Locale locale  = new Locale("en");
-    	System.out.println("Entered registration");
+    	LOGGER.debug("Entered registration");
         MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");  //i will come back here
-        System.out.println("merchantStore "+merchantStore);
+        
         //Language language = super.getLanguage(request);
         Language language = languageService.getByCode( Constants.DEFAULT_LANGUAGE );
         String userName = null;
@@ -1083,7 +1097,7 @@ public class CustomerRegistrationController extends AbstractController {
         	customer.setActivated("0");
         	customer.setClearPassword(password);
         	customerData = customerFacade.registerCustomer( customer, merchantStore, language );
-            System.out.println("customerData is "+customerData);
+           
         }       catch ( Exception e )
         {
             LOGGER.error( "Error while registering customer.. ", e);
@@ -1120,7 +1134,7 @@ public class CustomerRegistrationController extends AbstractController {
 		
 		emailService.sendHtmlEmail(merchantStore, email);
         
-        
+        LOGGER.debug("Ended registerCustomer");
         return customerResponse;         
     }
 	
@@ -1128,7 +1142,7 @@ public class CustomerRegistrationController extends AbstractController {
 	@ResponseBody
 	public CustomerResponse updateVendor(@RequestPart("vendorRequest") String vendorRequestStr,
     		@RequestPart("file") MultipartFile[] uploadedFiles) throws Exception {
-		System.out.println("customer ");
+		LOGGER.debug("Updating vendor");
 		VendorRequest vendorRequest = new ObjectMapper().readValue(vendorRequestStr, VendorRequest.class);
     	CustomerResponse customerResponse = new CustomerResponse();
         MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");  //i will come back here
@@ -1139,6 +1153,7 @@ public class CustomerRegistrationController extends AbstractController {
         {
         		customer	= customerFacade.getCustomerByUserName(vendorRequest.getEmail(), merchantStore );
         		if(customer == null){
+        			LOGGER.debug("Vendor is not exist, update is not possible");
         			customerResponse.setErrorMessage("Vendor is not exist, update is not possible ");
         			return customerResponse;
         		}
@@ -1201,6 +1216,7 @@ public class CustomerRegistrationController extends AbstractController {
         
         try {
         customerFacade.updateCustomer(customer);
+        LOGGER.debug("Vendor Updated");
         }catch(Exception e) {
         	storageService.deleteFile(certFileName);
         	storageService.deleteFile(userProfile);
@@ -1210,6 +1226,7 @@ public class CustomerRegistrationController extends AbstractController {
         }
         customerResponse.setSuccessMessage("Vendor profile updated successfully");
         customerResponse.setStatus(TRUE);
+        LOGGER.debug("Ended updateVendor");
         return customerResponse; 
 	}
 
@@ -1217,11 +1234,11 @@ public class CustomerRegistrationController extends AbstractController {
 		String filePath = ""; 
 		if (!file.isEmpty()) {
 			String fileName = file.getOriginalFilename();
-			System.out.println("fileName "+fileName);
+			LOGGER.debug("fileName "+fileName);
 			try {	
 				filePath = storageService.store(file,tempPath);
 			}catch(StorageException se){
-				System.out.println("StoreException occured, do wee need continue "+se);
+				LOGGER.error("StoreException occured"+se);
 				throw se;
 			}
 		}
@@ -1233,7 +1250,7 @@ public class CustomerRegistrationController extends AbstractController {
     //public CustomerResponse registerServices(@RequestBody ServicesRequest servicesRequest) throws Exception {
     public CustomerResponse registerServices(@RequestPart("vendorRequest") String serviceRequestStr,
     		@RequestPart("file") MultipartFile vendorCertificate) throws Exception {
-
+        LOGGER.debug("Entered registerServices");
     	ServicesRequest servicesRequest = new ObjectMapper().readValue(serviceRequestStr, ServicesRequest.class);
     	CustomerResponse customerResponse = new CustomerResponse();
         customerResponse.setStatus("false");
@@ -1308,9 +1325,9 @@ public class CustomerRegistrationController extends AbstractController {
     	if(vendorCertificate.getSize() != 0) {
     		try{
     			certFileName = storageService.store(vendorCertificate,"service");
-    			System.out.println("certFileName "+certFileName);
+    			LOGGER.debug("certFileName "+certFileName);
     		}catch(StorageException se){
-    			System.out.println("StoreException occured, do wee need continue "+se);
+    			LOGGER.error("StoreException occured"+se.getMessage());
     		}
         	vendorAttrs.setVendorAuthCert(certFileName);
     	}
@@ -1354,7 +1371,7 @@ public class CustomerRegistrationController extends AbstractController {
         	return customerResponse;
         }
 
-        System.out.println("userName "+userName+" password "+password);
+    
         @SuppressWarnings( "unused" )
         CustomerEntity customerData = null;
         try
@@ -1367,7 +1384,7 @@ public class CustomerRegistrationController extends AbstractController {
             for(Integer serviceId:serviceIds){
             	Services services = servicesService.getById(serviceId);
             	if(services != null){
-            		System.out.println("service id =="+services.getServiceType());
+            		LOGGER.debug("service id =="+services.getServiceType());
             		servicesList.add(services);
             		
             	}
@@ -1376,7 +1393,7 @@ public class CustomerRegistrationController extends AbstractController {
             if(servicesList.size() > 0)
             	customer.setServices(servicesList);
             customerData = customerFacade.registerCustomer( customer, merchantStore, language );
-            System.out.println("customerData is "+customerData);
+            
         } catch ( Exception e )
         {	/// if any exception raised during creation of customer we have to delete the certificate
         	//storageService.deleteFile(certFileName);
@@ -1385,7 +1402,7 @@ public class CustomerRegistrationController extends AbstractController {
              return customerResponse;
         }  
          
-       
+        LOGGER.debug("Vendor registration successful");
         customerResponse.setSuccessMessage("Vendor registration successfull");
         customerResponse.setStatus(TRUE);
        
@@ -1414,6 +1431,8 @@ public class CustomerRegistrationController extends AbstractController {
 
 		
 		emailService.sendHtmlEmail(merchantStore, email);
+		LOGGER.debug("Email sent successful");
+	
 		return customerResponse;         
     }
 

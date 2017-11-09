@@ -275,17 +275,20 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 		
 		super.delete(product);
 		searchService.deleteIndex(product.getMerchantStore(), product);
+		LOGGER.debug("Product deleted");
 		
 	}
 	
 	@Override
 	public void create(Product product) throws ServiceException {
+		LOGGER.debug("Creating product");
 		this.saveOrUpdate(product);
 		searchService.index(product.getMerchantStore(), product);
 	}
 	
 	@Override
 	public void update(Product product) throws ServiceException {
+		LOGGER.debug("Updating product");
 		this.saveOrUpdate(product);
 		searchService.index(product.getMerchantStore(), product);
 	}
@@ -362,18 +365,19 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 
 	@Override
 	public List<Product> getProductsListByFiltersAndPrice(String categoryCode,List<Long> filterIds, BigDecimal minPrice, BigDecimal maxPrice,Double productRating) {
-		
+		LOGGER.debug("Fetching products based on price,filters and rating");
 		return productRepository.findProductsByFiltersAndPrice(categoryCode,filterIds,minPrice,maxPrice,productRating);
 	}
 
 	@Override
 	public List<Product> getDealOfDay(Date startDate, Date endDate, String status) {
-		// TODO Auto-generated method stub
+		LOGGER.debug("Fetching dealofday basedd on start date, end date and status");
 		return productRepository.findDealOfDay(startDate,endDate,status);
 	}
 
 	@Override
 	public List<Product> getTodaysDeals(Date date) {
+		LOGGER.debug("Retrieving deals");
 		// Retrieves Deals for the particular date
 		return productRepository.findTodayDeals(date);
 	}
@@ -381,12 +385,13 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 	@Override
 	public List<Product> getAdminTodaysDeals() {
 		// Retrieves Deals from current date
+		LOGGER.debug("Retrieving deals");
 		return productRepository.getAdminTodaysDeals();
 	}
 
 	@Override
 	public List<Product> getAllDealOfDay(String columnName, String columnValue) {
-		// TODO Auto-generated method stub
+		LOGGER.debug("Retrieving all deal of day products");
 		return productRepository.getAllDealOfDay(columnName,columnValue);
 	}
 

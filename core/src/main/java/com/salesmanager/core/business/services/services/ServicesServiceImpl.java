@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.salesmanager.core.business.exception.ServiceException;
@@ -15,6 +17,8 @@ import com.salesmanager.core.model.services.Services;
 @Service("services")
 public class ServicesServiceImpl extends SalesManagerEntityServiceImpl<Integer, Services> 
 		implements ServicesService {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(ServicesServiceImpl.class);
 	
 	private ServicesRepository servicesRepository;
 
@@ -48,10 +52,10 @@ public class ServicesServiceImpl extends SalesManagerEntityServiceImpl<Integer, 
 	@Override
 	public List<Services> getAllServices() throws ServiceException {
 		try {
-			System.out.println("invoking repo method ...");
+			LOGGER.debug("invoking repo method ...");
 			List<Services> services = new ArrayList<Services>();
 			services = servicesRepository.findAll();
-			System.out.println("services in impl ..."+services);
+			
 			return services;
 		} catch (Exception e) {
 			throw new ServiceException(e);

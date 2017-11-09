@@ -80,13 +80,14 @@ public class MerchantStoreController {
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public MerchantStoreResponse getMerchantStore() {
+		LOGGER.debug("Entered getMerchantStore");
 	    MerchantStoreResponse merchantStoreResponse=new MerchantStoreResponse();
 		
 	
 		try {
 			
 			MerchantStore merchants=merchantStoreService.getMerchantStore(MerchantStore.DEFAULT_STORE);
-	        System.out.println("merchants="+merchants);
+	        
 	        System.out.println("merchants.getStoreaddress()="+merchants.getStoreaddress());
 			merchantStoreResponse.setPhone(merchants.getStorephone());
 			merchantStoreResponse.seteMail(merchants.getStoreEmailAddress());
@@ -98,9 +99,10 @@ public class MerchantStoreController {
 			
 		    
 		} catch (ServiceException e) {
-			// TODO Auto-generated catch block
+			LOGGER.error("Error while getting contact details");
 			e.printStackTrace();
 		}
+		LOGGER.debug("Ended getMerchantStore");
 		return merchantStoreResponse;
 		
 	}

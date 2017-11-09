@@ -69,7 +69,7 @@ public class ShoppingCartServiceImpl extends SalesManagerEntityServiceImpl<Long,
 	@Override
 	@Transactional
 	public ShoppingCart getShoppingCart(final Customer customer) throws ServiceException {
-
+        LOGGER.debug("Fetching cart by customer");
 		try {
 
 			ShoppingCart shoppingCart = shoppingCartRepository.findByCustomer(customer.getId());
@@ -82,6 +82,7 @@ public class ShoppingCartServiceImpl extends SalesManagerEntityServiceImpl<Long,
 			}
 
 		} catch (Exception e) {
+			LOGGER.error("Error while fetching cart");
 			throw new ServiceException(e);
 		}
 
@@ -92,6 +93,7 @@ public class ShoppingCartServiceImpl extends SalesManagerEntityServiceImpl<Long,
 	 */
 	@Override
 	public void saveOrUpdate(final ShoppingCart shoppingCart) throws ServiceException {
+		LOGGER.debug("save or update cart");
 		if (shoppingCart.getId() == null || shoppingCart.getId().longValue() == 0) {
 			super.create(shoppingCart);
 		} else {
@@ -107,7 +109,7 @@ public class ShoppingCartServiceImpl extends SalesManagerEntityServiceImpl<Long,
 	@Override
 	@Transactional
 	public ShoppingCart getById(final Long id, final MerchantStore store) throws ServiceException {
-
+        LOGGER.debug("Fetching cart by store and customer id");
 		try {
 			ShoppingCart shoppingCart = shoppingCartRepository.findById(store.getId(), id);
 			if (shoppingCart == null) {
@@ -136,7 +138,7 @@ public class ShoppingCartServiceImpl extends SalesManagerEntityServiceImpl<Long,
 	@Override
 	@Transactional
 	public ShoppingCart getById(final Long id) {
-
+        LOGGER.debug("Fetching cart by customer id");
 		try {
 			ShoppingCart shoppingCart = shoppingCartRepository.findOne(id);
 			if (shoppingCart == null) {
@@ -151,7 +153,7 @@ public class ShoppingCartServiceImpl extends SalesManagerEntityServiceImpl<Long,
 				return shoppingCart;
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			LOGGER.error("Error while fetching cart by customer id");
 			e.printStackTrace();
 		}
 		return null;
@@ -166,7 +168,7 @@ public class ShoppingCartServiceImpl extends SalesManagerEntityServiceImpl<Long,
 	@Override
 	@Transactional
 	public ShoppingCart getByCode(final String code, final MerchantStore store) throws ServiceException {
-
+        LOGGER.debug("Fetching cart by store and cart code");
 		try {
 			ShoppingCart shoppingCart = shoppingCartRepository.findByCode(store.getId(), code);
 			if (shoppingCart == null) {
@@ -195,6 +197,7 @@ public class ShoppingCartServiceImpl extends SalesManagerEntityServiceImpl<Long,
 
 	@Override
 	public void deleteCart(final ShoppingCart shoppingCart) throws ServiceException {
+		LOGGER.debug("Deleting cart");
 		ShoppingCart cart = this.getById(shoppingCart.getId());
 		if (cart != null) {
 			super.delete(cart);
@@ -219,7 +222,7 @@ public class ShoppingCartServiceImpl extends SalesManagerEntityServiceImpl<Long,
 
 	@Transactional(noRollbackFor = { org.springframework.dao.EmptyResultDataAccessException.class })
 	private ShoppingCart getPopulatedShoppingCart(final ShoppingCart shoppingCart) throws Exception {
-
+        LOGGER.debug("Fetching populated cart");
 		try {
 
 			boolean cartIsObsolete = false;
@@ -364,6 +367,7 @@ public class ShoppingCartServiceImpl extends SalesManagerEntityServiceImpl<Long,
 		/**
 		 * Determines if products are virtual
 		 */
+		LOGGER.debug("Creating shipping product");
 		Set<ShoppingCartItem> items = cart.getLineItems();
 		List<ShippingProduct> shippingProducts = null;
 		for (ShoppingCartItem item : items) {
@@ -421,6 +425,7 @@ public class ShoppingCartServiceImpl extends SalesManagerEntityServiceImpl<Long,
 
 	@Override
 	public void removeShoppingCart(final ShoppingCart cart) throws ServiceException {
+		LOGGER.debug("Deleting cart");
 		shoppingCartRepository.delete(cart);
 	}
 
@@ -475,7 +480,7 @@ public class ShoppingCartServiceImpl extends SalesManagerEntityServiceImpl<Long,
 
 	private Set<ShoppingCartItem> getShoppingCartItems(final ShoppingCart sessionCart, final MerchantStore store,
 			final ShoppingCart cartModel) throws Exception {
-
+        LOGGER.debug("fetching cart items");
 		Set<ShoppingCartItem> shoppingCartItemsSet = null;
 		if (CollectionUtils.isNotEmpty(sessionCart.getLineItems())) {
 			shoppingCartItemsSet = new HashSet<ShoppingCartItem>();
@@ -531,6 +536,7 @@ public class ShoppingCartServiceImpl extends SalesManagerEntityServiceImpl<Long,
 
 	@Override
 	public void deleteShoppingCartItem(Long id) {
+		LOGGER.debug("Deliting cart item");
 		shoppingCartItemRepository.delete(id);
 	}
 

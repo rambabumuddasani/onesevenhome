@@ -83,7 +83,7 @@ import com.salesmanager.shop.store.model.shoppingCart.ShoppingCartItemResponse;
 @RequestMapping("/cart/")
 public class ShoppingCartController extends AbstractController {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ShoppingCartController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ShoppingCartController.class);
 
 	@Inject
 	private ShoppingCartService shoppingCartService;
@@ -104,7 +104,7 @@ public class ShoppingCartController extends AbstractController {
 	@RequestMapping(value={"/addShoppingCartItem"}, method=RequestMethod.POST,produces = {MediaType.APPLICATION_JSON_VALUE})
 	@ResponseBody
 	public ShoppingCartItemResponse addShoppingCartItem(@RequestBody final ShoppingCartItem item, final HttpServletRequest request) throws Exception {
-
+        LOGGER.debug("Entered addShoppingCartItem");
 		ShoppingCartData shoppingCart=null;
 
 		//Look in the HttpSession to see if a customer is logged in
@@ -137,6 +137,7 @@ public class ShoppingCartController extends AbstractController {
 */		System.out.println(" DisplayCart Link "+getNewResourceURL(request, "cart/addShoppingCartItem"));
 		ShoppingCartItemResponse shoppingCartItemResponse = new ShoppingCartItemResponse();
 		shoppingCartItemResponse.setCartQuantity(cartQty);
+		LOGGER.debug("Ended addShoppingCartItem");
 		return shoppingCartItemResponse;
 	}
 	
@@ -151,7 +152,7 @@ public class ShoppingCartController extends AbstractController {
 	//  http://localhost:8080/shop/cart/displayCart?userId=1
 	@RequestMapping(value={"/displayCart"},  method = { RequestMethod.GET, RequestMethod.POST })
 	public @ResponseBody ShoppingCartData displayMiniCart(final String shoppingCartCode, HttpServletRequest request, Model model){
-
+        LOGGER.debug("Entered displayMiniCart");
 		try {
 			MerchantStore merchantStore = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
 			Customer customer = getSessionAttribute(  Constants.CUSTOMER, request );
@@ -165,8 +166,9 @@ public class ShoppingCartController extends AbstractController {
 			}
 			return cart;
 		} catch(Exception e) {
-			LOG.error("Error while getting the shopping cart",e);
-		}		
+			LOGGER.error("Error while getting the shopping cart",e);
+		}	
+		LOGGER.debug("Ended displayMiniCart");
 		return new ShoppingCartData();
 	}
 
@@ -174,6 +176,7 @@ public class ShoppingCartController extends AbstractController {
 	@RequestMapping(value={"/removeShoppingCartItem/{shoppingCartCode}/{lineItemId}"},   method = { RequestMethod.GET})
 	public @ResponseBody ShoppingCartData removeShoppingCartItem(@PathVariable String shoppingCartCode,
 			@PathVariable Long lineItemId, HttpServletRequest request) throws Exception {
+		LOGGER.debug("Entered removeShoppingCartItem");
 		Language language = (Language)request.getAttribute(Constants.LANGUAGE);
 		MerchantStore merchantStore = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
 		ShoppingCartData cart =  shoppingCartFacade.getShoppingCartData(null, merchantStore, shoppingCartCode);
@@ -192,7 +195,7 @@ public class ShoppingCartController extends AbstractController {
 
 		request.getSession().setAttribute(Constants.SHOPPING_CART, cart.getCode());
 
-		LOG.debug("removed item" + lineItemId + "from cart");
+		LOGGER.debug("removed item" + lineItemId + "from cart");
 		return shoppingCartData;
 	}	
 	
@@ -205,6 +208,7 @@ public class ShoppingCartController extends AbstractController {
 	 */
 	@RequestMapping(value={"/updateShoppingCartItem"},  method = { RequestMethod.POST })
 	public @ResponseBody ShoppingCartData updateShoppingCartItem( @RequestBody final ShoppingCartItem[] shoppingCartItems, final HttpServletRequest request)  {
+		LOGGER.debug("Entered updateShoppingCartItem");
 		ShoppingCartData shoppingCart = null;
 	    MerchantStore store = getSessionAttribute(Constants.MERCHANT_STORE, request);
 	    Language language = (Language)request.getAttribute(Constants.LANGUAGE);
@@ -212,17 +216,18 @@ public class ShoppingCartController extends AbstractController {
         String cartCode = (String)request.getSession().getAttribute(Constants.SHOPPING_CART);
         
         if(StringUtils.isEmpty(cartCode)) {
-			LOG.error(" cart code is null, returning validation failed message" );
+        	LOGGER.error(" cart code is null, returning validation failed message" );
         }
         try {
         	List<ShoppingCartItem> items = Arrays.asList(shoppingCartItems);
 			shoppingCart = shoppingCartFacade.updateCartItems(items, store, language);
 		} catch (Exception e) {
-			LOG.error("Excption while updating cart" ,e);
+			LOGGER.error("Excption while updating cart" ,e);
 		}
         if(shoppingCart == null){
         	shoppingCart = new ShoppingCartData();
         }
+        LOGGER.debug("Ended updateShoppingCartItem");
         return shoppingCart;
 	}
 

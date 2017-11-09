@@ -58,7 +58,7 @@ public class ShoppingCartFacadeImpl
 {
 
     
-    private static final Logger LOG = LoggerFactory.getLogger(ShoppingCartFacadeImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ShoppingCartFacadeImpl.class);
 
     @Inject
     private ShoppingCartService shoppingCartService;
@@ -244,13 +244,13 @@ public class ShoppingCartFacadeImpl
             {
                 if ( shoppingCartItem.getId().longValue() == entryId )
                 {
-                    LOG.info( "Found line item  for given entry id: " + entryId );
+                    LOGGER.info( "Found line item  for given entry id: " + entryId );
                     return shoppingCartItem;
 
                 }
             }
         }
-        LOG.info( "Unable to find any entry for given Id: " + entryId );
+        LOGGER.info( "Unable to find any entry for given Id: " + entryId );
         return null;
     }
 
@@ -271,7 +271,7 @@ public class ShoppingCartFacadeImpl
         {
             if ( customer != null )
             {
-                LOG.info( "Reteriving customer shopping cart..." );
+            	LOGGER.info( "Reteriving customer shopping cart..." );
 
                 cart = shoppingCartService.getShoppingCart( customer );
 
@@ -288,7 +288,7 @@ public class ShoppingCartFacadeImpl
         }
         catch ( ServiceException ex )
         {
-            LOG.error( "Error while retriving cart from customer", ex );
+        	LOGGER.error( "Error while retriving cart from customer", ex );
         }
         catch( NoResultException nre) {
         	//nothing
@@ -299,7 +299,7 @@ public class ShoppingCartFacadeImpl
             return null;
         }
 
-        LOG.info( "Cart model found." );
+        LOGGER.info( "Cart model found." );
 
         ShoppingCartDataPopulator shoppingCartDataPopulator = new ShoppingCartDataPopulator();
         shoppingCartDataPopulator.setShoppingCartCalculationService( shoppingCartCalculationService );
@@ -412,7 +412,7 @@ public class ShoppingCartFacadeImpl
 
                 entryToUpdate.getProduct();
 
-                LOG.info( "Updating cart entry quantity to" + newQuantity );
+                LOGGER.info( "Updating cart entry quantity to" + newQuantity );
                 entryToUpdate.setQuantity( (int) newQuantity );
                 List<ProductAttribute> productAttributes = new ArrayList<ProductAttribute>();
                 productAttributes.addAll( entryToUpdate.getProduct().getAttributes() );
@@ -421,7 +421,7 @@ public class ShoppingCartFacadeImpl
                 entryToUpdate.setItemPrice( finalPrice.getFinalPrice() );
                 shoppingCartService.saveOrUpdate( cartModel );
 
-                LOG.info( "Cart entry updated with desired quantity" );
+                LOGGER.info( "Cart entry updated with desired quantity" );
                 ShoppingCartDataPopulator shoppingCartDataPopulator = new ShoppingCartDataPopulator();
                 shoppingCartDataPopulator.setShoppingCartCalculationService( shoppingCartCalculationService );
                 shoppingCartDataPopulator.setPricingService( pricingService );
@@ -460,7 +460,7 @@ public class ShoppingCartFacadeImpl
 
                 entryToUpdate.getProduct();
 
-                LOG.info( "Updating cart entry quantity to" + item.getQuantity() );
+                LOGGER.info( "Updating cart entry quantity to" + item.getQuantity() );
                 entryToUpdate.setQuantity( (int) item.getQuantity() );
                 
                 List<ProductAttribute> productAttributes = new ArrayList<ProductAttribute>();
@@ -480,7 +480,7 @@ public class ShoppingCartFacadeImpl
     		
     		cartModel.setLineItems(cartItems);
     		shoppingCartService.saveOrUpdate( cartModel );
-            LOG.info( "Cart entry updated with desired quantity" );
+    		LOGGER.info( "Cart entry updated with desired quantity" );
             ShoppingCartDataPopulator shoppingCartDataPopulator = new ShoppingCartDataPopulator();
             shoppingCartDataPopulator.setShoppingCartCalculationService( shoppingCartCalculationService );
             shoppingCartDataPopulator.setPricingService( pricingService );
@@ -500,8 +500,8 @@ public class ShoppingCartFacadeImpl
             }
             catch ( ServiceException e )
             {
-                LOG.error( "unable to find any cart asscoiated with this Id: " + cartId );
-                LOG.error( "error while fetching cart model...", e );
+            	LOGGER.error( "unable to find any cart asscoiated with this Id: " + cartId );
+                LOGGER.error( "error while fetching cart model...", e );
                 return null;
             }
             catch( NoResultException nre) {
@@ -524,7 +524,7 @@ public class ShoppingCartFacadeImpl
 	        	//nothing
 
 		} catch(Exception e) {
-			LOG.error("Cannot retrieve cart code " + code,e);
+			LOGGER.error("Cannot retrieve cart code " + code,e);
 		}
 
 
@@ -540,11 +540,13 @@ public class ShoppingCartFacadeImpl
 	@Override
 	public ShoppingCart getShoppingCartModel(Customer customer,
 			MerchantStore store) throws Exception {
+		LOGGER.debug("fetching cart model");
 		return shoppingCartService.getByCustomer(customer);
 	}
 
 	@Override
 	public void saveOrUpdateShoppingCart(ShoppingCart cart) throws Exception {
+		LOGGER.debug("save or update cart");
 		shoppingCartService.saveOrUpdate(cart);
 		
 	}

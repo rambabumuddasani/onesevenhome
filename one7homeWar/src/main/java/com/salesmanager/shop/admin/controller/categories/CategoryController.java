@@ -87,16 +87,16 @@ public class CategoryController {
 		CategoryResponse categoryResponse = new CategoryResponse();
 		try
 		{
-			System.out.println("inside getCategories");
+			LOGGER.debug("Entered getCategories");
 			List<Category> categories = categoryService.listByStore();
 			//CategoryJson[] categoryjson = new CategoryJson[categories.size()];
 			Map<String,List<Category>> parentMap = new HashMap<String, List<Category>>();
 			
 			for(Category category:categories) {
-				System.out.println("cat parent =="+category.getParent());
+				
 				if(category.getParent() != null) {
 					List<Category> childCategories = null;
-					System.out.println("parent data =="+category.getParent().getCode());
+					
 					if(parentMap.containsKey(category.getParent().getCode())) {
 						childCategories = parentMap.get(category.getParent().getCode());
 					}
@@ -109,27 +109,26 @@ public class CategoryController {
 						
 				}
 			}
-			System.out.println("parentMap =="+parentMap);
+		
 			List<CategoryJson> CategoryJsonList = new ArrayList<CategoryJson>();
 			int i=0;
 			for(Category category:categories) {
-				System.out.println("cat image =="+category.getCategoryImage());
-				System.out.println("cat parent =="+category.getParent());
+				
 				if(category.getParent() == null) {
 					CategoryJson categoryjson = new CategoryJson();
 					categoryjson.setType("category");
 					categoryjson.setTitle((category.getDescriptions().get(0)).getName());
 					categoryjson.setUrl("/building_materials");
-					System.out.println("no parent data =="+category.getCode());
+					
 					if(parentMap != null && parentMap.containsKey(category.getCode())) {
 						System.out.println("child found..."+category.getCode());
 						List<Category> subList = parentMap.get(category.getCode());
-						System.out.println("subList =="+subList);
-						System.out.println("subList.size() =="+subList.size());
+						
+						
 						List<SubCategoryJson> subcategoryjsonList = new ArrayList<SubCategoryJson>();
 						int j=0;
 						for(Category subcategory:subList) {
-							System.out.println("childs found..."+parentMap.get(category.getCode()));
+							
 							SubCategoryJson subcategoryjson = new SubCategoryJson();
 							subcategoryjson.setType("sub_category");
 							subcategoryjson.setTitle((subcategory.getDescriptions().get(0)).getName());
@@ -148,12 +147,13 @@ public class CategoryController {
 				}
 			}
 			
-			System.out.println("categories =="+categories);
+			
 
 		}catch(Exception e){
-			System.out.println(e.getMessage());
-			e.printStackTrace(System.out);
+			LOGGER.error("Error while getting categories"+e.getMessage());
+			
 		}
+		LOGGER.debug("Ended getCategories");
 		return categoryResponse;
 	}
 
@@ -161,18 +161,19 @@ public class CategoryController {
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public CategoryResponse getAllCategories() {
+		LOGGER.debug("Entered getAllCategories");
 		CategoryResponse categoryResponse = new CategoryResponse();
 		try
 		{
-			System.out.println("inside getCategories");
+			
 			List<Category> categories = categoryService.listByStore();
 			Map<String,List<Category>> parentMap = new HashMap<String, List<Category>>();
 			
 			for(Category category:categories) {
-				System.out.println("cat parent =="+category.getParent());
+				
 				if(category.getParent() != null) {
 					List<Category> childCategories = null;
-					System.out.println("parent data =="+category.getParent().getCode());
+					
 					if(parentMap.containsKey(category.getParent().getCode())) {
 						childCategories = parentMap.get(category.getParent().getCode());
 					}
@@ -185,14 +186,13 @@ public class CategoryController {
 						
 				}
 			}
-			System.out.println("parentMap =="+parentMap);
+			
 			List<CategoryJson> CategoryJsonList = new ArrayList<CategoryJson>();
 			int i=0;
 			String catTitle = null;
 			String subCatTitle = null;
 			for(Category category:categories) {
-				System.out.println("cat image =="+category.getCategoryImage());
-				System.out.println("cat parent =="+category.getParent());
+				
 				if(category.getParent() == null) {
 					CategoryJson categoryjson = new CategoryJson();
 					categoryjson.setType("category");
@@ -201,16 +201,16 @@ public class CategoryController {
 					catTitle = "/categories/"+catTitle.replaceAll(" ", "_");
 					categoryjson.setImageURL((category.getDescriptions().get(0)).getSeUrl());
 					categoryjson.setUrl(catTitle);
-					System.out.println("no parent data =="+category.getCode());
+				
 					if(parentMap != null && parentMap.containsKey(category.getCode())) {
-						System.out.println("child found..."+category.getCode());
+						
 						List<Category> subList = parentMap.get(category.getCode());
-						System.out.println("subList =="+subList);
-						System.out.println("subList.size() =="+subList.size());
+						
+						
 						List<SubCategoryJson> subcategoryjsonList = new ArrayList<SubCategoryJson>();
 						int j=0;
 						for(Category subcategory:subList) {
-							System.out.println("childs found..."+parentMap.get(category.getCode()));
+							
 							SubCategoryJson subcategoryjson = new SubCategoryJson();
 							subcategoryjson.setType("sub_category");
 							subCatTitle = subcategory.getCode();
@@ -229,12 +229,13 @@ public class CategoryController {
 				}
 			}
 			
-			System.out.println("categories =="+categories);
+			;
 
 		}catch(Exception e){
-			System.out.println(e.getMessage());
-			e.printStackTrace(System.out);
+			LOGGER.error("Error while getting all categories"+e.getMessage());
+			
 		}
+		LOGGER.debug("Ended getAllCategories");
 		return categoryResponse;
 	}
 
@@ -710,6 +711,7 @@ public class CategoryController {
             produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public CreateCategoryResponse createCategory(@RequestBody CreateCategoryRequest createCategoryRequest) throws Exception {
+		LOGGER.debug("Entered createCategory");
 		CreateCategoryResponse createCategoryResponse = new CreateCategoryResponse();
 		try {
 			MerchantStore merchantStore=merchantStoreService.getMerchantStore(MerchantStore.DEFAULT_STORE);
@@ -721,7 +723,7 @@ public class CategoryController {
 			Category categoryParent = categoryService.getByCategoryCode(parentName);
 			
 			if(category != null){
-				System.out.println("category already exists.");
+				LOGGER.debug("category already exists.");
 				createCategoryResponse.setStatus(false);
 				createCategoryResponse.setErrorMessage("category already exists.");
 			} else {
@@ -738,14 +740,17 @@ public class CategoryController {
 					}
 				
 				categoryService.saveOrUpdate(childCat);
+				LOGGER.debug("Category created");
 				createCategoryResponse.setStatus(true);
 				createCategoryResponse.setCategoryId(childCat.getId());
 				
 			}
 		} catch (Exception e){
+			LOGGER.error("Category already exist"+e.getMessage());
 			createCategoryResponse.setStatus(false);
 			createCategoryResponse.setErrorMessage("category already exists.");
 		}
+		LOGGER.debug("Ended createCategory");
 		return createCategoryResponse;
 
 	}
@@ -754,15 +759,17 @@ public class CategoryController {
 	@ResponseBody
 	public CreateCategoryResponse createCategoryWithImage(@RequestPart("createCategoryRequest") String createCategoryRequestStr,
 			@RequestPart("file") MultipartFile categoryUploadedImage) throws Exception {
+		LOGGER.debug("Entered createCategoryWithImage");
 		CreateCategoryRequest createCategoryRequest = new ObjectMapper().readValue(createCategoryRequestStr, CreateCategoryRequest.class);
 		CreateCategoryResponse createCategoryResponse = new CreateCategoryResponse();
     	String fileName = "";
     	if(categoryUploadedImage.getSize() != 0) {
     		try{
+    			LOGGER.debug("Storing image"+categoryUploadedImage.getName());
     			fileName = storageService.store(categoryUploadedImage,"category");
     			System.out.println("fileName "+fileName);
     		}catch(StorageException se){
-    			System.out.println("StoreException occured, do wee need continue "+se);
+    			LOGGER.error("StoreException occured, do we need continue "+se);
     			createCategoryResponse.setErrorMessage("Failed while storing image");
     			createCategoryResponse.setStatus(false);
     			return createCategoryResponse;
@@ -780,7 +787,7 @@ public class CategoryController {
 			language.setId(1);
 
 			if(category != null){
-				System.out.println("category already exists with code:"+categoryName);
+				LOGGER.debug("category already exists with code:"+categoryName);
 				createCategoryResponse.setStatus(false);
 				createCategoryResponse.setErrorMessage("category already exists with code:"+categoryName);
 			} else {
@@ -810,14 +817,17 @@ public class CategoryController {
 				
 				
 				categoryService.saveOrUpdate(childCat);
+				LOGGER.debug("Category created with image");
 				createCategoryResponse.setStatus(true);
 				createCategoryResponse.setCategoryId(childCat.getId());
 				
 			}
 		} catch (Exception e){
+			LOGGER.error("Fail while creating category with image");
 			createCategoryResponse.setStatus(false);
-			createCategoryResponse.setErrorMessage("faile while creating category");
+			createCategoryResponse.setErrorMessage("Fail while creating category");
 		}
+		LOGGER.debug("Ended createCategoryWithImage");
 		return createCategoryResponse;
 
 	}
@@ -826,6 +836,7 @@ public class CategoryController {
             produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public CreateCategoryResponse deleteCategory(@RequestBody CreateCategoryRequest createCategoryRequest) throws Exception {
+		LOGGER.debug("Entered deleteCategory");
 		CreateCategoryResponse createCategoryResponse = new CreateCategoryResponse();
 		try {
 			String categoryName = createCategoryRequest.getCategoryName();
@@ -833,18 +844,21 @@ public class CategoryController {
 			Category category = categoryService.getByCategoryCode(categoryName);
 			
 			if(category == null){
-				System.out.println("No category exists with category code:"+categoryName);
+				LOGGER.debug("No category exists with category code:"+categoryName);
 				createCategoryResponse.setStatus(false);
 				createCategoryResponse.setErrorMessage("No category exists with category code:"+categoryName);
 			} else {
 				categoryService.delete(category);
+				LOGGER.debug("Category deleted");
 				createCategoryResponse.setStatus(true);
 				createCategoryResponse.setCategoryId(category.getId());
 			}
 		} catch (Exception e){
+			LOGGER.error("Unable to delete the category"+e.getMessage());
 			createCategoryResponse.setStatus(false);
 			createCategoryResponse.setErrorMessage("unable to delete the category");
 		}
+		LOGGER.debug("Ended deleteCategory");
 		return createCategoryResponse;
 
 	}

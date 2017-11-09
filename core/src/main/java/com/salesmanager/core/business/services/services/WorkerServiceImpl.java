@@ -9,6 +9,8 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.salesmanager.core.business.modules.services.ServicesWorkerVO;
@@ -24,6 +26,8 @@ import com.salesmanager.core.model.services.WorkerRating;
 @Service
 public class WorkerServiceImpl extends SalesManagerEntityServiceImpl<Integer, CompanyService> implements WorkerService  {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(WorkerServiceImpl.class);
+	
 	@Inject
 	CompanyServiceRepository serviceWorkerRepository;
 	
@@ -37,7 +41,8 @@ public class WorkerServiceImpl extends SalesManagerEntityServiceImpl<Integer, Co
 	}
 
 	@Override
-	public Set<CompanyService> getWorkerByService(Integer serviceId) {		
+	public Set<CompanyService> getWorkerByService(Integer serviceId) {
+		LOGGER.debug("Fetching service companies by service id");
 		Set<CompanyService> workerService=serviceWorkerRepository.findByServiceId(serviceId);
 		return workerService;
 	}
@@ -51,7 +56,8 @@ public class WorkerServiceImpl extends SalesManagerEntityServiceImpl<Integer, Co
 */
 
 
-	public WorkerServiceResponse getWorkerByServiceType(String serviceType) {		
+	public WorkerServiceResponse getWorkerByServiceType(String serviceType) {	
+		LOGGER.debug("Fetching service companies by service type");
 		WorkerServiceResponse response = new WorkerServiceResponse();
 		Set<CompanyService> serviceWorker = serviceWorkerRepository.findByServiceType(serviceType);
 		Set<ServicesWorkerVO> servicesWorkerVOSet= new HashSet<ServicesWorkerVO>();
@@ -79,7 +85,7 @@ public class WorkerServiceImpl extends SalesManagerEntityServiceImpl<Integer, Co
 		return response;
 	}
 	private int getTotalRating(Set<WorkerRating> ratings) {
-    
+    LOGGER.debug("Calculating total rating ");
     int totalRating=0;
   //Set<WorkerRating> ratings =worker.getWorkerRating();
   		Map<Integer,Integer> ratingMap = new HashMap<Integer , Integer> (5);
@@ -112,7 +118,7 @@ public class WorkerServiceImpl extends SalesManagerEntityServiceImpl<Integer, Co
 }
 
 	private int getAvgWorkerRating(Set<WorkerRating> ratings) {
-
+        LOGGER.debug("Calculating average rating");
 		int avgRating = 0;
 		//Set<WorkerRating> ratings =worker.getWorkerRating();
 		Map<Integer,Integer> ratingMap = new HashMap<Integer , Integer> (5);
@@ -151,7 +157,7 @@ public class WorkerServiceImpl extends SalesManagerEntityServiceImpl<Integer, Co
 
 	@Override
 	public WorkerRatingResponse getWorkrRatingdByWorker(Integer workerId) {
-		
+		LOGGER.debug("Get WorkrRatingdByWorker by id");
 		WorkerRatingResponse workerRatingResponse = new WorkerRatingResponse();
 		List<WorkerRating> workerRatings = workerRatingRepository.findByWorker(workerId);
 		List<WorkerRatingVO> workerRatingVOSet = new ArrayList<WorkerRatingVO>();
