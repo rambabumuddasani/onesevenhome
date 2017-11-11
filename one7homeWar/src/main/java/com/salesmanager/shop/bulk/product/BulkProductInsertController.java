@@ -17,7 +17,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.salesmanager.core.business.exception.ServiceException;
@@ -26,6 +28,7 @@ import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.catalog.product.image.ProductImage;
 import com.salesmanager.shop.admin.controller.products.CreateProductRequest;
 import com.salesmanager.shop.admin.controller.products.CreateProductResponse;
+import com.salesmanager.shop.fileupload.services.StorageException;
 import com.salesmanager.shop.fileupload.services.StorageProperties;
 import com.salesmanager.shop.fileupload.services.StorageService;
 import com.salesmanager.shop.utils.HttpPostClient;
@@ -38,6 +41,7 @@ public class BulkProductInsertController {
 	@Inject
 	private ProductService productService;
 
+	@Inject
 	private StorageService storageService;
 	
 	@Inject
@@ -45,14 +49,16 @@ public class BulkProductInsertController {
 	
 	@RequestMapping(value="/bulkProductInsertion", method = RequestMethod.POST)
 	@ResponseBody
-/*	private List<String> invokeBulkProductInertion(@RequestPart("file") MultipartFile bulkProductFile
+	private List<String> invokeBulkProductInertion(@RequestPart("file") MultipartFile bulkProductFile
 			) throws IOException, ServiceException,Exception{
-
-*/	
-	public List<String> invokeBulkProductInertion() throws IOException, ServiceException,Exception{
 		List<String> responseRroductIds = new ArrayList<String>();
-		String fileName = "F:\\onesevenhomeProj\\onesevenhome\\f.txt";
-	/*	if(bulkProductFile.getSize() != 0) {
+		String fileName = "";
+		/*	
+		 * 
+		 *  public List<String> invokeBulkProductInertion() throws IOException, ServiceException,Exception{
+			String fileName = "F:\\onesevenhomeProj\\onesevenhome\\f.txt";
+		 */	
+		if(bulkProductFile.getSize() != 0) {
 			try{
 				fileName = storageService.store(bulkProductFile,"bulkOrderproduct");
 				LOGGER.info("bulk order upload fileName "+fileName);
@@ -61,7 +67,7 @@ public class BulkProductInsertController {
 				return responseRroductIds;
 			}
 		}
-*/
+
 		List<String> lines = Files.readAllLines(Paths.get(fileName));
 		for(String eachLine : lines){	
 			String[] eachLineToken = eachLine.split("\\|");
@@ -94,19 +100,19 @@ public class BulkProductInsertController {
 			responseRroductIds.add(dbProductId.toString());
 			Product dbProduct = productService.getById(dbProductId);
 			if(dbProduct == null){
-					LOGGER.debug("No product available with product id : "+dbProduct);
-					throw new Exception();
+					String errorMsg = "No product available with product id : "+dbProduct;
+					LOGGER.debug(errorMsg);
+					throw new ServiceException(errorMsg);
 			}
 			String imgURL = eachLineToken[9].trim();
 			String[] imgUrlTokens = imgURL.split("&"); // some reg expression
 			Set<ProductImage> images = new HashSet<ProductImage>();
 
 			for(String eachImgUrl : imgUrlTokens){
-				ProductImage productImage = null;
-				productImage = new ProductImage();
+				ProductImage productImage = new ProductImage();
 				productImage.setProduct(dbProduct);
 				StringBuilder img = new StringBuilder(storageProperties.getLocation())
-						.append(java.io.File.separator)
+						//.append(java.io.File.separator)
 						.append("product")
 						.append(java.io.File.separator)
 						.append(eachImgUrl);

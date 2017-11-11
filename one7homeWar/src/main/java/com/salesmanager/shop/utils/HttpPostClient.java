@@ -46,6 +46,7 @@ public class HttpPostClient {
 
 	public static String invokePostRequestAndReturnResponseAsString(String url,String jsonRequest) {
 		CloseableHttpClient client = HttpClients.createDefault();
+		String jsonResponse  = "";
 		HttpResponse response = null;
 		HttpPost httpPost = new HttpPost(url);
 		StringEntity entity;
@@ -55,6 +56,7 @@ public class HttpPostClient {
 			httpPost.setHeader("Accept", "application/json");
 			httpPost.setHeader("Content-type", "application/json");
 			response = client.execute(httpPost);
+			jsonResponse = convertStreamToString(response);
 			System.out.println("Response Code "+response.getStatusLine().getStatusCode());
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
@@ -69,7 +71,8 @@ public class HttpPostClient {
 				e.printStackTrace();
 			}
 		}	
-		return convertStreamToString(response);
+		System.out.println("jsonResponse "+jsonResponse);
+		return jsonResponse;
 	}
 
 	

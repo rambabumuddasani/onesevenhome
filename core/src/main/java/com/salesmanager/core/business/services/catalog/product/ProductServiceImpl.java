@@ -103,7 +103,7 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 		product.getDescriptions().add(description);
 		description.setProduct(product);
 		update(product);
-		searchService.index(product.getMerchantStore(), product);
+		//searchService.index(product.getMerchantStore(), product);
 	}
 	
 	@Override
@@ -274,7 +274,7 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 		}
 		
 		super.delete(product);
-		searchService.deleteIndex(product.getMerchantStore(), product);
+		//searchService.deleteIndex(product.getMerchantStore(), product);
 		LOGGER.debug("Product deleted");
 		
 	}
@@ -283,14 +283,14 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 	public void create(Product product) throws ServiceException {
 		LOGGER.debug("Creating product");
 		this.saveOrUpdate(product);
-		searchService.index(product.getMerchantStore(), product);
+		//searchService.index(product.getMerchantStore(), product);
 	}
 	
 	@Override
 	public void update(Product product) throws ServiceException {
 		LOGGER.debug("Updating product");
 		this.saveOrUpdate(product);
-		searchService.index(product.getMerchantStore(), product);
+		//searchService.index(product.getMerchantStore(), product);
 	}
 	
 
