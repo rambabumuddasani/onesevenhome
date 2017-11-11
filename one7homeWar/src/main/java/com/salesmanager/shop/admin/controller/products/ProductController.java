@@ -1907,21 +1907,10 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
 		               produces = MediaType.APPLICATION_JSON_VALUE)
       @ResponseBody
       public CreateProductResponse createProduct(@RequestBody CreateProductRequest createProductRequest) throws Exception {
-		
 		LOGGER.debug("Entered createProduct");
-		/*{"sku":"1234"
-	"description":""
-	"name":""
-	"title":""
-	"short_desc":"used in production description page"
-	"product_desc_title":"used in production description page"
-	"price":""
-	"discount_price":""
-	"category":""}*/
 		CreateProductResponse createProductResponse = new CreateProductResponse();
 		try {
 		MerchantStore merchantStore=merchantStoreService.getMerchantStore(MerchantStore.DEFAULT_STORE);
-		com.salesmanager.shop.admin.model.catalog.Product  product = new com.salesmanager.shop.admin.model.catalog.Product();
 		Product newProduct = new Product();
 		Set<ProductDescription> descriptions = new HashSet<ProductDescription>();
 		ProductDescription productDescription = new ProductDescription();
@@ -1929,8 +1918,7 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
 		Set<ProductPrice> prices = new HashSet<ProductPrice>();
 		ProductAvailability productAvailability = new ProductAvailability();
 		ProductPrice productPrice = new ProductPrice();
-		
-		System.out.println("createProductRequest.getSku() =="+createProductRequest.getSku());
+/*		System.out.println("createProductRequest.getSku() =="+createProductRequest.getSku());
 		System.out.println("createProductRequest.getDescription() =="+createProductRequest.getDescription());
 		System.out.println("createProductRequest.getProductName() =="+createProductRequest.getProductName());
 		System.out.println("createProductRequest.getTitle() =="+createProductRequest.getTitle());
@@ -1938,7 +1926,7 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
 		System.out.println("createProductRequest.getProductDescTitle() =="+createProductRequest.getProductDescTitle());
 		System.out.println("createProductRequest.getProductPrice() =="+createProductRequest.getProductPrice());
 		System.out.println("createProductRequest.getCategory() =="+createProductRequest.getCategory());
-		
+*/		
 		productDescription.setName(createProductRequest.getProductName());
 		productDescription.setDescription(createProductRequest.getDescription());
 		productDescription.setTitle(createProductRequest.getTitle());
@@ -1989,7 +1977,6 @@ public ProductResponse getProductDetailsAndPrice(Product dbProduct,boolean isSpe
 		}
 		LOGGER.debug("Ended createProduct");
 		return createProductResponse;
-		
 	}
     
   @RequestMapping(value="/updateProduct", method = RequestMethod.POST, 
