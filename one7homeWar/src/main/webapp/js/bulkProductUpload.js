@@ -31,7 +31,7 @@ app.controller("demoController", function ($scope, $http) {
 		$http({
 			method: 'POST',
 			//url: newURL+"/vendor/register",
-			url: newURL+"/bulkProductInsertion",
+			url: newURL+"/shop/bulkProductInsertion",
 			headers: { 'Content-Type': undefined },
 
 			transformRequest: function (data) {
