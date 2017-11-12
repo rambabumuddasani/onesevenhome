@@ -87,7 +87,7 @@ public class BulkProductInsertController {
 			createProjectRequest.setCategory(eachLineToken[8].trim());
 			ObjectMapper mapper = new ObjectMapper();
 			String jsonRequest = mapper.writeValueAsString(createProjectRequest);
-			String url = "http://localhost:8080/createProduct";
+			String url = "http://localhost:8080/shop/createProduct";
 			//HttpResponse httpResponse = HttpPostClient.invokePostRequest(url, jsonRequest);
 			String responseData = HttpPostClient.invokePostRequestAndReturnResponseAsString(url, jsonRequest);
 			CreateProductResponse productResponse = mapper.readValue(responseData, CreateProductResponse.class);
