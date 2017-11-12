@@ -64,6 +64,9 @@ public class Category extends SalesManagerEntity<Long, Category> implements Audi
 	
 	@Column(name = "CATEGORY_IMAGE", length=100)
 	private String categoryImage;
+	
+	@Column(name = "CATEGORY_IMAGE1", length=100)
+	private String categoryImage1;
 
 	@Column(name = "SORT_ORDER")
 	private Integer sortOrder = 0;
@@ -209,5 +212,13 @@ public class Category extends SalesManagerEntity<Long, Category> implements Audi
 		}
 		
 		return null;
+	}
+
+	public String getCategoryImage1() {
+		return categoryImage1;
+	}
+
+	public void setCategoryImage1(String categoryImage1) {
+		this.categoryImage1 = categoryImage1;
 	}
 }

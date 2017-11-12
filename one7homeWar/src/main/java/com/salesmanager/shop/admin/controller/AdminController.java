@@ -1322,12 +1322,12 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		ApproveTestimonialResponse approveTestimonialResponse = new ApproveTestimonialResponse();
 		Long testimonialIdLong = approveTestimonialRequest.getTestimonialId();
 		CustomerTestimonial customerTestimonial = customerTestmonialService.getTestimonialById(testimonialIdLong);
-		if(approveTestimonialRequest.isEnable()==true) {
-			customerTestimonial.setEnable(true);
-		}
-		else {
-			customerTestimonial.setEnable(false);
-		}
+		//if(approveTestimonialRequest.isEnable()) {
+			customerTestimonial.setEnable(approveTestimonialRequest.isEnable());
+		//}
+		//else {
+			//customerTestimonial.setEnable(false);
+		//}
 		try {
 			customerTestmonialService.update(customerTestimonial);
 			LOGGER.debug("Testimonial approved");

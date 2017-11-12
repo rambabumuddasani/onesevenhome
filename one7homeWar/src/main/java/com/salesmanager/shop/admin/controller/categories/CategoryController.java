@@ -862,5 +862,41 @@ public class CategoryController {
 		return createCategoryResponse;
 
 	}
+	@RequestMapping(value="/getCategoryWithImages", method = RequestMethod.GET, 
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public CategoryImageResponse getAllCategoryWithImages() {
+		LOGGER.debug("Entered getAllCategoryWithImages");
+		CategoryImageResponse categoryImageResponse = new CategoryImageResponse();
+		try
+		{
+			List<CategoryImageJson> categoryJsonList = new ArrayList<CategoryImageJson>();
+			List<Category> categories = categoryService.listByStore();
+			int i=0;
+			String catTitle = null;
+			for(Category category:categories) {
+				if(category.getParent()==null) {
+					CategoryImageJson categoryImageJson = new CategoryImageJson();
+					
+					categoryImageJson.setType("category");
+					catTitle = category.getCode();
+					categoryImageJson.setTitle((category.getDescriptions().get(0)).getName());
+					catTitle = "/categories/"+catTitle.replaceAll(" ", "_");
+					categoryImageJson.setImageURL((category.getDescriptions().get(0)).getSeUrl());
+					categoryImageJson.setUrl(catTitle);
+					categoryImageJson.setImageURL1(category.getCategoryImage());
+					categoryImageJson.setImageURL2(category.getCategoryImage1());
+					categoryJsonList.add(categoryImageJson);	
+					i++;
+				}
+				
+			}
+			categoryImageResponse.setCategoryImagedata(categoryJsonList);
+		
+		}catch(Exception e) {
+			LOGGER.error("Error while getting category with images");
+		}
 	
+		return categoryImageResponse;	
+	}
 }
