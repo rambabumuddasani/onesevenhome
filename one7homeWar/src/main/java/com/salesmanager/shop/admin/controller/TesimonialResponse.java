@@ -1,13 +1,13 @@
 package com.salesmanager.shop.admin.controller;
 
-public class CustomerTestimonialVO {
-    
+public class TesimonialResponse {
+	
 	private Long customerId;
 	private String customerName;
 	private String description;
+	private String status;
 	private String emailAddress;
 	private Long testimonialId;
-	private String status;
 	public Long getCustomerId() {
 		return customerId;
 	}
@@ -26,6 +26,12 @@ public class CustomerTestimonialVO {
 	public void setDescription(String description) {
 		this.description = description;
 	}
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
+	}
 	public String getEmailAddress() {
 		return emailAddress;
 	}
@@ -38,10 +44,5 @@ public class CustomerTestimonialVO {
 	public void setTestimonialId(Long testimonialId) {
 		this.testimonialId = testimonialId;
 	}
-	public String getStatus() {
-		return status;
-	}
-	public void setStatus(String status) {
-		this.status = status;
-	}
+	
 }

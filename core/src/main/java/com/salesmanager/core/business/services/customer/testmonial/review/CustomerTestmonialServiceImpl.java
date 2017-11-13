@@ -36,7 +36,13 @@ public class CustomerTestmonialServiceImpl extends SalesManagerEntityServiceImpl
 
 	@Override
 	public List<CustomerTestimonial> getApprovedTestimonial() {
-		// TODO Auto-generated method stub
+		
 		return customerTestimonialRepository.getApprovedTestimonial();
+	}
+
+	@Override
+	public List<CustomerTestimonial> getDeclinedtestimonials() {
+		
+		return customerTestimonialRepository.getDeclinedtestimonials();
 	}
 }

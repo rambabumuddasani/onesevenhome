@@ -1266,7 +1266,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		return subCatImageResponse;
     }
    
-    // Save Testimonial
+/*    // Save Testimonial
     @RequestMapping(value="/testimonial/save", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
   	@ResponseBody
   	public TestimonialResponse saveTestimonial(@RequestBody TestimonialRequest testimonialRequest) throws Exception {
@@ -1364,6 +1364,144 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	adminApproveTestimonialResponse.setApprovedTestimonials(adminApproveTestimonialVOList);
     	LOGGER.debug("Ended getAdminApproveTestimonials");
     	return adminApproveTestimonialResponse;	
+    }*/
+    @RequestMapping(value="/testimonial/{testimonialId}", method = RequestMethod.GET)
+	@ResponseBody
+	public TesimonialResponse getTestimonialById(@PathVariable String testimonialId) {
+    	TesimonialResponse tesimonialResponse = new TesimonialResponse();
+    	Long testimonialIdLong = new Long(testimonialId);
+    	CustomerTestimonial customerTestimonial = customerTestmonialService.getTestimonialById(testimonialIdLong);
+    	tesimonialResponse.setCustomerId(customerTestimonial.getCustomer().getId());
+    	tesimonialResponse.setCustomerName(customerTestimonial.getCustomer().getBilling().getFirstName());
+    	tesimonialResponse.setEmailAddress(customerTestimonial.getCustomer().getEmailAddress());
+    	tesimonialResponse.setDescription(customerTestimonial.getDescription());
+    	tesimonialResponse.setStatus(customerTestimonial.getStatus());
+    	tesimonialResponse.setTestimonialId(customerTestimonial.getId());
+    	return tesimonialResponse;
+    }
+    @RequestMapping(value="/approve/testimonial", method = RequestMethod.POST, 
+			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public ApproveTestimonialResponse approveOrDeclineTestimonial(@RequestBody ApproveTestimonialRequest approveTestimonialRequest) throws Exception {
+		LOGGER.debug("Entered approveOrDeclineTestimonial");
+		ApproveTestimonialResponse approveTestimonialResponse = new ApproveTestimonialResponse();
+		Long testimonialIdLong = approveTestimonialRequest.getTestimonialId();
+		CustomerTestimonial customerTestimonial = customerTestmonialService.getTestimonialById(testimonialIdLong);
+		if(approveTestimonialRequest.getStatus().equals("Y")) {
+			customerTestimonial.setStatus("Y");
+		}
+		else {
+			customerTestimonial.setStatus("N");
+		}
+		try {
+			customerTestmonialService.update(customerTestimonial);
+			
+			if(approveTestimonialRequest.getStatus().equals("Y")){
+				LOGGER.debug("Testimonial approved");
+			approveTestimonialResponse.setSuccessMessage("Testimonial approved successfully");
+			approveTestimonialResponse.setStatus(TRUE);
+			}
+			if(approveTestimonialRequest.getStatus().equals("N")) {
+				LOGGER.debug("Testimonial declined");
+				approveTestimonialResponse.setSuccessMessage("Testimonial is declined");
+				approveTestimonialResponse.setStatus(FALSE);
+			}
+		} catch (Exception e) {
+			LOGGER.error("Error in updating Testimonial");
+			approveTestimonialResponse.setErrorMessage("Error in approving Testimonial");
+			approveTestimonialResponse.setStatus(FALSE);
+			return approveTestimonialResponse;
+		}
+		LOGGER.debug("Ended approveOrDeclineTestimonial");
+    	return approveTestimonialResponse;
+    } 
+    @RequestMapping(value="/getTestimonials", method = RequestMethod.POST)
+	@ResponseBody
+	public PaginatedResponse getTestimonials(@RequestBody AdminTestimonialsRequest adminTestimonialsRequest,@RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) {
+    	LOGGER.debug("Entered getTestimonials");
+    	AdminTestimonialResponse adminTestimonialResponse = new AdminTestimonialResponse();
+    	List<CustomerTestimonialVO>  customerTestimonialVOList = new ArrayList<CustomerTestimonialVO>();
+    	PaginatedResponse paginatedResponse = new PaginatedResponse();
+    	if(adminTestimonialsRequest.getStatus().equals("ALL")){
+    		List<CustomerTestimonial> customerTestimonials = customerTestmonialService.getAllTestimonials();  
+    		
+    		for(CustomerTestimonial testmonial : customerTestimonials) {
+        		CustomerTestimonialVO customerTestimonialVO = new CustomerTestimonialVO();
+        		customerTestimonialVO.setCustomerId(testmonial.getCustomer().getId());
+        		customerTestimonialVO.setCustomerName(testmonial.getCustomer().getBilling().getFirstName());
+        		customerTestimonialVO.setEmailAddress(testmonial.getCustomer().getEmailAddress());
+        		customerTestimonialVO.setDescription(testmonial.getDescription());
+        		customerTestimonialVO.setTestimonialId(testmonial.getId());
+        		customerTestimonialVO.setStatus(testmonial.getStatus());
+        		customerTestimonialVOList.add(customerTestimonialVO);
+        	}
+    		adminTestimonialResponse.setCustomerTestimonials(customerTestimonialVOList);
+    	}
+    	if(adminTestimonialsRequest.getStatus().equals("Y")) {
+    		List<CustomerTestimonial> approvedTestimonials = customerTestmonialService.getApprovedTestimonial();
+    		
+    		for(CustomerTestimonial testmonial : approvedTestimonials) {
+        		CustomerTestimonialVO customerTestimonialVO = new CustomerTestimonialVO();
+        		customerTestimonialVO.setCustomerId(testmonial.getCustomer().getId());
+        		customerTestimonialVO.setCustomerName(testmonial.getCustomer().getBilling().getFirstName());
+        		customerTestimonialVO.setEmailAddress(testmonial.getCustomer().getEmailAddress());
+        		customerTestimonialVO.setDescription(testmonial.getDescription());
+        		customerTestimonialVO.setTestimonialId(testmonial.getId());
+        		customerTestimonialVO.setStatus(testmonial.getStatus());
+        		customerTestimonialVOList.add(customerTestimonialVO);
+        	}
+    		adminTestimonialResponse.setCustomerTestimonials(customerTestimonialVOList);
+    	}
+    	if(adminTestimonialsRequest.getStatus().equals("N")) {
+    		List<CustomerTestimonial> declinedTestimonials = customerTestmonialService.getDeclinedtestimonials();
+    		
+    		for(CustomerTestimonial testmonial : declinedTestimonials) {
+        		CustomerTestimonialVO customerTestimonialVO = new CustomerTestimonialVO();
+        		customerTestimonialVO.setCustomerId(testmonial.getCustomer().getId());
+        		customerTestimonialVO.setCustomerName(testmonial.getCustomer().getBilling().getFirstName());
+        		customerTestimonialVO.setEmailAddress(testmonial.getCustomer().getEmailAddress());
+        		customerTestimonialVO.setDescription(testmonial.getDescription());
+        		customerTestimonialVO.setTestimonialId(testmonial.getId());
+        		customerTestimonialVO.setStatus(testmonial.getStatus());
+        		customerTestimonialVOList.add(customerTestimonialVO);
+        	}
+    		adminTestimonialResponse.setCustomerTestimonials(customerTestimonialVOList);
+    	}
+    	PaginationData paginaionData=createPaginaionData(page,size);
+    	calculatePaginaionData(paginaionData,size, customerTestimonialVOList.size());
+    	paginatedResponse.setPaginationData(paginaionData);
+		if(customerTestimonialVOList == null || customerTestimonialVOList.isEmpty() || customerTestimonialVOList.size() < paginaionData.getCountByPage()){
+			paginatedResponse.setResponseData(customerTestimonialVOList);
+			LOGGER.debug("Ended getTestimonials");
+			return paginatedResponse;
+		}
+    	List<CustomerTestimonialVO> paginatedResponses = customerTestimonialVOList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+    	paginatedResponse.setResponseData(paginatedResponses);
+		return paginatedResponse;
+		//return adminTestimonialResponse;
+    }
+    @RequestMapping(value="/testimonial/save", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
+  	@ResponseBody
+  	public TestimonialResponse saveTestimonial(@RequestBody TestimonialRequest testimonialRequest) throws Exception {
+    	LOGGER.debug("Entered saveTestimonial");
+    	TestimonialResponse testimonialResponse = new TestimonialResponse();
+    	if(StringUtils.isEmpty(testimonialRequest.getTestmonialDescription())){
+    		testimonialResponse.setErrorMessage("Feedback cannot be empty");
+    		testimonialResponse.setStatus(FALSE);
+    		return testimonialResponse;
+    	}
+    	
+    	Customer customer = customerService.getById(testimonialRequest.getCustomerId());
+    	CustomerTestimonial customerTestimonial = new CustomerTestimonial();
+    	customerTestimonial.setCustomer(customer);
+    	customerTestimonial.setDescription(testimonialRequest.getTestmonialDescription());
+    	customerTestimonial.setStatus("N");
+    	customerTestmonialService.save(customerTestimonial);
+    	testimonialResponse.setSuccessMessage("Feedback Saved successfully");
+    	LOGGER.debug("Testimonial saved");
+    	testimonialResponse.setStatus(TRUE);
+    	LOGGER.debug("Ended saveTestimonial");
+    	return testimonialResponse;
     }
 }
     

@@ -25,7 +25,7 @@ public class CustomerTestimonial extends SalesManagerEntity<Long, CustomerTestim
 
 	@Id
 	@Column(name = "CUST_TESTIMONIAL_ID")
-	@TableGenerator(name = "TABLE_GEN", table = "SM_SEQUENCER", pkColumnName = "SEQ_NAME", valueColumnName = "SEQ_COUNT", pkColumnValue = "PRODUCT_IMG_SEQ_NEXT_VAL")
+	@TableGenerator(name = "TABLE_GEN", table = "SM_SEQUENCER", pkColumnName = "SEQ_NAME", valueColumnName = "SEQ_COUNT", pkColumnValue = "CUSTOMER_TESTIMONIAL_SEQ_NEXT_VAL")
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = "TABLE_GEN")
 	private Long id;
     
@@ -39,8 +39,8 @@ public class CustomerTestimonial extends SalesManagerEntity<Long, CustomerTestim
 	@JoinColumn(name = "CUSTOMER_ID", nullable = false)
     private Customer customer;
 	
-	@Column(name = "ENABLE")
-	private boolean enable = false;
+	@Column(name = "STATUS")
+	private String status;
 
 	public Long getId() {
 		return id;
@@ -74,14 +74,12 @@ public class CustomerTestimonial extends SalesManagerEntity<Long, CustomerTestim
 		this.customer = customer;
 	}
 
-	public boolean isEnable() {
-		return enable;
+	public String getStatus() {
+		return status;
 	}
 
-	public void setEnable(boolean enable) {
-		this.enable = enable;
+	public void setStatus(String status) {
+		this.status = status;
 	}
-
-	
 	
 }

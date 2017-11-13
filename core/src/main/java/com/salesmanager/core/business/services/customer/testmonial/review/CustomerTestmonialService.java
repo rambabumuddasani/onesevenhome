@@ -13,5 +13,7 @@ public interface CustomerTestmonialService extends SalesManagerEntityService<Lon
 
 	List<CustomerTestimonial> getApprovedTestimonial();
 
+	List<CustomerTestimonial> getDeclinedtestimonials();
+
 	
 }

@@ -12,7 +12,11 @@ public interface CustomerTestimonialRepository extends JpaRepository<CustomerTes
 	@Query("select ct from CustomerTestimonial ct where ct.id =?1")
 	CustomerTestimonial getTestimonialById(Long testimonialIdLong);
 
-	@Query("select ct from CustomerTestimonial ct where ct.enable = true")
+	
+	@Query("select ct from CustomerTestimonial ct where ct.status = 'Y'")
 	List<CustomerTestimonial> getApprovedTestimonial();
+
+	@Query("select ct from CustomerTestimonial ct where ct.status = 'N'")
+	List<CustomerTestimonial> getDeclinedtestimonials();
 
 }
