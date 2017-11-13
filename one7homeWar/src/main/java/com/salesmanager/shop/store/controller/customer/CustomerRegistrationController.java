@@ -1474,7 +1474,7 @@ public class CustomerRegistrationController extends AbstractController {
     	customer.setBilling(billing);
     	customer.setCustomerType("0");
     	for(String custType:Constants.customerTypes.keySet()){
-    		if(Constants.customerTypes.get(custType).equals(userRequest.getUserType())){
+    		if(Constants.customerTypes.get(custType).equals(userRequest.getUserType().toUpperCase())){
     			customer.setCustomerType(custType);
     			break;
     		}
