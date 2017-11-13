@@ -1568,19 +1568,21 @@ public class CustomerRegistrationController extends AbstractController {
             //set user clear password
         	customer.setClearPassword(password);
         	customer.setActivated("0");
-            List<Integer> serviceIds = userRequest.getServiceIds();
-            List<Services> servicesList = new ArrayList<Services>();
-            for(Integer serviceId:serviceIds){
-            	Services services = servicesService.getById(serviceId);
-            	if(services != null){
-            		LOGGER.debug("service id =="+services.getServiceType());
-            		servicesList.add(services);
-            		
-            	}
-            	
-            }
-            if(servicesList.size() > 0)
-            	customer.setServices(servicesList);
+        	if(userRequest.getServiceIds() != null) {
+                List<Integer> serviceIds = userRequest.getServiceIds();
+                List<Services> servicesList = new ArrayList<Services>();
+                for(Integer serviceId:serviceIds){
+                	Services services = servicesService.getById(serviceId);
+                	if(services != null){
+                		LOGGER.debug("service id =="+services.getServiceType());
+                		servicesList.add(services);
+                		
+                	}
+                	
+                }
+                if(servicesList.size() > 0)
+                	customer.setServices(servicesList);
+        	}
             customerData = customerFacade.registerCustomer( customer, merchantStore, language );
             
         } catch ( Exception e )

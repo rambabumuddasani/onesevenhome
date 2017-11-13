@@ -22,8 +22,13 @@ import com.salesmanager.core.business.services.customer.CustomerService;
 import com.salesmanager.core.business.services.services.ServicesService;
 import com.salesmanager.core.business.services.services.WorkerService;
 import com.salesmanager.core.model.customer.Customer;
+import com.salesmanager.core.model.customer.CustomerTestimonial;
+import com.salesmanager.core.model.customer.ServicesRating;
 import com.salesmanager.core.model.services.Services;
 import com.salesmanager.core.model.services.CompanyService;
+import org.springframework.web.bind.annotation.RequestBody;
+import com.salesmanager.shop.admin.controller.TestimonialRequest;
+import com.salesmanager.shop.admin.controller.TestimonialResponse;
 
 
 
@@ -91,5 +96,27 @@ public class ServicesController {
 		LOGGER.debug("Entered getWorkerRating ");
 		return workerService.getWorkrRatingdByWorker(workerId);
 	}
+	
+    @RequestMapping(value="/servicerating/save", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
+  	@ResponseBody
+  	public ServicesRatingResponse saveServicesRating(@RequestBody ServicesRatingRequest servicesRatingRequest) throws Exception {
+    	LOGGER.debug("Entered saveServicesRating");
+    	ServicesRatingResponse servicesRatingResponse = new ServicesRatingResponse();
+    	
+    	Customer customer = customerService.getById(servicesRatingRequest.getCustomerId());
+    	Customer service = customerService.getById(servicesRatingRequest.getServiceId());
+    	ServicesRating servicesRating = new ServicesRating();
+    	servicesRating.setCustomer(customer);
+    	servicesRating.setService(service);
+    	servicesRating.setRating(servicesRatingRequest.getRating());
+    	servicesRating.setReviewTitle(servicesRatingRequest.getReviewTitle());
+    	servicesRating.setReviewDescription(servicesRatingRequest.getReviewDescription());
+    	//customerTestmonialService.save(customerTestimonial);
+    	servicesRatingResponse.setSuccessMessage("Rating Saved successfully");
+    	LOGGER.debug("saveServicesRating saved");
+    	servicesRatingResponse.setStatus(true);
+    	LOGGER.debug("Ended saveServicesRating");
+    	return servicesRatingResponse;
+    }
 
 }
