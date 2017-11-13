@@ -1,5 +1,8 @@
 package com.salesmanager.shop.store.controller.customer;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -69,10 +72,9 @@ public class CustomerLoginController extends AbstractController {
 	   
     @Inject
     MerchantStoreService merchantStoreService ;
- 
 
-	private static final Logger LOG = LoggerFactory.getLogger(CustomerLoginController.class);
-
+	private static final Logger LOG = LoggerFactory.getLogger(CustomerRegistrationController.class);
+    
 	/*
 	private AjaxResponse logon(String userName, String password, String storeCode, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
@@ -187,7 +189,6 @@ public class CustomerLoginController extends AbstractController {
 			//check if username is from the appropriate store
 			Customer customerModel = customerFacade.getCustomerByUserName(userName, store);
 
-			System.out.println("customermodel"+customerModel);
 			if(customerModel==null) {
 				loginResponse.setSuccess(false);
 				loginResponse.setErrorMessage(" Failed to login , invalid credentials."); 
@@ -272,8 +273,8 @@ public class CustomerLoginController extends AbstractController {
 			loginResponse.setType("CUSTOMER");
 			loginResponse.setName(customerModel.getBilling().getFirstName() + " " + customerModel.getBilling().getLastName());
 			if(customerModel.getCustomerType() != null){
-				if(customerModel.getCustomerType().equals("1")){
-					loginResponse.setType("VENDOR");
+				if(Constants.customerTypes.containsKey(customerModel.getCustomerType())){
+					loginResponse.setType(Constants.customerTypes.get(customerModel.getCustomerType()));
 					loginResponse.setName(customerModel.getVendorAttrs().getVendorName());
 				}
 			}

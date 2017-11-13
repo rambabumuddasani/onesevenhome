@@ -1,5 +1,8 @@
 package com.salesmanager.shop.constants;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Constants {
 	
 	public final static String SLASH = "/";
@@ -119,5 +122,12 @@ public class Constants {
     public final static String RESPONSE_KEY_USERNAME = "userName";
     
     public final static String DEBUG_MODE = "debugMode";
+    
+    public static Map<String,String> customerTypes = new HashMap<String,String>();
+	
+	static {
+		customerTypes.put("1", "VENDOR");
+		customerTypes.put("2", "SERVICE");
+	}
 
 }
