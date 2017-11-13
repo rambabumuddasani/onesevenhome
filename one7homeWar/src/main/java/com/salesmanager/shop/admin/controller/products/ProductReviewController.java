@@ -1,6 +1,7 @@
 package com.salesmanager.shop.admin.controller.products;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -200,11 +201,22 @@ public class ProductReviewController {
 			return 0d;
 		}
 	    avgReview = totalNumarater/totalDenaminator;
+	    String  formatedAvgReviewStr = getFormattedAvgReview(avgReview);
+	    Double formatedAvgReview = Double.parseDouble(formatedAvgReviewStr);
 	    LOGGER.debug("Entered getAvgReview");
-		return avgReview;
+		return formatedAvgReview;
 	}
 
 	
+	private String getFormattedAvgReview(Double avgReview) {
+		
+		DecimalFormat df = new DecimalFormat();
+		df.setMaximumFractionDigits(1); //Sets the maximum number of digits after the decimal point
+		df.setMinimumFractionDigits(0); //Sets the minimum number of digits after the decimal point
+		df.setGroupingUsed(false); //If false thousands separator such ad 1,000 wont work so it will display 1000
+	    return df.format(avgReview);
+	}
+
 	/*@SuppressWarnings({ "rawtypes", "unchecked" })
 	@PreAuthorize("hasRole('PRODUCTS')")
 	@RequestMapping(value="/admin/products/reviews/paging.html", method=RequestMethod.POST)
