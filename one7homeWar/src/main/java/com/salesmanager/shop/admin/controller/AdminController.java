@@ -1403,8 +1403,8 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 			}
 			if(approveTestimonialRequest.getStatus().equals("N")) {
 				LOGGER.debug("Testimonial declined");
-				approveTestimonialResponse.setSuccessMessage("Testimonial is declined");
-				approveTestimonialResponse.setStatus(FALSE);
+				approveTestimonialResponse.setSuccessMessage("Testimonial is declined successfully");
+				approveTestimonialResponse.setStatus(TRUE);
 			}
 		} catch (Exception e) {
 			LOGGER.error("Error in updating Testimonial");
@@ -1502,6 +1502,29 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	testimonialResponse.setStatus(TRUE);
     	LOGGER.debug("Ended saveTestimonial");
     	return testimonialResponse;
+    }
+    @RequestMapping(value="/deleteTestimonial/{testimonialId}", method = RequestMethod.GET)
+    @ResponseBody
+    public DeleteTesimonialResponse deleteTestimonial(@PathVariable String testimonialId) throws Exception {
+    	LOGGER.debug("Entered deleteTestimonial");
+    	DeleteTesimonialResponse deleteTesimonialResponse = new DeleteTesimonialResponse();
+    	Long testimonialIdLong = new Long(testimonialId);
+    	try {
+    	CustomerTestimonial customerTestimonial = customerTestmonialService.getTestimonialById(testimonialIdLong);
+    	if(customerTestimonial==null) {
+    		deleteTesimonialResponse.setErrormessage("Testimonial not found for id "+testimonialIdLong);
+    		deleteTesimonialResponse.setStatus(FALSE);
+    	}
+    	customerTestmonialService.delete(customerTestimonial);
+    	LOGGER.debug("Testimonial deleted");
+    	deleteTesimonialResponse.setSuccessMessage("Testimonial deleted successfully");
+    	deleteTesimonialResponse.setStatus(TRUE);
+    	}catch(Exception e) {
+    		LOGGER.error("Error while deleting testimonial",e.getMessage());
+    	}
+    	LOGGER.debug("Ended deleteTestimonial");
+    	return deleteTesimonialResponse;
+    	
     }
 }
     
