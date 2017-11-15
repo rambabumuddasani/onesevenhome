@@ -1688,6 +1688,10 @@ public class CustomerRegistrationController extends AbstractController {
         	billing.setFirstName(userRequest.getEmail());
         	billing.setLastName(userRequest.getEmail());
         }
+        if(userRequest.getPassword() != null) {
+        	customer.setPassword(userRequest.getPassword());
+        }
+
         if(userRequest.getArea() != null)
         	customer.setArea(userRequest.getArea());
         if(userRequest.getStreet() != null)
