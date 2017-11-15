@@ -12,6 +12,8 @@ public class CustomerDetailsResponse {
 	private CustomerDetails customerDetails;
 	
 	private VendorDetails vendorDetails;
+	
+	private ServiceDetails serviceDetails;
 
 	public CustomerDetails getCustomerDetails() {
 		return customerDetails;
@@ -27,6 +29,14 @@ public class CustomerDetailsResponse {
 
 	public void setVendorDetails(VendorDetails vendorDetails) {
 		this.vendorDetails = vendorDetails;
+	}
+
+	public ServiceDetails getServiceDetails() {
+		return serviceDetails;
+	}
+
+	public void setServiceDetails(ServiceDetails serviceDetails) {
+		this.serviceDetails = serviceDetails;
 	}	
     
 }

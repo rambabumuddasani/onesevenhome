@@ -1,8 +1,9 @@
 package com.salesmanager.shop.store.controller.customer;
 
-import com.salesmanager.core.model.reference.country.Country;
+import java.util.List;
 
-public class VendorDetails {
+public class ServiceDetails {
+
 	private String email;
 	private String password;
 	private String confirmPassword;
@@ -31,6 +32,7 @@ public class VendorDetails {
 	private String activationURL;
 	private String vendorTIN;
 	private String userProfile;
+	List<Integer> serviceIds;
 	public String getEmail() {
 		return email;
 	}
@@ -60,6 +62,48 @@ public class VendorDetails {
 	}
 	public void setVendorOfficeAddress(String vendorOfficeAddress) {
 		this.vendorOfficeAddress = vendorOfficeAddress;
+	}
+	public String getHouseNumber() {
+		return houseNumber;
+	}
+	public void setHouseNumber(String houseNumber) {
+		this.houseNumber = houseNumber;
+	}
+	public String getStreet() {
+		return street;
+	}
+	public void setStreet(String street) {
+		this.street = street;
+	}
+	public String getArea() {
+		return area;
+	}
+	public void setArea(String area) {
+		this.area = area;
+	}
+	public String getCity() {
+		return city;
+	}
+	public void setCity(String city) {
+		this.city = city;
+	}
+	public String getState() {
+		return state;
+	}
+	public void setState(String state) {
+		this.state = state;
+	}
+	public String getPinCode() {
+		return pinCode;
+	}
+	public void setPinCode(String pinCode) {
+		this.pinCode = pinCode;
+	}
+	public String getCountry() {
+		return country;
+	}
+	public void setCountry(String country) {
+		this.country = country;
 	}
 	public String getVendorMobile() {
 		return vendorMobile;
@@ -151,48 +195,10 @@ public class VendorDetails {
 	public void setUserProfile(String userProfile) {
 		this.userProfile = userProfile;
 	}
-	public String getHouseNumber() {
-		return houseNumber;
+	public List<Integer> getServiceIds() {
+		return serviceIds;
 	}
-	public void setHouseNumber(String houseNumber) {
-		this.houseNumber = houseNumber;
+	public void setServiceIds(List<Integer> serviceIds) {
+		this.serviceIds = serviceIds;
 	}
-	public String getStreet() {
-		return street;
-	}
-	public void setStreet(String street) {
-		this.street = street;
-	}
-	public String getArea() {
-		return area;
-	}
-	public void setArea(String area) {
-		this.area = area;
-	}
-	public String getCity() {
-		return city;
-	}
-	public void setCity(String city) {
-		this.city = city;
-	}
-	public String getState() {
-		return state;
-	}
-	public void setState(String state) {
-		this.state = state;
-	}
-	public String getPinCode() {
-		return pinCode;
-	}
-	public void setPinCode(String pinCode) {
-		this.pinCode = pinCode;
-	}
-	public String getCountry() {
-		return country;
-	}
-	public void setCountry(String country) {
-		this.country = country;
-	}
-	
-	
 }

@@ -979,13 +979,20 @@ public class CustomerRegistrationController extends AbstractController {
 
 		    customerDetailsResponse.setCustomerDetails(custDetails);
 		    LOGGER.debug("Retrieved customer details");
-		    return customerDetailsResponse;
+		 
 	}
-		else {
+		if(customer.getCustomerType().equals("1")) {
 			VendorDetails vendorDetails = new VendorDetails();
 			vendorDetails.setEmail(customer.getEmailAddress());
 			vendorDetails.setVendorName(customer.getVendorAttrs().getVendorName());
-			vendorDetails.setVendorOfficeAddress(customer.getVendorAttrs().getVendorOfficeAddress());
+			//vendorDetails.setVendorOfficeAddress(customer.getVendorAttrs().getVendorOfficeAddress());
+			vendorDetails.setHouseNumber(customer.getVendorAttrs().getVendorOfficeAddress());
+			vendorDetails.setStreet(customer.getBilling().getAddress());
+			vendorDetails.setArea(customer.getArea());
+			vendorDetails.setCity(customer.getBilling().getCity());
+			vendorDetails.setState(customer.getBilling().getState());
+			vendorDetails.setCountry(customer.getBilling().getCountry().getName());
+			vendorDetails.setPinCode(customer.getBilling().getPostalCode());
 			vendorDetails.setVendorMobile(customer.getVendorAttrs().getVendorMobile());
 			vendorDetails.setVendorTelephone(customer.getVendorAttrs().getVendorTelephone());
 			vendorDetails.setVendorFax(customer.getVendorAttrs().getVendorFax());
@@ -1002,10 +1009,46 @@ public class CustomerRegistrationController extends AbstractController {
 			vendorDetails.setUserProfile(customer.getUserProfile());
 			customerDetailsResponse.setVendorDetails(vendorDetails);
 			LOGGER.debug("Retrieved vendor details");
-			return customerDetailsResponse;
+			
 		}
-		//return customeDetailsResponse;
+		if(customer.getCustomerType().equals("2")) {
+			ServiceDetails serviceDetails = new ServiceDetails();
+			serviceDetails.setEmail(customer.getEmailAddress());
+			serviceDetails.setVendorName(customer.getVendorAttrs().getVendorName());
+			//vendorDetails.setVendorOfficeAddress(customer.getVendorAttrs().getVendorOfficeAddress());
+			serviceDetails.setHouseNumber(customer.getVendorAttrs().getVendorOfficeAddress());
+			serviceDetails.setStreet(customer.getBilling().getAddress());
+			serviceDetails.setArea(customer.getArea());
+			serviceDetails.setCity(customer.getBilling().getCity());
+			serviceDetails.setState(customer.getBilling().getState());
+			serviceDetails.setCountry(customer.getBilling().getCountry().getName());
+			serviceDetails.setPinCode(customer.getBilling().getPostalCode());
+			serviceDetails.setVendorMobile(customer.getVendorAttrs().getVendorMobile());
+			serviceDetails.setVendorTelephone(customer.getVendorAttrs().getVendorTelephone());
+			serviceDetails.setVendorFax(customer.getVendorAttrs().getVendorFax());
+			serviceDetails.setVendorConstFirm(customer.getVendorAttrs().getVendorConstFirm());
+			serviceDetails.setVendorCompanyNature(customer.getVendorAttrs().getVendorCompanyNature());
+			serviceDetails.setVendorRegistrationNo(customer.getVendorAttrs().getVendorRegistrationNo());
+			serviceDetails.setVendorPAN(customer.getVendorAttrs().getVendorPAN());
+			serviceDetails.setVendorLicense(customer.getVendorAttrs().getVendorLicense());
+			serviceDetails.setVendorAuthCert(customer.getVendorAttrs().getVendorAuthCert());
+			serviceDetails.setVendorExpLine(customer.getVendorAttrs().getVendorExpLine());
+			serviceDetails.setVendorMajorCust(customer.getVendorAttrs().getVendorMajorCust());
+			serviceDetails.setVatRegNo(customer.getVendorAttrs().getVendorVatRegNo());
+			serviceDetails.setVendorTIN(customer.getVendorAttrs().getVendorTinNumber());
+			serviceDetails.setUserProfile(customer.getUserProfile());
+			List<Services> services = customer.getServices();
+			List<Integer> serviceIds = new ArrayList<Integer>();
+			for(Services service : services){
+				Integer serviceId = service.getId();
+				serviceIds.add(serviceId);
+			}
+			serviceDetails.setServiceIds(serviceIds);
+			customerDetailsResponse.setServiceDetails(serviceDetails);
+			LOGGER.debug("Retrieved service details");
 		
+		}
+		return customerDetailsResponse;
 	}
 	
 	@RequestMapping(value="/customer/register", method = RequestMethod.POST, 
