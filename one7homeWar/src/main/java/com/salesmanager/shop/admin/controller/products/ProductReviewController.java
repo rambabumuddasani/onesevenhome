@@ -3,6 +3,7 @@ package com.salesmanager.shop.admin.controller.products;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -108,7 +109,7 @@ public class ProductReviewController {
 				productReviewVO.setReviewRating(review.getReviewRating());
 				productReviewVO.setReviewDate(review.getReviewDate());
 				//productReviewVO.setReviewRead(review.getReviewRead());
-				productReviewVO.setNick(review.getCustomer().getNick());
+				productReviewVO.setName(review.getCustomer().getBilling().getFirstName());
 				//productReviewVO.setCustomerId(review.getCustomer().getId());
 				//productReviewVO.setProductId(review.getProduct().getId());;
 				productReviewVO.setDescription(review.getDescription());
@@ -126,7 +127,7 @@ public class ProductReviewController {
 			productService.update(dbProduct);*/
 			//productReviewResponse.setStatus(1);
 		} catch (Exception e) {			
-		    LOGGER.error("Error in retrieving Product Reviews");
+		    LOGGER.error("Error in retrieving Product Reviews",e.getMessage());
 		}	
 		LOGGER.debug("Ended productReviews method");
 		return productReviewResponse;
@@ -376,6 +377,7 @@ public class ProductReviewController {
 			Product product = productService.getProductAndProductReviewByProductId(productReviewReq.getProductId());
 			product.setId(productReviewReq.getProductId());
 			productReview.setProduct(product);
+			productReview.setReviewDate(new Date());
 			product.getProductReview().add(productReview);
 			// get customer from session object
 
@@ -384,7 +386,7 @@ public class ProductReviewController {
 			product.setProductReviewAvg(new BigDecimal(avgReview));
 			
 			//Customer customer = (Customer)request.getSession().getAttribute(Constants.CUSTOMER);	// ram hard coded here
-			Customer customer = customerService.getById(productReviewReq.getProductId());
+			Customer customer = customerService.getById(productReviewReq.getUserId());
 			productReview.setCustomer(customer);
 			productReviewService.save(productReview);
 			if(productReview.getId() == null) {
@@ -398,7 +400,7 @@ public class ProductReviewController {
 		    productReviewSaveResponse.setMessage("Product Review saved successfully");		     
 		    //return  productReviewSaveResponse;
 		} catch (Exception e) {			
-			LOGGER.error("Error while saving productReview", e.getMessage());
+			LOGGER.error("Error while saving productReview"+e.getMessage());
 			productReviewSaveResponse.setStatus("false");
 			productReviewSaveResponse.setMessage("Error in saving the Product review");
 			return productReviewSaveResponse;
