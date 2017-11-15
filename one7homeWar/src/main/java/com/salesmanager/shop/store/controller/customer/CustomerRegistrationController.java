@@ -1630,8 +1630,11 @@ public class CustomerRegistrationController extends AbstractController {
         MultipartFile 	vendorCertificateFile = uploadedFiles[1];
 		String tempVendorProfilePicPath = new StringBuilder("vendor").append(File.separator).append("profiles").toString(); // give file directory path
 		String tempVendorCertificatePath = new StringBuilder("vendor").append(File.separator).append("certificates").toString(); // give file directory path
-        //for(MultipartFile 	file : uploadedFiles){
-        
+
+		if(userRequest.getUserType().equals("SERVICE")){
+			tempVendorProfilePicPath = new StringBuilder("service").append(File.separator).append("profiles").toString(); // give file directory path
+			tempVendorCertificatePath = new StringBuilder("service").append(File.separator).append("certificates").toString(); // give file directory path
+		}
 		userProfile = storeFile(profilePicFile, tempVendorProfilePicPath);
         if(!StringUtils.isEmpty(userProfile)){
         	customer.setUserProfile(userProfile);
@@ -1664,7 +1667,7 @@ public class CustomerRegistrationController extends AbstractController {
     		
        	
 	        customerFacade.updateCustomer(customer);
-	        LOGGER.debug("Vendor Updated");
+	        LOGGER.debug("User Updated");
         }catch(Exception e) {
         	storageService.deleteFile(certFileName);
         	storageService.deleteFile(userProfile);
@@ -1672,9 +1675,9 @@ public class CustomerRegistrationController extends AbstractController {
             customerResponse.setErrorMessage(e.getMessage());
             return customerResponse;
         }
-        customerResponse.setSuccessMessage("Vendor profile updated successfully");
+        customerResponse.setSuccessMessage("Profile updated successfully");
         customerResponse.setStatus(TRUE);
-        LOGGER.debug("Ended updateVendor");
+        LOGGER.debug("Ended user update");
         return customerResponse; 
 	}
 
