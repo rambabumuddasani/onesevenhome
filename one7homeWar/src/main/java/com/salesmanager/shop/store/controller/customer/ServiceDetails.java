@@ -33,6 +33,8 @@ public class ServiceDetails {
 	private String vendorTIN;
 	private String userProfile;
 	List<Integer> serviceIds;
+	private String gst;
+	
 	public String getEmail() {
 		return email;
 	}
@@ -201,4 +203,11 @@ public class ServiceDetails {
 	public void setServiceIds(List<Integer> serviceIds) {
 		this.serviceIds = serviceIds;
 	}
+	public String getGst() {
+		return gst;
+	}
+	public void setGst(String gst) {
+		this.gst = gst;
+	}
+	
 }

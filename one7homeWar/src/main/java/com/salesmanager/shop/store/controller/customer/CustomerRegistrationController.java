@@ -1008,6 +1008,7 @@ public class CustomerRegistrationController extends AbstractController {
 			vendorDetails.setVatRegNo(customer.getVendorAttrs().getVendorVatRegNo());
 			vendorDetails.setVendorTIN(customer.getVendorAttrs().getVendorTinNumber());
 			vendorDetails.setUserProfile(customer.getUserProfile());
+			vendorDetails.setGst(customer.getGst());
 			customerDetailsResponse.setVendorDetails(vendorDetails);
 			LOGGER.debug("Retrieved vendor details");
 			
@@ -1038,6 +1039,7 @@ public class CustomerRegistrationController extends AbstractController {
 			serviceDetails.setVatRegNo(customer.getVendorAttrs().getVendorVatRegNo());
 			serviceDetails.setVendorTIN(customer.getVendorAttrs().getVendorTinNumber());
 			serviceDetails.setUserProfile(customer.getUserProfile());
+			serviceDetails.setGst(customer.getGst());
 			List<Services> services = customer.getServices();
 			List<Integer> serviceIds = new ArrayList<Integer>();
 			for(Services service : services){

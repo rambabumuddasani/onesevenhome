@@ -31,6 +31,8 @@ public class VendorDetails {
 	private String activationURL;
 	private String vendorTIN;
 	private String userProfile;
+	private String gst;
+	
 	public String getEmail() {
 		return email;
 	}
@@ -192,6 +194,12 @@ public class VendorDetails {
 	}
 	public void setCountry(String country) {
 		this.country = country;
+	}
+	public String getGst() {
+		return gst;
+	}
+	public void setGst(String gst) {
+		this.gst = gst;
 	}
 	
 	
