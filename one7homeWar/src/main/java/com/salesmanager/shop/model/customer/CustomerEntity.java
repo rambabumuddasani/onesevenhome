@@ -47,6 +47,7 @@ public class CustomerEntity extends Customer implements Serializable {
 	private String dob;
 	@JsonIgnore
 	private List<Services> services;
+	private String gst;
 	
 	@NotEmpty(message="{NotEmpty.customer.userName}")
 	private String userName;
@@ -189,6 +190,14 @@ public class CustomerEntity extends Customer implements Serializable {
 
 	public void setServices(List<Services> services) {
 		this.services = services;
+	}
+
+	public String getGst() {
+		return gst;
+	}
+
+	public void setGst(String gst) {
+		this.gst = gst;
 	}
 
 }

@@ -1709,7 +1709,10 @@ public class CustomerRegistrationController extends AbstractController {
         if(userRequest.getPinCode() != null)
         	billing.setPostalCode(userRequest.getPinCode());
     	
-    	customer.setBilling(billing);
+        if(userRequest.getGst() != null)
+        	customer.setGst(userRequest.getGst());
+
+        customer.setBilling(billing);
     	
     	return customer;
 	}
@@ -1754,7 +1757,10 @@ public class CustomerRegistrationController extends AbstractController {
         if(userRequest.getPinCode() != null)
         	billing.setPostalCode(userRequest.getPinCode());
     	
-    	customer.setBilling(billing);
+        if(userRequest.getGst() != null)
+        	customer.setGst(userRequest.getGst());
+
+        customer.setBilling(billing);
     	
     	return customer;
 	}

@@ -34,6 +34,7 @@ public class UserRequest implements Serializable {
 	private String serviceTIN;
 	List<Integer> serviceIds;
 	private String userType;
+	private String gst;
 	
 	public String getEmail() {
 		return email;
@@ -196,6 +197,12 @@ public class UserRequest implements Serializable {
 	}
 	public void setUserType(String userType) {
 		this.userType = userType;
+	}
+	public String getGst() {
+		return gst;
+	}
+	public void setGst(String gst) {
+		this.gst = gst;
 	}
 	
 }

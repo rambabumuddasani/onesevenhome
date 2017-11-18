@@ -187,6 +187,9 @@ public class Customer extends SalesManagerEntity<Long, Customer> {
 	@Column(name="IS_VENDOR_ACTIVATED",nullable=false)
 	private String isVendorActivated="N";
 	
+	@Column(name="GST",length=20)
+	private String gst;
+
 	public Customer() {
 	}
 
@@ -434,6 +437,14 @@ public class Customer extends SalesManagerEntity<Long, Customer> {
 
 	public void setServices(List<Services> services) {
 		this.services = services;
+	}
+
+	public String getGst() {
+		return gst;
+	}
+
+	public void setGst(String gst) {
+		this.gst = gst;
 	}
 	
 }

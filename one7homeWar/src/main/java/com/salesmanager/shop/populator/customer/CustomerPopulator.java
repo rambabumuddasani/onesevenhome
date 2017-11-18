@@ -74,6 +74,7 @@ public class CustomerPopulator extends
 			target.setEmailAddress(source.getEmailAddress());
 			target.setNick(source.getUserName());
 			target.setArea(source.getArea());
+			target.setGst(source.getGst());
 			if(source.getGender()!=null && target.getGender()==null) {
 				target.setGender( com.salesmanager.core.model.customer.CustomerGender.valueOf( source.getGender() ) );
 			}

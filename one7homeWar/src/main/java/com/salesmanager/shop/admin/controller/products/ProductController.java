@@ -1141,8 +1141,12 @@ public class ProductController extends AbstractController {
 			if(productPrice.getProductPriceAmount() != null)
 				productDetails.setProductOriginalPrice(productPrice.getProductPriceAmount());
 			if(productPrice.getProductPriceSpecialAmount() != null) {
-				productDetails.setProductDiscountPrice(productPrice.getProductPriceSpecialAmount());
-				productDetails.setDiscountPercentage(getDiscountPercentage(productPrice));
+				if(productPrice.getProductPriceSpecialStartDate() != null && productPrice.getProductPriceSpecialEndDate() != null) {
+					if(productPrice.getProductPriceSpecialEndDate().compareTo(productPrice.getProductPriceSpecialStartDate()) > 0){
+						productDetails.setProductDiscountPrice(productPrice.getProductPriceSpecialAmount());
+						productDetails.setDiscountPercentage(getDiscountPercentage(productPrice));
+					}
+				}
 			}
 			
 			//adding filters
