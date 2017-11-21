@@ -40,6 +40,7 @@ import com.salesmanager.core.business.services.catalog.product.price.ProductPric
 import com.salesmanager.core.business.services.catalog.product.type.ProductTypeService;
 import com.salesmanager.core.business.services.customer.CustomerService;
 import com.salesmanager.core.business.services.customer.testmonial.review.CustomerTestmonialService;
+import com.salesmanager.core.business.services.image.brand.BrandImageService;
 import com.salesmanager.core.business.services.merchant.MerchantStoreService;
 import com.salesmanager.core.business.services.reference.country.CountryService;
 import com.salesmanager.core.business.services.reference.language.LanguageService;
@@ -56,6 +57,7 @@ import com.salesmanager.core.model.catalog.product.price.ProductPrice;
 import com.salesmanager.core.model.catalog.product.type.ProductType;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.customer.CustomerTestimonial;
+import com.salesmanager.core.model.image.brand.BrandImage;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.product.vendor.VendorProduct;
 import com.salesmanager.core.model.reference.country.Country;
@@ -126,6 +128,9 @@ public class AdminController extends AbstractController {
     
     @Inject
     private CustomerTestmonialService customerTestmonialService;
+    
+    @Inject
+    private BrandImageService brandImageService;
     
     // Admin update store address
 	@RequestMapping(value="/admin/updatestore", method = RequestMethod.POST, 
@@ -1398,12 +1403,12 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 			
 			if(approveTestimonialRequest.getStatus().equals("Y")){
 				LOGGER.debug("Testimonial approved");
-			approveTestimonialResponse.setSuccessMessage("Testimonial approved successfully");
+			approveTestimonialResponse.setSuccessMessage("Testimonial enabled successfully");
 			approveTestimonialResponse.setStatus(TRUE);
 			}
 			if(approveTestimonialRequest.getStatus().equals("N")) {
 				LOGGER.debug("Testimonial declined");
-				approveTestimonialResponse.setSuccessMessage("Testimonial is declined successfully");
+				approveTestimonialResponse.setSuccessMessage("Testimonial is disabled successfully");
 				approveTestimonialResponse.setStatus(TRUE);
 			}
 		} catch (Exception e) {
@@ -1486,7 +1491,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	LOGGER.debug("Entered saveTestimonial");
     	TestimonialResponse testimonialResponse = new TestimonialResponse();
     	if(StringUtils.isEmpty(testimonialRequest.getTestmonialDescription())){
-    		testimonialResponse.setErrorMessage("Feedback cannot be empty");
+    		testimonialResponse.setErrorMessage("Testimonial cannot be empty");
     		testimonialResponse.setStatus(FALSE);
     		return testimonialResponse;
     	}
@@ -1497,7 +1502,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	customerTestimonial.setDescription(testimonialRequest.getTestmonialDescription());
     	customerTestimonial.setStatus("N");
     	customerTestmonialService.save(customerTestimonial);
-    	testimonialResponse.setSuccessMessage("Feedback Saved successfully");
+    	testimonialResponse.setSuccessMessage("Testimonial saved successfully");
     	LOGGER.debug("Testimonial saved");
     	testimonialResponse.setStatus(TRUE);
     	LOGGER.debug("Ended saveTestimonial");
@@ -1514,6 +1519,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	if(customerTestimonial==null) {
     		deleteTesimonialResponse.setErrormessage("Testimonial not found for id "+testimonialIdLong);
     		deleteTesimonialResponse.setStatus(FALSE);
+    		return deleteTesimonialResponse;
     	}
     	customerTestmonialService.delete(customerTestimonial);
     	LOGGER.debug("Testimonial deleted");
@@ -1525,6 +1531,119 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	LOGGER.debug("Ended deleteTestimonial");
     	return deleteTesimonialResponse;
     	
+    }
+    @RequestMapping(value="/uploadBrandImage", method = RequestMethod.POST)
+	@ResponseBody
+	public BrandImageResponse uploadBrandImage(@RequestPart("brandImageRequest") String brandImageStr,
+			@RequestPart("file") MultipartFile brandImage) throws Exception {
+    	LOGGER.debug("Entered uploadBrandImage");
+    	BrandImageRequest brandImageRequest = new ObjectMapper().readValue(brandImageStr, BrandImageRequest.class);
+    	BrandImageResponse brandImageResponse = new BrandImageResponse();
+    	
+    	String fileName = "";
+    	// Storing uploaded or updated image 
+    	if(brandImage.getSize() != 0) {
+    		try{
+    			LOGGER.debug("Storing brandImage");
+    			fileName = storageService.store(brandImage,"brandimg");
+    			System.out.println("fileName "+fileName);
+    		}catch(StorageException se){
+    			LOGGER.error("StoreException occured"+se.getMessage());
+    			brandImageResponse.setErrorMessage("Failed while storing brand image");
+    			brandImageResponse.setStatus(FALSE);
+    			return brandImageResponse;
+    		}
+    	}
+    		try { 
+    			BrandImage brandImageObj = new BrandImage();
+    			brandImageObj.setImage(fileName);
+    			brandImageObj.setName(brandImageRequest.getBrandName());
+    			brandImageObj.setStatus("N");
+    			brandImageService.save(brandImageObj);
+    			LOGGER.debug("Brand Image uploaded");
+    		}
+		catch(Exception e){
+			LOGGER.error("Error while storing brand image");
+			if(StringUtils.isEmpty(fileName)){
+				storageService.deleteFile(fileName); // delete image
+			}
+			brandImageResponse.setStatus(FALSE);
+			brandImageResponse.setErrorMessage("Error while storing brand image");
+		}
+        LOGGER.debug("Ended uploadBrandImage");
+		return brandImageResponse;
+    	
+    }
+    @RequestMapping(value="/deleteBrandImage/{brandImageId}", method = RequestMethod.GET)
+    @ResponseBody
+    public DeleteBrandImageResponse deleteBrandImage(@PathVariable String brandImageId) throws Exception {
+		LOGGER.debug("Entered deleteBrandImage");
+		DeleteBrandImageResponse deleteBrandImageResponse = new DeleteBrandImageResponse();
+		Long brandImageIdLong = new Long(brandImageId);
+		try {
+		BrandImage brandImage = brandImageService.getById(brandImageIdLong);
+		if(brandImage==null){
+			deleteBrandImageResponse.setErrorMessage("Brand Image cannot be found");
+			deleteBrandImageResponse.setStatus(FALSE);
+			return deleteBrandImageResponse;
+		}
+		brandImageService.delete(brandImage);
+		LOGGER.debug("Brand Image deleted");
+		deleteBrandImageResponse.setSuccessMessage("Brand Image deleted successfully");
+		deleteBrandImageResponse.setStatus(TRUE);
+		}catch(Exception e) {
+			LOGGER.error("Error while deleting brand image",e.getMessage());
+		}
+    	return deleteBrandImageResponse;
+    	
+    }
+    @RequestMapping(value="/getBrandImages", method = RequestMethod.POST)
+    @ResponseBody
+    public AdminBrandImageResponse getBrandImages(@RequestBody AdminBrandImageRequest adminBrandImageRequest) throws Exception {
+		LOGGER.debug("Entered getBrandImages");
+		AdminBrandImageResponse adminBrandImageResponse = new AdminBrandImageResponse();
+    	List<BrandImageVO> brandImageVOList = new ArrayList<BrandImageVO>();
+    	if(adminBrandImageRequest.getStatus().equals("ALL")) {
+    		List<BrandImage> brandImages = brandImageService.getAllBrandImages();
+    		for(BrandImage brandImage : brandImages) {
+    			BrandImageVO brandImageVO = new BrandImageVO();
+    			brandImageVO.setBrandId(brandImage.getId());
+    			brandImageVO.setBrandName(brandImage.getName());
+    			brandImageVO.setBrangImage(brandImage.getImage());
+    			brandImageVO.setStatus(brandImage.getStatus());
+    			brandImageVOList.add(brandImageVO);
+    		}
+    		adminBrandImageResponse.setBrandImages(brandImageVOList);
+    	}
+    	if(adminBrandImageRequest.getStatus().equals("Y")) {
+    		List<BrandImage> brandImages = brandImageService.getEnableBrandImages();
+    		for(BrandImage brandImage : brandImages) {
+    			BrandImageVO brandImageVO = new BrandImageVO();
+    			brandImageVO.setBrandId(brandImage.getId());
+    			brandImageVO.setBrandName(brandImage.getName());
+    			brandImageVO.setBrangImage(brandImage.getImage());
+    			brandImageVO.setStatus(brandImage.getStatus());
+    			brandImageVOList.add(brandImageVO);
+    		}
+    		adminBrandImageResponse.setBrandImages(brandImageVOList);
+    		
+    	}
+    	if(adminBrandImageRequest.getStatus().equals("N")) {
+    		List<BrandImage> brandImages = brandImageService.getDisableBrandImages();
+    		for(BrandImage brandImage : brandImages) {
+    			BrandImageVO brandImageVO = new BrandImageVO();
+    			brandImageVO.setBrandId(brandImage.getId());
+    			brandImageVO.setBrandName(brandImage.getName());
+    			brandImageVO.setBrangImage(brandImage.getImage());
+    			brandImageVO.setStatus(brandImage.getStatus());
+    			brandImageVOList.add(brandImageVO);
+    		}
+    		adminBrandImageResponse.setBrandImages(brandImageVOList);
+    		
+    	}
+    	return adminBrandImageResponse;
+    	
+
     }
 }
     
