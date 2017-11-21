@@ -13,9 +13,8 @@ import java.util.regex.Pattern;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.commons.lang3.Validate;
 import org.springframework.stereotype.Service;
 
 import com.salesmanager.core.business.constants.Constants;
@@ -295,6 +294,16 @@ public class PaymentServiceImpl implements PaymentService {
 	
 	}
 	
+	@Override
+	public Transaction createTransactionObject(BigDecimal amount,Order order){
+		Transaction transaction = new Transaction();
+		transaction.setAmount(amount);
+		transaction.setTransactionDate(new Date());
+		transaction.setTransactionType(TransactionType.AUTHORIZE);
+		transaction.setOrder(order);
+		transaction.setPaymentType(PaymentType.CCAvenue);
+		return transaction;
+	}
 
 	
 

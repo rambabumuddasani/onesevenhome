@@ -94,6 +94,10 @@ import com.salesmanager.shop.utils.LabelUtils;
 @RequestMapping("/order")
 public class ShoppingOrderController extends AbstractController {
 	
+	private static final String ORDER_STATUS = "order_status";
+
+	private static final String SUCCESS = "Success";
+
 	private static final Logger LOGGER = LoggerFactory
 	.getLogger(ShoppingOrderController.class);
 	
@@ -610,8 +614,8 @@ public class ShoppingOrderController extends AbstractController {
 		String currency = cCAvenuePaymentConfiguration.getCurrency();
 		String workingKey = cCAvenuePaymentConfiguration.getWorkingKey();
 		String merchantId = cCAvenuePaymentConfiguration.getMerchantID();
-		String cancelUrl = cCAvenuePaymentConfiguration.getCancelUrl()+orderId;
-		String redirectUrl = cCAvenuePaymentConfiguration.getRedirectUrl()+orderId;
+		String cancelUrl = cCAvenuePaymentConfiguration.getCancelUrl()+"/"+orderId;
+		String redirectUrl = cCAvenuePaymentConfiguration.getRedirectUrl()+"/"+orderId;
 /*		String accessCode = "AVHD01EJ26AZ97DHZA";
 		String currency = "INR";
 		String workingKey = "3851071924D585DD8AE59B9C17489B26";
@@ -632,7 +636,8 @@ public class ShoppingOrderController extends AbstractController {
 		reqParams.put("billing_city", customer.getBilling().getCity());
 		reqParams.put("billing_state", customer.getBilling().getState());	
 		reqParams.put("billing_zip", customer.getBilling().getPostalCode());
-		reqParams.put("billing_country", customer.getBilling().getCountry().getIsoCode());
+		//reqParams.put("billing_country", customer.getBilling().getCountry().getIsoCode());
+		reqParams.put("billing_country", "India");
 		reqParams.put("billing_tel", customer.getBilling().getTelephone());
 		reqParams.put("billing_email", customer.getEmailAddress());
 /*		reqParams.put("delivery_name", "Ram");
@@ -675,14 +680,14 @@ public class ShoppingOrderController extends AbstractController {
 		OrderStatusHistory orderHistory = new OrderStatusHistory();
 		orderHistory.setOrder(order);
 		Set<String> reqParams = new HashSet<String>();
-		reqParams.add("order_status");
+		reqParams.add(ORDER_STATUS);
 		reqParams.add("tracking_id");
 		reqParams.add("status_message");
 		reqParams.add("trans_date");
-		Map<String,String> data = new HashMap();
+		Map<String,String> data = new HashMap<String,String>();
 		decryptRequiredResponse(request, reqParams, data);
 		OrderStatus status = null;
-		if("Success".equals(data.get("order_status"))){
+		if(SUCCESS.equals(data.get(ORDER_STATUS))){
 			status = OrderStatus.ORDERED;
 		}else {
 			status = OrderStatus.FAILURE;
@@ -692,6 +697,7 @@ public class ShoppingOrderController extends AbstractController {
 		orderService.addOrderStatusHistory(order, orderHistory);
 		order.setStatus(status);
 		orderService.saveOrUpdate(order);
+		paymentService.createTransactionObject(order.getTotal(),order);
 		return "Order completed "+orderId;
 	}
 
@@ -706,6 +712,7 @@ public class ShoppingOrderController extends AbstractController {
 		orderService.addOrderStatusHistory(order, orderHistory);
 		order.setStatus(OrderStatus.FAILURE);
 		orderService.saveOrUpdate(order);
+		paymentService.createTransactionObject(order.getTotal(),order);
 		return "Order canceled "+orderId;
 	}
 

@@ -95,9 +95,13 @@ public interface PaymentService {
 	 * Returns a PaymentModule based on the payment code
 	 * @param paymentModuleCode
 	 * @return PaymentModule
-	 * @throws ServiceException
+	 * @throws ServiceException	
 	 */
 	PaymentModule getPaymentModule(String paymentModuleCode)
 			throws ServiceException;
+
+	//Transaction createPaymentObject(BigDecimal amount);
+
+	Transaction createTransactionObject(BigDecimal amount, Order order);
 
 }
