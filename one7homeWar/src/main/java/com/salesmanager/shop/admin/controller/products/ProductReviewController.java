@@ -143,7 +143,7 @@ public class ProductReviewController {
 		Double reviewRating = review.getReviewRating();
 		if(ratingMap.containsKey(reviewRating)){
 			Integer count = ratingMap.get(reviewRating);
-			ratingMap.put(reviewRating,count++);
+			ratingMap.put(reviewRating,++count);
 		}else {
 			ratingMap.put(reviewRating,1);
 		}
@@ -182,7 +182,7 @@ public class ProductReviewController {
 			Double reviewRating = review.getReviewRating();
 			if(ratingMap.containsKey(reviewRating)){
 				Integer count = ratingMap.get(reviewRating);
-				ratingMap.put(reviewRating,count++);
+				ratingMap.put(reviewRating,++count);
 			}else {
 				ratingMap.put(reviewRating,1);
 			}
