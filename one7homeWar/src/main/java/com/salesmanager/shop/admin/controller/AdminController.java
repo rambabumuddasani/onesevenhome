@@ -1561,6 +1561,8 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     			brandImageObj.setStatus(brandImageRequest.getStatus());
     			brandImageService.save(brandImageObj);
     			LOGGER.debug("Brand Image uploaded");
+    			brandImageResponse.setStatus(TRUE);
+    			brandImageResponse.setSuccessmessge("Brand Image uploaded successfully");
     		}
 		catch(Exception e){
 			LOGGER.error("Error while storing brand image");
