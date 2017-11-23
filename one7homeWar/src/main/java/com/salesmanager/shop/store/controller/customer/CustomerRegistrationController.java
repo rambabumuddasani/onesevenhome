@@ -1687,8 +1687,8 @@ public class CustomerRegistrationController extends AbstractController {
  
 		if(userRequest.getEmail() != null){
         	customer.setEmailAddress(userRequest.getEmail());
-        	billing.setFirstName(userRequest.getEmail());
-        	billing.setLastName(userRequest.getEmail());
+        	//billing.setFirstName(userRequest.getEmail());
+        	//billing.setLastName(userRequest.getEmail());
         }
         if(userRequest.getPassword() != null) {
         	customer.setPassword(userRequest.getPassword());
@@ -1704,8 +1704,11 @@ public class CustomerRegistrationController extends AbstractController {
         	customer.setArea(userRequest.getArea()); 
         if(userRequest.getCity() != null)
         	billing.setCity(userRequest.getCity());
-        if(userRequest.getCompanyName() != null)
+        if(userRequest.getCompanyName() != null) {
         	billing.setCompany(userRequest.getCompanyName());
+            billing.setFirstName(userRequest.getCompanyName());
+            billing.setLastName(userRequest.getCompanyName());
+        }
         if(userRequest.getState() != null)
         	billing.setState(userRequest.getState());
         if(userRequest.getPinCode() != null)
@@ -1728,8 +1731,8 @@ public class CustomerRegistrationController extends AbstractController {
         	customer.setFirstName(userRequest.getEmail());
         	customer.setLastName(userRequest.getEmail());
         	customer.setUserName(userRequest.getEmail());
-        	billing.setFirstName(userRequest.getEmail());
-        	billing.setLastName(userRequest.getEmail());
+        	//billing.setFirstName(userRequest.getEmail());
+        	//billing.setLastName(userRequest.getEmail());
         }
     	customer.setClearPassword(userRequest.getPassword());
     	customer.setStoreCode("DEFAULT");
@@ -1752,8 +1755,11 @@ public class CustomerRegistrationController extends AbstractController {
         	customer.setArea(userRequest.getArea()); 
         if(userRequest.getCity() != null)
         	billing.setCity(userRequest.getCity());
-        if(userRequest.getCompanyName() != null)
+        if(userRequest.getCompanyName() != null) {
         	billing.setCompany(userRequest.getCompanyName());
+            billing.setFirstName(userRequest.getCompanyName());
+            billing.setLastName(userRequest.getCompanyName());
+        }
         if(userRequest.getState() != null)
         	billing.setStateProvince(userRequest.getState());
         if(userRequest.getPinCode() != null)
