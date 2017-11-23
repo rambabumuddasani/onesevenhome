@@ -1402,12 +1402,12 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 			customerTestmonialService.update(customerTestimonial);
 			
 			if(approveTestimonialRequest.getStatus().equals("Y")){
-				LOGGER.debug("Testimonial approved");
+				LOGGER.debug("Testimonial enabled");
 			approveTestimonialResponse.setSuccessMessage("Testimonial enabled successfully");
 			approveTestimonialResponse.setStatus(TRUE);
 			}
 			if(approveTestimonialRequest.getStatus().equals("N")) {
-				LOGGER.debug("Testimonial declined");
+				LOGGER.debug("Testimonial disabled");
 				approveTestimonialResponse.setSuccessMessage("Testimonial is disabled successfully");
 				approveTestimonialResponse.setStatus(TRUE);
 			}
@@ -1558,7 +1558,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     			BrandImage brandImageObj = new BrandImage();
     			brandImageObj.setImage(fileName);
     			brandImageObj.setName(brandImageRequest.getBrandName());
-    			brandImageObj.setStatus("N");
+    			brandImageObj.setStatus(brandImageRequest.getStatus());
     			brandImageService.save(brandImageObj);
     			LOGGER.debug("Brand Image uploaded");
     		}
@@ -1587,6 +1587,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 			deleteBrandImageResponse.setStatus(FALSE);
 			return deleteBrandImageResponse;
 		}
+		storageService.deleteFile(brandImage.getImage());
 		brandImageService.delete(brandImage);
 		LOGGER.debug("Brand Image deleted");
 		deleteBrandImageResponse.setSuccessMessage("Brand Image deleted successfully");
@@ -1644,6 +1645,41 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	return adminBrandImageResponse;
     	
 
+    }
+    @RequestMapping(value="/enable/brangImage", method = RequestMethod.POST)
+	@ResponseBody
+	public EnableBrandImageResponse enableOrDisableBrandImage(@RequestBody EnableBrandImageRequest enableBrandImageRequest) throws Exception {
+		LOGGER.debug("Entered enableBrandImage");
+		EnableBrandImageResponse enableBrandImageResponse = new EnableBrandImageResponse();
+		try {
+			BrandImage brandImage = brandImageService.getById(enableBrandImageRequest.getBrandImageId());
+			if(brandImage==null){
+				enableBrandImageResponse.setErrorMessage("Brand Image cannot be found");
+				enableBrandImageResponse.setStatus(FALSE);
+				return enableBrandImageResponse;
+			}
+			if(enableBrandImageRequest.getStatus().equals("Y")){
+				brandImage.setStatus(enableBrandImageRequest.getStatus());
+			} else {
+				brandImage.setStatus(enableBrandImageRequest.getStatus());
+			}
+			brandImageService.update(brandImage);
+			
+			if(enableBrandImageRequest.getStatus().equals("Y")) {
+			LOGGER.debug("Brand Image enabled");
+			enableBrandImageResponse.setSuccessMessage("Brand Image enabled successfully");
+			enableBrandImageResponse.setStatus(TRUE);
+			}
+			if(enableBrandImageRequest.getStatus().equals("N")) {
+				LOGGER.debug("Brand Image disabled");
+				enableBrandImageResponse.setSuccessMessage("Brand disabled successfully");
+				enableBrandImageResponse.setStatus(TRUE);
+				}
+			}catch(Exception e) {
+				LOGGER.error("Error while enabling/disabling brand image",e.getMessage());
+			}
+    	return enableBrandImageResponse;
+    	
     }
 }
     
