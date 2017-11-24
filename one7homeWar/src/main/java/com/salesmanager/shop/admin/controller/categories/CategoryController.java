@@ -52,7 +52,7 @@ import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.fileupload.services.StorageException;
 import com.salesmanager.shop.fileupload.services.StorageService;
 import com.salesmanager.shop.utils.LabelUtils;
-import com.sun.prism.Image;
+//import com.sun.prism.Image;
 
 
 
