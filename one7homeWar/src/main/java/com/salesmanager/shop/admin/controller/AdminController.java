@@ -514,15 +514,8 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
 		MerchantStore store=merchantStoreService.getMerchantStore(MerchantStore.DEFAULT_STORE);
 		List<ProductType> productTypes = productTypeService.list();
 		
-		//List<TaxClass> taxClasses = taxClassService.listByStore(store);
-		
-		//List<Language> languages = store.getLanguages();
-		
 		com.salesmanager.shop.admin.model.catalog.Product product = new com.salesmanager.shop.admin.model.catalog.Product();
 		List<ProductDescription> descriptions = new ArrayList<ProductDescription>();
-
-
-			//Product dbProduct = productService.getById(productId);
 			
 			product.setProduct(dbProduct);
 			Set<ProductDescription> productDescriptions = dbProduct.getDescriptions();
@@ -672,37 +665,6 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     	return adminVendorProductResponse;
     	
     }
-    
-    /*//show vendor products under admin gui so that admin can approve vendor products 
-    @RequestMapping(value="/admin/vendor/products", method = RequestMethod.GET)
-	@ResponseBody
-	public AdminVendorProductResponse getVendorProducts() throws Exception {
-    	System.out.println("getVendorProducts() : ");
-    	AdminVendorProductResponse adminVendorProductResponse = new AdminVendorProductResponse();
-    	List<VendorProduct> vendorProducts = vendorProductService.getVendorProducts();
-    	if(vendorProducts==null) {
-    		adminVendorProductResponse.setErrorMsg("Vendor products not found");
-    		return adminVendorProductResponse;
-    	}
-    	System.out.println("VendorProducts: "+vendorProducts);
-    	List<VendorProductVO> vproductList = new ArrayList<VendorProductVO>();
-    	for(VendorProduct vendorProduct : vendorProducts) {
-    		System.out.println("vendorProduct"+vendorProduct);
-    		VendorProductVO vendorProductVO = new VendorProductVO();
-    		vendorProductVO.setVendorProductId(vendorProduct.getId());
-    		vendorProductVO.setVendorId(vendorProduct.getCustomer().getId());
-    		System.out.println("vendorProduct.getCustomer().getId()"+vendorProduct.getCustomer().getId());
-    		if (!(vendorProduct.getCustomer().getVendorAttrs().getVendorName().equals(null))){
-    		vendorProductVO.setVendorName(vendorProduct.getCustomer().getVendorAttrs().getVendorName());
-    		}
-    		vendorProductVO.setProductId(vendorProduct.getProduct().getId());
-    		vendorProductVO.setProductName(vendorProduct.getProduct().getProductDescription().getName());
-    		//vendorProductVO.setDescription(vendorProduct.getProduct().getProductDescription().getDescription());
-    		vproductList.add(vendorProductVO);
-    	}
-    	adminVendorProductResponse.setVendorProducts(vproductList);
-    	return adminVendorProductResponse;
-    }*/
     
     // get vendor products with pagination
     @RequestMapping(value="/admin/vendor/products", method = RequestMethod.GET)
@@ -1051,50 +1013,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
      return dealUpdateOrRemoveResponse;
 
 }
-    /*@RequestMapping(value="/uploadSubCatImage", method = RequestMethod.POST)
-	@ResponseBody
-	public SubCatImageResponse uploadSubCatImage(@RequestPart("subCatImageRequest") String subCatImageRequestStr,
-			@RequestPart("file") MultipartFile subCatImage) throws Exception {
-    	System.out.println("Entered uploadSubCatImage");
-    	SubCatImageRequest subCatImageRequest = new ObjectMapper().readValue(subCatImageRequestStr, SubCatImageRequest.class);
-    	SubCatImageResponse subCatImageResponse = new SubCatImageResponse();
-    	Category subCategory = categoryService.getByCategoryCode(subCatImageRequest.getSubCategoryName());
-    	String fileName = "";
-    	// Storing uploaded img 
-    	if(subCatImage.getSize() != 0) {
-    		try{
-    			fileName = storageService.store(subCatImage,"subcategoryimg");
-    			System.out.println("fileName "+fileName);
-    		}catch(StorageException se){
-    			System.out.println("StoreException occured, do wee need continue "+se);
-    			subCatImageResponse.setErrorMessage("Failed while storing image");
-    			subCatImageResponse.setStatus("false");
-    			return subCatImageResponse;
-    		}
-    	}
-    		try {	
-				SubCategoryImage subCategoryImage = new SubCategoryImage();
-				subCategoryImage.setSubCategoryImageURL(fileName);
-				subCategoryImage.setCategory(subCategory);
-				System.out.println("Sub category image url::"+fileName);
-				System.out.println("sub category id::"+subCategory.getId());
-				
-				subCategoryService.save(subCategoryImage);
-				
-				subCatImageResponse.setSubCategoryId(subCategory.getId());
-				subCatImageResponse.setSubCatImgURL(fileName);
-				subCatImageResponse.setSuccessMessage("SubCategory Image uploaded successfully");
-				subCatImageResponse.setStatus("true");
-					
-    		}
-		catch(Exception e){
-			e.printStackTrace();
-			subCatImageResponse.setStatus("false");
-			subCatImageResponse.setErrorMessage("Error while storing sub category image");
-		}
-    
-		return subCatImageResponse;
-    }*/
+   //Retrieval of subcategory images
     @RequestMapping(value="/getAllSubCatImages", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -1139,52 +1058,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
         LOGGER.debug("Entered getAllSubCatImages");
     	return adminSubCatImgResponse;
     }
-   /* @RequestMapping(value="/updateSubCatImage", method = RequestMethod.POST)
-	@ResponseBody
-	public SubCatImageResponse updateSubCatImage(@RequestPart("subCatImageRequest") String subCatImageRequestStr,
-			@RequestPart("file") MultipartFile subCatImage) throws Exception {
-				
-    	SubCatImageRequest subCatImageRequest = new ObjectMapper().readValue(subCatImageRequestStr, SubCatImageRequest.class);
-    	SubCatImageResponse subCatImageResponse = new SubCatImageResponse();
-    	Category subCategory = categoryService.getByCategoryCode(subCatImageRequest.getSubCategoryName());
-    	String fileName = "";
-    	// Storing uploaded img 
-    	if(subCatImage.getSize() != 0) {
-    		try{
-    			fileName = storageService.store(subCatImage,"subcategoryimg");
-    			System.out.println("fileName "+fileName);
-    		}catch(StorageException se){
-    			System.out.println("StoreException occured, do wee need continue "+se);
-    			subCatImageResponse.setErrorMessage("Failed while storing image");
-    			subCatImageResponse.setStatus("false");
-    			return subCatImageResponse;
-    		}
-    	}
-    		try {	
-    			SubCategoryImage subCategoryImage = subCategoryService.getByCategoryId(subCategory.getId());
-    			System.out.println("subCategoryImage id::"+subCategoryImage.getCategory().getId());
-				subCategoryImage.setSubCategoryImageURL(fileName);
-				subCategoryImage.setCategory(subCategory);
-				System.out.println("Sub category image url::"+fileName);
-				System.out.println("sub category id::"+subCategory.getId());
-				
-				subCategoryService.update(subCategoryImage);
-				
-				subCatImageResponse.setSubCategoryId(subCategory.getId());
-				subCatImageResponse.setSubCatImgURL(fileName);
-				subCatImageResponse.setSuccessMessage("SubCategory Image updated successfully");
-				subCatImageResponse.setStatus("true");
-					
-    		}
-		catch(Exception e){
-			e.printStackTrace();
-			subCatImageResponse.setStatus("false");
-			subCatImageResponse.setErrorMessage("Error while storing updating sub category image");
-		}
-    
-		return subCatImageResponse;
-    	
-    }*/
+   
     // Remove sub category image
     @RequestMapping(value="/deleteSubCatImage/{subCategoryId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -1271,105 +1145,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		return subCatImageResponse;
     }
    
-/*    // Save Testimonial
-    @RequestMapping(value="/testimonial/save", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
-  	@ResponseBody
-  	public TestimonialResponse saveTestimonial(@RequestBody TestimonialRequest testimonialRequest) throws Exception {
-    	LOGGER.debug("Entered saveTestimonial");
-    	TestimonialResponse testimonialResponse = new TestimonialResponse();
-    	if(StringUtils.isEmpty(testimonialRequest.getTestmonialDescription())){
-    		testimonialResponse.setErrorMessage("Feedback cannot be empty");
-    		testimonialResponse.setStatus(FALSE);
-    		return testimonialResponse;
-    	}
-    	
-    	Customer customer = customerService.getById(testimonialRequest.getCustomerId());
-    	CustomerTestimonial customerTestimonial = new CustomerTestimonial();
-    	customerTestimonial.setCustomer(customer);
-    	customerTestimonial.setDescription(testimonialRequest.getTestmonialDescription());
-    	customerTestimonial.setEnable(false);
-    	customerTestmonialService.save(customerTestimonial);
-    	testimonialResponse.setSuccessMessage("Feedback Saved successfully");
-    	LOGGER.debug("Testimonial saved");
-    	testimonialResponse.setStatus(TRUE);
-    	LOGGER.debug("Ended saveTestimonial");
-    	return testimonialResponse;
-    }
-    @RequestMapping(value="/getAllTestimonials", method = RequestMethod.GET, 
-			produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public AdminTestimonialResponse getAllTestimonials() throws Exception {
-    	LOGGER.debug("Entered getAllTestimonials");
-    	AdminTestimonialResponse adminTestimonialResponse = new AdminTestimonialResponse();
-    	List<CustomerTestimonialVO>  customerTestimonialVOList = new ArrayList<CustomerTestimonialVO>();
-    	List<CustomerTestimonial> customerTestimonials = customerTestmonialService.getAllTestimonials();
-    	for(CustomerTestimonial testmonial : customerTestimonials) {
-    		CustomerTestimonialVO customerTestimonialVO = new CustomerTestimonialVO();
-    		customerTestimonialVO.setCustomerId(testmonial.getCustomer().getId());
-    		customerTestimonialVO.setCustomerName(testmonial.getCustomer().getBilling().getFirstName());
-    		customerTestimonialVO.setEmailAddress(testmonial.getCustomer().getEmailAddress());
-    		customerTestimonialVO.setDescription(testmonial.getDescription());
-    		customerTestimonialVO.setTestimonialId(testmonial.getId());
-    		customerTestimonialVO.setEnable(testmonial.isEnable());
-    		customerTestimonialVOList.add(customerTestimonialVO);
-    	}
-    	adminTestimonialResponse.setCustomerTestimonials(customerTestimonialVOList);
-    	LOGGER.debug("Ended getAllTestimonials");
-    	return adminTestimonialResponse;
-    	
-    }
-    // Approve customer testimonials
-    @RequestMapping(value="/approve/testimonial", method = RequestMethod.POST, 
-			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public ApproveTestimonialResponse approveTestimonial(@RequestBody ApproveTestimonialRequest approveTestimonialRequest) throws Exception {
-		LOGGER.debug("Entered approveTestimonial");
-		ApproveTestimonialResponse approveTestimonialResponse = new ApproveTestimonialResponse();
-		Long testimonialIdLong = approveTestimonialRequest.getTestimonialId();
-		CustomerTestimonial customerTestimonial = customerTestmonialService.getTestimonialById(testimonialIdLong);
-		//if(approveTestimonialRequest.isEnable()) {
-			customerTestimonial.setEnable(approveTestimonialRequest.isEnable());
-		//}
-		//else {
-			//customerTestimonial.setEnable(false);
-		//}
-		try {
-			customerTestmonialService.update(customerTestimonial);
-			LOGGER.debug("Testimonial approved");
-			approveTestimonialResponse.setSuccessMessage("Testimonial approved successfully");
-			approveTestimonialResponse.setStatus(TRUE);
-		} catch (Exception e) {
-			LOGGER.error("Error in updating Testimonial");
-			approveTestimonialResponse.setErrorMessage("Error in approving Testimonial");
-			approveTestimonialResponse.setStatus(FALSE);
-			return approveTestimonialResponse;
-		}
-		LOGGER.debug("Ended approveTestimonial");
-    	return approveTestimonialResponse;
-    } 
-    // Retrieve Admin Approved customer testimonials
-    @RequestMapping(value="/getApprovedTestimonials", method = RequestMethod.GET, 
-			produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public AdminApproveTestimonialResponse getAdminApproveTestimonials() {
-    	LOGGER.debug("Entered getAdminApproveTestimonials");
-    	AdminApproveTestimonialResponse adminApproveTestimonialResponse = new AdminApproveTestimonialResponse();
-    	List<AdminApproveTestimonialVO> adminApproveTestimonialVOList = new ArrayList<AdminApproveTestimonialVO>();
-    	List<CustomerTestimonial> approvedTestimonials = customerTestmonialService.getApprovedTestimonial();
-    	for(CustomerTestimonial approvedTestimonial : approvedTestimonials) {
-    		AdminApproveTestimonialVO adminApproveTestimonialVO = new AdminApproveTestimonialVO();
-    		adminApproveTestimonialVO.setCustomerId(approvedTestimonial.getCustomer().getId());
-    		adminApproveTestimonialVO.setCustomerName(approvedTestimonial.getCustomer().getBilling().getFirstName());
-    		adminApproveTestimonialVO.setEmailAddress(approvedTestimonial.getCustomer().getEmailAddress());
-    		adminApproveTestimonialVO.setDescription(approvedTestimonial.getDescription());
-    		adminApproveTestimonialVO.setEnable(approvedTestimonial.isEnable());
-    		adminApproveTestimonialVO.setTestimonialId(approvedTestimonial.getId());
-    		adminApproveTestimonialVOList.add(adminApproveTestimonialVO);
-    	}
-    	adminApproveTestimonialResponse.setApprovedTestimonials(adminApproveTestimonialVOList);
-    	LOGGER.debug("Ended getAdminApproveTestimonials");
-    	return adminApproveTestimonialResponse;	
-    }*/
+    // Approve testimonial by id
     @RequestMapping(value="/testimonial/{testimonialId}", method = RequestMethod.GET)
 	@ResponseBody
 	public TesimonialResponse getTestimonialById(@PathVariable String testimonialId) {
@@ -1384,6 +1160,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	tesimonialResponse.setTestimonialId(customerTestimonial.getId());
     	return tesimonialResponse;
     }
+    // Approve testimonial
     @RequestMapping(value="/approve/testimonial", method = RequestMethod.POST, 
 			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -1420,11 +1197,12 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		LOGGER.debug("Ended approveOrDeclineTestimonial");
     	return approveTestimonialResponse;
     } 
+    // Retrieval of testimonials
     @RequestMapping(value="/getTestimonials", method = RequestMethod.POST)
 	@ResponseBody
 	public PaginatedResponse getTestimonials(@RequestBody AdminTestimonialsRequest adminTestimonialsRequest,@RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) {
     	LOGGER.debug("Entered getTestimonials");
-    	AdminTestimonialResponse adminTestimonialResponse = new AdminTestimonialResponse();
+    	
     	List<CustomerTestimonialVO>  customerTestimonialVOList = new ArrayList<CustomerTestimonialVO>();
     	PaginatedResponse paginatedResponse = new PaginatedResponse();
     	if(adminTestimonialsRequest.getStatus().equals("ALL")){
@@ -1440,7 +1218,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
         		customerTestimonialVO.setStatus(testmonial.getStatus());
         		customerTestimonialVOList.add(customerTestimonialVO);
         	}
-    		adminTestimonialResponse.setCustomerTestimonials(customerTestimonialVOList);
+    		
     	}
     	if(adminTestimonialsRequest.getStatus().equals("Y")) {
     		List<CustomerTestimonial> approvedTestimonials = customerTestmonialService.getApprovedTestimonial();
@@ -1455,7 +1233,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
         		customerTestimonialVO.setStatus(testmonial.getStatus());
         		customerTestimonialVOList.add(customerTestimonialVO);
         	}
-    		adminTestimonialResponse.setCustomerTestimonials(customerTestimonialVOList);
+    		
     	}
     	if(adminTestimonialsRequest.getStatus().equals("N")) {
     		List<CustomerTestimonial> declinedTestimonials = customerTestmonialService.getDeclinedtestimonials();
@@ -1470,7 +1248,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
         		customerTestimonialVO.setStatus(testmonial.getStatus());
         		customerTestimonialVOList.add(customerTestimonialVO);
         	}
-    		adminTestimonialResponse.setCustomerTestimonials(customerTestimonialVOList);
+    		
     	}
     	PaginationData paginaionData=createPaginaionData(page,size);
     	calculatePaginaionData(paginaionData,size, customerTestimonialVOList.size());
@@ -1483,8 +1261,9 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	List<CustomerTestimonialVO> paginatedResponses = customerTestimonialVOList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
     	paginatedResponse.setResponseData(paginatedResponses);
 		return paginatedResponse;
-		//return adminTestimonialResponse;
+		
     }
+    // Save testimonial
     @RequestMapping(value="/testimonial/save", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
   	@ResponseBody
   	public TestimonialResponse saveTestimonial(@RequestBody TestimonialRequest testimonialRequest) throws Exception {
@@ -1508,6 +1287,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	LOGGER.debug("Ended saveTestimonial");
     	return testimonialResponse;
     }
+    // delete testimonial
     @RequestMapping(value="/deleteTestimonial/{testimonialId}", method = RequestMethod.GET)
     @ResponseBody
     public DeleteTesimonialResponse deleteTestimonial(@PathVariable String testimonialId) throws Exception {
@@ -1532,6 +1312,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	return deleteTesimonialResponse;
     	
     }
+    // upload brand image
     @RequestMapping(value="/uploadBrandImage", method = RequestMethod.POST)
 	@ResponseBody
 	public BrandImageResponse uploadBrandImage(@RequestPart("brandImageRequest") String brandImageStr,
@@ -1576,6 +1357,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		return brandImageResponse;
     	
     }
+    // delete brand image
     @RequestMapping(value="/deleteBrandImage/{brandImageId}", method = RequestMethod.GET)
     @ResponseBody
     public DeleteBrandImageResponse deleteBrandImage(@PathVariable String brandImageId) throws Exception {
@@ -1600,11 +1382,13 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	return deleteBrandImageResponse;
     	
     }
+    //Retrieval of brand images
     @RequestMapping(value="/getBrandImages", method = RequestMethod.POST)
     @ResponseBody
-    public AdminBrandImageResponse getBrandImages(@RequestBody AdminBrandImageRequest adminBrandImageRequest) throws Exception {
+    public PaginatedResponse getBrandImages(@RequestBody AdminBrandImageRequest adminBrandImageRequest, @RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
 		LOGGER.debug("Entered getBrandImages");
-		AdminBrandImageResponse adminBrandImageResponse = new AdminBrandImageResponse();
+		PaginatedResponse paginatedResponse = new PaginatedResponse();
+		
     	List<BrandImageVO> brandImageVOList = new ArrayList<BrandImageVO>();
     	if(adminBrandImageRequest.getStatus().equals("ALL")) {
     		List<BrandImage> brandImages = brandImageService.getAllBrandImages();
@@ -1616,7 +1400,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     			brandImageVO.setStatus(brandImage.getStatus());
     			brandImageVOList.add(brandImageVO);
     		}
-    		adminBrandImageResponse.setBrandImages(brandImageVOList);
+    		
     	}
     	if(adminBrandImageRequest.getStatus().equals("Y")) {
     		List<BrandImage> brandImages = brandImageService.getEnableBrandImages();
@@ -1628,7 +1412,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     			brandImageVO.setStatus(brandImage.getStatus());
     			brandImageVOList.add(brandImageVO);
     		}
-    		adminBrandImageResponse.setBrandImages(brandImageVOList);
+    		
     		
     	}
     	if(adminBrandImageRequest.getStatus().equals("N")) {
@@ -1641,17 +1425,28 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     			brandImageVO.setStatus(brandImage.getStatus());
     			brandImageVOList.add(brandImageVO);
     		}
-    		adminBrandImageResponse.setBrandImages(brandImageVOList);
+    		
     		
     	}
-    	return adminBrandImageResponse;
+    	PaginationData paginaionData=createPaginaionData(page,size);
+    	calculatePaginaionData(paginaionData,size, brandImageVOList.size());
+    	paginatedResponse.setPaginationData(paginaionData);
+		if(brandImageVOList == null || brandImageVOList.isEmpty() || brandImageVOList.size() < paginaionData.getCountByPage()){
+			paginatedResponse.setResponseData(brandImageVOList);
+			
+			return paginatedResponse;
+		}
+    	List<BrandImageVO> paginatedResponses = brandImageVOList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+    	paginatedResponse.setResponseData(paginatedResponses);
+    	LOGGER.debug("Ended BrandImages");
+		return paginatedResponse;
     	
-
     }
-    @RequestMapping(value="/enable/brangImage", method = RequestMethod.POST)
+    //Enable brand image
+    @RequestMapping(value="/enable/brandImage", method = RequestMethod.POST)
 	@ResponseBody
 	public EnableBrandImageResponse enableOrDisableBrandImage(@RequestBody EnableBrandImageRequest enableBrandImageRequest) throws Exception {
-		LOGGER.debug("Entered enableBrandImage");
+		LOGGER.debug("Entered enableOrDisableBrandImage");
 		EnableBrandImageResponse enableBrandImageResponse = new EnableBrandImageResponse();
 		try {
 			BrandImage brandImage = brandImageService.getById(enableBrandImageRequest.getBrandImageId());
@@ -1674,12 +1469,13 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 			}
 			if(enableBrandImageRequest.getStatus().equals("N")) {
 				LOGGER.debug("Brand Image disabled");
-				enableBrandImageResponse.setSuccessMessage("Brand disabled successfully");
+				enableBrandImageResponse.setSuccessMessage("Brand Image disabled successfully");
 				enableBrandImageResponse.setStatus(TRUE);
 				}
 			}catch(Exception e) {
 				LOGGER.error("Error while enabling/disabling brand image",e.getMessage());
 			}
+		LOGGER.debug("Ended enableOrDisableBrandImage");
     	return enableBrandImageResponse;
     	
     }

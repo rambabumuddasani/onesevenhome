@@ -1,8 +1,6 @@
 package com.salesmanager.shop.admin.controller.login;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -22,7 +20,6 @@ import com.salesmanager.core.business.services.customer.CustomerService;
 import com.salesmanager.core.business.services.merchant.MerchantStoreService;
 import com.salesmanager.core.business.services.user.UserService;
 import com.salesmanager.core.business.vendor.product.services.VendorProductService;
-import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.user.User;
 import com.salesmanager.shop.store.controller.AbstractController;
 import com.salesmanager.shop.store.controller.customer.CustomerLoginController;
@@ -84,7 +81,6 @@ public class AdminLoginController extends AbstractController {
 	@RequestMapping(value="/admin/login", method=RequestMethod.POST,consumes=MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody AdminLoginResponse basicLogon(@RequestBody AdminLoginRequest adminLoginRequest) throws Exception {
 		LOGGER.debug("Entered Login");
-		LOGGER.debug("username"+adminLoginRequest.getEmailAddress()+" password "+adminLoginRequest.getPassword());
 		String email = adminLoginRequest.getEmailAddress();
 		String password = adminLoginRequest.getPassword();
 		
