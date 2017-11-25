@@ -3,6 +3,9 @@ package com.salesmanager.core.business.services.order;
 import java.io.ByteArrayOutputStream;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.services.common.generic.SalesManagerEntityService;
 import com.salesmanager.core.model.customer.Customer;
@@ -113,4 +116,6 @@ public interface OrderService extends SalesManagerEntityService<Long, Order> {
 	boolean hasDownloadFiles(Order order) throws ServiceException;
 
 	List<Order> findOrdersByCustomer(Long id);
+
+	Page<Order> findPaginatedOrdersByCustomer(Long id, Pageable pageable);
 }
