@@ -20,6 +20,8 @@ import org.apache.commons.lang.Validate;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -763,6 +765,25 @@ public class ShoppingOrderController extends AbstractController {
 	    Long customerId = customer.getId();
 		Language language = (Language)request.getAttribute("LANGUAGE");
 		List<Order> orders = orderService.findOrdersByCustomer(customerId);
+		List<ReadableOrder> allOrders = new ArrayList<ReadableOrder>();
+		for(Order o : orders){
+			allOrders.add(orderFacade.getReadableOrderByOrder(o, store, language));
+		}
+		return allOrders;
+	}
+	
+	
+	@RequestMapping(value="/orders", method = RequestMethod.POST)
+	@ResponseBody
+	public List<ReadableOrder> getAllPaginatedCustomerOrders(HttpServletRequest request, Locale locale,Pageable pageable) throws Exception {
+		System.out.println("entering getAllPaginatedCustomerOrders");
+		MerchantStore store = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
+	    Customer customer = getSessionAttribute(  Constants.CUSTOMER, request );
+	    Long customerId = customer.getId();
+		Language language = (Language)request.getAttribute("LANGUAGE");
+		Page<Order> pageOrders = orderService.findPaginatedOrdersByCustomer(customerId,pageable);
+		System.out.println("pageOrders "+pageOrders.toString());
+		List<Order> orders = pageOrders.getContent();
 		List<ReadableOrder> allOrders = new ArrayList<ReadableOrder>();
 		for(Order o : orders){
 			allOrders.add(orderFacade.getReadableOrderByOrder(o, store, language));
