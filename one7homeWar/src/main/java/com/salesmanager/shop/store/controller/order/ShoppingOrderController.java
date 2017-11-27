@@ -22,6 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -772,14 +774,16 @@ public class ShoppingOrderController extends AbstractController {
 		return allOrders;
 	}
 	
-	
 	@RequestMapping(value="/orders", method = RequestMethod.POST)
 	@ResponseBody
-	public List<ReadableOrder> getAllPaginatedCustomerOrders(HttpServletRequest request, Locale locale,Pageable pageable) throws Exception {
-		System.out.println("entering getAllPaginatedCustomerOrders");
+	//public List<ReadableOrder> getAllPaginatedCustomerOrders(HttpServletRequest request, Locale locale,Pageable pageable) throws Exception {
+	public List<ReadableOrder> getAllPaginatedCustomerOrders(HttpServletRequest request, Locale locale) throws Exception {
+	System.out.println("entering getAllPaginatedCustomerOrders");
 		MerchantStore store = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
 	    Customer customer = getSessionAttribute(  Constants.CUSTOMER, request );
 	    Long customerId = customer.getId();
+        Pageable pageable = createPageRequest();
+        System.out.println("pageable "+pageable);
 		Language language = (Language)request.getAttribute("LANGUAGE");
 		Page<Order> pageOrders = orderService.findPaginatedOrdersByCustomer(customerId,pageable);
 		System.out.println("pageOrders "+pageOrders.toString());
@@ -790,6 +794,12 @@ public class ShoppingOrderController extends AbstractController {
 		}
 		return allOrders;
 	}
+	
+	
+	private Pageable createPageRequest() {
+        //Create a new Pageable object here.
+	    return new PageRequest(0, 10);
+	}	
 	
 	/**
 	 * Recalculates shipping and tax following a change in country or province

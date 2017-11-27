@@ -18,7 +18,19 @@ public interface OrderRepository extends JpaRepository<Order, Long>, OrderReposi
     @Query("select distinct o from Order o join fetch o.orderProducts op join fetch o.orderTotal ot left join fetch o.orderHistory oh left join fetch op.downloads opd left join fetch op.orderAttributes opa left join fetch op.prices opp where o.customerId = ?1")
 	List<Order> findOrdersByCustomer(Long id);
     
-    @Query(value = "select distinct o from Order o join fetch o.orderProducts op join fetch o.orderTotal ot left join fetch o.orderHistory oh left join fetch op.downloads opd left join fetch op.orderAttributes opa left join fetch op.prices opp where o.customerId = ?1",
-    	       countQuery = "select count(distinct o) from Order o join fetch o.orderProducts op join fetch o.orderTotal ot left join fetch o.orderHistory oh left join fetch op.downloads opd left join fetch op.orderAttributes opa left join fetch op.prices opp where o.customerId = ?1")
+/*    @Query(value = "select distinct o from Order o join o.orderProducts op join o.orderTotal ot left join o.orderHistory oh left join op.downloads opd left join op.orderAttributes opa left join op.prices opp where o.customerId = ?1",
+    	       countQuery = "select count(distinct o) from Order o join o.orderProducts op join o.orderTotal ot left join o.orderHistory oh left join op.downloads opd left join op.orderAttributes opa left join op.prices opp where o.customerId = ?1")
     Page<Order> findPaginatedOrdersByCustomer(@Param("id") Long id,Pageable pageable);
+*/
+
+/**
+
+https://stackoverflow.com/questions/21549480/spring-data-fetch-join-with-paging-is-not-working
+
+
+*/    
+    @Query(value = "select distinct o from Order o join fetch o.orderProducts op join fetch o.orderTotal ot left join fetch o.orderHistory oh left join fetch op.downloads opd left join fetch op.orderAttributes opa left join fetch op.prices opp where o.customerId = ?1",
+    	       countQuery = "select count(distinct o) from Order o  where o.customerId = ?1")
+    Page<Order> findPaginatedOrdersByCustomer(@Param("id") Long id,Pageable pageable);
+
 }

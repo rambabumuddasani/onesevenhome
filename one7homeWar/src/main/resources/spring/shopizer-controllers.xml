@@ -78,5 +78,6 @@
  	</mvc:interceptors>
 	
 
+ <bean class="org.springframework.data.web.config.SpringDataWebConfiguration" />
 	 
 </beans>
