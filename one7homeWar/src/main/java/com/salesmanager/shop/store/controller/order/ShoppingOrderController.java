@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.ccavenue.security.AesCryptUtil;
@@ -70,6 +71,7 @@ import com.salesmanager.core.model.shoppingcart.ShoppingCartItem;
 import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.model.customer.PersistableCustomer;
 import com.salesmanager.shop.model.customer.ReadableDelivery;
+import com.salesmanager.shop.model.order.OrderResponse;
 import com.salesmanager.shop.model.order.ReadableOrder;
 import com.salesmanager.shop.model.order.ReadableOrderTotal;
 import com.salesmanager.shop.model.order.ReadableShippingSummary;
@@ -761,28 +763,40 @@ public class ShoppingOrderController extends AbstractController {
 	// url/allOrderDetails?userId=1
 	@RequestMapping(value="/allOrderDetails", method = RequestMethod.POST)
 	@ResponseBody
-	public List<ReadableOrder> getAllCustomerOrders(HttpServletRequest request, Locale locale) throws Exception {
+	//public List<ReadableOrder> getAllCustomerOrders(HttpServletRequest request, Locale locale,Pageable pageable) throws Exception {
+	public OrderResponse getAllCustomerOrders(HttpServletRequest request, Locale locale,@RequestParam(value="page",defaultValue = "1") int page, 
+				@RequestParam(value="size",defaultValue="5")int size) throws Exception {
+		OrderResponse orderResponse = new OrderResponse();
 		MerchantStore store = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
 	    Customer customer = getSessionAttribute(  Constants.CUSTOMER, request );
 	    Long customerId = customer.getId();
+        Pageable pageable = createPageRequest(page,size);
 		Language language = (Language)request.getAttribute("LANGUAGE");
-		List<Order> orders = orderService.findOrdersByCustomer(customerId);
+		Page<Order> pageOrders = orderService.findPaginatedOrdersByCustomer(customerId,pageable);
+		//List<Order> orders = orderService.findOrdersByCustomer(customerId);
 		List<ReadableOrder> allOrders = new ArrayList<ReadableOrder>();
-		for(Order o : orders){
+		for(Order o : pageOrders){
 			allOrders.add(orderFacade.getReadableOrderByOrder(o, store, language));
 		}
-		return allOrders;
+		orderResponse.setFirst(pageOrders.isFirst());
+		orderResponse.setLast(pageOrders.isLast());
+		orderResponse.setNumber(pageOrders.getNumber());
+		orderResponse.setNumberOfElements(pageOrders.getNumberOfElements());
+		orderResponse.setOrders(allOrders);
+		orderResponse.setSize(pageOrders.getSize());
+		orderResponse.setTotalPages(pageOrders.getTotalPages());
+		return orderResponse;
 	}
 	
 	@RequestMapping(value="/orders", method = RequestMethod.POST)
 	@ResponseBody
-	//public List<ReadableOrder> getAllPaginatedCustomerOrders(HttpServletRequest request, Locale locale,Pageable pageable) throws Exception {
-	public List<ReadableOrder> getAllPaginatedCustomerOrders(HttpServletRequest request, Locale locale) throws Exception {
-	System.out.println("entering getAllPaginatedCustomerOrders");
+	public List<ReadableOrder> getAllPaginatedCustomerOrders(HttpServletRequest request, Locale locale,Pageable pageable) throws Exception {
+	//public List<ReadableOrder> getAllPaginatedCustomerOrders(HttpServletRequest request, Locale locale) throws Exception {
+		System.out.println("entering getAllPaginatedCustomerOrders");
 		MerchantStore store = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
 	    Customer customer = getSessionAttribute(  Constants.CUSTOMER, request );
 	    Long customerId = customer.getId();
-        Pageable pageable = createPageRequest();
+        //Pageable pageable = createPageRequest(page,size);
         System.out.println("pageable "+pageable);
 		Language language = (Language)request.getAttribute("LANGUAGE");
 		Page<Order> pageOrders = orderService.findPaginatedOrdersByCustomer(customerId,pageable);
@@ -794,11 +808,9 @@ public class ShoppingOrderController extends AbstractController {
 		}
 		return allOrders;
 	}
-	
-	
-	private Pageable createPageRequest() {
-        //Create a new Pageable object here.
-	    return new PageRequest(0, 10);
+		
+	private Pageable createPageRequest(int page,int size) {
+	    return new PageRequest(page, size);
 	}	
 	
 	/**
