@@ -41,14 +41,16 @@ import com.salesmanager.core.model.catalog.product.review.ProductReview;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
-
+import com.salesmanager.shop.admin.controller.VendorProductVO;
 import com.salesmanager.shop.admin.model.web.Menu;
 import com.salesmanager.shop.constants.Constants;
+import com.salesmanager.shop.controller.AbstractController;
+import com.salesmanager.shop.store.model.paging.PaginationData;
 import com.salesmanager.shop.utils.LabelUtils;
 
 @Controller
 @CrossOrigin
-public class ProductReviewController {
+public class ProductReviewController extends AbstractController{
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProductReviewController.class);
 	
@@ -91,10 +93,11 @@ public class ProductReviewController {
 	
 	@RequestMapping(value="/products/{productId}/reviews", method=RequestMethod.GET,produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public ProductReviewResponse productReviews(@PathVariable Long productId) {
+	public PaginatedReviewResponse productReviews(@PathVariable Long productId, @RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) {
+		PaginatedReviewResponse paginatedReviewResponse = new PaginatedReviewResponse();
 		LOGGER.debug("Entered productReviews method");
 		//String sProductId = request.getParameter("productId");
-		ProductReviewResponse productReviewResponse = new ProductReviewResponse();
+		//ProductReviewResponse productReviewResponse = new ProductReviewResponse();
 		List<ProductReviewVO> productReviewResponseList =new ArrayList<ProductReviewVO>();		
 		
 		try {
@@ -116,11 +119,24 @@ public class ProductReviewController {
 				//productReviewVO.setDescriptionName(review.getDescriptionName());
 				productReviewResponseList.add(productReviewVO);
 			}
-			productReviewResponse.setProductReviews(productReviewResponseList);
+			//productReviewResponse.setProductReviews(productReviewResponseList);
 			Double avgReview = getAvgReview(reviews);
 			Long totalRatingCount = getTotalRatingCount(reviews);
-			productReviewResponse.setAvgReview(avgReview);
-			productReviewResponse.setTotalRatingCount(totalRatingCount);
+			//productReviewResponse.setAvgReview(avgReview);
+			//productReviewResponse.setTotalRatingCount(totalRatingCount);
+			paginatedReviewResponse.setAvgReview(avgReview);
+			paginatedReviewResponse.setTotalratingCount(totalRatingCount);
+			PaginationData paginaionData=createPaginaionData(page,size);
+	    	calculatePaginaionData(paginaionData,size, productReviewResponseList.size());
+	    	paginatedReviewResponse.setPaginationData(paginaionData);
+			if(productReviewResponseList == null || productReviewResponseList.isEmpty() || productReviewResponseList.size() < paginaionData.getCountByPage()){
+				paginatedReviewResponse.setReviewList(productReviewResponseList);
+				return paginatedReviewResponse;
+			}
+	    	List<ProductReviewVO> paginatedResponses = productReviewResponseList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+	    	paginatedReviewResponse.setReviewList(paginatedResponses);
+	    	LOGGER.debug("Ended getVendorProducts");
+			//return paginatedResponse;
 			/*Product dbProduct = productService.getById(productId);
 			BigDecimal productAvgReview = new BigDecimal(avgReview);
 			dbProduct.setProductReviewAvg(productAvgReview);
@@ -130,7 +146,7 @@ public class ProductReviewController {
 		    LOGGER.error("Error in retrieving Product Reviews",e.getMessage());
 		}	
 		LOGGER.debug("Ended productReviews method");
-		return productReviewResponse;
+		return paginatedReviewResponse;
 	}
 	
     public Long getTotalRatingCount(List<ProductReview> reviews) {
