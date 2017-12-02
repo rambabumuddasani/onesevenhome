@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,6 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.salesmanager.core.business.exception.ServiceException;
+import com.salesmanager.core.business.modules.email.Email;
 import com.salesmanager.core.business.services.catalog.category.CategoryService;
 import com.salesmanager.core.business.services.catalog.category.SubCategoryService;
 import com.salesmanager.core.business.services.catalog.product.ProductService;
@@ -44,6 +46,7 @@ import com.salesmanager.core.business.services.image.brand.BrandImageService;
 import com.salesmanager.core.business.services.merchant.MerchantStoreService;
 import com.salesmanager.core.business.services.reference.country.CountryService;
 import com.salesmanager.core.business.services.reference.language.LanguageService;
+import com.salesmanager.core.business.services.system.EmailService;
 import com.salesmanager.core.business.services.user.UserService;
 import com.salesmanager.core.business.utils.ProductPriceUtils;
 import com.salesmanager.core.business.vendor.product.services.VendorProductService;
@@ -66,11 +69,14 @@ import com.salesmanager.core.model.reference.language.Language;
 import com.salesmanager.core.model.user.User;
 import com.salesmanager.shop.admin.controller.products.PaginatedResponse;
 import com.salesmanager.shop.constants.Constants;
+import com.salesmanager.shop.constants.EmailConstants;
 import com.salesmanager.shop.controller.AbstractController;
 import com.salesmanager.shop.fileupload.services.StorageException;
 import com.salesmanager.shop.fileupload.services.StorageService;
 import com.salesmanager.shop.store.model.paging.PaginationData;
 import com.salesmanager.shop.utils.DateUtil;
+import com.salesmanager.shop.utils.EmailUtils;
+import com.salesmanager.shop.utils.LabelUtils;
 
 @Controller
 @CrossOrigin
@@ -79,6 +85,7 @@ public class AdminController extends AbstractController {
 	private static final String TRUE = "true";
 	private static final String FALSE = "false";
 	private static final Logger LOGGER = LoggerFactory.getLogger(AdminController.class);
+	private static final String ADIMIN_APPROVE_PRODUCT_TMPL = "email_template_vendor_approve_products.ftl";
 	
 	@Inject
 	private MerchantStoreService merchantStoreService;
@@ -131,6 +138,15 @@ public class AdminController extends AbstractController {
     
     @Inject
     private BrandImageService brandImageService;
+    
+    @Inject
+	private EmailUtils emailUtils;
+    
+	@Inject
+	private LabelUtils messages;
+	
+	@Inject
+	EmailService emailService;
     
     // Admin update store address
 	@RequestMapping(value="/admin/updatestore", method = RequestMethod.POST, 
@@ -724,6 +740,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
 	    VendorProduct vendorProduct = vendorProductService.getVendorProductById(vendorProductId);
     	if(vendorProduct==null) {
     		activateProductResponse.setErrorMesg("Vendor product not found");
+    		activateProductResponse.setStatus(FALSE);
     		return activateProductResponse;
     	}
     	// Approving and updating vendor product
@@ -731,13 +748,57 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     	vendorProduct.setAdminActivated(activateProductRequest.isStatus());
     	vendorProductService.update(vendorProduct);
     	if(vendorProduct.isAdminActivated()==true) {
-    		activateProductResponse.setSuccessMsg("Activated");
-    		activateProductResponse.setStatus("true");
+    		activateProductResponse.setSuccessMsg("Approved");
+    		activateProductResponse.setStatus(TRUE);
     	} else {
-    		activateProductResponse.setErrorMesg("Declined");
-    		activateProductResponse.setStatus("false");
+    		activateProductResponse.setSuccessMsg("Declined");
+    		activateProductResponse.setStatus(TRUE);
     	}
+    	final Locale locale  = new Locale("en");
+    	MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");
+    	String url ="http://rainiersoft.com/clients/onesevenhome/";
+    	String imageURL = url.concat(vendorProduct.getProduct().getProductImage().getProductImageUrl());
+    	ProductAvailability productAvailability = null;
+		ProductPrice productPrice = null;
+		Set<ProductAvailability> availabilities = vendorProduct.getProduct().getAvailabilities();
+		if(availabilities!=null && availabilities.size()>0) {
+			
+			for(ProductAvailability availability : availabilities) {
+				if(availability.getRegion().equals(com.salesmanager.core.business.constants.Constants.ALL_REGIONS)) {
+					productAvailability = availability;
+					Set<ProductPrice> prices = availability.getPrices();
+					for(ProductPrice price : prices) {
+						if(price.isDefaultPrice()) {
+							productPrice = price;
+						}
+					}
+				}
+			}
+		}
+		
+    	Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
+		templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, vendorProduct.getCustomer().getVendorAttrs().getVendorName());
+		templateTokens.put(EmailConstants.EMAIL_PRODUCT_NAME, vendorProduct.getProduct().getProductDescription().getName());
+		templateTokens.put(EmailConstants.EMAIL_PRODUCT_APPROVED_STATUS, activateProductResponse.getSuccessMsg() );
+		templateTokens.put(EmailConstants.EMAIL_PRODUCT_IMAGE_URL, imageURL);
+		templateTokens.put(EmailConstants.EMAIL_PRODUCT_PRICE, productPrice.getProductPriceAmount().toString());
+		templateTokens.put(EmailConstants.EMAIL_PRODUCT_DESCRIPTION, vendorProduct.getProduct().getProductDescription().getDescription());
+		
+		
+		Email email = new Email();
+		email.setFrom(merchantStore.getStorename());
+		email.setFromEmail(merchantStore.getStoreEmailAddress());
+		email.setSubject(messages.getMessage("email.vendor.product.approve.status",locale));
+		email.setTo(vendorProduct.getCustomer().getEmailAddress());
+		email.setTemplateName(ADIMIN_APPROVE_PRODUCT_TMPL);
+		email.setTemplateTokens(templateTokens);
+
+
+		
+		emailService.sendHtmlEmail(merchantStore, email);
+		vendorProductService.delete(vendorProduct);
     	LOGGER.debug("Ended adminApproveProducts");
+    	
 	    return activateProductResponse;
     	
     }

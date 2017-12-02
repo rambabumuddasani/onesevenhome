@@ -167,8 +167,8 @@ public class CustomerRegistrationController extends AbstractController {
 	private final static String FORGOT_PASSWORD_TPL = "email_template_user_password_link.ftl";
     
 
-	private final static String NEW_USER_ACTIVATION_TMPL = "email_template_new_user_activate.ftl";
-
+	//private final static String NEW_USER_ACTIVATION_TMPL = "email_template_new_user_activate.ftl";
+	private final static String NEW_USER_ACTIVATION_TMPL = "email_template_customer_registration.ftl";
 
 	@RequestMapping(value="/registration.html", method=RequestMethod.GET)
 	public String displayRegistration(final Model model, final HttpServletRequest request, final HttpServletResponse response) throws Exception {
@@ -1134,7 +1134,7 @@ public class CustomerRegistrationController extends AbstractController {
         	return customerResponse;
         }
         
-        System.out.println("userName "+userName+" password "+password);
+        
         @SuppressWarnings( "unused" )
         CustomerEntity customerData = null;
         try
@@ -1160,9 +1160,11 @@ public class CustomerRegistrationController extends AbstractController {
         Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
 		templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, customer.getFirstName());
 		templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, customer.getLastName());
+		templateTokens.put(EmailConstants.EMAIL_USER_NAME, customer.getUserName());
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_USERNAME_LABEL, messages.getMessage("label.generic.username",locale));
 		templateTokens.put(EmailConstants.EMAIL_TEXT_NEW_USER_ACTIVATION, messages.getMessage("email.newuser.text.activation",locale));
-		templateTokens.put(EmailConstants.EMAIL_TEXT_NEW_USER_ACTIVATION_LINK, messages.getMessage("email.newuser.text.activation.link",activationURLArg,locale));
+		//templateTokens.put(EmailConstants.EMAIL_TEXT_NEW_USER_ACTIVATION_LINK, messages.getMessage("email.newuser.text.activation.link",activationURLArg,locale));
+		templateTokens.put(EmailConstants.EMAIL_TEXT_NEW_USER_ACTIVATION_LINK, activationURL);
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_PASSWORD_LABEL, messages.getMessage("label.generic.password",locale));
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
@@ -1561,11 +1563,13 @@ public class CustomerRegistrationController extends AbstractController {
         //sending email
         String[] activationURLArg = {activationURL};
         Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
-		templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, customer.getFirstName());
-		templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, customer.getLastName());
+		templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, customer.getVendor().getVendorName());
+		templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, "");
+		templateTokens.put(EmailConstants.EMAIL_USER_NAME, customer.getUserName());
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_USERNAME_LABEL, messages.getMessage("label.generic.username",locale));
 		templateTokens.put(EmailConstants.EMAIL_TEXT_NEW_USER_ACTIVATION, messages.getMessage("email.newuser.text.activation",locale));
-		templateTokens.put(EmailConstants.EMAIL_TEXT_NEW_USER_ACTIVATION_LINK, messages.getMessage("email.newuser.text.activation.link",activationURLArg,locale));
+		//templateTokens.put(EmailConstants.EMAIL_TEXT_NEW_USER_ACTIVATION_LINK, messages.getMessage("email.newuser.text.activation.link",activationURLArg,locale));
+		templateTokens.put(EmailConstants.EMAIL_TEXT_NEW_USER_ACTIVATION_LINK, activationURL);
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_PASSWORD_LABEL, messages.getMessage("label.generic.password",locale));
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));

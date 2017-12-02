@@ -87,5 +87,10 @@ public class EmailConstants {
 	public static final String EMAIL_CONTACT_TMPL = "email_template_contact.ftl";
 	public static final String EMAIL_NOTIFICATION_TMPL = "email_template_notification.ftl";
 	
-	
+	public static final String EMAIL_PRODUCT_NAME = "EMAIL_PRODUCT_NAME";
+	public static final String EMAIL_PRODUCT_APPROVED_STATUS = "EMAIL_PRODUCT_APPROVED_STATUS";
+	public static final String EMAIL_PRODUCT_DECLINED = "EMAIL_PRODUCT_DECLINED";
+	public static final String EMAIL_PRODUCT_IMAGE_URL = "EMAIL_PRODUCT_IMAGE_URL";
+	public static final String EMAIL_PRODUCT_PRICE = "EMAIL_PRODUCT_PRICE";
+	public static final String EMAIL_PRODUCT_DESCRIPTION = "EMAIL_PRODUCT_DESCRIPTION";
 }

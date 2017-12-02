@@ -36,11 +36,11 @@ public class VendorProduct extends SalesManagerEntity<Long, VendorProduct>{
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = "TABLE_GEN")
 	private Long id;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name="PRODUCT_ID", nullable=false)
 	private Product product;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name="CUSTOMER_ID", nullable=false)
 	private Customer customer;
 	
