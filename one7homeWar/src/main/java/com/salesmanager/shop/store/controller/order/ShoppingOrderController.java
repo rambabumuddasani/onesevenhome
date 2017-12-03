@@ -2,6 +2,7 @@ package com.salesmanager.shop.store.controller.order;
 
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -806,7 +807,7 @@ public class ShoppingOrderController extends AbstractController {
 	    }
 	    if(toDate == null){
 	    	LocalDate localDays = LocalDate.now().plusDays(15);
-	    	toDate = localDays;
+	    	toDate = Date.from(localDays.atStartOfDay(ZoneId.systemDefault()).toInstant());
 	    }
         Pageable pageable = createPageRequest(page,size);
 		Language language = (Language)request.getAttribute("LANGUAGE");
