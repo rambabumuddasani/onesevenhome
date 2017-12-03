@@ -1,6 +1,7 @@
 package com.salesmanager.core.business.services.order;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -118,4 +119,6 @@ public interface OrderService extends SalesManagerEntityService<Long, Order> {
 	List<Order> findOrdersByCustomer(Long id);
 
 	Page<Order> findPaginatedOrdersByCustomer(Long id, Pageable pageable);
+
+	Page<Order> findByDatePurchasedBetween(Date startDate, Date endDate, Pageable pageable);
 }

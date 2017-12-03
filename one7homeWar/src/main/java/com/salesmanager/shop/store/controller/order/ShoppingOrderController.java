@@ -1,6 +1,7 @@
 package com.salesmanager.shop.store.controller.order;
 
 import java.io.UnsupportedEncodingException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -21,9 +22,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
-
+import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -788,7 +789,45 @@ public class ShoppingOrderController extends AbstractController {
 		return orderResponse;
 	}
 	
-	@RequestMapping(value="/orders", method = RequestMethod.POST)
+	// url/allOrderDetails?userId=1
+	@RequestMapping(value="/adminViewOrders", method = RequestMethod.POST)
+	@ResponseBody
+	public OrderResponse getAllCustomerOrdersForAdmin(HttpServletRequest request, Locale locale,
+				@RequestParam(value="page",defaultValue = "1") int page, 
+				@RequestParam(value="size",defaultValue="5")int size,
+				@RequestParam("fromDate") @DateTimeFormat(pattern="yyyy-MM-dd") Date fromDate,
+				@RequestParam("toDate")   @DateTimeFormat(pattern="yyyy-MM-dd") Date toDate) throws Exception {
+		OrderResponse orderResponse = new OrderResponse();
+		MerchantStore store = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
+	    //Customer customer = getSessionAttribute(  Constants.CUSTOMER, request );
+	    //Long customerId = customer.getId();
+	    if(fromDate == null){
+	    	fromDate = new Date();
+	    }
+	    if(toDate == null){
+	    	LocalDate localDays = LocalDate.now().plusDays(15);
+	    	toDate = localDays;
+	    }
+        Pageable pageable = createPageRequest(page,size);
+		Language language = (Language)request.getAttribute("LANGUAGE");
+		Page<Order> pageOrders = orderService.findByDatePurchasedBetween(fromDate, toDate,pageable);
+		//List<Order> orders = orderService.findOrdersByCustomer(customerId);
+		List<ReadableOrder> allOrders = new ArrayList<ReadableOrder>();
+		for(Order o : pageOrders){
+			allOrders.add(orderFacade.getReadableOrderByOrder(o, store, language));
+		}
+		orderResponse.setFirst(pageOrders.isFirst());
+		orderResponse.setLast(pageOrders.isLast());
+		orderResponse.setNumber(pageOrders.getNumber());
+		orderResponse.setNumberOfElements(pageOrders.getNumberOfElements());
+		orderResponse.setOrders(allOrders);
+		orderResponse.setSize(pageOrders.getSize());
+		orderResponse.setTotalPages(pageOrders.getTotalPages());
+		return orderResponse;
+	}
+
+	
+/*	@RequestMapping(value="/orders", method = RequestMethod.POST)
 	@ResponseBody
 	public List<ReadableOrder> getAllPaginatedCustomerOrders(HttpServletRequest request, Locale locale,Pageable pageable) throws Exception {
 	//public List<ReadableOrder> getAllPaginatedCustomerOrders(HttpServletRequest request, Locale locale) throws Exception {
@@ -808,7 +847,7 @@ public class ShoppingOrderController extends AbstractController {
 		}
 		return allOrders;
 	}
-		
+*/		
 	private Pageable createPageRequest(int page,int size) {
 	    return new PageRequest(page, size);
 	}	
