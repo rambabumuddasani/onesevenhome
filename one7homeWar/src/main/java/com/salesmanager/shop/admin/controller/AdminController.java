@@ -44,6 +44,7 @@ import com.salesmanager.core.business.services.customer.CustomerService;
 import com.salesmanager.core.business.services.customer.testmonial.review.CustomerTestmonialService;
 import com.salesmanager.core.business.services.image.brand.BrandImageService;
 import com.salesmanager.core.business.services.merchant.MerchantStoreService;
+import com.salesmanager.core.business.services.postrequirement.PostRequirementService;
 import com.salesmanager.core.business.services.reference.country.CountryService;
 import com.salesmanager.core.business.services.reference.language.LanguageService;
 import com.salesmanager.core.business.services.system.EmailService;
@@ -62,6 +63,7 @@ import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.customer.CustomerTestimonial;
 import com.salesmanager.core.model.image.brand.BrandImage;
 import com.salesmanager.core.model.merchant.MerchantStore;
+import com.salesmanager.core.model.postrequirement.PostRequirement;
 import com.salesmanager.core.model.product.vendor.VendorProduct;
 import com.salesmanager.core.model.reference.country.Country;
 import com.salesmanager.core.model.reference.country.CountryDescription;
@@ -86,7 +88,7 @@ public class AdminController extends AbstractController {
 	private static final String FALSE = "false";
 	private static final Logger LOGGER = LoggerFactory.getLogger(AdminController.class);
 	private static final String ADIMIN_APPROVE_PRODUCT_TMPL = "email_template_vendor_approve_products.ftl";
-	
+	private static final String ADIMIN_ADD_PRODUCT_TMPL = "email_template_postrequirement.ftl";
 	@Inject
 	private MerchantStoreService merchantStoreService;
 	
@@ -147,6 +149,9 @@ public class AdminController extends AbstractController {
 	
 	@Inject
 	EmailService emailService;
+	
+	@Inject
+	PostRequirementService postRequirementService;
     
     // Admin update store address
 	@RequestMapping(value="/admin/updatestore", method = RequestMethod.POST, 
@@ -698,7 +703,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     	
     	List<VendorProductVO> vproductList = new ArrayList<VendorProductVO>();
     	for(VendorProduct vendorProduct : vendorProducts) {
-    		System.out.println("vendorProduct :"+vendorProduct);
+    		
     		VendorProductVO vendorProductVO = new VendorProductVO();
     		vendorProductVO.setVendorProductId(vendorProduct.getId());
     		vendorProductVO.setVendorId(vendorProduct.getCustomer().getId());
@@ -710,6 +715,8 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     		vendorProductVO.setProductName(vendorProduct.getProduct().getProductDescription().getName());
     		vendorProductVO.setProductDescription(vendorProduct.getProduct().getProductDescription().getDescription());
     		vendorProductVO.setImageURL(vendorProduct.getProduct().getProductImage().getProductImageUrl());
+    		vendorProductVO.setVendorMobile(vendorProduct.getCustomer().getVendorAttrs().getVendorMobile());
+    		vendorProductVO.setVendorAddress(vendorProduct.getCustomer().getVendorAttrs().getVendorOfficeAddress());
     		//vendorProductVO.setDescription(vendorProduct.getProduct().getProductDescription().getDescription());
     		vproductList.add(vendorProductVO);
     	}
@@ -1540,6 +1547,116 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	return enableBrandImageResponse;
     	
     }
+    @RequestMapping(value="/postreqirement/save", method=RequestMethod.POST)
+  	@ResponseBody
+  	public PostRequirementResponse postReqirement(@RequestBody PostRequirementRequest postRequirementRequest) throws Exception {
+    	LOGGER.debug("Entered postReqirement");
+    	PostRequirementResponse postReqirementResponse = new PostRequirementResponse();
+    	if(StringUtils.isEmpty(postRequirementRequest.getQuery())){
+    		postReqirementResponse.setErrorMessage("Query cannot be empty..Please provide your query");
+    		postReqirementResponse.setStatus(FALSE);
+    		return postReqirementResponse;
+    	}
+    	try {
+    	Customer customer = customerService.getById(postRequirementRequest.getCustomerId());
+    	Category category = categoryService.getByCategoryCode(postRequirementRequest.getCategory());
+    	PostRequirement postRequirement = new PostRequirement();
+    	//postRequirement.setCustomer(customer);
+    	postRequirement.setCustomerId(customer.getId());
+    	postRequirement.setQuery(postRequirementRequest.getQuery());
+    	//postRequirement.setState(postRequirementRequest.getState());
+    	//postRequirement.setCategory(category);
+    	postRequirement.setCategoryId(category.getId());
+    	postRequirementService.save(postRequirement);
+    	LOGGER.debug("Query saved");
+    	postReqirementResponse.setSuccessMessage("Query saved successfully");
+    	postReqirementResponse.setStatus(TRUE);
+    	} catch (Exception e){
+    		LOGGER.error("Error while saving query"+e.getMessage());
+    	}
+    	LOGGER.debug("Ended postReqirement");
+		return postReqirementResponse;
+    	
+    }
+    @RequestMapping(value="/getPostRequirements", method = RequestMethod.GET)
+	@ResponseBody
+	public PaginatedResponse getPostRequirements(@RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) {
+    	LOGGER.debug("Entered getPostRequirements");
+    	PaginatedResponse paginatedResponse = new PaginatedResponse();
+    	List<PostRequirementVO> postRequirementVOList = new ArrayList<PostRequirementVO>();
+    	try {
+    		List<PostRequirement> postRequirements = postRequirementService.getAllPostRequirements();
+    		for(PostRequirement postRequirement: postRequirements) {
+    			PostRequirementVO postRequirementVO = new PostRequirementVO();
+    			postRequirementVO.setPostRequirementId(postRequirement.getId());
+    			//postRequirementVO.setState(postRequirement.getState());
+    			postRequirementVO.setQuery(postRequirement.getQuery());
+    			Customer customer = customerService.getById(postRequirement.getCustomerId());
+    			postRequirementVO.setCustomerId(customer.getId());
+    			postRequirementVO.setCustomerName(customer.getVendorAttrs().getVendorName());
+    			Category category = categoryService.getById(postRequirement.getCategoryId());
+    			postRequirementVO.setCategory(category.getDescription().getName());
+    			if(customer.getCustomerType().equals(null) && customer.getCustomerType().equals("0")) {
+    				postRequirementVO.setCustomerName(customer.getBilling().getFirstName().concat(" ").concat(customer.getBilling().getLastName()));
+    			}else {
+    				postRequirementVO.setCustomerName(customer.getVendorAttrs().getVendorName());
+    			}
+    			postRequirementVOList.add(postRequirementVO);
+    		}
+    		PaginationData paginaionData=createPaginaionData(page,size);
+        	calculatePaginaionData(paginaionData,size, postRequirementVOList.size());
+        	paginatedResponse.setPaginationData(paginaionData);
+    		if(postRequirementVOList == null || postRequirementVOList.isEmpty() || postRequirementVOList.size() < paginaionData.getCountByPage()){
+    			paginatedResponse.setResponseData(postRequirementVOList);
+    			LOGGER.debug("Ended getProductForCatAndTitle method ");
+    			return paginatedResponse;
+    		}
+        	List<PostRequirementVO> paginatedResponses = postRequirementVOList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+        	paginatedResponse.setResponseData(paginatedResponses);
+    		return paginatedResponse;
+    	}catch (Exception e) {
+    		LOGGER.error("Error while retrieving queries "+e.getMessage());	
+    	}
+    	LOGGER.debug("Ended getPostRequirements");
+		return paginatedResponse;
+    	
+    }
+    /*@RequestMapping(value="/postrequirement/{postRequirementId}", method=RequestMethod.GET)
+  	@ResponseBody
+  	public PostRequirementResponse sendMail(@PathVariable String postRequirementId) throws Exception {
+		LOGGER.debug("Entered sendMail");
+		PostRequirementResponse postRequirementResponse = new PostRequirementResponse();
+		Long postRequirementIdLong = new Long(postRequirementId);
+		try {
+		PostRequirement postRequirement = postRequirementService.getById(postRequirementIdLong);
+		final Locale locale  = new Locale("en");
+    	MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");
+    	Customer customer = customerService.getById(postRequirement.getCustomerId());
+    	Category category = categoryService.getById(postRequirement.getCategoryId());
+    	
+    	Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
+		templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, customer.getVendorAttrs().getVendorName());
+		templateTokens.put(EmailConstants.EMAIL_PRODUCT_LABEL, messages.getMessage("email.vendor.add.request.product", locale));
+		templateTokens.put(EmailConstants.EMAIL_CATEGORY, category.getDescription().getName());
+		
+		Email email = new Email();
+		email.setFrom(merchantStore.getStorename());
+		email.setFromEmail(merchantStore.getStoreEmailAddress());
+		email.setSubject(messages.getMessage("email.vendor.product.approve.status",locale));
+		email.setTo(customer.getEmailAddress());
+		email.setTemplateName(ADIMIN_ADD_PRODUCT_TMPL);
+		email.setTemplateTokens(templateTokens);
+
+		emailService.sendHtmlEmail(merchantStore, email);
+	    LOGGER.debug("Email sent successful");
+		} catch(Exception e) {
+			LOGGER.error("Error while sending email");
+		}
+		postRequirementResponse.setSuccessMessage("Email sent sucessful");
+		postRequirementResponse.setStatus(TRUE);
+    	return postRequirementResponse;
+    	
+    }*/
 }
     
  

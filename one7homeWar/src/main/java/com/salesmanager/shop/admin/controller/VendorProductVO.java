@@ -11,6 +11,8 @@ public class VendorProductVO {
 	private String productName;
 	private String imageURL;
 	private String productDescription;
+	private String vendorAddress;
+	private String vendorMobile;
 	public Long getVendorId() {
 		return vendorId;
 	}
@@ -53,5 +55,18 @@ public class VendorProductVO {
 	public void setProductDescription(String productDescription) {
 		this.productDescription = productDescription;
 	}
+	public String getVendorAddress() {
+		return vendorAddress;
+	}
+	public void setVendorAddress(String vendorAddress) {
+		this.vendorAddress = vendorAddress;
+	}
+	public String getVendorMobile() {
+		return vendorMobile;
+	}
+	public void setVendorMobile(String vendorMobile) {
+		this.vendorMobile = vendorMobile;
+	}
+	
 	
 }
