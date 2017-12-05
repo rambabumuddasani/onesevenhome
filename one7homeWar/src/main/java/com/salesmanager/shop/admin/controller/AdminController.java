@@ -88,7 +88,7 @@ public class AdminController extends AbstractController {
 	private static final String FALSE = "false";
 	private static final Logger LOGGER = LoggerFactory.getLogger(AdminController.class);
 	private static final String ADIMIN_APPROVE_PRODUCT_TMPL = "email_template_vendor_approve_products.ftl";
-	private static final String ADIMIN_ADD_PRODUCT_TMPL = "email_template_postrequirement.ftl";
+	//private static final String ADIMIN_ADD_PRODUCT_TMPL = "email_template_admin_vendor_postrequirement.ftl";
 	@Inject
 	private MerchantStoreService merchantStoreService;
 	
@@ -716,7 +716,12 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     		vendorProductVO.setProductDescription(vendorProduct.getProduct().getProductDescription().getDescription());
     		vendorProductVO.setImageURL(vendorProduct.getProduct().getProductImage().getProductImageUrl());
     		vendorProductVO.setVendorMobile(vendorProduct.getCustomer().getVendorAttrs().getVendorMobile());
-    		vendorProductVO.setVendorAddress(vendorProduct.getCustomer().getVendorAttrs().getVendorOfficeAddress());
+    		vendorProductVO.setHouseNumber(vendorProduct.getCustomer().getVendorAttrs().getVendorOfficeAddress());
+    		vendorProductVO.setStreet(vendorProduct.getCustomer().getBilling().getAddress());
+    		vendorProductVO.setCity(vendorProduct.getCustomer().getBilling().getCity());
+    		vendorProductVO.setArea(vendorProduct.getCustomer().getArea());
+    		vendorProductVO.setState(vendorProduct.getCustomer().getBilling().getState());
+    		vendorProductVO.setPinCode(vendorProduct.getCustomer().getBilling().getPostalCode());
     		//vendorProductVO.setDescription(vendorProduct.getProduct().getProductDescription().getDescription());
     		vproductList.add(vendorProductVO);
     	}
@@ -1547,9 +1552,9 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	return enableBrandImageResponse;
     	
     }
-    @RequestMapping(value="/postreqirement/save", method=RequestMethod.POST)
+    @RequestMapping(value="/postrequirement/save", method=RequestMethod.POST)
   	@ResponseBody
-  	public PostRequirementResponse postReqirement(@RequestBody PostRequirementRequest postRequirementRequest) throws Exception {
+  	public PostRequirementResponse postRequirement(@RequestBody PostRequirementRequest postRequirementRequest) throws Exception {
     	LOGGER.debug("Entered postReqirement");
     	PostRequirementResponse postReqirementResponse = new PostRequirementResponse();
     	if(StringUtils.isEmpty(postRequirementRequest.getQuery())){
@@ -1561,11 +1566,8 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	Customer customer = customerService.getById(postRequirementRequest.getCustomerId());
     	Category category = categoryService.getByCategoryCode(postRequirementRequest.getCategory());
     	PostRequirement postRequirement = new PostRequirement();
-    	//postRequirement.setCustomer(customer);
     	postRequirement.setCustomerId(customer.getId());
     	postRequirement.setQuery(postRequirementRequest.getQuery());
-    	//postRequirement.setState(postRequirementRequest.getState());
-    	//postRequirement.setCategory(category);
     	postRequirement.setCategoryId(category.getId());
     	postRequirementService.save(postRequirement);
     	LOGGER.debug("Query saved");
@@ -1573,6 +1575,8 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	postReqirementResponse.setStatus(TRUE);
     	} catch (Exception e){
     		LOGGER.error("Error while saving query"+e.getMessage());
+    		postReqirementResponse.setErrorMessage("Error while saving query");
+    		postReqirementResponse.setStatus(FALSE);
     	}
     	LOGGER.debug("Ended postReqirement");
 		return postReqirementResponse;
@@ -1589,7 +1593,6 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     		for(PostRequirement postRequirement: postRequirements) {
     			PostRequirementVO postRequirementVO = new PostRequirementVO();
     			postRequirementVO.setPostRequirementId(postRequirement.getId());
-    			//postRequirementVO.setState(postRequirement.getState());
     			postRequirementVO.setQuery(postRequirement.getQuery());
     			Customer customer = customerService.getById(postRequirement.getCustomerId());
     			postRequirementVO.setCustomerId(customer.getId());
@@ -1642,7 +1645,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		Email email = new Email();
 		email.setFrom(merchantStore.getStorename());
 		email.setFromEmail(merchantStore.getStoreEmailAddress());
-		email.setSubject(messages.getMessage("email.vendor.product.approve.status",locale));
+		email.setSubject(messages.getMessage("email.vendor.add.request.product",locale));
 		email.setTo(customer.getEmailAddress());
 		email.setTemplateName(ADIMIN_ADD_PRODUCT_TMPL);
 		email.setTemplateTokens(templateTokens);
@@ -1650,7 +1653,11 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		emailService.sendHtmlEmail(merchantStore, email);
 	    LOGGER.debug("Email sent successful");
 		} catch(Exception e) {
+			e.printStackTrace();
 			LOGGER.error("Error while sending email");
+			postRequirementResponse.setErrorMessage("Error while sending email");
+			postRequirementResponse.setStatus(FALSE);
+			return postRequirementResponse;
 		}
 		postRequirementResponse.setSuccessMessage("Email sent sucessful");
 		postRequirementResponse.setStatus(TRUE);

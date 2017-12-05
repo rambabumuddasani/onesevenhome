@@ -11,8 +11,13 @@ public class VendorProductVO {
 	private String productName;
 	private String imageURL;
 	private String productDescription;
-	private String vendorAddress;
 	private String vendorMobile;
+	private String houseNumber;
+	private String street;
+	private String area;
+	private String city;
+	private String state;
+	private String pinCode;
 	public Long getVendorId() {
 		return vendorId;
 	}
@@ -55,17 +60,47 @@ public class VendorProductVO {
 	public void setProductDescription(String productDescription) {
 		this.productDescription = productDescription;
 	}
-	public String getVendorAddress() {
-		return vendorAddress;
-	}
-	public void setVendorAddress(String vendorAddress) {
-		this.vendorAddress = vendorAddress;
-	}
 	public String getVendorMobile() {
 		return vendorMobile;
 	}
 	public void setVendorMobile(String vendorMobile) {
 		this.vendorMobile = vendorMobile;
+	}
+	public String getHouseNumber() {
+		return houseNumber;
+	}
+	public void setHouseNumber(String houseNumber) {
+		this.houseNumber = houseNumber;
+	}
+	public String getStreet() {
+		return street;
+	}
+	public void setStreet(String street) {
+		this.street = street;
+	}
+	public String getArea() {
+		return area;
+	}
+	public void setArea(String area) {
+		this.area = area;
+	}
+	public String getCity() {
+		return city;
+	}
+	public void setCity(String city) {
+		this.city = city;
+	}
+	public String getState() {
+		return state;
+	}
+	public void setState(String state) {
+		this.state = state;
+	}
+	public String getPinCode() {
+		return pinCode;
+	}
+	public void setPinCode(String pinCode) {
+		this.pinCode = pinCode;
 	}
 	
 	
