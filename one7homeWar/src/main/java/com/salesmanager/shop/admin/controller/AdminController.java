@@ -88,7 +88,7 @@ public class AdminController extends AbstractController {
 	private static final String FALSE = "false";
 	private static final Logger LOGGER = LoggerFactory.getLogger(AdminController.class);
 	private static final String ADIMIN_APPROVE_PRODUCT_TMPL = "email_template_vendor_approve_products.ftl";
-	//private static final String ADIMIN_ADD_PRODUCT_TMPL = "email_template_admin_vendor_postrequirement.ftl";
+	private static final String ADIMIN_ADD_PRODUCT_TMPL = "email_template_admin_vendor_postrequirement.ftl";
 	@Inject
 	private MerchantStoreService merchantStoreService;
 	
@@ -1624,7 +1624,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		return paginatedResponse;
     	
     }
-    /*@RequestMapping(value="/postrequirement/{postRequirementId}", method=RequestMethod.GET)
+    @RequestMapping(value="/postrequirement/{postRequirementId}", method=RequestMethod.GET)
   	@ResponseBody
   	public PostRequirementResponse sendMail(@PathVariable String postRequirementId) throws Exception {
 		LOGGER.debug("Entered sendMail");
@@ -1652,18 +1652,18 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 
 		emailService.sendHtmlEmail(merchantStore, email);
 	    LOGGER.debug("Email sent successful");
+	    postRequirementResponse.setSuccessMessage("Email sent sucessful");
+		postRequirementResponse.setStatus(TRUE);
 		} catch(Exception e) {
-			e.printStackTrace();
 			LOGGER.error("Error while sending email");
 			postRequirementResponse.setErrorMessage("Error while sending email");
 			postRequirementResponse.setStatus(FALSE);
 			return postRequirementResponse;
 		}
-		postRequirementResponse.setSuccessMessage("Email sent sucessful");
-		postRequirementResponse.setStatus(TRUE);
+		
     	return postRequirementResponse;
     	
-    }*/
+    }
 }
     
  

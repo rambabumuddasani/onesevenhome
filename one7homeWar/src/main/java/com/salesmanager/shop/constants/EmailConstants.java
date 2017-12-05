@@ -93,4 +93,6 @@ public class EmailConstants {
 	public static final String EMAIL_PRODUCT_IMAGE_URL = "EMAIL_PRODUCT_IMAGE_URL";
 	public static final String EMAIL_PRODUCT_PRICE = "EMAIL_PRODUCT_PRICE";
 	public static final String EMAIL_PRODUCT_DESCRIPTION = "EMAIL_PRODUCT_DESCRIPTION";
+	public static final String EMAIL_PRODUCT_LABEL = "EMAIL_PRODUCT_LABEL";
+	public static final String EMAIL_CATEGORY = "EMAIL_CATEGORY";
 }
