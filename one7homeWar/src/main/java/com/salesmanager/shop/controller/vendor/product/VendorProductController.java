@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.salesmanager.core.business.exception.ServiceException;
@@ -354,4 +355,58 @@ public class VendorProductController extends AbstractController {
 		LOGGER.error("getProductVendors");
 		return vendorsList;
 	}
+	
+	@RequestMapping(value={"/seachPincodeWiseVendors/{productId}"},  method = { RequestMethod.GET })
+	@ResponseBody	
+	public VendorsList getProductVendorsByProductIdAndCustomerPinCode(@PathVariable Long productId,@RequestParam(name = "postalCode",required=true)  String billingPostalCode ,HttpServletRequest request){
+		LOGGER.debug("Entered getProductVendors");
+		VendorsList vendorsList = new VendorsList();
+		List<VendorResponse> vendorsDataForProduct = new ArrayList<VendorResponse>();
+		//Customer customer = getSessionAttribute(  Constants.CUSTOMER, request );
+		//String billingPostalCode = customer.getBilling().getPostalCode();
+		try {
+		List<VendorProduct> dbVendorProductList = vendorProductService.findProductVendorsByProductIdAndCustomerPinCode(productId, billingPostalCode);
+		if(dbVendorProductList == null || dbVendorProductList.isEmpty()){
+			vendorsList.setStatus("Couldn't locate this product in your pincode, Sorry!");
+			return vendorsList;
+		}
+		LOGGER.debug("dbVendorProductList size=="+dbVendorProductList.size());
+		for(VendorProduct vendorProduct : dbVendorProductList){
+			VendorResponse vendorResponse = new VendorResponse();
+			LOGGER.debug("customer --vendor=="+vendorProduct.getCustomer().getEmailAddress());
+			if(vendorProduct.getCustomer() != null) {
+				vendorResponse.setEmail(vendorProduct.getCustomer().getEmailAddress());
+				vendorResponse.setVendorName(vendorProduct.getCustomer().getVendorAttrs().getVendorName());
+				vendorResponse.setVendorOfficeAddress(vendorProduct.getCustomer().getVendorAttrs().getVendorOfficeAddress());
+				vendorResponse.setVendorMobile(vendorProduct.getCustomer().getVendorAttrs().getVendorMobile());
+				vendorResponse.setVendorTelephone(vendorProduct.getCustomer().getVendorAttrs().getVendorTelephone());
+				vendorResponse.setVendorFax(vendorProduct.getCustomer().getVendorAttrs().getVendorFax());
+				vendorResponse.setVendorConstFirm(vendorProduct.getCustomer().getVendorAttrs().getVendorConstFirm());
+				vendorResponse.setVendorCompanyNature(vendorProduct.getCustomer().getVendorAttrs().getVendorCompanyNature());
+				vendorResponse.setVendorRegistrationNo(vendorProduct.getCustomer().getVendorAttrs().getVendorRegistrationNo());
+				vendorResponse.setVendorPAN(vendorProduct.getCustomer().getVendorAttrs().getVendorPAN());
+				vendorResponse.setVendorLicense(vendorProduct.getCustomer().getVendorAttrs().getVendorLicense());
+				vendorResponse.setVendorExpLine(vendorProduct.getCustomer().getVendorAttrs().getVendorExpLine());
+				vendorResponse.setVendorMajorCust(vendorProduct.getCustomer().getVendorAttrs().getVendorMajorCust());
+				vendorResponse.setVatRegNo(vendorProduct.getCustomer().getVendorAttrs().getVendorVatRegNo());
+				vendorResponse.setVendorTIN(vendorProduct.getCustomer().getVendorAttrs().getVendorTinNumber());
+				vendorResponse.setVendorImageURL(vendorProduct.getCustomer().getUserProfile());
+				vendorResponse.setAuthCertURL(vendorProduct.getCustomer().getVendorAttrs().getVendorAuthCert());
+				
+				vendorsDataForProduct.add(vendorResponse);
+			}
+			
+		}
+		vendorsList.setVendorsDataForProduct(vendorsDataForProduct);
+		
+		}catch(Exception e){
+			LOGGER.error("error occured while retrieving vendors based on product id ="+productId+"---"+e.getMessage());
+			//e.printStackTrace(System.out);
+		}
+		vendorsList.setStatus("OK");
+		LOGGER.error("getProductVendors");
+		return vendorsList;
+	}
+
+	
 }
