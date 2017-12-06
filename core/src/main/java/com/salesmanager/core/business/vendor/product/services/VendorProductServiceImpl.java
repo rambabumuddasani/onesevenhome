@@ -66,5 +66,12 @@ public class VendorProductServiceImpl extends SalesManagerEntityServiceImpl<Long
 		LOGGER.debug("fetching admin activated vendor products");
 		return vendorProductRepository.findProductVendors(productId);
 	}
+
 	
+	@Override
+	public List<VendorProduct> findProductVendorsByProductIdAndCustomerPinCode(Long productId, String postalCode) {
+		LOGGER.debug("fetching admin activated vendor products");
+		return vendorProductRepository.findProductVendorsByProductIdAndCustomerPinCode(productId,postalCode);
+	}
+
 }

@@ -36,6 +36,10 @@ public interface VendorProductRepository extends JpaRepository<VendorProduct, Lo
 			+ " where vp.adminActivated = TRUE and pd.id=?1 ")
 	public List<VendorProduct> findProductVendors(Long productId);
 
+	@Query("select distinct vp from VendorProduct vp join fetch vp.product pd join fetch vp.customer customer"
+			+ " where vp.adminActivated = TRUE and pd.id=?1 and customer.billing.postalCode = ?2")
+	public List<VendorProduct> findProductVendorsByProductIdAndCustomerPinCode(Long productId,String postalCode);
+	
 	/*	@Query("select vp from VendorProduct vp where vp.id=?1")
 	public VendorProduct findVendorProductById(Long vendorProductId);
 */
