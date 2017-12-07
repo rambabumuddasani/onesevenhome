@@ -1571,18 +1571,60 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	postRequirement.setCategoryId(category.getId());
     	postRequirementService.save(postRequirement);
     	LOGGER.debug("Query saved");
+    	final Locale locale  = new Locale("en");
+    	MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");
+    	
+    	Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
+		templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, customer.getVendorAttrs().getVendorName());
+		templateTokens.put(EmailConstants.EMAIL_PRODUCT_LABEL, messages.getMessage("email.vendor.add.request.product", locale));
+		templateTokens.put(EmailConstants.EMAIL_CATEGORY, category.getDescription().getName());
+		
+		Email email = new Email();
+		email.setFrom(merchantStore.getStorename());
+		email.setFromEmail(merchantStore.getStoreEmailAddress());
+		email.setSubject(messages.getMessage("email.vendor.request.postrequirement",locale));
+		email.setTo("surendervarmac@gmail.com");
+		email.setTemplateName(ADIMIN_ADD_PRODUCT_TMPL);
+		email.setTemplateTokens(templateTokens);
+
+		emailService.sendHtmlEmail(merchantStore, email);
+		sendEmailToCustomer(customer,category);
     	postReqirementResponse.setSuccessMessage("Query saved successfully");
     	postReqirementResponse.setStatus(TRUE);
     	} catch (Exception e){
+    		e.printStackTrace();
     		LOGGER.error("Error while saving query"+e.getMessage());
     		postReqirementResponse.setErrorMessage("Error while saving query");
     		postReqirementResponse.setStatus(FALSE);
+    		return postReqirementResponse;
     	}
     	LOGGER.debug("Ended postReqirement");
 		return postReqirementResponse;
     	
     }
-    @RequestMapping(value="/getPostRequirements", method = RequestMethod.GET)
+    private void sendEmailToCustomer(Customer customer, Category category) throws Exception {
+    	final Locale locale  = new Locale("en");
+    	MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");
+    	
+    	Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
+		templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, customer.getVendorAttrs().getVendorName());
+		templateTokens.put(EmailConstants.EMAIL_PRODUCT_LABEL, messages.getMessage("email.vendor.add.request.product", locale));
+		templateTokens.put(EmailConstants.EMAIL_CATEGORY, category.getDescription().getName());
+		
+		Email email = new Email();
+		email.setFrom(merchantStore.getStorename());
+		email.setFromEmail(merchantStore.getStoreEmailAddress());
+		email.setSubject(messages.getMessage("email.vendor.request.postrequirement",locale));
+		email.setTo(customer.getEmailAddress());
+		email.setTemplateName(ADIMIN_ADD_PRODUCT_TMPL);
+		email.setTemplateTokens(templateTokens);
+		
+		emailService.sendHtmlEmail(merchantStore, email);
+		LOGGER.debug("Email sent to customer");
+		
+	}
+
+	@RequestMapping(value="/getPostRequirements", method = RequestMethod.GET)
 	@ResponseBody
 	public PaginatedResponse getPostRequirements(@RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) {
     	LOGGER.debug("Entered getPostRequirements");
@@ -1624,14 +1666,17 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		return paginatedResponse;
     	
     }
-    @RequestMapping(value="/postrequirement/{postRequirementId}", method=RequestMethod.GET)
+    @RequestMapping(value="/postrequirement", method=RequestMethod.POST)
   	@ResponseBody
-  	public PostRequirementResponse sendMail(@PathVariable String postRequirementId) throws Exception {
+  	public PostRequirementResponse sendMail(@RequestBody RequirementRequest requirementRequest) throws Exception {
 		LOGGER.debug("Entered sendMail");
 		PostRequirementResponse postRequirementResponse = new PostRequirementResponse();
-		Long postRequirementIdLong = new Long(postRequirementId);
+		//Long postRequirementIdLong = new Long(postRequirementId);
 		try {
-		PostRequirement postRequirement = postRequirementService.getById(postRequirementIdLong);
+		PostRequirement postRequirement = postRequirementService.getById(requirementRequest.getPostRequirementId());
+		postRequirement.setResponseMessage(requirementRequest.getResponseMessage());
+		postRequirementService.save(postRequirement);
+		
 		final Locale locale  = new Locale("en");
     	MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");
     	Customer customer = customerService.getById(postRequirement.getCustomerId());
@@ -1641,6 +1686,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, customer.getVendorAttrs().getVendorName());
 		templateTokens.put(EmailConstants.EMAIL_PRODUCT_LABEL, messages.getMessage("email.vendor.add.request.product", locale));
 		templateTokens.put(EmailConstants.EMAIL_CATEGORY, category.getDescription().getName());
+		templateTokens.put(EmailConstants.EMAIL_AMIN_RESPONSE_MESSAGE, postRequirement.getResponseMessage());
 		
 		Email email = new Email();
 		email.setFrom(merchantStore.getStorename());
@@ -1651,6 +1697,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		email.setTemplateTokens(templateTokens);
 
 		emailService.sendHtmlEmail(merchantStore, email);
+		sendEmailToAdmin(merchantStore);
 	    LOGGER.debug("Email sent successful");
 	    postRequirementResponse.setSuccessMessage("Email sent sucessful");
 		postRequirementResponse.setStatus(TRUE);
@@ -1664,6 +1711,27 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	return postRequirementResponse;
     	
     }
+
+	private void sendEmailToAdmin(MerchantStore merchantStore) throws Exception{
+		User user = userService.getById(1l);
+		final Locale locale  = new Locale("en");
+		
+    	Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
+		templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, user.getAdminName());
+		templateTokens.put(EmailConstants.EMAIL_PRODUCT_LABEL, messages.getMessage("email.vendor.add.request.product", locale));
+		
+		
+		Email email = new Email();
+		email.setFrom(merchantStore.getStorename());
+		email.setFromEmail(merchantStore.getStoreEmailAddress());
+		email.setSubject(messages.getMessage("email.vendor.add.request.product",locale));
+		email.setTo("surendervarmac@gmail.com");
+		email.setTemplateName(ADIMIN_ADD_PRODUCT_TMPL);
+		email.setTemplateTokens(templateTokens);
+
+		emailService.sendHtmlEmail(merchantStore, email);
+		LOGGER.debug("Email sent to Admin");
+	}
 }
     
  

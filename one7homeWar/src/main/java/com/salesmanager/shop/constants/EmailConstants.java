@@ -95,4 +95,5 @@ public class EmailConstants {
 	public static final String EMAIL_PRODUCT_DESCRIPTION = "EMAIL_PRODUCT_DESCRIPTION";
 	public static final String EMAIL_PRODUCT_LABEL = "EMAIL_PRODUCT_LABEL";
 	public static final String EMAIL_CATEGORY = "EMAIL_CATEGORY";
+	public static final String EMAIL_AMIN_RESPONSE_MESSAGE = "EMAIL_AMIN_RESPONSE_MESSAGE";
 }

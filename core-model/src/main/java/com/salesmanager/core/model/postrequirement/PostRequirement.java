@@ -37,13 +37,14 @@ public class PostRequirement extends SalesManagerEntity<Long,PostRequirement> {
 	@Column(name="QUERY", length=300)
 	private String query;
 	
-	
 	@Column(name="CUSTOMER_ID", nullable = false)
 	private Long customerId;
 	
-	
 	@Column(name = "CATEGORY_ID", nullable = false)
 	private Long categoryId;
+	
+	@Column(name="RESPONSE_MESSAGE", length=256)
+	private String responseMessage;
 	
 	public Long getId() {
 		return id;
@@ -83,6 +84,14 @@ public class PostRequirement extends SalesManagerEntity<Long,PostRequirement> {
 
 	public void setCategoryId(Long categoryId) {
 		this.categoryId = categoryId;
+	}
+
+	public String getResponseMessage() {
+		return responseMessage;
+	}
+
+	public void setResponseMessage(String responseMessage) {
+		this.responseMessage = responseMessage;
 	}
 
 	
