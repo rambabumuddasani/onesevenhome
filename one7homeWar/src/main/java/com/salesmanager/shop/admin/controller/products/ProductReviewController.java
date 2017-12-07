@@ -3,6 +3,7 @@ package com.salesmanager.shop.admin.controller.products;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -103,6 +104,7 @@ public class ProductReviewController extends AbstractController{
 		try {
 
 			List<ProductReview> reviews = productReviewService.getByProductId(productId);
+			Collections.sort(reviews, new DateComparator());
 			
 			for(ProductReview review : reviews) {
 				ProductReviewVO productReviewVO = new ProductReviewVO();
