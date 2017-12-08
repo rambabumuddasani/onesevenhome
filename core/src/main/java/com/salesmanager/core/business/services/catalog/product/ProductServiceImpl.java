@@ -149,7 +149,6 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 		
 	}
 	
-		
 	@Override
 	public List<Product> getProductsListByFilters(List<Long> filterIds) throws ServiceException {
 		
@@ -393,6 +392,11 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 	public List<Product> getAllDealOfDay(String columnName, String columnValue) {
 		LOGGER.debug("Retrieving all deal of day products");
 		return productRepository.getAllDealOfDay(columnName,columnValue);
+	}
+	
+	@Override
+	public List<Product> getProductsListBySearch(String searchString) throws ServiceException {
+		return productRepository.getProductsListBySearch(searchString);
 	}
 
 }

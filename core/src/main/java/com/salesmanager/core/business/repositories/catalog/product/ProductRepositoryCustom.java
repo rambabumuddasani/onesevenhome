@@ -53,5 +53,6 @@ public interface ProductRepositoryCustom {
 		List<Product> findProductsByFiltersAndPrice(String categoryCode,List<Long> filterIds, BigDecimal minPrice, BigDecimal maxPrice,Double productRating);
 
 		Product getProductAndProductReviewByProductId(Long productId);
+		List<Product> getProductsListBySearch(String searchString);
 
 }

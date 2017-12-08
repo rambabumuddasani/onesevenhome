@@ -1268,8 +1268,21 @@ public class ProductController extends AbstractController {
 			if(product.getProductImage() != null)
 				productResponse.setImageURL(product.getProductImage().getProductImageUrl());
 			
+			if(productPrice.getProductPriceAmount() != null)
+				productResponse.setProductPrice(productPrice.getProductPriceAmount());
+			if(productPrice.getProductPriceSpecialAmount() != null) {
+				if(productPrice.getProductPriceSpecialStartDate() != null && productPrice.getProductPriceSpecialEndDate() != null) {
+					if(productPrice.getProductPriceSpecialEndDate().compareTo(productPrice.getProductPriceSpecialStartDate()) > 0){
+						productResponse.setProductPrice(productPrice.getProductPriceAmount());
+						productResponse.setProductDiscountPrice(productPrice.getProductPriceSpecialAmount());
+						productResponse.setDiscountPercentage(getDiscountPercentage(productPrice));
+						productResponse.setProductPriceSpecialEndDate(productPrice.getProductPriceSpecialEndDate());
+						productResponse.setProductPriceSpecialStartDate(productPrice.getProductPriceSpecialStartDate());
+					}
+				}
+			}
 		
-			if(isSpecial) {
+/*			if(isSpecial) {
 				productResponse.setProductPrice(productPrice.getProductPriceAmount());
 				productResponse.setProductDiscountPrice(productPrice.getProductPriceSpecialAmount());
 				productResponse.setDiscountPercentage(getDiscountPercentage(productPrice));
@@ -1279,6 +1292,7 @@ public class ProductController extends AbstractController {
 			}
 			else
 				productResponse.setProductPrice(productPrice.getProductPriceAmount());
+				*/
 			productResponse.setProductDescription(dbProduct.getProductDescription().getDescription());	
 			productResponse.setProductName(dbProduct.getProductDescription().getName());
 			//productResponse.setVendorName(dbProduct.getManufacturer().getCode());
@@ -2249,5 +2263,39 @@ public CreateProductResponse updateProductDiscount(@RequestBody ProductDiscountR
   		LOGGER.debug("Ended deleteProductImage");
   		return productImageResponse;
   	}
+
+	@RequestMapping(value="/getProductsBySearch", method = RequestMethod.POST, 
+			consumes = MediaType.APPLICATION_JSON_VALUE,
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public FilteredProducts getProductsBySearch(@RequestParam(value="pageNumber", defaultValue = "1") int page ,@RequestParam(value="pageSize", defaultValue="15") int size, @RequestBody SearchRequest searchRequest) throws Exception {
 		
+		LOGGER.debug("Entered getProductsBySearch");
+		
+		ProductResponse productResponse = new ProductResponse();
+		FilteredProducts filteredProducts = new FilteredProducts();
+		List<ProductResponse> responses = new ArrayList<ProductResponse>();
+
+		if(searchRequest.getSearchString() != null) {
+			List<Product> dbProducts = productService.getProductsListBySearch(searchRequest.getSearchString());
+
+			for(Product product:dbProducts) {
+				productResponse = getProductDetails(product,false);
+				responses.add(productResponse);
+			}
+			
+		}
+		if(responses == null || responses.isEmpty() || responses.size() < page){
+			filteredProducts.setFilteredProducts(responses);
+			return filteredProducts;
+		}
+	    PaginationData paginaionData=createPaginaionData(page,size);
+    	calculatePaginaionData(paginaionData,size, responses.size());
+    	filteredProducts.setPaginationData(paginaionData);
+		List<ProductResponse> paginatedProdResponses = responses.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+		filteredProducts.setFilteredProducts(paginatedProdResponses);
+		LOGGER.debug("Ended getProductsBySearch");
+		return filteredProducts;
+	}
+	 
 }

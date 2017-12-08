@@ -70,6 +70,7 @@ public interface ProductService extends SalesManagerEntityService<Long, Product>
 	List<Product> getAdminTodaysDeals();
 
 	List<Product> getAllDealOfDay(String columnName, String columnValue);
+	List<Product> getProductsListBySearch(String searchString)  throws ServiceException;
 
 }
 	
