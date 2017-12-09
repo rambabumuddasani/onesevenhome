@@ -19,6 +19,7 @@ import com.salesmanager.core.business.modules.services.ServicesResponse;
 import com.salesmanager.core.business.modules.services.WorkerRatingResponse;
 import com.salesmanager.core.business.modules.services.WorkerServiceResponse;
 import com.salesmanager.core.business.services.customer.CustomerService;
+import com.salesmanager.core.business.services.services.ServicesRatingService;
 import com.salesmanager.core.business.services.services.ServicesService;
 import com.salesmanager.core.business.services.services.WorkerService;
 import com.salesmanager.core.model.customer.Customer;
@@ -41,6 +42,9 @@ public class ServicesController {
 
 	@Inject
 	ServicesService servicesService;
+
+	@Inject
+	ServicesRatingService servicesRatingService;
 
 	@Inject
 	WorkerService workerService;
@@ -111,7 +115,7 @@ public class ServicesController {
     	servicesRating.setRating(servicesRatingRequest.getRating());
     	servicesRating.setReviewTitle(servicesRatingRequest.getReviewTitle());
     	servicesRating.setReviewDescription(servicesRatingRequest.getReviewDescription());
-    	//customerTestmonialService.save(customerTestimonial);
+    	servicesRatingService.save(servicesRating);
     	servicesRatingResponse.setSuccessMessage("Rating Saved successfully");
     	LOGGER.debug("saveServicesRating saved");
     	servicesRatingResponse.setStatus(true);
