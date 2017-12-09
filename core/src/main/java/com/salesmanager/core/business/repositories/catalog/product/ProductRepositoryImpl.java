@@ -74,7 +74,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 		qs.append("left join fetch p.taxClass tx ");
 		
 		//qs.append("where pa.region in (:lid) ");
-		qs.append("where categs.code in (:categoryCode)");
+		qs.append("where categs.code in (:categoryCode) order by p.id asc");
 
 
 
@@ -127,7 +127,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 		qs.append("left join fetch p.type type ");
 		qs.append("left join fetch p.taxClass tx ");
 		
-		qs.append("where filters.id in (:fid)");
+		qs.append("where filters.id in (:fid) order by p.id asc");
 
 
 
@@ -179,7 +179,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 			qs.append("left join fetch p.type type ");
 			qs.append("left join fetch p.taxClass tx ");
 			
-			qs.append("where pap.productPriceSpecialStartDate <= sysdate() and pap.productPriceSpecialEndDate >= sysdate()");
+			qs.append("where pap.productPriceSpecialStartDate <= sysdate() and pap.productPriceSpecialEndDate >= sysdate() order by p.id asc");
 	
 	
 	    	String hql = qs.toString();
@@ -231,7 +231,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 			qs.append("left join fetch p.taxClass tx ");
 			
 			qs.append("where pap.productPriceSpecialStartDate <= sysdate() and pap.productPriceSpecialEndDate >= sysdate()");
-			qs.append(" and pap.dealOfDay ='Y'");
+			qs.append(" and pap.dealOfDay ='Y' order by p.id asc");
 	
 	    	String hql = qs.toString();
 			Query q = this.em.createQuery(hql);
@@ -1179,7 +1179,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 		qs.append("left join fetch p.taxClass tx ");
 		
 		//qs.append("where pa.region in (:lid) ");
-		qs.append("where tx.id=:tid");
+		qs.append("where tx.id=:tid order by p.id asc");
 
 
 
@@ -1260,6 +1260,8 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 				}
 	     }
 		
+		qs.append(" order by p.id asc");
+		
     	String hql = qs.toString();
 		Query q = this.em.createQuery(hql);
 		
@@ -1328,7 +1330,7 @@ try {
 			qs.append("left join fetch p.type type ");
 			qs.append("left join fetch p.taxClass tx ");
 			
-			qs.append("where pap.productPriceSpecialStartDate >= curdate()");
+			qs.append("where pap.productPriceSpecialStartDate >= curdate() order by p.id asc");
 	
 	        System.out.println("Query======"+qs);
 	
@@ -1382,7 +1384,7 @@ try {
 			qs.append(" where pap."+columnName+"="+"'"+columnValue+"'");
 			//qs.append(" and pap."+columnName+"="+"'"+coulumnValue+"'");
 			//qs.append(" and pap.dealOfDay ='Y'");
-	        qs.append(" and pap.productPriceSpecialEndDate>curdate()");
+	        qs.append(" and pap.productPriceSpecialEndDate>curdate() order by p.id asc");
 	    	String hql = qs.toString();
 			Query q = this.em.createQuery(hql);
 	
@@ -1444,7 +1446,7 @@ try {
 		qs.append("left join fetch p.type type ");
 		qs.append("left join fetch p.taxClass tx ");
 		
-		qs.append("where pd.name like :searchString ");
+		qs.append("where pd.name like :searchString order by p.id asc");
 
 
 
