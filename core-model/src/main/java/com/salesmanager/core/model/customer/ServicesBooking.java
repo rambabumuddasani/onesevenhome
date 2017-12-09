@@ -20,8 +20,8 @@ import com.salesmanager.core.model.generic.SalesManagerEntity;
 import com.salesmanager.core.model.services.Services;
 
 @Entity
-@Table(name = "SERVICES_RATING", schema=SchemaConstant.SALESMANAGER_SCHEMA)
-public class ServicesRating extends SalesManagerEntity<Long, ServicesRating> {
+@Table(name = "SERVICES_BOOKING", schema=SchemaConstant.SALESMANAGER_SCHEMA)
+public class ServicesBooking extends SalesManagerEntity<Long, ServicesBooking> {
 	
 	/**
 	 * 
@@ -30,23 +30,14 @@ public class ServicesRating extends SalesManagerEntity<Long, ServicesRating> {
 
 	@Id
 	@Column(name = "ID")
-	@TableGenerator(name = "TABLE_GEN", table = "SM_SEQUENCER", pkColumnName = "SEQ_NAME", valueColumnName = "SEQ_COUNT", pkColumnValue = "SERVICES_RATING_SEQ_NEXT_VAL")
+	@TableGenerator(name = "TABLE_GEN", table = "SM_SEQUENCER", pkColumnName = "SEQ_NAME", valueColumnName = "SEQ_COUNT", pkColumnValue = "SERVICES_BOOKING_SEQ_NEXT_VAL")
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = "TABLE_GEN")
 	private Long id;
  
 	@Temporal(TemporalType.DATE)
-	@Column(name="CREATE_DATE")
-	private Date createDate;
+	@Column(name="BOOKING_DATE")
+	private Date bookingDate;
 	
-	@Column(name="RATING")
-	private Integer rating;
-
-	@Column(name="REVIEW_DESC", length=500)
-    private String reviewDescription;
-	
-	@Column(name="REVIEW_TITLE")
-    private String reviewTitle;
-    
 	@ManyToOne(targetEntity = Customer.class)
 	@JoinColumn(name = "CUSTOMER_ID", nullable = false)
     private Customer customer;
@@ -58,7 +49,7 @@ public class ServicesRating extends SalesManagerEntity<Long, ServicesRating> {
 	@ManyToOne(targetEntity = Services.class)
 	@JoinColumn(name = "SERVICE_TYPE_ID", nullable = false)
     private Services serviceType;
-	
+
 	public Long getId() {
 		return id;
 	}
@@ -67,36 +58,12 @@ public class ServicesRating extends SalesManagerEntity<Long, ServicesRating> {
 		this.id = id;
 	}
 
-	public Date getCreateDate() {
-		return createDate;
+	public Date getBookingDate() {
+		return bookingDate;
 	}
 
-	public void setCreateDate(Date createDate) {
-		this.createDate = createDate;
-	}
-
-	public Integer getRating() {
-		return rating;
-	}
-
-	public void setRating(Integer rating) {
-		this.rating = rating;
-	}
-
-	public String getReviewDescription() {
-		return reviewDescription;
-	}
-
-	public void setReviewDescription(String reviewDescription) {
-		this.reviewDescription = reviewDescription;
-	}
-
-	public String getReviewTitle() {
-		return reviewTitle;
-	}
-
-	public void setReviewTitle(String reviewTitle) {
-		this.reviewTitle = reviewTitle;
+	public void setBookingDate(Date bookingDate) {
+		this.bookingDate = bookingDate;
 	}
 
 	public Customer getCustomer() {
@@ -122,5 +89,5 @@ public class ServicesRating extends SalesManagerEntity<Long, ServicesRating> {
 	public void setServiceType(Services serviceType) {
 		this.serviceType = serviceType;
 	}
-
+	
 }

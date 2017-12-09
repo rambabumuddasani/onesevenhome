@@ -4,9 +4,11 @@ public class ServicesRatingRequest {
 	
 	private Long customerId;
 	private Long serviceId;
+	private Integer serviceTypeId;
 	private Integer rating;
     private String reviewDescription;
     private String reviewTitle;
+    
 	public Long getCustomerId() {
 		return customerId;
 	}
@@ -36,6 +38,12 @@ public class ServicesRatingRequest {
 	}
 	public void setReviewTitle(String reviewTitle) {
 		this.reviewTitle = reviewTitle;
+	}
+	public Integer getServiceTypeId() {
+		return serviceTypeId;
+	}
+	public void setServiceTypeId(Integer serviceTypeId) {
+		this.serviceTypeId = serviceTypeId;
 	}
 
 }
