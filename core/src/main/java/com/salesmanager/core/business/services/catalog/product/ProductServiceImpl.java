@@ -164,6 +164,12 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 	}
 
 	@Override
+	public List<Product> getVendorNotAssociatedProductsListByCategory(String categoryCode,List<Long> productIds) throws ServiceException {
+		return productRepository.getVendorNotAssociatedProductsListByCategory(categoryCode,productIds);
+	}
+
+	
+	@Override
 	public ProductDescription getProductDescription(Product product, Language language) {
 		for (ProductDescription description : product.getDescriptions()) {
 			if (description.getLanguage().equals(language)) {

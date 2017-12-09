@@ -93,6 +93,66 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 
 
 	}
+	
+	@SuppressWarnings("rawtypes")
+	@Override
+	public List<Product> getVendorNotAssociatedProductsListByCategory(String categoryCode,List<Long> productIds) {
+		//TODO Test performance 
+		/**
+		 * Testing in debug mode takes a long time with this query
+		 * running in normal mode is fine
+		 */
+
+		StringBuilder qs = new StringBuilder();
+		qs.append("select distinct p from Product as p ");
+		qs.append("join fetch p.merchantStore merch ");
+		qs.append("join fetch p.availabilities pa ");
+		qs.append("left join fetch pa.prices pap ");
+		
+		qs.append("join fetch p.descriptions pd ");
+		qs.append("join fetch p.categories categs ");
+		
+		
+		
+		qs.append("left join fetch pap.descriptions papd ");
+		
+		
+		//images
+		qs.append("left join fetch p.images images ");
+		
+		//options (do not need attributes for listings)
+		qs.append("left join fetch p.attributes pattr ");
+		qs.append("left join fetch pattr.productOption po ");
+		qs.append("left join fetch po.descriptions pod ");
+		qs.append("left join fetch pattr.productOptionValue pov ");
+		qs.append("left join fetch pov.descriptions povd ");
+		
+		//other lefts
+		qs.append("left join fetch p.manufacturer manuf ");
+		qs.append("left join fetch p.type type ");
+		qs.append("left join fetch p.taxClass tx ");
+		
+		//qs.append("where pa.region in (:lid) ");
+		qs.append("where categs.code in (:categoryCode)");
+
+		qs.append("and p.id not in (:productIds)");
+
+    	String hql = qs.toString();
+		Query q = this.em.createQuery(hql);
+
+    	q.setParameter("categoryCode", categoryCode);
+    	q.setParameter("productIds", productIds);
+
+    	@SuppressWarnings("unchecked")
+		List<Product> products =  q.getResultList();
+
+    	
+    	return products;
+
+
+	}
+
+	
 	@SuppressWarnings("rawtypes")
 	@Override
 	public List<Product> getProductsListByFilters(Set filterIds) {

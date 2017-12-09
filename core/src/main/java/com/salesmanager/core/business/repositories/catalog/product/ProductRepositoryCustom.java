@@ -55,4 +55,6 @@ public interface ProductRepositoryCustom {
 		Product getProductAndProductReviewByProductId(Long productId);
 		List<Product> getProductsListBySearch(String searchString);
 
+		List<Product> getVendorNotAssociatedProductsListByCategory(String categoryCode, List<Long> productId);
+
 }

@@ -72,5 +72,7 @@ public interface ProductService extends SalesManagerEntityService<Long, Product>
 	List<Product> getAllDealOfDay(String columnName, String columnValue);
 	List<Product> getProductsListBySearch(String searchString)  throws ServiceException;
 
+	List<Product> getVendorNotAssociatedProductsListByCategory(String categoryCode, List<Long> productIds) throws ServiceException;
+
 }
 	
