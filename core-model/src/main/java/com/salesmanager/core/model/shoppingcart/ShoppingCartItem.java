@@ -75,6 +75,8 @@ public class ShoppingCartItem extends SalesManagerEntity<Long, ShoppingCartItem>
 	@Transient
 	private FinalPrice finalPrice;//contains price details (raw prices)
 	
+	@Column(name="VENDOR_ID", nullable=false)
+	private Long vendorId;
 
 	@Transient
 	private Product product;
@@ -82,16 +84,21 @@ public class ShoppingCartItem extends SalesManagerEntity<Long, ShoppingCartItem>
 	@Transient
 	private boolean obsolete = false;
 
-
-
-
 	public ShoppingCartItem(ShoppingCart shoppingCart, Product product) {
 		this.product = product;
 		this.productId = product.getId();
 		this.quantity = 1;
 		this.shoppingCart = shoppingCart;
-		
 	}
+	
+	public Long getVendorId() {
+		return vendorId;
+	}
+
+	public void setVendorId(Long vendorId) {
+		this.vendorId = vendorId;
+	}
+
 	
 	public ShoppingCartItem(Product product) {
 		this.product = product;

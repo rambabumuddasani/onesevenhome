@@ -128,27 +128,13 @@ public class ShoppingCartController extends AbstractController {
 
 		shoppingCart = shoppingCartFacade.addItemsToShoppingCart( shoppingCart, item, store,language,customer );
 		request.getSession().setAttribute(Constants.SHOPPING_CART, shoppingCart.getCode());
-		System.out.println("request URL "+ request.getRequestURL());
-		System.out.println("URI "+request.getRequestURI());
 		int cartQty = shoppingCart.getShoppingCartItems().size();
-/*		String response = "{'miniCartData':{'cartQuantity':"+cartQtry+"}}";
-		System.out.println("Response "+response);
-		System.out.println("shoppingCart "+shoppingCart.getShoppingCartItems());
-*/		System.out.println(" DisplayCart Link "+getNewResourceURL(request, "cart/addShoppingCartItem"));
 		ShoppingCartItemResponse shoppingCartItemResponse = new ShoppingCartItemResponse();
 		shoppingCartItemResponse.setCartQuantity(cartQty);
 		LOGGER.debug("Ended addShoppingCartItem");
 		return shoppingCartItemResponse;
 	}
 	
-	private String getNewResourceURL(HttpServletRequest request,String newResourceURL){
-		StringBuilder newURL =  new StringBuilder();
-		String url = request.getRequestURL().toString();
-		String baseURL = url.substring(0, url.length() - request.getRequestURI().length()) + request.getContextPath() + "/";
-		newURL.append(baseURL).append(newResourceURL);
-		return newURL.toString();
-	}
-
 	//  http://localhost:8080/shop/cart/displayCart?userId=1
 	@RequestMapping(value={"/displayCart"},  method = { RequestMethod.GET, RequestMethod.POST })
 	public @ResponseBody ShoppingCartData displayMiniCart(final String shoppingCartCode, HttpServletRequest request, Model model){

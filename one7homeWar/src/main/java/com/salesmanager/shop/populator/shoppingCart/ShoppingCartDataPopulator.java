@@ -3,13 +3,26 @@
  */
 package com.salesmanager.shop.populator.shoppingCart;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.configuration.ConversionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
+
 import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.services.catalog.product.PricingService;
+import com.salesmanager.core.business.services.customer.CustomerService;
 import com.salesmanager.core.business.services.shoppingcart.ShoppingCartCalculationService;
 import com.salesmanager.core.business.utils.AbstractDataPopulator;
 import com.salesmanager.core.model.catalog.product.attribute.ProductOptionDescription;
 import com.salesmanager.core.model.catalog.product.attribute.ProductOptionValueDescription;
 import com.salesmanager.core.model.catalog.product.image.ProductImage;
+import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.order.OrderSummary;
 import com.salesmanager.core.model.order.OrderTotalSummary;
@@ -19,26 +32,11 @@ import com.salesmanager.shop.model.order.OrderTotal;
 import com.salesmanager.shop.model.shoppingcart.ShoppingCartAttribute;
 import com.salesmanager.shop.model.shoppingcart.ShoppingCartData;
 import com.salesmanager.shop.model.shoppingcart.ShoppingCartItem;
+import com.salesmanager.shop.populator.order.VendorPopulator;
+import com.salesmanager.shop.store.controller.customer.VendorResponse;
 import com.salesmanager.shop.utils.ImageFilePath;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.configuration.ConversionException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
-
-/**
- * @author Umesh A
- *
- */
-
-
-public class ShoppingCartDataPopulator extends AbstractDataPopulator<ShoppingCart,ShoppingCartData>
-{
+public class ShoppingCartDataPopulator extends AbstractDataPopulator<ShoppingCart,ShoppingCartData> {
 
     private static final Logger LOG = LoggerFactory.getLogger(ShoppingCartDataPopulator.class);
 
@@ -48,44 +46,32 @@ public class ShoppingCartDataPopulator extends AbstractDataPopulator<ShoppingCar
     
     private ImageFilePath imageUtils;
 
-			public ImageFilePath getimageUtils() {
-				return imageUtils;
-			}
-		
-		
-		
-		
-			public void setimageUtils(ImageFilePath imageUtils) {
-				this.imageUtils = imageUtils;
-			}
+	private CustomerService customerService;
+    
+	public ImageFilePath getimageUtils() {
+		return imageUtils;
+	}
 
-
+	public void setimageUtils(ImageFilePath imageUtils) {
+		this.imageUtils = imageUtils;
+	}
 
     @Override
-    public ShoppingCartData createTarget()
-    {
-
+    public ShoppingCartData createTarget() {
         return new ShoppingCartData();
     }
-
-
 
     public ShoppingCartCalculationService getOrderService() {
         return shoppingCartCalculationService;
     }
 
-
-
     public PricingService getPricingService() {
         return pricingService;
     }
 
-
     @Override
     public ShoppingCartData populate(final ShoppingCart shoppingCart,
                                      final ShoppingCartData cart, final MerchantStore store, final Language language) {
-
-    	//Validate.notNull(imageUtils, "Requires to set imageUtils");
     	int cartQuantity = 0;
         cart.setCode(shoppingCart.getShoppingCartCode());
         Set<com.salesmanager.core.model.shoppingcart.ShoppingCartItem> items = shoppingCart.getLineItems();
@@ -97,15 +83,23 @@ public class ShoppingCartDataPopulator extends AbstractDataPopulator<ShoppingCar
 
                     ShoppingCartItem shoppingCartItem = new ShoppingCartItem();
                     shoppingCartItem.setCode(cart.getCode());
-                    shoppingCartItem.setProductCode(item.getProduct().getSku());
-                    shoppingCartItem.setProductVirtual(item.isProductVirtual());
-
+                    
+                    if(item.getVendorId() != null && !StringUtils.isEmpty(item.getVendorId())){
+	                    Customer vendor = customerService.getById(item.getVendorId());
+						VendorResponse vendorResponse = new VendorResponse();
+						VendorPopulator vendorPopulator  = new VendorPopulator();
+						vendorPopulator.populate(vendor, vendorResponse, null, null);
+						shoppingCartItem.setVendorResponse(vendorResponse);
+                    }
+                    
+					shoppingCartItem.setProductCode(item.getProduct().getSku());
+                    shoppingCartItem.setProductVirtual(item.isProductVirtual())	;
                     shoppingCartItem.setProductId(item.getProductId());
                     shoppingCartItem.setId(item.getId());
                     shoppingCartItem.setName(item.getProduct().getProductDescription().getName());
-
                     shoppingCartItem.setPrice(pricingService.getDisplayAmount(item.getItemPrice(),store));
                     shoppingCartItem.setQuantity(item.getQuantity());
+                    
                     /*int itemQty = item.getQuantity().intValue();
                     int itemPrice = item.getItemPrice().intValue();
                     shoppingCartItem.setTotalPriceOfEachItem(itemQty*itemPrice);
@@ -176,8 +170,9 @@ public class ShoppingCartDataPopulator extends AbstractDataPopulator<ShoppingCar
         catch(ServiceException ex){
             LOG.error( "Error while converting cart Model to cart Data.."+ex );
             throw new ConversionException( "Unable to create cart data", ex );
-        }
-        return cart;
+        } catch (com.salesmanager.core.business.exception.ConversionException ex) {
+            throw new ConversionException( "Unable to create cart data", ex );		}
+        return cart;	
 
 
     };
@@ -198,6 +193,14 @@ public class ShoppingCartDataPopulator extends AbstractDataPopulator<ShoppingCar
     public void setShoppingCartCalculationService(final ShoppingCartCalculationService shoppingCartCalculationService) {
         this.shoppingCartCalculationService = shoppingCartCalculationService;
     }
+
+	public CustomerService getCustomerService() {
+		return customerService;
+	}
+
+	public void setCustomerService(CustomerService customerService) {
+		this.customerService = customerService;
+	}
 
 
 

@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.salesmanager.shop.model.ShopEntity;
+import com.salesmanager.shop.store.controller.customer.VendorResponse;
 
 
 public class ShoppingCartItem extends ShopEntity implements Serializable {
@@ -28,14 +29,10 @@ public class ShoppingCartItem extends ShopEntity implements Serializable {
 	
 	private String subTotal;
 	private String discountPrice;
-	//private long totalPriceOfEachItem;
+	private long vendorId;
+
+	private VendorResponse vendorResponse = new VendorResponse();
 	
-	public String getDiscountPrice() {
-		return discountPrice;
-	}
-	public void setDiscountPrice(String discountPrice) {
-		this.discountPrice = discountPrice;
-	}
 	@JsonIgnore
 	private List<ShoppingCartAttribute> shoppingCartAttributes;
 	
@@ -62,6 +59,18 @@ public class ShoppingCartItem extends ShopEntity implements Serializable {
 	}
 	public void setQuantity(int quantity) {
 		this.quantity = quantity;
+	}
+	public long getVendorId() {
+		return vendorId;
+	}
+	public void setVendorId(long vendorId) {
+		this.vendorId = vendorId;
+	}
+	public String getDiscountPrice() {
+		return discountPrice;
+	}
+	public void setDiscountPrice(String discountPrice) {
+		this.discountPrice = discountPrice;
 	}
 
 
@@ -123,4 +132,10 @@ public class ShoppingCartItem extends ShopEntity implements Serializable {
 	public void setTotalPriceOfEachItem(long totalPriceOfEachItem) {
 		this.totalPriceOfEachItem = totalPriceOfEachItem;
 	}*/
+	public VendorResponse getVendorResponse() {
+		return vendorResponse;
+	}
+	public void setVendorResponse(VendorResponse vendorResponse) {
+		this.vendorResponse = vendorResponse;
+	}
 }

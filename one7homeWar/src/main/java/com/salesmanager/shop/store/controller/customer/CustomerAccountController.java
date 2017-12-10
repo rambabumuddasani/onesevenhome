@@ -119,16 +119,10 @@ public class CustomerAccountController extends AbstractController {
 	@Inject
 	private EmailTemplatesUtils emailTemplatesUtils;
 
-    
-    @Inject
-    private ZoneService zoneService;
-    
+        
     @Inject
     private CustomerFacade customerFacade;
-    
-    @Inject
-    private OrderService orderService;
-    
+        
     @Inject
     private OrderFacade orderFacade;
     
@@ -292,11 +286,8 @@ public class CustomerAccountController extends AbstractController {
 		customerService.saveOrUpdate(customer);
 		
 		emailTemplatesUtils.changePasswordNotificationEmail(customer, store, LocaleUtils.getLocale(customer.getDefaultLanguage()), request.getContextPath());
-		
 		model.addAttribute("success", "success");
-
 		return template.toString();
-		
 	}
 	
 

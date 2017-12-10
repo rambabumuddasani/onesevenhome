@@ -81,6 +81,11 @@ public class ShoppingCartFacadeImpl
 	@Inject
 	@Qualifier("img")
 	private ImageFilePath imageUtils;
+	
+	@Inject
+	private CustomerService customerService;
+	
+
 
     public void deleteShoppingCart(final Long id, final MerchantStore store) throws Exception {
     	ShoppingCart cart = shoppingCartService.getById(id, store);
@@ -181,7 +186,8 @@ public class ShoppingCartFacadeImpl
 
         com.salesmanager.core.model.shoppingcart.ShoppingCartItem item =
             shoppingCartService.populateShoppingCartItem( product );
-
+        
+        item.setVendorId(shoppingCartItem.getVendorId());
         item.setQuantity( shoppingCartItem.getQuantity() );
         item.setShoppingCart( cartModel );
 
@@ -305,7 +311,7 @@ public class ShoppingCartFacadeImpl
         shoppingCartDataPopulator.setShoppingCartCalculationService( shoppingCartCalculationService );
         shoppingCartDataPopulator.setPricingService( pricingService );
         shoppingCartDataPopulator.setimageUtils(imageUtils);
-
+        shoppingCartDataPopulator.setCustomerService(customerService);
         Language language = (Language) getKeyValue( Constants.LANGUAGE );
         MerchantStore merchantStore = (MerchantStore) getKeyValue( Constants.MERCHANT_STORE );
         
@@ -469,13 +475,7 @@ public class ShoppingCartFacadeImpl
                 final FinalPrice finalPrice =
                         productPriceUtils.getFinalProductPrice( entryToUpdate.getProduct(), productAttributes );
                 entryToUpdate.setItemPrice( finalPrice.getFinalPrice() );
-                    
-
                 cartItems.add(entryToUpdate);
-    			
-    			
-    			
-    			
     		}
     		
     		cartModel.setLineItems(cartItems);
@@ -552,14 +552,6 @@ public class ShoppingCartFacadeImpl
 	}
     // RAM PLEASE REMOVE THIS ONE ADD IT TO fILTER
 	
-	@Inject
-	private MerchantStoreService merchantService;
-	
-	@Inject
-	private LanguageService languageService;
-	
-	@Inject
-	private CustomerService customerService;
 
 	
 /*    public  MerchantStore getMerchantStore(){
