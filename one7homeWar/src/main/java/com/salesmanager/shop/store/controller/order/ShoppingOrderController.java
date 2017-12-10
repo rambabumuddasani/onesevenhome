@@ -69,6 +69,7 @@ import com.salesmanager.core.model.shipping.ShippingMetaData;
 import com.salesmanager.core.model.shipping.ShippingOption;
 import com.salesmanager.core.model.shipping.ShippingQuote;
 import com.salesmanager.core.model.shipping.ShippingSummary;
+import com.salesmanager.core.model.shoppingcart.ShoppingCart;
 import com.salesmanager.core.model.shoppingcart.ShoppingCartItem;
 import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.model.customer.PersistableCustomer;
@@ -568,6 +569,29 @@ public class ShoppingOrderController extends AbstractController {
 	        	LOGGER.error("Error while post processing order",e);
 	        }
 	        return modelOrder;
+	}
+	// address/addrpref/1?userId=1
+	@RequestMapping(value="/address/addrpref/{preferedShippingAddress}")
+	public String commitOrder1(@PathVariable("preferedShippingAddress") Integer preferedShippingAddress,
+			HttpServletRequest request) throws Exception {
+		 Customer customer = getSessionAttribute(  Constants.CUSTOMER, request);
+		 String userPinCode = null;
+		 if(preferedShippingAddress == 1){
+			 userPinCode = customer.getBilling().getPostalCode();
+		 }else if(preferedShippingAddress == 2){
+			 userPinCode = customer.getDelivery().getPostalCode();
+		 }else {
+			 userPinCode = customer.getSecondaryDelivery().getPostalCode();
+		 }
+		 ShoppingCart shoppingCart = shoppingCartService.getByCustomer(customer);
+		 Set<ShoppingCartItem> lineItems =  shoppingCart.getLineItems();
+		 Set vendorIds = new HashSet<String>();
+		 for(ShoppingCartItem item : lineItems){
+			 vendorIds.add(item.getVendorId());
+			 Customer vendor = customerService.getById(item.getVendorId());
+			 String vendorPostalCode = vendor.getBilling().getPostalCode();
+		 }
+		 return null;
 	}
 	
     /*
