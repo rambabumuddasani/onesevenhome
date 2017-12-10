@@ -6,6 +6,7 @@ public class VendorResponse implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
+	private long vendorId;
 	private String email;
 	private String vendorName;
 	private String vendorOfficeAddress;
@@ -125,6 +126,12 @@ public class VendorResponse implements Serializable {
 	}
 	public void setAuthCertURL(String authCertURL) {
 		this.authCertURL = authCertURL;
+	}
+	public long getVendorId() {
+		return vendorId;
+	}
+	public void setVendorId(long vendorId) {
+		this.vendorId = vendorId;
 	}
 
 }
