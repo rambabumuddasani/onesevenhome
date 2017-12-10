@@ -591,6 +591,37 @@ public class ShoppingOrderController extends AbstractController {
 			 Customer vendor = customerService.getById(item.getVendorId());
 			 String vendorPostalCode = vendor.getBilling().getPostalCode();
 		 }
+		 /**
+		  * http://maps.googleapis.com/maps/api/distancematrix/json?origins=504303&destinations=500018&mode=driving&language=en-EN&sensor=false
+
+
+{
+    "destination_addresses": [
+        "Hyderabad, Telangana 500018, India"
+    ],
+    "origin_addresses": [
+        "Telangana 504303, India"
+    ],
+    "rows": [
+        {
+            "elements": [
+                {
+                    "distance": {
+                        "text": "243 km",
+                        "value": 243180
+                    },
+                    "duration": {
+                        "text": "4 hours 46 mins",
+                        "value": 17148
+                    },
+                    "status": "OK"
+                }
+            ]
+        }
+    ],
+    "status": "OK"
+}
+		  */
 		 return null;
 	}
 	
