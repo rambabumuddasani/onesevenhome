@@ -89,7 +89,7 @@ public class ShoppingCartDataPopulator extends AbstractDataPopulator<ShoppingCar
 						VendorResponse vendorResponse = new VendorResponse();
 						VendorPopulator vendorPopulator  = new VendorPopulator();
 						vendorPopulator.populate(vendor, vendorResponse, null, null);
-						shoppingCartItem.setVendorResponse(vendorResponse);
+						shoppingCartItem.setVendorDetails(vendorResponse);
                     }
                     
 					shoppingCartItem.setProductCode(item.getProduct().getSku());

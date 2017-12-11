@@ -31,7 +31,7 @@ public class ShoppingCartItem extends ShopEntity implements Serializable {
 	private String discountPrice;
 	private long vendorId;
 
-	private VendorResponse vendorResponse = new VendorResponse();
+	private VendorResponse vendorDetails = new VendorResponse();
 	
 	@JsonIgnore
 	private List<ShoppingCartAttribute> shoppingCartAttributes;
@@ -132,10 +132,10 @@ public class ShoppingCartItem extends ShopEntity implements Serializable {
 	public void setTotalPriceOfEachItem(long totalPriceOfEachItem) {
 		this.totalPriceOfEachItem = totalPriceOfEachItem;
 	}*/
-	public VendorResponse getVendorResponse() {
-		return vendorResponse;
+	public VendorResponse getVendorDetails() {
+		return vendorDetails;
 	}
-	public void setVendorResponse(VendorResponse vendorResponse) {
-		this.vendorResponse = vendorResponse;
+	public void setVendorDetails(VendorResponse vendorResponse) {
+		this.vendorDetails = vendorResponse;
 	}
 }

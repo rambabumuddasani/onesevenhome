@@ -161,7 +161,7 @@ public class ShoppingCartFacadeImpl
         shoppingCartDataPopulator.setShoppingCartCalculationService( shoppingCartCalculationService );
         shoppingCartDataPopulator.setPricingService( pricingService );
         shoppingCartDataPopulator.setimageUtils(imageUtils);
-
+        shoppingCartDataPopulator.setCustomerService(customerService);
         return shoppingCartDataPopulator.populate( cartModel, store, language );
     }
 
@@ -347,6 +347,7 @@ public class ShoppingCartFacadeImpl
         shoppingCartDataPopulator.setShoppingCartCalculationService( shoppingCartCalculationService );
         shoppingCartDataPopulator.setPricingService( pricingService );
         shoppingCartDataPopulator.setimageUtils(imageUtils);
+        shoppingCartDataPopulator.setCustomerService(customerService);
         Language language = (Language) getKeyValue( Constants.LANGUAGE );
         MerchantStore merchantStore = (MerchantStore) getKeyValue( Constants.MERCHANT_STORE );        
 
@@ -388,6 +389,7 @@ public class ShoppingCartFacadeImpl
                     shoppingCartDataPopulator.setShoppingCartCalculationService( shoppingCartCalculationService );
                     shoppingCartDataPopulator.setPricingService( pricingService );
                     shoppingCartDataPopulator.setimageUtils(imageUtils);
+                    shoppingCartDataPopulator.setCustomerService(customerService);
                     return shoppingCartDataPopulator.populate( cartModel, store, language );
                 }
             }
@@ -432,6 +434,7 @@ public class ShoppingCartFacadeImpl
                 shoppingCartDataPopulator.setShoppingCartCalculationService( shoppingCartCalculationService );
                 shoppingCartDataPopulator.setPricingService( pricingService );
                 shoppingCartDataPopulator.setimageUtils(imageUtils);
+                shoppingCartDataPopulator.setCustomerService(customerService);
                 return shoppingCartDataPopulator.populate( cartModel, store, language );
 
             }
@@ -485,6 +488,7 @@ public class ShoppingCartFacadeImpl
             shoppingCartDataPopulator.setShoppingCartCalculationService( shoppingCartCalculationService );
             shoppingCartDataPopulator.setPricingService( pricingService );
             shoppingCartDataPopulator.setimageUtils(imageUtils);
+            shoppingCartDataPopulator.setCustomerService(customerService);
             return shoppingCartDataPopulator.populate( cartModel, store, language );
 
         }
