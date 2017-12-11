@@ -104,7 +104,7 @@ public class ProductReviewController extends AbstractController{
 		try {
 
 			List<ProductReview> reviews = productReviewService.getByProductId(productId);
-			Collections.sort(reviews, new DateComparator());
+			
 			
 			for(ProductReview review : reviews) {
 				ProductReviewVO productReviewVO = new ProductReviewVO();

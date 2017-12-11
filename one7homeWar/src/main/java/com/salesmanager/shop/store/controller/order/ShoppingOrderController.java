@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -904,10 +905,12 @@ public class ShoppingOrderController extends AbstractController {
 		return allOrders;
 	}
 */		
-	private Pageable createPageRequest(int page,int size) {
+	/*private Pageable createPageRequest(int page,int size) {
 	    return new PageRequest(page, size);
-	}	
-	
+	}*/	
+	private Pageable createPageRequest(int page,int size) {
+	    return new PageRequest(page, size,Direction.DESC,"datePurchased");
+	}
 	/**
 	 * Recalculates shipping and tax following a change in country or province
 	 * @param order
