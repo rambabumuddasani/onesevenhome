@@ -97,7 +97,7 @@ public class VendorProductController extends AbstractController {
 			vendorProduct.setProduct(dbProduct);
 			vendorProduct.setCustomer(customer);
 			vendorProduct.setCreatedDate(new Date());
-			//vendorProduct.setVendorWishListed(Boolean.FALSE);
+			vendorProduct.setVendorWishListed(Boolean.FALSE);
 			productsInfo.setProductId(dbProduct.getId());
 			productsInfo.setProductName(dbProduct.getProductDescription().getName());
 			vpList.add(vendorProduct);
