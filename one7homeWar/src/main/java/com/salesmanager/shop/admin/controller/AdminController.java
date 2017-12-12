@@ -808,7 +808,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
 
 		
 		emailService.sendHtmlEmail(merchantStore, email);
-		vendorProductService.delete(vendorProduct);
+		//vendorProductService.delete(vendorProduct);
     	LOGGER.debug("Ended adminApproveProducts");
     	
 	    return activateProductResponse;
