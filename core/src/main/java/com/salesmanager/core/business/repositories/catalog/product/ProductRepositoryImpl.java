@@ -134,15 +134,17 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 		
 		//qs.append("where pa.region in (:lid) ");
 		qs.append("where categs.code in (:categoryCode)");
-
-		qs.append("and p.id not in (:productIds)");
+		if(productIds != null && !productIds.isEmpty()) {
+			qs.append("and p.id not in (:productIds)");
+		}
 
     	String hql = qs.toString();
 		Query q = this.em.createQuery(hql);
 
     	q.setParameter("categoryCode", categoryCode);
-    	q.setParameter("productIds", productIds);
-
+	if(productIds != null && !productIds.isEmpty()) {
+    		q.setParameter("productIds", productIds);
+	}
     	@SuppressWarnings("unchecked")
 		List<Product> products =  q.getResultList();
 
