@@ -165,8 +165,8 @@ public class CustomerRegistrationController extends AbstractController {
 	private final static String RESET_PASSWORD_TPL = "email_template_password_reset_user.ftl";	
 	private final static String NEW_USER_TMPL = "email_template_new_user.ftl";
 	private final static String FORGOT_PASSWORD_TPL = "email_template_user_password_link.ftl";
-    
-
+	
+	
 	//private final static String NEW_USER_ACTIVATION_TMPL = "email_template_new_user_activate.ftl";
 	private final static String NEW_USER_ACTIVATION_TMPL = "email_template_customer_registration.ftl";
 
