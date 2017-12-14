@@ -33,8 +33,11 @@ public interface ShippingQuotePrePostProcessModule {
 			ShippingOrigin origin, 
 			MerchantStore store, 
 			IntegrationConfiguration globalShippingConfiguration, 
-			IntegrationModule currentModule, 
+			IntegrationModule currentModule, 	
 			ShippingConfiguration shippingConfiguration, 
 			List<IntegrationModule> allModules, Locale locale) throws IntegrationException;
+
+
+	List<Long> getDistnaceBetweenVendorAndCustomer(List<String> vendorPinCodes, String customerPinCode);
 
 }

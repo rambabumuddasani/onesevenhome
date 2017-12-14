@@ -1,6 +1,7 @@
 package com.shopizer.modules.shipping.distance;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -15,6 +16,7 @@ import com.google.maps.GeoApiContext;
 import com.google.maps.GeocodingApi;
 import com.google.maps.model.Distance;
 import com.google.maps.model.DistanceMatrix;
+import com.google.maps.model.DistanceMatrixElement;
 import com.google.maps.model.DistanceMatrixRow;
 import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.LatLng;
@@ -57,14 +59,14 @@ import com.salesmanager.core.modules.integration.shipping.model.ShippingQuotePre
  *
  */
 public class ShippingDistancePreProcessorImpl implements ShippingQuotePrePostProcessModule {
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(ShippingDistancePreProcessorImpl.class);
-	
+
 	private final static String BLANK = " ";
-	
+
 	private final static String MODULE_CODE = "shippingDistanceModule";
 
-	
+
 	private String apiKey;
 
 	private List<String> allowedZonesCodes = null;
@@ -87,63 +89,59 @@ public class ShippingDistancePreProcessorImpl implements ShippingQuotePrePostPro
 	public static void main(String[] args) {
 		ShippingDistancePreProcessorImpl obj = new ShippingDistancePreProcessorImpl();
 		String customerPinCode = "500018";
-		List<String> vendorPinCodes = Arrays.asList("500012", "560045", "500014");
-		long distnace  = obj.getDistnaceBetweenVendorAndCustomer(vendorPinCodes, customerPinCode);
-		System.out.println("Distnace "+distnace);
+		//List<String> vendorPinCodes = Arrays.asList("500030", "500044", "501301","500027","500013","500015","500060","500028");
+		List<String> vendorPinCodes = Arrays.asList("560036", "504303");
+		List<Long> distnaceList  = obj.getDistnaceBetweenVendorAndCustomer(vendorPinCodes, customerPinCode);
+		System.out.println("Distnace "+distnaceList);
 	}
 
+	@Override
+	public  List<Long> getDistnaceBetweenVendorAndCustomer(List<String> vendorPinCodes,String customerPinCode)  {		
+		List<Long> distenceInKm = new ArrayList<Long>();
+		//List<Long> distnaceList = new ArrayList<Long>();
 
-	public  long getDistnaceBetweenVendorAndCustomer(List<String> vendorPinCodes,String customerPinCode)  {		
-		
 		/** which destinations are supported by this module **/
-		
 		if(vendorPinCodes == null || vendorPinCodes.isEmpty()) {
-			return -1l;
+			return distenceInKm;
 		}
-				
 		if(StringUtils.isBlank(customerPinCode)) {
-			return -1l;
+			return distenceInKm;
 		}
-		apiKey = "AIzaSyAmCfWHdkYxhLbzFWwtBx8k6KzEhOdO9ok";
+		//apiKey = "AIzaSyAmCfWHdkYxhLbzFWwtBx8k6KzEhOdO9ok";
 		Validate.notNull(apiKey, "Requires the configuration of google apiKey");
-		
 		GeoApiContext context = new GeoApiContext().setApiKey(apiKey);
-		
 		//build origin address
 		StringBuilder originAddress = new StringBuilder();
-		
 		originAddress.append(customerPinCode);		
-		
 		//build destination address
 		StringBuilder destinationAddress = new StringBuilder();
 		for(String vendorPin : vendorPinCodes){
 			destinationAddress.append(vendorPin+"|");			
 		}
 		destinationAddress.deleteCharAt(destinationAddress.length()-1);
-		
 		try {
 			if(!StringUtils.isBlank(originAddress) && !StringUtils.isBlank(destinationAddress)) {				
 				DistanceMatrix  distanceRequest = DistanceMatrixApi.newRequest(context)
 						.origins(originAddress.toString())
 						.destinations(destinationAddress.toString())
 						.awaitIgnoreError();
-				
 				if(distanceRequest!=null) {
 					DistanceMatrixRow distanceMax = distanceRequest.rows[0];
-					Distance distance = distanceMax.elements[0].distance;
+					for(DistanceMatrixElement distMatElement : distanceMax.elements){
+						Distance distance = distMatElement.distance;
+						distenceInKm.add(distance.inMeters);
+						System.out.println(" distance in KMs "+distance.humanReadable);
+					}
+					//Distance distance = distanceMax.elements[0].distance;
 					//quote.getQuoteInformations().put(Constants.DISTANCE_KEY, 0.001 * distance.inMeters);
-					System.out.println("distance "+distance);
-					return distance.inMeters;
+					System.out.println("distance "+distenceInKm);
 				}
-
 			}
-		
 		} catch (Exception e) {
 			LOGGER.error("Exception while calculating the shipping distance",e);
 		}
-		return -1l;
+		return distenceInKm;
 	}
-
 
 
 	public void prePostProcessShippingQuotes(ShippingQuote quote,
@@ -153,15 +151,15 @@ public class ShippingDistancePreProcessorImpl implements ShippingQuotePrePostPro
 			IntegrationModule currentModule,
 			ShippingConfiguration shippingConfiguration,
 			List<IntegrationModule> allModules, Locale locale)
-			throws IntegrationException {
-		
-		
+					throws IntegrationException {
+
+
 		/** which destinations are supported by this module **/
-		
+
 		if(delivery.getZone()==null) {
 			return;
 		}
-		
+
 		boolean zoneAllowed = false;
 		if(allowedZonesCodes!=null) {
 			for(String zoneCode : allowedZonesCodes) {
@@ -171,26 +169,26 @@ public class ShippingDistancePreProcessorImpl implements ShippingQuotePrePostPro
 				}
 			}
 		}
-		
+
 		if(!zoneAllowed) {
 			return;
 		}
-		
+
 		if(StringUtils.isBlank(delivery.getPostalCode())) {
 			return;
 		}
-		
+
 		Validate.notNull(apiKey, "Requires the configuration of google apiKey");
-		
+
 		GeoApiContext context = new GeoApiContext().setApiKey(apiKey);
-		
+
 		//build origin address
 		StringBuilder originAddress = new StringBuilder();
-		
+
 		originAddress.append(origin.getAddress()).append(BLANK)
 		.append(origin.getCity()).append(BLANK)
 		.append(origin.getPostalCode()).append(BLANK);
-		
+
 		if(!StringUtils.isBlank(origin.getState())) {
 			originAddress.append(origin.getState()).append(" ");
 		}
@@ -199,16 +197,16 @@ public class ShippingDistancePreProcessorImpl implements ShippingQuotePrePostPro
 		}
 		originAddress.append(origin.getCountry().getIsoCode());
 
-		
+
 		//build destination address
 		StringBuilder destinationAddress = new StringBuilder();
-		
+
 		destinationAddress.append(delivery.getAddress()).append(BLANK);
 		if(!StringUtils.isBlank(delivery.getCity())) {
 			destinationAddress.append(delivery.getCity()).append(BLANK);
 		}
 		destinationAddress.append(delivery.getPostalCode()).append(BLANK);
-		
+
 		if(!StringUtils.isBlank(delivery.getState())) {
 			destinationAddress.append(delivery.getState()).append(" ");
 		}
@@ -216,8 +214,8 @@ public class ShippingDistancePreProcessorImpl implements ShippingQuotePrePostPro
 			destinationAddress.append(delivery.getZone().getCode()).append(" ");
 		}
 		destinationAddress.append(delivery.getCountry().getIsoCode());
-		
-		
+
+
 		try {
 			GeocodingResult[] originAdressResult =  GeocodingApi.geocode(context,
 					originAddress.toString()).await();
@@ -228,20 +226,18 @@ public class ShippingDistancePreProcessorImpl implements ShippingQuotePrePostPro
 			if(originAdressResult.length>0 && destinationAdressResult.length>0) {
 				LatLng originLatLng = originAdressResult[0].geometry.location;
 				LatLng destinationLatLng = destinationAdressResult[0].geometry.location;
-				
+
 				delivery.setLatitude(String.valueOf(destinationLatLng.lat));
 				delivery.setLongitude(String.valueOf(destinationLatLng.lng));
-				
+
 				//keep latlng for further usage in order to display the map
-	
-				
+
+
 				DistanceMatrix  distanceRequest = DistanceMatrixApi.newRequest(context)
-		 		.origins(new LatLng(originLatLng.lat, originLatLng.lng))
-		 		
-		 		.destinations(new LatLng(destinationLatLng.lat, destinationLatLng.lng))
-		 				.awaitIgnoreError();
-				
-				
+						.origins(new LatLng(originLatLng.lat, originLatLng.lng))
+						.destinations(new LatLng(destinationLatLng.lat, destinationLatLng.lng))
+						.awaitIgnoreError();
+
 				if(distanceRequest!=null) {
 					DistanceMatrixRow distanceMax = distanceRequest.rows[0];
 					Distance distance = distanceMax.elements[0].distance;
@@ -249,50 +245,47 @@ public class ShippingDistancePreProcessorImpl implements ShippingQuotePrePostPro
 				}
 
 			}
-		
 		} catch (Exception e) {
 			LOGGER.error("Exception while calculating the shipping distance",e);
 		}
-
 	}
-
-
-
-
-
 	public String getApiKey() {
 		return apiKey;
 	}
-
-
-
-
-
 	public void setApiKey(String apiKey) {
 		this.apiKey = apiKey;
 	}
-
-
-
-
-
-	
 	public String getModuleCode() {
-		// TODO Auto-generated method stub
 		return MODULE_CODE;
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
+
+/**
+ * http://maps.googleapis.com/maps/api/distancematrix/json?origins=504303&destinations=500018&mode=driving&language=en-EN&sensor=false
+{
+"destination_addresses": [
+"Hyderabad, Telangana 500018, India"
+],
+"origin_addresses": [
+"Telangana 504303, India"
+],
+"rows": [
+{
+   "elements": [
+       {
+           "distance": {
+               "text": "243 km",
+               "value": 243180
+           },
+           "duration": {
+               "text": "4 hours 46 mins",
+               "value": 17148
+           },
+           "status": "OK"
+       }
+   ]
+}
+],
+"status": "OK"
+}
+ */

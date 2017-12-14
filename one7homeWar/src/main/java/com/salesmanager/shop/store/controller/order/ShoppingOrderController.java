@@ -72,6 +72,7 @@ import com.salesmanager.core.model.shipping.ShippingQuote;
 import com.salesmanager.core.model.shipping.ShippingSummary;
 import com.salesmanager.core.model.shoppingcart.ShoppingCart;
 import com.salesmanager.core.model.shoppingcart.ShoppingCartItem;
+import com.salesmanager.core.modules.integration.shipping.model.ShippingQuotePrePostProcessModule;
 import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.model.customer.PersistableCustomer;
 import com.salesmanager.shop.model.customer.ReadableDelivery;
@@ -110,7 +111,10 @@ public class ShoppingOrderController extends AbstractController {
 
 	private static final Logger LOGGER = LoggerFactory
 	.getLogger(ShoppingOrderController.class);
-	
+
+	@Inject
+	ShippingQuotePrePostProcessModule shippingQuotePrePostProcessModule;
+
 	@Inject
 	private ShoppingCartFacade shoppingCartFacade;
 	
@@ -588,44 +592,20 @@ public class ShoppingOrderController extends AbstractController {
 		 }
 		 ShoppingCart shoppingCart = shoppingCartService.getByCustomer(customer);
 		 Set<ShoppingCartItem> lineItems =  shoppingCart.getLineItems();
-		 Set vendorIds = new HashSet<String>();
-		 for(ShoppingCartItem item : lineItems){
+		 List<Long> vendorIds = new ArrayList<Long>();
+		 List<String> vendorPostalCodes = new ArrayList<String>();
+		 for(ShoppingCartItem item : lineItems) {
 			 vendorIds.add(item.getVendorId());
 			 Customer vendor = customerService.getById(item.getVendorId());
-			 String vendorPostalCode = vendor.getBilling().getPostalCode();
+			 vendorPostalCodes.add(vendor.getBilling().getPostalCode());
+			// String vendorPostalCode = vendor.getBilling().getPostalCode();
 		 }
-
-/**
-		  * http://maps.googleapis.com/maps/api/distancematrix/json?origins=504303&destinations=500018&mode=driving&language=en-EN&sensor=false
-
-
-{
-    "destination_addresses": [
-        "Hyderabad, Telangana 500018, India"
-    ],
-    "origin_addresses": [
-        "Telangana 504303, India"
-    ],
-    "rows": [
-        {
-            "elements": [
-                {
-                    "distance": {
-                        "text": "243 km",
-                        "value": 243180
-                    },
-                    "duration": {
-                        "text": "4 hours 46 mins",
-                        "value": 17148
-                    },
-                    "status": "OK"
-                }
-            ]
-        }
-    ],
-    "status": "OK"
-}
-		  */
+		 List<Long> distanceInMeters = shippingQuotePrePostProcessModule.getDistnaceBetweenVendorAndCustomer(vendorPostalCodes, userPinCode);
+		 Map<Long,Long> vendorDistanceFromCustomerLocation = new HashMap<Long,Long>();
+		 int vIndex = 0;
+		 for(Long vId : vendorIds){
+			 vendorDistanceFromCustomerLocation.put(vId, distanceInMeters.get(vIndex++));
+		 }
 		 return null;
 	}
 	
