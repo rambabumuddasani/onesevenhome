@@ -581,8 +581,10 @@ public class ShoppingOrderController extends AbstractController {
 			 userPinCode = customer.getBilling().getPostalCode();
 		 }else if(preferedShippingAddress == 2){
 			 userPinCode = customer.getDelivery().getPostalCode();
-		 }else {
+		 }else if(preferedShippingAddress == 2){
 			 userPinCode = customer.getSecondaryDelivery().getPostalCode();
+		 }else {
+			 throw new Exception("invalid preferedShippingAddress value");
 		 }
 		 ShoppingCart shoppingCart = shoppingCartService.getByCustomer(customer);
 		 Set<ShoppingCartItem> lineItems =  shoppingCart.getLineItems();
@@ -592,7 +594,8 @@ public class ShoppingOrderController extends AbstractController {
 			 Customer vendor = customerService.getById(item.getVendorId());
 			 String vendorPostalCode = vendor.getBilling().getPostalCode();
 		 }
-		 /**
+
+/**
 		  * http://maps.googleapis.com/maps/api/distancematrix/json?origins=504303&destinations=500018&mode=driving&language=en-EN&sensor=false
 
 

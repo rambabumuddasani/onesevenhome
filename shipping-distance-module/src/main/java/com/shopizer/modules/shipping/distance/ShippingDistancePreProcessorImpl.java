@@ -1,6 +1,7 @@
 package com.shopizer.modules.shipping.distance;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -83,6 +84,65 @@ public class ShippingDistancePreProcessorImpl implements ShippingQuotePrePostPro
 	}
 
 
+	public static void main(String[] args) {
+		ShippingDistancePreProcessorImpl obj = new ShippingDistancePreProcessorImpl();
+		String customerPinCode = "500018";
+		List<String> vendorPinCodes = Arrays.asList("500012", "560045", "500014");
+		long distnace  = obj.getDistnaceBetweenVendorAndCustomer(vendorPinCodes, customerPinCode);
+		System.out.println("Distnace "+distnace);
+	}
+
+
+	public  long getDistnaceBetweenVendorAndCustomer(List<String> vendorPinCodes,String customerPinCode)  {		
+		
+		/** which destinations are supported by this module **/
+		
+		if(vendorPinCodes == null || vendorPinCodes.isEmpty()) {
+			return -1l;
+		}
+				
+		if(StringUtils.isBlank(customerPinCode)) {
+			return -1l;
+		}
+		apiKey = "AIzaSyAmCfWHdkYxhLbzFWwtBx8k6KzEhOdO9ok";
+		Validate.notNull(apiKey, "Requires the configuration of google apiKey");
+		
+		GeoApiContext context = new GeoApiContext().setApiKey(apiKey);
+		
+		//build origin address
+		StringBuilder originAddress = new StringBuilder();
+		
+		originAddress.append(customerPinCode);		
+		
+		//build destination address
+		StringBuilder destinationAddress = new StringBuilder();
+		for(String vendorPin : vendorPinCodes){
+			destinationAddress.append(vendorPin+"|");			
+		}
+		destinationAddress.deleteCharAt(destinationAddress.length()-1);
+		
+		try {
+			if(!StringUtils.isBlank(originAddress) && !StringUtils.isBlank(destinationAddress)) {				
+				DistanceMatrix  distanceRequest = DistanceMatrixApi.newRequest(context)
+						.origins(originAddress.toString())
+						.destinations(destinationAddress.toString())
+						.awaitIgnoreError();
+				
+				if(distanceRequest!=null) {
+					DistanceMatrixRow distanceMax = distanceRequest.rows[0];
+					Distance distance = distanceMax.elements[0].distance;
+					//quote.getQuoteInformations().put(Constants.DISTANCE_KEY, 0.001 * distance.inMeters);
+					System.out.println("distance "+distance);
+					return distance.inMeters;
+				}
+
+			}
+		
+		} catch (Exception e) {
+			LOGGER.error("Exception while calculating the shipping distance",e);
+		}
+		return -1l;
+	}
 
 
 
