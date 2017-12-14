@@ -715,7 +715,8 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     		vendorProductVO.setProductName(vendorProduct.getProduct().getProductDescription().getName());
     		vendorProductVO.setProductDescription(vendorProduct.getProduct().getProductDescription().getDescription());
     		vendorProductVO.setImageURL(vendorProduct.getProduct().getProductImage().getProductImageUrl());
-    		vendorProductVO.setVendorMobile(vendorProduct.getCustomer().getVendorAttrs().getVendorMobile());
+    		//vendorProductVO.setVendorMobile(vendorProduct.getCustomer().getVendorAttrs().getVendorMobile());
+    		vendorProductVO.setVendorTelephone(vendorProduct.getCustomer().getVendorAttrs().getVendorTelephone());
     		vendorProductVO.setHouseNumber(vendorProduct.getCustomer().getVendorAttrs().getVendorOfficeAddress());
     		vendorProductVO.setStreet(vendorProduct.getCustomer().getBilling().getAddress());
     		vendorProductVO.setCity(vendorProduct.getCustomer().getBilling().getCity());

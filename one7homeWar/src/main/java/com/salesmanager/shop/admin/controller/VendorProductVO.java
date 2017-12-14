@@ -11,6 +11,7 @@ public class VendorProductVO {
 	private String productName;
 	private String imageURL;
 	private String productDescription;
+	@JsonIgnore
 	private String vendorMobile;
 	private String houseNumber;
 	private String street;
@@ -18,6 +19,7 @@ public class VendorProductVO {
 	private String city;
 	private String state;
 	private String pinCode;
+	private String vendorTelephone;
 	public Long getVendorId() {
 		return vendorId;
 	}
@@ -101,6 +103,12 @@ public class VendorProductVO {
 	}
 	public void setPinCode(String pinCode) {
 		this.pinCode = pinCode;
+	}
+	public String getVendorTelephone() {
+		return vendorTelephone;
+	}
+	public void setVendorTelephone(String vendorTelephone) {
+		this.vendorTelephone = vendorTelephone;
 	}
 	
 	
