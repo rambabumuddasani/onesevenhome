@@ -40,6 +40,12 @@ public class ShippingDecisionPreProcessorImpl implements ShippingQuotePrePostPro
 	private StatelessKnowledgeSession shippingMethodDecision;
 	
 	private KnowledgeBase kbase;
+
+       public List<Long> getDistnaceBetweenVendorAndCustomer(List<String> vendorPinCodes, String customerPinCode) {
+                return null;
+        }
+
+
 	
 	@Override
 	public void prePostProcessShippingQuotes(ShippingQuote quote,

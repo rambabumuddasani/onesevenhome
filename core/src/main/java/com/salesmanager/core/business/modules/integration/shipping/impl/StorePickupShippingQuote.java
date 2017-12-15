@@ -48,6 +48,9 @@ public class StorePickupShippingQuote implements ShippingQuoteModule, ShippingQu
 	@Inject
 	private ProductPriceUtils productPriceUtils;
 
+        public List<Long> getDistnaceBetweenVendorAndCustomer(List<String> vendorPinCodes, String customerPinCode) {
+		return null;
+	}
 
 	@Override
 	public void validateModuleConfiguration(
