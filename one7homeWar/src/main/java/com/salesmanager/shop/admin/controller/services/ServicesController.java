@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -15,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -33,18 +33,10 @@ import com.salesmanager.core.business.services.services.WorkerService;
 import com.salesmanager.core.business.services.system.EmailService;
 import com.salesmanager.core.business.services.user.UserService;
 import com.salesmanager.core.model.customer.Customer;
-import com.salesmanager.core.model.customer.CustomerTestimonial;
 import com.salesmanager.core.model.customer.ServicesBooking;
 import com.salesmanager.core.model.customer.ServicesRating;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.services.Services;
-import com.salesmanager.core.model.user.User;
-import com.salesmanager.core.model.services.CompanyService;
-import org.springframework.web.bind.annotation.RequestBody;
-
-import com.salesmanager.shop.admin.controller.CustomerTestimonialVO;
-import com.salesmanager.shop.admin.controller.TestimonialRequest;
-import com.salesmanager.shop.admin.controller.TestimonialResponse;
 import com.salesmanager.shop.admin.controller.products.PaginatedResponse;
 import com.salesmanager.shop.constants.EmailConstants;
 import com.salesmanager.shop.controller.AbstractController;
@@ -204,6 +196,7 @@ public class ServicesController extends AbstractController{
     	servicesBooking.setService(service);
     	servicesBooking.setServiceType(services);
     	servicesBooking.setBookingDate(new Date());
+    	servicesBooking.setStatus("N");
     	
     	servicesBookingService.save(servicesBooking);
     	servicesRatingResponse.setSuccessMessage("Service booking accepted.");
@@ -276,25 +269,142 @@ public class ServicesController extends AbstractController{
 		
 	}
 
-	@RequestMapping(value="/admin/getServicesBooking", method = RequestMethod.GET)
+	@RequestMapping(value="/admin/getServicesBooking", method = RequestMethod.POST)
 	@ResponseBody
-	public PaginatedResponse getServicesBooking(@RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+	public PaginatedResponse getServicesBooking(@RequestBody AdminServicesBookingRequest adminServicesBookingRequest, @RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
 		LOGGER.debug("Entered getServicesBooking");
 		PaginatedResponse paginatedResponse = new PaginatedResponse();
+		CustomerBookingDetails customerBookingDetails = new CustomerBookingDetails();
 		try {
-		List<ServicesBooking> servicesBookings = servicesBookingService.getAllServicesBookings();
-		if(servicesBookings==null) {
-			paginatedResponse.setErrorMsg("Services booking not found");
-			return paginatedResponse;
-		}
 		List<ServicesBookingVO> servicesBookingVOList = new ArrayList<ServicesBookingVO>();
+		if(adminServicesBookingRequest.getStatus().equals("ALL")) {
+			List<ServicesBooking> servicesBookings = servicesBookingService.getAllServicesBookings();	
 		for(ServicesBooking servicesBooking : servicesBookings) {
 			ServicesBookingVO servicesBookingVO = new ServicesBookingVO();
 			servicesBookingVO.setBookingDate(servicesBooking.getBookingDate());
 			servicesBookingVO.setServicesBookingId(servicesBooking.getId());
-			servicesBookingVO.setCustomerName(servicesBooking.getCustomer().getBilling().getFirstName());
 			servicesBookingVO.setServiceType(servicesBooking.getServiceType().getServiceType());
+			if(servicesBooking.getCustomer().getCustomerType().equals("0")){
+			customerBookingDetails.setCustomerName(servicesBooking.getCustomer().getBilling().getFirstName().concat("").concat(servicesBooking.getCustomer().getBilling().getLastName()));
+			customerBookingDetails.setContactNumber(servicesBooking.getCustomer().getBilling().getTelephone());
+			customerBookingDetails.setStreet(servicesBooking.getCustomer().getBilling().getAddress());
+			customerBookingDetails.setArea(servicesBooking.getCustomer().getArea());
+			customerBookingDetails.setCity(servicesBooking.getCustomer().getBilling().getState());
+			customerBookingDetails.setState(servicesBooking.getCustomer().getBilling().getState());
+			customerBookingDetails.setPinCode(servicesBooking.getCustomer().getBilling().getPostalCode());
+			customerBookingDetails.setEmailAddress(servicesBooking.getCustomer().getEmailAddress());
+			}
+			else {
+				customerBookingDetails.setCustomerName(servicesBooking.getCustomer().getVendorAttrs().getVendorName());
+				customerBookingDetails.setContactNumber(servicesBooking.getCustomer().getBilling().getTelephone());
+				customerBookingDetails.setStreet(servicesBooking.getCustomer().getVendorAttrs().getVendorOfficeAddress());
+				customerBookingDetails.setArea(servicesBooking.getCustomer().getArea());
+				customerBookingDetails.setCity(servicesBooking.getCustomer().getBilling().getState());
+				customerBookingDetails.setState(servicesBooking.getCustomer().getBilling().getState());
+				customerBookingDetails.setPinCode(servicesBooking.getCustomer().getBilling().getPostalCode());
+				customerBookingDetails.setEmailAddress(servicesBooking.getCustomer().getEmailAddress());
+			}
+			Customer serviceProvider = servicesBooking.getService();
+			Long serviceProviderId = serviceProvider.getId();
+			ServiceProviderDetails serviceProviderDetails = new ServiceProviderDetails();
+			serviceProviderDetails.setServiceProviderId(serviceProviderId);
+			serviceProviderDetails.setArea(serviceProvider.getArea());
+			serviceProviderDetails.setCity(serviceProvider.getBilling().getCity());
+			serviceProviderDetails.setState(serviceProvider.getBilling().getState());
+			serviceProviderDetails.setPinCode(serviceProvider.getBilling().getPostalCode());
+			serviceProviderDetails.setEmailAddress(serviceProvider.getEmailAddress());
+			//serviceProviderDetails.setContactNumber(serviceProvider.getVendorAttrs().getVendorTelephone());
+			//serviceProviderDetails.setCompanyName(serviceProvider.getVendorAttrs().getVendorName());
+			servicesBookingVO.setServiceProviderDetails(serviceProviderDetails);
+			servicesBookingVO.setCustomerBookingdetails(customerBookingDetails);
 			servicesBookingVOList.add(servicesBookingVO);
+		}
+		}
+		if(adminServicesBookingRequest.getStatus().equals("Y")) {
+			List<ServicesBooking> servicesBookings = servicesBookingService.getClosedServicesBookings();
+			for(ServicesBooking servicesBooking : servicesBookings) {
+				ServicesBookingVO servicesBookingVO = new ServicesBookingVO();
+				servicesBookingVO.setBookingDate(servicesBooking.getBookingDate());
+				servicesBookingVO.setServicesBookingId(servicesBooking.getId());
+				servicesBookingVO.setServiceType(servicesBooking.getServiceType().getServiceType());
+				if(servicesBooking.getCustomer().getCustomerType().equals("0")){
+					customerBookingDetails.setCustomerName(servicesBooking.getCustomer().getBilling().getFirstName().concat("").concat(servicesBooking.getCustomer().getBilling().getLastName()));
+					customerBookingDetails.setContactNumber(servicesBooking.getCustomer().getBilling().getTelephone());
+					customerBookingDetails.setStreet(servicesBooking.getCustomer().getBilling().getAddress());
+					customerBookingDetails.setArea(servicesBooking.getCustomer().getArea());
+					customerBookingDetails.setCity(servicesBooking.getCustomer().getBilling().getState());
+					customerBookingDetails.setState(servicesBooking.getCustomer().getBilling().getState());
+					customerBookingDetails.setPinCode(servicesBooking.getCustomer().getBilling().getPostalCode());
+					customerBookingDetails.setEmailAddress(servicesBooking.getCustomer().getEmailAddress());
+					}
+					else {
+						customerBookingDetails.setCustomerName(servicesBooking.getCustomer().getVendorAttrs().getVendorName());
+						customerBookingDetails.setContactNumber(servicesBooking.getCustomer().getBilling().getTelephone());
+						customerBookingDetails.setStreet(servicesBooking.getCustomer().getVendorAttrs().getVendorOfficeAddress());
+						customerBookingDetails.setArea(servicesBooking.getCustomer().getArea());
+						customerBookingDetails.setCity(servicesBooking.getCustomer().getBilling().getState());
+						customerBookingDetails.setState(servicesBooking.getCustomer().getBilling().getState());
+						customerBookingDetails.setPinCode(servicesBooking.getCustomer().getBilling().getPostalCode());
+						customerBookingDetails.setEmailAddress(servicesBooking.getCustomer().getEmailAddress());
+					}
+				Customer serviceProvider = servicesBooking.getService();
+				Long serviceProviderId = serviceProvider.getId();
+				ServiceProviderDetails serviceProviderDetails = new ServiceProviderDetails();
+				serviceProviderDetails.setServiceProviderId(serviceProviderId);
+				serviceProviderDetails.setArea(serviceProvider.getArea());
+				serviceProviderDetails.setCity(serviceProvider.getBilling().getCity());
+				serviceProviderDetails.setState(serviceProvider.getBilling().getState());
+				serviceProviderDetails.setPinCode(serviceProvider.getBilling().getPostalCode());
+				serviceProviderDetails.setEmailAddress(serviceProvider.getEmailAddress());
+				//serviceProviderDetails.setContactNumber(serviceProvider.getVendorAttrs().getVendorTelephone());
+				//serviceProviderDetails.setCompanyName(serviceProvider.getVendorAttrs().getVendorName());
+				servicesBookingVO.setServiceProviderDetails(serviceProviderDetails);
+				servicesBookingVO.setCustomerBookingdetails(customerBookingDetails);
+				servicesBookingVOList.add(servicesBookingVO);
+			}
+		}
+		if(adminServicesBookingRequest.getStatus().equals("N")) {
+			List<ServicesBooking> servicesBookings = servicesBookingService.getOpenedServicesBookings();
+			for(ServicesBooking servicesBooking : servicesBookings) {
+				ServicesBookingVO servicesBookingVO = new ServicesBookingVO();
+				servicesBookingVO.setBookingDate(servicesBooking.getBookingDate());
+				servicesBookingVO.setServicesBookingId(servicesBooking.getId());
+				servicesBookingVO.setServiceType(servicesBooking.getServiceType().getServiceType());
+				if(servicesBooking.getCustomer().getCustomerType().equals("0")){
+					customerBookingDetails.setCustomerName(servicesBooking.getCustomer().getBilling().getFirstName().concat("").concat(servicesBooking.getCustomer().getBilling().getLastName()));
+					customerBookingDetails.setContactNumber(servicesBooking.getCustomer().getBilling().getTelephone());
+					customerBookingDetails.setStreet(servicesBooking.getCustomer().getBilling().getAddress());
+					customerBookingDetails.setArea(servicesBooking.getCustomer().getArea());
+					customerBookingDetails.setCity(servicesBooking.getCustomer().getBilling().getState());
+					customerBookingDetails.setState(servicesBooking.getCustomer().getBilling().getState());
+					customerBookingDetails.setPinCode(servicesBooking.getCustomer().getBilling().getPostalCode());
+					customerBookingDetails.setEmailAddress(servicesBooking.getCustomer().getEmailAddress());
+					}
+					else {
+						customerBookingDetails.setCustomerName(servicesBooking.getCustomer().getVendorAttrs().getVendorName());
+						customerBookingDetails.setContactNumber(servicesBooking.getCustomer().getBilling().getTelephone());
+						customerBookingDetails.setStreet(servicesBooking.getCustomer().getVendorAttrs().getVendorOfficeAddress());
+						customerBookingDetails.setArea(servicesBooking.getCustomer().getArea());
+						customerBookingDetails.setCity(servicesBooking.getCustomer().getBilling().getState());
+						customerBookingDetails.setState(servicesBooking.getCustomer().getBilling().getState());
+						customerBookingDetails.setPinCode(servicesBooking.getCustomer().getBilling().getPostalCode());
+						customerBookingDetails.setEmailAddress(servicesBooking.getCustomer().getEmailAddress());
+					}
+				Customer serviceProvider = servicesBooking.getService();
+				Long serviceProviderId = serviceProvider.getId();
+				ServiceProviderDetails serviceProviderDetails = new ServiceProviderDetails();
+				serviceProviderDetails.setServiceProviderId(serviceProviderId);
+				serviceProviderDetails.setArea(serviceProvider.getArea());
+				serviceProviderDetails.setCity(serviceProvider.getBilling().getCity());
+				serviceProviderDetails.setState(serviceProvider.getBilling().getState());
+				serviceProviderDetails.setPinCode(serviceProvider.getBilling().getPostalCode());
+				serviceProviderDetails.setEmailAddress(serviceProvider.getEmailAddress());
+				//serviceProviderDetails.setContactNumber(serviceProvider.getVendorAttrs().getVendorTelephone());
+				//serviceProviderDetails.setCompanyName(serviceProvider.getVendorAttrs().getVendorName());
+				servicesBookingVO.setServiceProviderDetails(serviceProviderDetails);
+				servicesBookingVO.setCustomerBookingdetails(customerBookingDetails);
+				servicesBookingVOList.add(servicesBookingVO);
+			}
 		}
 		PaginationData paginaionData=createPaginaionData(page,size);
     	calculatePaginaionData(paginaionData,size, servicesBookingVOList.size());
@@ -307,6 +417,7 @@ public class ServicesController extends AbstractController{
     	List<ServicesBookingVO> paginatedResponses = servicesBookingVOList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
     	paginatedResponse.setResponseData(paginatedResponses);
 		} catch(Exception e) {
+			e.printStackTrace();
 			paginatedResponse.setErrorMsg("Error while retrieving services bookings"+e.getMessage());
 			LOGGER.error("Error while retrieving services bookings");
 			return paginatedResponse;
@@ -314,4 +425,66 @@ public class ServicesController extends AbstractController{
     	return paginatedResponse;
     	
     }
+	@RequestMapping(value="/admin/servicesBooking", method = RequestMethod.POST)
+	@ResponseBody
+	public ServicesBookingStatusResponse servicesBookingStatus(@RequestBody ServicesBookingStatusRequest servicesBookingStatusRequest) throws Exception {
+		LOGGER.debug("Entered servicesBookingStatus");
+		ServicesBookingStatusResponse servicesBookingStatusResponse = new ServicesBookingStatusResponse();
+		try {
+			ServicesBooking servicesBooking = servicesBookingService.getById(servicesBookingStatusRequest.getServicesBookingId());
+			if(servicesBooking==null) {
+				LOGGER.debug("services booking not found");
+				servicesBookingStatusResponse.setErrormessage("services booking not found");
+				servicesBookingStatusResponse.setStatus("FALSE");
+				return servicesBookingStatusResponse;
+			}
+			if(servicesBookingStatusRequest.getStatus().equals("Y")) {
+				LOGGER.debug("Services Booking closed");
+				servicesBooking.setStatus(servicesBookingStatusRequest.getStatus());
+				servicesBooking.setComment(servicesBookingStatusRequest.getComment());
+			} 
+			servicesBookingService.update(servicesBooking);
+			if(servicesBookingStatusRequest.getStatus().equals("Y")) {
+				LOGGER.debug("Services Booking closed");
+				servicesBookingStatusResponse.setSuccessMessage("Services Booking closed successfully");
+				servicesBookingStatusResponse.setStatus("TRUE");
+			}
+			if(servicesBookingStatusRequest.getStatus().equals("N")) {
+				LOGGER.debug("Services Booking already in open state");
+				servicesBookingStatusResponse.setErrormessage("Services Booking is already in open state");
+				
+			}
+		}catch(Exception e) {
+			LOGGER.error("Error occured while closing services booking"+e.getMessage());
+			servicesBookingStatusResponse.setErrormessage("Error occured while closing services booking");
+			servicesBookingStatusResponse.setStatus("FALSE");
+			return servicesBookingStatusResponse;
+		}
+		return servicesBookingStatusResponse;
+		
+	}
+	@RequestMapping(value="/admin/deleteServicesBooking/{servicesBookingId}", method = RequestMethod.POST)
+	@ResponseBody
+	public DeleteServicesBookingResponse deleteServicesBookingStatus(@PathVariable String servicesBookingId) throws Exception {
+		LOGGER.debug("Entered deleteServicesBookingStatus");
+		DeleteServicesBookingResponse deleteServicesBookingResponse = new DeleteServicesBookingResponse();
+		try {
+		Long servicesBookingIdLong = new Long(servicesBookingId);
+		ServicesBooking servicesBooking = servicesBookingService.getById(servicesBookingIdLong);
+		if(servicesBooking==null) {
+			LOGGER.debug("No services booking found for this id  "+servicesBookingIdLong);
+			deleteServicesBookingResponse.setErrorMessage("services booking not found");
+			deleteServicesBookingResponse.setStatus("FALSE");
+			return deleteServicesBookingResponse;
+		}
+		servicesBookingService.delete(servicesBooking);
+		LOGGER.debug("Services booking deleted");
+		deleteServicesBookingResponse.setSuccessMessage("Services Booking deleted successfully");
+		deleteServicesBookingResponse.setStatus("TRUE");
+		}catch(Exception e) {
+			LOGGER.error("Error while delting services booking"+e.getMessage());
+		}
+		return deleteServicesBookingResponse;
+		
+	}
 }

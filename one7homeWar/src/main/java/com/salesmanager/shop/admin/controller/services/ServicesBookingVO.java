@@ -2,16 +2,13 @@ package com.salesmanager.shop.admin.controller.services;
 
 import java.util.Date;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 public class ServicesBookingVO {
 
 	private Long servicesBookingId;
 	private Date bookingDate;
-	private String customerName;
-	@JsonIgnore
-	private String serviceId;
 	private String serviceType;
+	CustomerBookingDetails customerBookingdetails;
+	ServiceProviderDetails serviceProviderDetails;
 	public Long getServicesBookingId() {
 		return servicesBookingId;
 	}
@@ -24,22 +21,22 @@ public class ServicesBookingVO {
 	public void setBookingDate(Date bookingDate) {
 		this.bookingDate = bookingDate;
 	}
-	public String getCustomerName() {
-		return customerName;
-	}
-	public void setCustomerName(String customerName) {
-		this.customerName = customerName;
-	}
 	public String getServiceType() {
 		return serviceType;
 	}
 	public void setServiceType(String serviceType) {
 		this.serviceType = serviceType;
 	}
-	public String getServiceId() {
-		return serviceId;
+	public ServiceProviderDetails getServiceProviderDetails() {
+		return serviceProviderDetails;
 	}
-	public void setServiceId(String serviceId) {
-		this.serviceId = serviceId;
+	public void setServiceProviderDetails(ServiceProviderDetails serviceProviderDetails) {
+		this.serviceProviderDetails = serviceProviderDetails;
+	}
+	public CustomerBookingDetails getCustomerBookingdetails() {
+		return customerBookingdetails;
+	}
+	public void setCustomerBookingdetails(CustomerBookingDetails customerBookingdetails) {
+		this.customerBookingdetails = customerBookingdetails;
 	}
 }

@@ -8,6 +8,10 @@ import com.salesmanager.core.model.customer.ServicesBooking;
 public interface ServicesBookingService extends SalesManagerEntityService<Long, ServicesBooking> {
 
 	List<ServicesBooking> getAllServicesBookings();
+
+	List<ServicesBooking> getClosedServicesBookings();
+
+	List<ServicesBooking> getOpenedServicesBookings();
 	
 	
 }

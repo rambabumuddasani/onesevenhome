@@ -35,4 +35,18 @@ public class ServicesBookingServiceImpl extends SalesManagerEntityServiceImpl<Lo
 	}
 
 
+	@Override
+	public List<ServicesBooking> getClosedServicesBookings() {
+	
+		return servicesBookingRepository.getClosedServicesBookings();
+	}
+
+
+	@Override
+	public List<ServicesBooking> getOpenedServicesBookings() {
+		
+		return servicesBookingRepository.getOpenedServicesBookings();
+	}
+
+
 }

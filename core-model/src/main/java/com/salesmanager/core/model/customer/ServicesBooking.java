@@ -49,6 +49,12 @@ public class ServicesBooking extends SalesManagerEntity<Long, ServicesBooking> {
 	@ManyToOne(targetEntity = Services.class)
 	@JoinColumn(name = "SERVICE_TYPE_ID", nullable = false)
     private Services serviceType;
+	
+	@Column(name="COMMENT")
+	private String comment;
+	
+	@Column(name="STATUS")
+	private String status;
 
 	public Long getId() {
 		return id;
@@ -88,6 +94,22 @@ public class ServicesBooking extends SalesManagerEntity<Long, ServicesBooking> {
 
 	public void setServiceType(Services serviceType) {
 		this.serviceType = serviceType;
+	}
+
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 	
 }
