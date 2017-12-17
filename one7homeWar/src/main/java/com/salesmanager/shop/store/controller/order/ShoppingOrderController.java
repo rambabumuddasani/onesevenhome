@@ -1,6 +1,7 @@
 package com.salesmanager.shop.store.controller.order;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ import org.apache.commons.lang.Validate;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -113,6 +115,7 @@ public class ShoppingOrderController extends AbstractController {
 	.getLogger(ShoppingOrderController.class);
 
 	@Inject
+	@Qualifier("shippingDistancePreProcessor")
 	ShippingQuotePrePostProcessModule shippingQuotePrePostProcessModule;
 
 	@Inject
@@ -160,9 +163,9 @@ public class ShoppingOrderController extends AbstractController {
 	@Inject
     private AuthenticationManager customerAuthenticationManager;
 	
-	@Inject
+/*	@Inject
 	private TransactionService transactionService;
-	
+*/	
 	@Inject
 	private EmailTemplatesUtils emailTemplatesUtils;
 	
@@ -541,10 +544,10 @@ public class ShoppingOrderController extends AbstractController {
 	        	//if has downloads, authenticate
 	        	
 	        	//check if any downloads exist for this order6
-	    		List<OrderProductDownload> orderProductDownloads = orderProdctDownloadService.getByOrderId(modelOrder.getId());
+/*	    		List<OrderProductDownload> orderProductDownloads = orderProdctDownloadService.getByOrderId(modelOrder.getId());
 	    		if(CollectionUtils.isNotEmpty(orderProductDownloads)) {
 
-/*		        	LOGGER.debug("Is user authenticated ? ",auth.isAuthenticated());
+		        	LOGGER.debug("Is user authenticated ? ",auth.isAuthenticated());
 		        	if(auth != null &&
 			        		 request.isUserInRole("AUTH_CUSTOMER")) {
 			        	//already authenticated
@@ -553,7 +556,7 @@ public class ShoppingOrderController extends AbstractController {
 				        customerFacade.authenticate(modelCustomer, userName, password);
 				        super.setSessionAttribute(Constants.CUSTOMER, modelCustomer, request);
 			        }
-*/		        	//send new user registration template
+		        	//send new user registration template
 					if(order.getCustomer().getId()==null || order.getCustomer().getId().longValue()==0) {
 						//send email for new customer
 						//customer.setClearPassword(password);//set clear password for email
@@ -561,7 +564,7 @@ public class ShoppingOrderController extends AbstractController {
 						//emailTemplatesUtils.sendRegistrationEmail( customer, store, locale, request.getContextPath() );
 					}
 	    		}
-	    		
+*/	    		
 				//send order confirmation email to customer
 				emailTemplatesUtils.sendOrderEmail(modelCustomer.getEmailAddress(), modelCustomer, modelOrder, locale, language, store, request.getContextPath());
 		/*        if(orderService.hasDownloadFiles(modelOrder)) {
@@ -600,13 +603,39 @@ public class ShoppingOrderController extends AbstractController {
 			 vendorPostalCodes.add(vendor.getBilling().getPostalCode());
 			// String vendorPostalCode = vendor.getBilling().getPostalCode();
 		 }
-		 List<Long> distanceInMeters = shippingQuotePrePostProcessModule.getDistnaceBetweenVendorAndCustomer(vendorPostalCodes, userPinCode);
+		 Map<Long,Long> vendorDistanceList = getVendorDistance(userPinCode, vendorIds, vendorPostalCodes);
+		 long freeShippingDistanceRange = 10l; // in KMs
+		 long eachKmDistanceCostInRs = 5l; // in RS
+		 long minOrderCostLimit = 100l;	// in RS
+		 long shippingCost =  0l;
+		 for(Map.Entry<Long, Long> entry : vendorDistanceList.entrySet()){
+			 if(minOrderCostLimit >= 100 ){
+				// long vendorId = entry.getKey();
+				 long vendorDistanceFromCustomerLoc  = entry.getValue();
+				 if(vendorDistanceFromCustomerLoc > freeShippingDistanceRange){
+					 long vendorDistanceChargeAfterFreeDistanceRange = (vendorDistanceFromCustomerLoc - freeShippingDistanceRange) * eachKmDistanceCostInRs;
+					 shippingCost += vendorDistanceChargeAfterFreeDistanceRange;
+				 }
+			 }else{
+				 long vendorDistanceFromCustomerLoc  = entry.getValue();
+				 //if(vendorDistanceFromCustomerLoc > freeShippingDistanceRange){
+					 long vendorDistanceCharge = (vendorDistanceFromCustomerLoc) * eachKmDistanceCostInRs;
+					 shippingCost += vendorDistanceCharge;
+				 //}			 
+			 }
+		 }
+		 return null;
+	}
+
+
+	private Map<Long,Long> getVendorDistance(String userPinCode, List<Long> vendorIds, List<String> vendorPostalCodes) {
+		List<Long> distanceInMeters = shippingQuotePrePostProcessModule.getDistnaceBetweenVendorAndCustomer(vendorPostalCodes, userPinCode);
 		 Map<Long,Long> vendorDistanceFromCustomerLocation = new HashMap<Long,Long>();
 		 int vIndex = 0;
 		 for(Long vId : vendorIds){
 			 vendorDistanceFromCustomerLocation.put(vId, distanceInMeters.get(vIndex++));
 		 }
-		 return null;
+		 return vendorDistanceFromCustomerLocation;
 	}
 	
     /*
