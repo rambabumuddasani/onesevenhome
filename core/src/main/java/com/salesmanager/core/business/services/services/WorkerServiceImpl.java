@@ -59,7 +59,7 @@ public class WorkerServiceImpl extends SalesManagerEntityServiceImpl<Integer, Co
 	public WorkerServiceResponse getWorkerByServiceType(String serviceType) {	
 		LOGGER.debug("Fetching service companies by service type");
 		WorkerServiceResponse response = new WorkerServiceResponse();
-		Set<CompanyService> serviceWorker = serviceWorkerRepository.findByServiceType(serviceType);
+		/*Set<CompanyService> serviceWorker = serviceWorkerRepository.findByServiceType(serviceType);
 		Set<ServicesWorkerVO> servicesWorkerVOSet= new HashSet<ServicesWorkerVO>();
 		for(CompanyService eachWorker : serviceWorker){
 			int avgRating = getAvgWorkerRating(eachWorker.getWorkerRating());
@@ -79,9 +79,7 @@ public class WorkerServiceImpl extends SalesManagerEntityServiceImpl<Integer, Co
 			servicesWorkerVO.setTotalRating(totalRating);
 			servicesWorkerVOSet.add(servicesWorkerVO);
 		}
-		//response.setWorkers(serviceWorker);
-		response.setWorkers(servicesWorkerVOSet);
-		//response.setServiceCompanies(servicesWorkerVOSet);
+		response.setWorkers(servicesWorkerVOSet);*/
 		return response;
 	}
 	private int getTotalRating(Set<WorkerRating> ratings) {
@@ -159,7 +157,7 @@ public class WorkerServiceImpl extends SalesManagerEntityServiceImpl<Integer, Co
 	public WorkerRatingResponse getWorkrRatingdByWorker(Integer workerId) {
 		LOGGER.debug("Get WorkrRatingdByWorker by id");
 		WorkerRatingResponse workerRatingResponse = new WorkerRatingResponse();
-		List<WorkerRating> workerRatings = workerRatingRepository.findByWorker(workerId);
+		/*List<WorkerRating> workerRatings = workerRatingRepository.findByWorker(workerId);
 		List<WorkerRatingVO> workerRatingVOSet = new ArrayList<WorkerRatingVO>();
 	    for(WorkerRating ratings:workerRatings) {
 	    	WorkerRatingVO workerRatingVO = new WorkerRatingVO(); 
@@ -171,7 +169,7 @@ public class WorkerServiceImpl extends SalesManagerEntityServiceImpl<Integer, Co
 	    	workerRatingVOSet.add(workerRatingVO);
 	    }
 	    
-	    workerRatingResponse.setWorkerRatings(workerRatingVOSet);
+	    workerRatingResponse.setWorkerRatings(workerRatingVOSet);*/
 		
 		return  workerRatingResponse;		
 	}

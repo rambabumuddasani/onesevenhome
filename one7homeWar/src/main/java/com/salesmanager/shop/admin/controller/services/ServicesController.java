@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.salesmanager.core.business.modules.email.Email;
 import com.salesmanager.core.business.modules.services.ServicesResponse;
+import com.salesmanager.core.business.modules.services.ServicesWorkerVO;
 import com.salesmanager.core.business.modules.services.WorkerRatingResponse;
 import com.salesmanager.core.business.modules.services.WorkerServiceResponse;
 import com.salesmanager.core.business.services.customer.CustomerService;
@@ -121,15 +122,59 @@ public class ServicesController extends AbstractController{
 		return customerService.findByServiceId(serviceid);
 	}
 
-	@RequestMapping(value="/services/{type}/workers", method = RequestMethod.GET, 
+	@RequestMapping(value="/vendortypes/{type}", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody	
-	//public List<Customer> getWorkerByService(@PathVariable String type) {		
-	public WorkerServiceResponse getWorkerByService(@PathVariable String type) {
+	public PaginatedResponse getVendorsByType(@PathVariable String type, @RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) {
+	
 		LOGGER.debug("Entered getWorkerByService by type");
-			//return workerService.getWorkerByServiceType(type);
-		return customerService.findByServiceType(type);
-			//return null;
+		PaginatedResponse paginatedResponse = new PaginatedResponse();
+		PaginationData paginaionData=createPaginaionData(page,size);
+		try {
+			List<ServicesWorkerVO> paginatedResponses = customerService.findByVendorType(type);
+	    	calculatePaginaionData(paginaionData,size, paginatedResponses.size());
+	    	paginatedResponse.setPaginationData(paginaionData);
+			if(paginatedResponses == null || paginatedResponses.isEmpty() || paginatedResponses.size() < paginaionData.getCountByPage()){
+				paginatedResponse.setResponseData(paginatedResponses);
+				return paginatedResponse;
+			}
+	    	paginatedResponses = paginatedResponses.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+	    	paginatedResponse.setResponseData(paginatedResponses);
+		} catch(Exception e) {
+			e.printStackTrace();
+			paginatedResponse.setErrorMsg("Error while retrieving getVendorsByType"+e.getMessage());
+			LOGGER.error("Error while retrieving getVendorsByType");
+			return paginatedResponse;
+		}
+    	return paginatedResponse;
+    	
+	}
+
+	@RequestMapping(value="/services/{type}/workers", method = RequestMethod.GET, 
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public PaginatedResponse getWorkerByService(@PathVariable String type, @RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) {
+		LOGGER.debug("Entered getWorkerByService by type");
+		PaginatedResponse paginatedResponse = new PaginatedResponse();
+		PaginationData paginaionData=createPaginaionData(page,size);
+		try {
+			List<ServicesWorkerVO> paginatedResponses = customerService.findByServiceType(type);
+	    	calculatePaginaionData(paginaionData,size, paginatedResponses.size());
+	    	paginatedResponse.setPaginationData(paginaionData);
+			if(paginatedResponses == null || paginatedResponses.isEmpty() || paginatedResponses.size() < paginaionData.getCountByPage()){
+				paginatedResponse.setResponseData(paginatedResponses);
+				return paginatedResponse;
+			}
+	    	paginatedResponses = paginatedResponses.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+	    	paginatedResponse.setResponseData(paginatedResponses);
+		} catch(Exception e) {
+			e.printStackTrace();
+			paginatedResponse.setErrorMsg("Error while retrieving getWorkerByService"+e.getMessage());
+			LOGGER.error("Error while retrieving getWorkerByService");
+			return paginatedResponse;
+		}
+    	return paginatedResponse;
+    	
 	}
 
 	@RequestMapping(value="/services/{type}/workers/{workerId}/rating", method = RequestMethod.GET, 

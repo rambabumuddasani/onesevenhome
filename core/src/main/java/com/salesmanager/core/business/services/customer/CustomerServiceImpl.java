@@ -1,5 +1,6 @@
 package com.salesmanager.core.business.services.customer;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -123,11 +124,11 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 	}
 	
 	@Override
-	public WorkerServiceResponse findByServiceType(String serviceType) {
+	public List<ServicesWorkerVO> findByServiceType(String serviceType) {
 		LOGGER.debug("Entered findByServiceType");
 		WorkerServiceResponse response = new WorkerServiceResponse();
 		List<Customer> customer = customerRepository.findByServiceType(serviceType);
-		Set<ServicesWorkerVO> servicesWorkerVOSet= new HashSet<ServicesWorkerVO>();
+		List<ServicesWorkerVO> servicesWorkerVOSet= new ArrayList<ServicesWorkerVO>();
 		for(Customer eachWorker : customer){
 			int avgRating = 0;
 			int totalRating= 0;
@@ -147,13 +148,37 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 			servicesWorkerVO.setTotalRating(totalRating);
 			servicesWorkerVOSet.add(servicesWorkerVO);
 		}
-		//response.setWorkers(serviceWorker);
-		response.setWorkers(servicesWorkerVOSet);
-		//response.setServiceCompanies(servicesWorkerVOSet);
-		LOGGER.debug("Ended findByServiceType");
-		return response;
+		LOGGER.debug("Ended findByVendorType");
+		return servicesWorkerVOSet;
 	}
 	
-	
+	@Override
+	public List<ServicesWorkerVO> findByVendorType(String userType) {
+		LOGGER.debug("Entered findByVendorType");
+		WorkerServiceResponse response = new WorkerServiceResponse();
+		List<Customer> customer = customerRepository.findByVendorType(userType);
+		List<ServicesWorkerVO> servicesWorkerVOList= new ArrayList<ServicesWorkerVO>();
+		for(Customer eachWorker : customer){
+			int avgRating = 0;
+			int totalRating= 0;
+			ServicesWorkerVO servicesWorkerVO = new ServicesWorkerVO();
+			servicesWorkerVO.setId(new Integer(String.valueOf((eachWorker.getId()))));
+			servicesWorkerVO.setCompanyName(eachWorker.getVendorAttrs().getVendorName());
+			servicesWorkerVO.setHouseNumber(eachWorker.getVendorAttrs().getVendorOfficeAddress());
+			servicesWorkerVO.setStreet(eachWorker.getBilling().getAddress());
+			servicesWorkerVO.setArea(eachWorker.getArea());
+			servicesWorkerVO.setCity(eachWorker.getBilling().getCity());
+			servicesWorkerVO.setState(eachWorker.getBilling().getState());
+			servicesWorkerVO.setPinCode(eachWorker.getBilling().getPostalCode());
+			servicesWorkerVO.setContactNumber(eachWorker.getBilling().getTelephone());
+			servicesWorkerVO.setImageUrl(eachWorker.getVendorAttrs().getVendorAuthCert());
+			servicesWorkerVO.setCountry(eachWorker.getBilling().getCountry().getName());
+			servicesWorkerVO.setAvgRating(avgRating);
+			servicesWorkerVO.setTotalRating(totalRating);
+			servicesWorkerVOList.add(servicesWorkerVO);
+		}
+		LOGGER.debug("Ended findByVendorType");
+		return servicesWorkerVOList;
+	}
 
 }

@@ -4,6 +4,7 @@ package com.salesmanager.core.business.services.customer;
 import java.util.List;
 
 import com.salesmanager.core.business.exception.ServiceException;
+import com.salesmanager.core.business.modules.services.ServicesWorkerVO;
 import com.salesmanager.core.business.modules.services.WorkerServiceResponse;
 import com.salesmanager.core.business.services.common.generic.SalesManagerEntityService;
 import com.salesmanager.core.model.common.Address;
@@ -39,7 +40,8 @@ public interface CustomerService  extends SalesManagerEntityService<Long, Custom
 
 	Customer getById(Long vendorId);
 
-	WorkerServiceResponse findByServiceType(String serviceType);
+	List<ServicesWorkerVO> findByServiceType(String serviceType);
 	List<Customer> findByServiceId(Integer serviceId);
+	List<ServicesWorkerVO> findByVendorType(String userType);
 
 }

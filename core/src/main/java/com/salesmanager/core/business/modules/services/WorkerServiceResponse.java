@@ -1,18 +1,18 @@
 package com.salesmanager.core.business.modules.services;
 
-import java.util.Set;
+import java.util.List;
 
 import com.salesmanager.core.model.services.CompanyService;
 
 public class WorkerServiceResponse {
 
-	Set<ServicesWorkerVO> workers;
+	List<ServicesWorkerVO> workers;
 
-	public Set<ServicesWorkerVO> getWorkers() {
+	public List<ServicesWorkerVO> getWorkers() {
 		return workers;
 	}
 
-	public void setWorkers(Set<ServicesWorkerVO> workers) {
+	public void setWorkers(List<ServicesWorkerVO> workers) {
 		this.workers = workers;
 	}
 	

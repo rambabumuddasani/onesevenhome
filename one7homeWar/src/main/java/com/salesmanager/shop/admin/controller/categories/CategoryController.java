@@ -198,7 +198,20 @@ public class CategoryController {
 					categoryjson.setType("category");
 					catTitle = category.getCode();
 					categoryjson.setTitle((category.getDescriptions().get(0)).getName());
-					catTitle = "/categories/"+catTitle.replaceAll(" ", "_");
+					String customerType = null;
+			    	for(String custType:Constants.customerTypes.keySet()){
+			    		if(Constants.customerTypes.get(custType).equals(catTitle.toUpperCase())){
+			    			customerType = custType;
+			    			break;
+			    		}
+			    	}
+					
+			    	if(customerType != null){
+			    		catTitle = "/vendortypes/"+customerType; 
+			    	} else {
+			    		catTitle = "/categories/"+catTitle.replaceAll(" ", "_");
+			    	}
+			    	
 					categoryjson.setImageURL((category.getDescriptions().get(0)).getSeUrl());
 					categoryjson.setUrl(catTitle);
 				

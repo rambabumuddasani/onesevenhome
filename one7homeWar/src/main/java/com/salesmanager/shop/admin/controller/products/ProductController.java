@@ -35,11 +35,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.salesmanager.core.business.modules.services.WorkerServiceResponse;
 import com.salesmanager.core.business.services.catalog.category.CategoryService;
 import com.salesmanager.core.business.services.catalog.product.ProductService;
 import com.salesmanager.core.business.services.catalog.product.image.ProductImageService;
 import com.salesmanager.core.business.services.catalog.product.manufacturer.ManufacturerService;
 import com.salesmanager.core.business.services.catalog.product.type.ProductTypeService;
+import com.salesmanager.core.business.services.customer.CustomerService;
 import com.salesmanager.core.business.services.merchant.MerchantStoreService;
 import com.salesmanager.core.business.services.tax.TaxClassService;
 import com.salesmanager.core.business.utils.CoreConfiguration;
@@ -109,7 +111,9 @@ public class ProductController extends AbstractController {
 
 	@Inject
 	MerchantStoreService merchantStoreService;
-
+	
+	@Inject
+	CustomerService customerService;
 	
 	@RequestMapping(value="/products/save", method=RequestMethod.POST)
 	public String saveProduct(@RequestBody com.salesmanager.shop.admin.model.catalog.Product  product ,HttpServletRequest request, Locale locale) throws Exception {
@@ -1682,5 +1686,5 @@ public CreateProductResponse updateProductDiscount(@RequestBody ProductDiscountR
 		LOGGER.debug("Ended getProductsBySearch");
 		return filteredProducts;
 	}
-	 
+	
 }
