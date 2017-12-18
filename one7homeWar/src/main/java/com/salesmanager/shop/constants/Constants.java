@@ -128,9 +128,9 @@ public class Constants {
 	static {
 		customerTypes.put("1", "VENDOR");
 		customerTypes.put("2", "SERVICE");
-		customerTypes.put("3", "ARCHITECT");
-		customerTypes.put("4", "WALLPAPER");
-		customerTypes.put("5", "MACHINERY");
+		customerTypes.put("3", "ARCHITECTS");
+		customerTypes.put("4", "WALL PAPER");
+		customerTypes.put("5", "MACHINERY & EQUIPMENT");
 	}
 
 }
