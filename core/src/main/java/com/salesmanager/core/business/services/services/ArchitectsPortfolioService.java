@@ -7,5 +7,5 @@ import com.salesmanager.core.model.customer.ArchitectsPortfolio;
 
 public interface ArchitectsPortfolioService extends SalesManagerEntityService<Long, ArchitectsPortfolio> {
 
-	
+	List<ArchitectsPortfolio> findByVendorId(Long vendorId);
 }

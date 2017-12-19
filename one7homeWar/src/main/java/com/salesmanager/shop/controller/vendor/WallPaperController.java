@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.MediaType;
 
 import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.modules.email.Email;
@@ -35,6 +36,7 @@ import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.catalog.product.image.ProductImage;
 import com.salesmanager.core.model.customer.ArchitectsPortfolio;
 import com.salesmanager.core.model.customer.Customer;
+import com.salesmanager.core.model.customer.MachineryPortfolio;
 import com.salesmanager.core.model.customer.WallPaperPortfolio;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.product.vendor.VendorProduct;
@@ -113,12 +115,41 @@ public class WallPaperController extends AbstractController {
 	    		wallPaperResponse.setSuccessMessage("New portfolio details uploaded successfully.");
 	    		
     		}catch(StorageException se){
-    			LOGGER.error("Failed while uploading portfolio for wall paper=="+wallPaperRequest.getPortfolioName());
-    			wallPaperResponse.setErrorMessage("Failed while storing image");
+    			LOGGER.error("Failed while uploading portfolio for wall paper=="+se.getMessage());
+    			wallPaperResponse.setErrorMessage("Failed while uploading portfolio for wall paper=="+wallPaperRequest.getPortfolioName());
     			wallPaperResponse.setStatus(false);
     			return wallPaperResponse;
     		}
     	}
     	return wallPaperResponse;
 	}
+	
+    @RequestMapping(value="/getWallPaperPortfolio", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
+  	@ResponseBody
+  	public WallPaperResponse getWallPaperPortfolio(@RequestBody WallPaperRequest wallPaperRequest) throws Exception {
+    	WallPaperResponse wallPaperResponse = new WallPaperResponse();
+    	WallPaperPortfolio wallPaperPortfolio = new WallPaperPortfolio();
+		
+		List<VendorPortfolioData> vendorPortfolioList = new ArrayList<VendorPortfolioData>();
+		try {
+			
+			List<WallPaperPortfolio> portfolioList = wallPaperPortfolioService.findByVendorId(wallPaperRequest.getVendorId());
+	    	for(WallPaperPortfolio portfolio:portfolioList){
+	    		VendorPortfolioData vendorPortfolioData = new VendorPortfolioData();
+	    		vendorPortfolioData.setPortfolioId(portfolio.getId());
+	    		vendorPortfolioData.setPortfolioName(portfolio.getPortfolioName());
+	    		vendorPortfolioData.setVendorId(wallPaperRequest.getVendorId());
+	    		vendorPortfolioList.add(vendorPortfolioData);
+	    	}
+	    	wallPaperResponse.setStatus(true);
+	    	wallPaperResponse.setVendorPortfolioList(vendorPortfolioList);
+		}catch(StorageException se){
+			LOGGER.error("Failed while fetching portfolio list for machinery=="+se.getMessage());
+			wallPaperResponse.setErrorMessage("Failed while fetching portfolio list for wall paper=="+wallPaperRequest.getVendorId());
+			wallPaperResponse.setStatus(false);
+			return wallPaperResponse;
+		}
+		return wallPaperResponse;
+    }
+	
 }

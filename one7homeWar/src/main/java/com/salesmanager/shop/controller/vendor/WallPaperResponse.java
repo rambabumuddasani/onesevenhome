@@ -1,11 +1,14 @@
 package com.salesmanager.shop.controller.vendor;
 
+import java.util.List;
+
 public class WallPaperResponse {
 	
 	private Long portfolioId;
 	private String errorMessage;
 	private String successMessage;
 	private boolean status;
+	private List<VendorPortfolioData> vendorPortfolioList;
 	public Long getPortfolioId() {
 		return portfolioId;
 	}
@@ -29,6 +32,12 @@ public class WallPaperResponse {
 	}
 	public void setStatus(boolean status) {
 		this.status = status;
+	}
+	public List<VendorPortfolioData> getVendorPortfolioList() {
+		return vendorPortfolioList;
+	}
+	public void setVendorPortfolioList(List<VendorPortfolioData> vendorPortfolioList) {
+		this.vendorPortfolioList = vendorPortfolioList;
 	}
 	
 }

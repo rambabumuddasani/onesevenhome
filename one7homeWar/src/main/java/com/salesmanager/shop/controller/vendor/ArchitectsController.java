@@ -38,6 +38,8 @@ import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.product.vendor.VendorProduct;
 import com.salesmanager.shop.admin.controller.products.ProductImageRequest;
 import com.salesmanager.shop.admin.controller.products.ProductImageResponse;
+import com.salesmanager.shop.admin.controller.services.ServicesRatingRequest;
+import com.salesmanager.shop.admin.controller.services.ServicesRatingResponse;
 import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.constants.EmailConstants;
 import com.salesmanager.shop.fileupload.services.StorageException;
@@ -48,6 +50,7 @@ import com.salesmanager.shop.utils.LabelUtils;
 import com.salesmanager.shop.fileupload.services.StorageService;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.MediaType;
 
 @Controller
 @CrossOrigin
@@ -111,12 +114,39 @@ public class ArchitectsController extends AbstractController {
 	    		architectsResponse.setSuccessMessage("New portfolio details uploaded successfully.");
 	    		
     		}catch(StorageException se){
-    			LOGGER.error("Failed while uploading portfolio for architect=="+architectsRequest.getPortfolioName());
-    			architectsResponse.setErrorMessage("Failed while storing image");
+    			LOGGER.error("Failed while uploading portfolio for architect=="+se.getMessage());
+    			architectsResponse.setErrorMessage("Failed while uploading portfolio for architect=="+architectsRequest.getPortfolioName());
     			architectsResponse.setStatus(false);
     			return architectsResponse;
     		}
     	}
     	return architectsResponse;
 	}
+    @RequestMapping(value="/getArchitectsPortfolio", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
+  	@ResponseBody
+  	public ArchitectsResponse getArchitectsPortfolio(@RequestBody ArchitectsRequest architectsRequest) throws Exception {
+		ArchitectsResponse architectsResponse = new ArchitectsResponse();
+		ArchitectsPortfolio architectsPortfolio = new ArchitectsPortfolio();
+		List<VendorPortfolioData> vendorPortfolioList = new ArrayList<VendorPortfolioData>();
+		try {
+			
+			List<ArchitectsPortfolio> portfolioList = architectsPortfolioService.findByVendorId(architectsRequest.getVendorId());
+	    	for(ArchitectsPortfolio portfolio:portfolioList){
+	    		VendorPortfolioData vendorPortfolioData = new VendorPortfolioData();
+	    		vendorPortfolioData.setPortfolioId(portfolio.getId());
+	    		vendorPortfolioData.setPortfolioName(portfolio.getPortfolioName());
+	    		vendorPortfolioData.setVendorId(architectsRequest.getVendorId());
+	    		vendorPortfolioList.add(vendorPortfolioData);
+	    	}
+			architectsResponse.setStatus(true);
+			architectsResponse.setVendorPortfolioList(vendorPortfolioList);
+		}catch(StorageException se){
+			LOGGER.error("Failed while fetching portfolio list for architect=="+se.getMessage());
+			architectsResponse.setErrorMessage("Failed while fetching portfolio list for architect=="+architectsRequest.getVendorId());
+			architectsResponse.setStatus(false);
+			return architectsResponse;
+		}
+		return architectsResponse;
+    }
+	
 }

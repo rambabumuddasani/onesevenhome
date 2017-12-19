@@ -26,5 +26,10 @@ public class WallPaperPortfolioServiceImpl extends SalesManagerEntityServiceImpl
 		super(wallPaperPortfolioRepository);
 		this.wallPaperPortfolioRepository = wallPaperPortfolioRepository;
 	}
+	
+	@Override
+	public List<WallPaperPortfolio> findByVendorId(Long vendorId) {
+		return wallPaperPortfolioRepository.findByVendorId(vendorId);
+	}
 
 }

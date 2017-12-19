@@ -26,5 +26,8 @@ public class ArchitectsPortfolioServiceImpl extends SalesManagerEntityServiceImp
 		super(architectsPortfolioRepository);
 		this.architectsPortfolioRepository = architectsPortfolioRepository;
 	}
-
+	@Override
+	public List<ArchitectsPortfolio> findByVendorId(Long vendorId) {
+		return architectsPortfolioRepository.findByVendorId(vendorId);
+	}
 }

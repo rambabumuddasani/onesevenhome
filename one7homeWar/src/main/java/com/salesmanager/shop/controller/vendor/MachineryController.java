@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.MediaType;
 
 import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.modules.email.Email;
@@ -32,6 +33,7 @@ import com.salesmanager.core.business.services.system.EmailService;
 import com.salesmanager.core.business.vendor.product.services.VendorProductService;
 import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.catalog.product.image.ProductImage;
+import com.salesmanager.core.model.customer.ArchitectsPortfolio;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.customer.MachineryPortfolio;
 import com.salesmanager.core.model.merchant.MerchantStore;
@@ -111,12 +113,40 @@ public class MachineryController extends AbstractController {
 	    		machineryResponse.setSuccessMessage("New portfolio details uploaded successfully.");
 	    		
     		}catch(StorageException se){
-    			LOGGER.error("Failed while uploading portfolio for machinery=="+machineryRequest.getPortfolioName());
-    			machineryResponse.setErrorMessage("Failed while storing image");
+    			LOGGER.error("Failed while uploading portfolio for machinery=="+se.getMessage());
+    			machineryResponse.setErrorMessage("Failed while uploading portfolio for machinery=="+machineryRequest.getPortfolioName());
     			machineryResponse.setStatus(false);
     			return machineryResponse;
     		}
     	}
     	return machineryResponse;
 	}
+    @RequestMapping(value="/getMachineryPortfolio", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
+  	@ResponseBody
+  	public MachineryResponse getMachineryPortfolio(@RequestBody MachineryRequest machineryRequest) throws Exception {
+		MachineryResponse machineryResponse = new MachineryResponse();
+		MachineryPortfolio machineryPortfolio = new MachineryPortfolio();
+		
+		List<VendorPortfolioData> vendorPortfolioList = new ArrayList<VendorPortfolioData>();
+		try {
+			
+			List<MachineryPortfolio> portfolioList = machineryPortfolioService.findByVendorId(machineryRequest.getVendorId());
+	    	for(MachineryPortfolio portfolio:portfolioList){
+	    		VendorPortfolioData vendorPortfolioData = new VendorPortfolioData();
+	    		vendorPortfolioData.setPortfolioId(portfolio.getId());
+	    		vendorPortfolioData.setPortfolioName(portfolio.getPortfolioName());
+	    		vendorPortfolioData.setVendorId(machineryRequest.getVendorId());
+	    		vendorPortfolioList.add(vendorPortfolioData);
+	    	}
+	    	machineryResponse.setStatus(true);
+	    	machineryResponse.setVendorPortfolioList(vendorPortfolioList);
+		}catch(StorageException se){
+			LOGGER.error("Failed while fetching portfolio list for machinery=="+se.getMessage());
+			machineryResponse.setErrorMessage("Failed while fetching portfolio list for machinery=="+machineryRequest.getVendorId());
+			machineryResponse.setStatus(false);
+			return machineryResponse;
+		}
+		return machineryResponse;
+    }
+	
 }
