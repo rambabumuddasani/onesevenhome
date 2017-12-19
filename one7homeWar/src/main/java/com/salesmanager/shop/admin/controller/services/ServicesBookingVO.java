@@ -9,6 +9,7 @@ public class ServicesBookingVO {
 	private String serviceType;
 	CustomerBookingDetails customerBookingdetails;
 	ServiceProviderDetails serviceProviderDetails;
+	private String status;
 	public Long getServicesBookingId() {
 		return servicesBookingId;
 	}
@@ -38,5 +39,11 @@ public class ServicesBookingVO {
 	}
 	public void setCustomerBookingdetails(CustomerBookingDetails customerBookingdetails) {
 		this.customerBookingdetails = customerBookingdetails;
+	}
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
 	}
 }

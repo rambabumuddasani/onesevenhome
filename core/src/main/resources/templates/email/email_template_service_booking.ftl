@@ -24,16 +24,71 @@
 							<tr>
 								<td style="color:#333333; padding:16px 45px 0px; fomnt-family:Arial,sans-serif;" align="left">
 									<p style="margin:0px 0 10px;font-size:12px;font-weight:normal;line-height:20px;">Dear <b>${EMAIL_USER_FIRSTNAME}  ${EMAIL_USER_LASTNAME}</b>,</p>
-									<!-- <p style="color:333;font-size:12px;line-height:15px;margin:0">Greetings from www.onesevenhome.com</p> -->
-									<p style="color:333;font-size:12px;line-height:15px;margin:0">Thank you for booking service. Service provider wll be in touch with you soon</p> 
-									<!-- <p style="color:333;font-size:12px;line-height:15px;margin:10px 0 10px 0;">Your Login ID is: <b>${EMAIL_USER_NAME}</b></p> -->
-									
+									<p style="color:333;font-size:12px;line-height:15px;margin:0">Greetings from www.onesevenhome.com</p>
+									<p style="color:333;font-size:12px;line-height:15px;margin:10px 0 10px 0;">Thank you for showing your interest on services offered by One Seven Home</p>
+									<p style="color:333;font-size:12px;line-height:15px;margin:10px 0 10px 0;">Your request for <b>${EMAIL_SERVICE_TYPE}</b> is informed to our vendor. They will be reaching you on your registered mobile before coming to your location.</p>
 								</td>
 							</tr>
-							
 					    </tbody>
 				    </table>
-				    
+				    <table width="700" cellspacing="0" cellpadding="0" border="0" align="left" style="background:#fff;border-top:3px solid #eaeced;border-bottom:3px solid #eaeced;clear:both">
+					    <tbody>
+							<tr>
+								<td align="center" style="color:#333333">
+									<p style="margin:45px 0;font-size:22px;font-weight:bold;line-height:20px">Vendor Name </p>
+								</td>
+							</tr>
+					    </tbody>
+				    </table>
+					<table width="700" cellspacing="0" cellpadding="0" border="0" align="left" style="background:#ededed;border-top:3px solid #eaeced;border-bottom:3px solid #eaeced;clear:both">
+					    <tbody>
+							<tr>
+								<td class="m_-6508970810580465838m_9166124052267274536m_6698583959415294282section-padding" style="padding:0 36px 36px">
+									<table width="100%" cellspacing="0" cellpadding="0" border="0">
+										<tbody>
+											<tr align="left">
+												<td width="100%" align="left">
+												    <table align="left" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:700px">
+                                                        <tbody><tr>
+															<td width="100%" align="left" valign="top" class="m_-6508970810580465838m_9166124052267274536m_6698583959415294282padding">
+															    <table cellpadding="0" cellspacing="0" border="0" width="100%">
+																	<tbody><tr>
+																		<td align="middle" valign="top">
+																		    <a href="#" target="_blank" data-saferedirecturl="#">
+																			   <img src="http://rainiersoft.com/clients/osh2/images/bpic1.png" width="300" height="250" border="0" class="CToWUd">																			</a>																		</td>
+																	</tr>
+																	<tr>
+																		<td width="299" align="middle">
+																		  <table bgcolor="#fff" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:299px;padding:20px 13px 16px 13px;border-bottom:4px solid #85a7a9">
+																				<tbody><tr>
+																					<td align="left" style="color:#333;font-size:16px;font-weight:bold;padding-bottom:13px">
+																						<span>Rating: Specify Ratings</span>
+																					</td>
+																				</tr>
+																		  </tbody></table>
+																		</td>
+																	</tr>
+																</tbody></table>
+															</td>
+													    </tr>
+													</tbody></table>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</td>
+							</tr>
+
+					    </tbody>
+					</table>
+				</td>
+			</tr>
+
+			<tr>
+			  <td>&nbsp;</td>
+			</tr>
+		</tbody>
+  </table>
 	<table width="700" border="0" align="center" cellpadding="0" cellspacing="0"  >
       <tbody>
         <tr style="  ">
@@ -68,7 +123,7 @@
 			<tr>
 				<td align="center">
 					 <p style="margin:20px 31px 15px 21px;font-weight:normal;line-height:20px;color:#000000">
-					     You are receiving this mail because you are registered on onesevenhome.com, to Unsubscribe <a style="color:#444;text-decoration:underline;font-weight:bold" href="#" target="_blank" data-saferedirecturl="https://www.google.com/url?hl=en&amp;q=http://msupply.us12.list-manage2.com/unsubscribe?u%3D3b0e84c9f9c844a0179cc0a62%26id%3Dd4e5f0794d%26e%3D7fffac015d%26c%3Db526858fed&amp;source=gmail&amp;ust=1503850177213000&amp;usg=AFQjCNGcqHPWhq4k0_hCzVFURRcAnY2yxA">click here</a>. Please do not reply to this mail.					 </p>
+					     You are receiving this mail because you are registered on mSupply.com, to Unsubscribe <a style="color:#444;text-decoration:underline;font-weight:bold" href="#" target="_blank" data-saferedirecturl="https://www.google.com/url?hl=en&amp;q=http://msupply.us12.list-manage2.com/unsubscribe?u%3D3b0e84c9f9c844a0179cc0a62%26id%3Dd4e5f0794d%26e%3D7fffac015d%26c%3Db526858fed&amp;source=gmail&amp;ust=1503850177213000&amp;usg=AFQjCNGcqHPWhq4k0_hCzVFURRcAnY2yxA">click here</a>. Please do not reply to this mail.					 </p>
 				</td>
 			</tr>
 		</tbody>
