@@ -79,11 +79,11 @@ public class MachineryController extends AbstractController {
 
 	private final static String VENDOR_ADD_PRODUCTS_TPL = "email_template_vendor_add_products.ftl";
 
-	@RequestMapping(value="/addmachineryPortfolio", method = RequestMethod.POST) 
+	@RequestMapping(value="/addMachineryPortfolio", method = RequestMethod.POST) 
 	@ResponseBody
-	public MachineryResponse addmachineryPortfolio(@RequestPart("machineryRequest") String machineryRequestStr,
+	public MachineryResponse addMachineryPortfolio(@RequestPart("machineryRequest") String machineryRequestStr,
 			@RequestPart("file") MultipartFile uploadedImage) throws Exception {
-		LOGGER.debug("Entered addmachineryPortfolio");
+		LOGGER.debug("Entered addMachineryPortfolio");
 		MachineryRequest machineryRequest = new ObjectMapper().readValue(machineryRequestStr, MachineryRequest.class);
 		MachineryResponse machineryResponse = new MachineryResponse();
 		MachineryPortfolio machineryPortfolio = new MachineryPortfolio();
@@ -111,7 +111,7 @@ public class MachineryController extends AbstractController {
 	    		machineryResponse.setSuccessMessage("New portfolio details uploaded successfully.");
 	    		
     		}catch(StorageException se){
-    			LOGGER.error("Failed while uploading portfolio for architect=="+machineryRequest.getPortfolioName());
+    			LOGGER.error("Failed while uploading portfolio for machinery=="+machineryRequest.getPortfolioName());
     			machineryResponse.setErrorMessage("Failed while storing image");
     			machineryResponse.setStatus(false);
     			return machineryResponse;

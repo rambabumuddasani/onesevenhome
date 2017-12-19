@@ -85,7 +85,7 @@ public class WallPaperController extends AbstractController {
 	@ResponseBody
 	public WallPaperResponse addWallPaperPortfolio(@RequestPart("wallPaperRequest") String wallPaperRequestStr,
 			@RequestPart("file") MultipartFile uploadedImage) throws Exception {
-		LOGGER.debug("Entered addArchitectsPortfolio");
+		LOGGER.debug("Entered addWallPaperPortfolio");
 		WallPaperRequest wallPaperRequest = new ObjectMapper().readValue(wallPaperRequestStr, WallPaperRequest.class);
 		WallPaperResponse wallPaperResponse = new WallPaperResponse();
 		WallPaperPortfolio wallPaperPortfolio = new WallPaperPortfolio();
@@ -113,7 +113,7 @@ public class WallPaperController extends AbstractController {
 	    		wallPaperResponse.setSuccessMessage("New portfolio details uploaded successfully.");
 	    		
     		}catch(StorageException se){
-    			LOGGER.error("Failed while uploading portfolio for architect=="+wallPaperRequest.getPortfolioName());
+    			LOGGER.error("Failed while uploading portfolio for wall paper=="+wallPaperRequest.getPortfolioName());
     			wallPaperResponse.setErrorMessage("Failed while storing image");
     			wallPaperResponse.setStatus(false);
     			return wallPaperResponse;
