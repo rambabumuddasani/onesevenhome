@@ -1686,5 +1686,5 @@ public CreateProductResponse updateProductDiscount(@RequestBody ProductDiscountR
 		LOGGER.debug("Ended getProductsBySearch");
 		return filteredProducts;
 	}
-	
+
 }

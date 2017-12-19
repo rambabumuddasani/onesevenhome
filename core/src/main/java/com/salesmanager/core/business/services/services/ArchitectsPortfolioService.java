@@ -1,0 +1,11 @@
+package com.salesmanager.core.business.services.services;
+
+import java.util.List;
+
+import com.salesmanager.core.business.services.common.generic.SalesManagerEntityService;
+import com.salesmanager.core.model.customer.ArchitectsPortfolio;
+
+public interface ArchitectsPortfolioService extends SalesManagerEntityService<Long, ArchitectsPortfolio> {
+
+	
+}
