@@ -252,11 +252,19 @@ public class ServicesController extends AbstractController{
     	final Locale locale  = new Locale("en");
     	
         Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
+        if(customer.getCustomerType().equals("0")) {
         templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, customer.getBilling().getFirstName());
         templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, customer.getBilling().getLastName());
+        } else {
+        	templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, customer.getVendorAttrs().getVendorName());
+        	templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, "");
+        }
         templateTokens.put(EmailConstants.EMAIL_USER_NAME, customer.getEmailAddress());
-        
-		Email email = new Email();
+        ServicesBooking serviceBooking = servicesBookingService.getById(servicesBooking.getId());
+        templateTokens.put(EmailConstants.EMAIL_SERVICE_TYPE, serviceBooking.getServiceType().getServiceType());
+        //templateTokens.put(EmailConstants.EMAIL_SERVICEPROVIDER_NAME, serviceBooking.getService().getVendorAttrs().getVendorName());   
+		
+        Email email = new Email();
 		email.setFrom(merchantStore.getStorename());
 		email.setFromEmail(merchantStore.getStoreEmailAddress());
 		email.setSubject(messages.getMessage("eamil.customer.service.booking",locale));
@@ -329,8 +337,9 @@ public class ServicesController extends AbstractController{
 			servicesBookingVO.setBookingDate(servicesBooking.getBookingDate());
 			servicesBookingVO.setServicesBookingId(servicesBooking.getId());
 			servicesBookingVO.setServiceType(servicesBooking.getServiceType().getServiceType());
+			servicesBookingVO.setStatus(servicesBooking.getStatus());
 			if(servicesBooking.getCustomer().getCustomerType().equals("0")){
-			customerBookingDetails.setCustomerName(servicesBooking.getCustomer().getBilling().getFirstName().concat("").concat(servicesBooking.getCustomer().getBilling().getLastName()));
+			customerBookingDetails.setCustomerName(servicesBooking.getCustomer().getBilling().getFirstName().concat(" ").concat(servicesBooking.getCustomer().getBilling().getLastName()));
 			customerBookingDetails.setContactNumber(servicesBooking.getCustomer().getBilling().getTelephone());
 			customerBookingDetails.setStreet(servicesBooking.getCustomer().getBilling().getAddress());
 			customerBookingDetails.setArea(servicesBooking.getCustomer().getArea());
@@ -372,8 +381,9 @@ public class ServicesController extends AbstractController{
 				servicesBookingVO.setBookingDate(servicesBooking.getBookingDate());
 				servicesBookingVO.setServicesBookingId(servicesBooking.getId());
 				servicesBookingVO.setServiceType(servicesBooking.getServiceType().getServiceType());
+				servicesBookingVO.setStatus(servicesBooking.getStatus());
 				if(servicesBooking.getCustomer().getCustomerType().equals("0")){
-					customerBookingDetails.setCustomerName(servicesBooking.getCustomer().getBilling().getFirstName().concat("").concat(servicesBooking.getCustomer().getBilling().getLastName()));
+					customerBookingDetails.setCustomerName(servicesBooking.getCustomer().getBilling().getFirstName().concat(" ").concat(servicesBooking.getCustomer().getBilling().getLastName()));
 					customerBookingDetails.setContactNumber(servicesBooking.getCustomer().getBilling().getTelephone());
 					customerBookingDetails.setStreet(servicesBooking.getCustomer().getBilling().getAddress());
 					customerBookingDetails.setArea(servicesBooking.getCustomer().getArea());
@@ -415,8 +425,9 @@ public class ServicesController extends AbstractController{
 				servicesBookingVO.setBookingDate(servicesBooking.getBookingDate());
 				servicesBookingVO.setServicesBookingId(servicesBooking.getId());
 				servicesBookingVO.setServiceType(servicesBooking.getServiceType().getServiceType());
+				servicesBookingVO.setStatus(servicesBooking.getStatus());
 				if(servicesBooking.getCustomer().getCustomerType().equals("0")){
-					customerBookingDetails.setCustomerName(servicesBooking.getCustomer().getBilling().getFirstName().concat("").concat(servicesBooking.getCustomer().getBilling().getLastName()));
+					customerBookingDetails.setCustomerName(servicesBooking.getCustomer().getBilling().getFirstName().concat(" ").concat(servicesBooking.getCustomer().getBilling().getLastName()));
 					customerBookingDetails.setContactNumber(servicesBooking.getCustomer().getBilling().getTelephone());
 					customerBookingDetails.setStreet(servicesBooking.getCustomer().getBilling().getAddress());
 					customerBookingDetails.setArea(servicesBooking.getCustomer().getArea());
@@ -508,7 +519,7 @@ public class ServicesController extends AbstractController{
 		return servicesBookingStatusResponse;
 		
 	}
-	@RequestMapping(value="/admin/deleteServicesBooking/{servicesBookingId}", method = RequestMethod.POST)
+	@RequestMapping(value="/admin/deleteServicesBooking/{servicesBookingId}", method = RequestMethod.GET)
 	@ResponseBody
 	public DeleteServicesBookingResponse deleteServicesBookingStatus(@PathVariable String servicesBookingId) throws Exception {
 		LOGGER.debug("Entered deleteServicesBookingStatus");
