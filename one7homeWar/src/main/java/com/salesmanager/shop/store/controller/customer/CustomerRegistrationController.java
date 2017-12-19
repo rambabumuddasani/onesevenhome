@@ -982,37 +982,6 @@ public class CustomerRegistrationController extends AbstractController {
 		    LOGGER.debug("Retrieved customer details");
 		 
 	}
-		if(customer.getCustomerType().equals("1")) {
-			VendorDetails vendorDetails = new VendorDetails();
-			vendorDetails.setEmail(customer.getEmailAddress());
-			vendorDetails.setVendorName(customer.getVendorAttrs().getVendorName());
-			//vendorDetails.setVendorOfficeAddress(customer.getVendorAttrs().getVendorOfficeAddress());
-			vendorDetails.setHouseNumber(customer.getVendorAttrs().getVendorOfficeAddress());
-			vendorDetails.setStreet(customer.getBilling().getAddress());
-			vendorDetails.setArea(customer.getArea());
-			vendorDetails.setCity(customer.getBilling().getCity());
-			vendorDetails.setState(customer.getBilling().getState());
-			vendorDetails.setCountry(customer.getBilling().getCountry().getName());
-			vendorDetails.setPinCode(customer.getBilling().getPostalCode());
-			vendorDetails.setVendorMobile(customer.getVendorAttrs().getVendorMobile());
-			vendorDetails.setVendorTelephone(customer.getVendorAttrs().getVendorTelephone());
-			vendorDetails.setVendorFax(customer.getVendorAttrs().getVendorFax());
-			vendorDetails.setVendorConstFirm(customer.getVendorAttrs().getVendorConstFirm());
-			vendorDetails.setVendorCompanyNature(customer.getVendorAttrs().getVendorCompanyNature());
-			vendorDetails.setVendorRegistrationNo(customer.getVendorAttrs().getVendorRegistrationNo());
-			vendorDetails.setVendorPAN(customer.getVendorAttrs().getVendorPAN());
-			vendorDetails.setVendorLicense(customer.getVendorAttrs().getVendorLicense());
-			vendorDetails.setVendorAuthCert(customer.getVendorAttrs().getVendorAuthCert());
-			vendorDetails.setVendorExpLine(customer.getVendorAttrs().getVendorExpLine());
-			vendorDetails.setVendorMajorCust(customer.getVendorAttrs().getVendorMajorCust());
-			vendorDetails.setVatRegNo(customer.getVendorAttrs().getVendorVatRegNo());
-			vendorDetails.setVendorTIN(customer.getVendorAttrs().getVendorTinNumber());
-			vendorDetails.setUserProfile(customer.getUserProfile());
-			vendorDetails.setGst(customer.getGst());
-			customerDetailsResponse.setVendorDetails(vendorDetails);
-			LOGGER.debug("Retrieved vendor details");
-			
-		}
 		if(customer.getCustomerType().equals("2")) {
 			ServiceDetails serviceDetails = new ServiceDetails();
 			serviceDetails.setEmail(customer.getEmailAddress());
@@ -1050,7 +1019,38 @@ public class CustomerRegistrationController extends AbstractController {
 			customerDetailsResponse.setServiceDetails(serviceDetails);
 			LOGGER.debug("Retrieved service details");
 		
+		} else {
+			VendorDetails vendorDetails = new VendorDetails();
+			vendorDetails.setEmail(customer.getEmailAddress());
+			vendorDetails.setVendorName(customer.getVendorAttrs().getVendorName());
+			//vendorDetails.setVendorOfficeAddress(customer.getVendorAttrs().getVendorOfficeAddress());
+			vendorDetails.setHouseNumber(customer.getVendorAttrs().getVendorOfficeAddress());
+			vendorDetails.setStreet(customer.getBilling().getAddress());
+			vendorDetails.setArea(customer.getArea());
+			vendorDetails.setCity(customer.getBilling().getCity());
+			vendorDetails.setState(customer.getBilling().getState());
+			vendorDetails.setCountry(customer.getBilling().getCountry().getName());
+			vendorDetails.setPinCode(customer.getBilling().getPostalCode());
+			vendorDetails.setVendorMobile(customer.getVendorAttrs().getVendorMobile());
+			vendorDetails.setVendorTelephone(customer.getVendorAttrs().getVendorTelephone());
+			vendorDetails.setVendorFax(customer.getVendorAttrs().getVendorFax());
+			vendorDetails.setVendorConstFirm(customer.getVendorAttrs().getVendorConstFirm());
+			vendorDetails.setVendorCompanyNature(customer.getVendorAttrs().getVendorCompanyNature());
+			vendorDetails.setVendorRegistrationNo(customer.getVendorAttrs().getVendorRegistrationNo());
+			vendorDetails.setVendorPAN(customer.getVendorAttrs().getVendorPAN());
+			vendorDetails.setVendorLicense(customer.getVendorAttrs().getVendorLicense());
+			vendorDetails.setVendorAuthCert(customer.getVendorAttrs().getVendorAuthCert());
+			vendorDetails.setVendorExpLine(customer.getVendorAttrs().getVendorExpLine());
+			vendorDetails.setVendorMajorCust(customer.getVendorAttrs().getVendorMajorCust());
+			vendorDetails.setVatRegNo(customer.getVendorAttrs().getVendorVatRegNo());
+			vendorDetails.setVendorTIN(customer.getVendorAttrs().getVendorTinNumber());
+			vendorDetails.setUserProfile(customer.getUserProfile());
+			vendorDetails.setGst(customer.getGst());
+			customerDetailsResponse.setVendorDetails(vendorDetails);
+			LOGGER.debug("Retrieved vendor details");
+			
 		}
+
 		return customerDetailsResponse;
 	}
 	
