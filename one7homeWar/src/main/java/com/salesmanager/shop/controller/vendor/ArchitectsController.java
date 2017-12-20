@@ -144,6 +144,8 @@ public class ArchitectsController extends AbstractController {
 			architectsResponse.setStatus(true);
 			architectsResponse.setVendorPortfolioList(vendorPortfolioList);
 	    	if(customer != null) {
+	    		architectsResponse.setVendorName(customer.getVendorAttrs().getVendorName());
+	    		architectsResponse.setVendorImageURL(customer.getVendorAttrs().getVendorAuthCert());
 	    		architectsResponse.setVendorShortDescription(customer.getVendorAttrs().getVendorShortDescription());
 	    		architectsResponse.setVendorDescription(customer.getVendorAttrs().getVendorDescription());
 	    	}

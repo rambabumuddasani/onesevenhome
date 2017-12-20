@@ -9,6 +9,8 @@ public class WallPaperResponse {
 	private String successMessage;
 	private boolean status;
 	private List<VendorPortfolioData> vendorPortfolioList;
+	private String vendorName;
+	private String vendorImageURL;
 	private String vendorDescription;
 	private String vendorShortDescription;
 
@@ -53,6 +55,18 @@ public class WallPaperResponse {
 	}
 	public void setVendorShortDescription(String vendorShortDescription) {
 		this.vendorShortDescription = vendorShortDescription;
+	}
+	public String getVendorName() {
+		return vendorName;
+	}
+	public void setVendorName(String vendorName) {
+		this.vendorName = vendorName;
+	}
+	public String getVendorImageURL() {
+		return vendorImageURL;
+	}
+	public void setVendorImageURL(String vendorImageURL) {
+		this.vendorImageURL = vendorImageURL;
 	}
 	
 }

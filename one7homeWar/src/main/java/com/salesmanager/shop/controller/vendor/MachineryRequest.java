@@ -31,15 +31,19 @@ public class MachineryRequest {
 	public void setPortfolioId(Long portfolioId) {
 		this.portfolioId = portfolioId;
 	}
+
 	public String getVendorDescription() {
 		return vendorDescription;
 	}
+
 	public void setVendorDescription(String vendorDescription) {
 		this.vendorDescription = vendorDescription;
 	}
+
 	public String getVendorShortDescription() {
 		return vendorShortDescription;
 	}
+
 	public void setVendorShortDescription(String vendorShortDescription) {
 		this.vendorShortDescription = vendorShortDescription;
 	}
