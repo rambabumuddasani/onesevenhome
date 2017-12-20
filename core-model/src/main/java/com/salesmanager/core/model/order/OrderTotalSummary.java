@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Output object after total calculation
  * @author Carl Samson
@@ -19,7 +21,9 @@ public class OrderTotalSummary implements Serializable {
 	private BigDecimal total;//final price
 	private BigDecimal taxTotal;//total of taxes
 	private BigDecimal totalDiscount;//total of discount
-
+	private BigDecimal shippingCharges;
+	
+	@JsonIgnore
 	private List<OrderTotal> totals;//all other fees (tax, shipping ....)
 
 	public BigDecimal getSubTotal() {
@@ -60,6 +64,14 @@ public class OrderTotalSummary implements Serializable {
 
 	public void setTaxTotal(BigDecimal taxTotal) {
 		this.taxTotal = taxTotal;
+	}
+
+	public BigDecimal getShippingCharges() {
+		return shippingCharges;
+	}
+
+	public void setShippingCharges(BigDecimal shippingCharges) {
+		this.shippingCharges = shippingCharges;
 	}
 
 }

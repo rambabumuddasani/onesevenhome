@@ -115,10 +115,6 @@ public class ShoppingOrderController extends AbstractController {
 	.getLogger(ShoppingOrderController.class);
 
 	@Inject
-	@Qualifier("shippingDistancePreProcessor")
-	ShippingQuotePrePostProcessModule shippingQuotePrePostProcessModule;
-
-	@Inject
 	private ShoppingCartFacade shoppingCartFacade;
 	
     @Inject
@@ -578,66 +574,7 @@ public class ShoppingOrderController extends AbstractController {
 	        }
 	        return modelOrder;
 	}
-	// address/addrpref/1?userId=1
-	@RequestMapping(value="/address/addrpref/{preferedShippingAddress}")
-	public String commitOrder1(@PathVariable("preferedShippingAddress") Integer preferedShippingAddress,
-			HttpServletRequest request) throws Exception {
-		 Customer customer = getSessionAttribute(  Constants.CUSTOMER, request);
-		 String userPinCode = null;
-		 if(preferedShippingAddress == 1){
-			 userPinCode = customer.getBilling().getPostalCode();
-		 }else if(preferedShippingAddress == 2){
-			 userPinCode = customer.getDelivery().getPostalCode();
-		 }else if(preferedShippingAddress == 2){
-			 userPinCode = customer.getSecondaryDelivery().getPostalCode();
-		 }else {
-			 throw new Exception("invalid preferedShippingAddress value");
-		 }
-		 ShoppingCart shoppingCart = shoppingCartService.getByCustomer(customer);
-		 Set<ShoppingCartItem> lineItems =  shoppingCart.getLineItems();
-		 List<Long> vendorIds = new ArrayList<Long>();
-		 List<String> vendorPostalCodes = new ArrayList<String>();
-		 for(ShoppingCartItem item : lineItems) {
-			 vendorIds.add(item.getVendorId());
-			 Customer vendor = customerService.getById(item.getVendorId());
-			 vendorPostalCodes.add(vendor.getBilling().getPostalCode());
-			// String vendorPostalCode = vendor.getBilling().getPostalCode();
-		 }
-		 Map<Long,Long> vendorDistanceList = getVendorDistance(userPinCode, vendorIds, vendorPostalCodes);
-		 long freeShippingDistanceRange = 10l; // in KMs
-		 long eachKmDistanceCostInRs = 5l; // in RS
-		 long minOrderCostLimit = 100l;	// in RS
-		 long shippingCost =  0l;
-		 for(Map.Entry<Long, Long> entry : vendorDistanceList.entrySet()){
-			 if(minOrderCostLimit >= 100 ){
-				// long vendorId = entry.getKey();
-				 long vendorDistanceFromCustomerLoc  = entry.getValue();
-				 if(vendorDistanceFromCustomerLoc > freeShippingDistanceRange){
-					 long vendorDistanceChargeAfterFreeDistanceRange = (vendorDistanceFromCustomerLoc - freeShippingDistanceRange) * eachKmDistanceCostInRs;
-					 shippingCost += vendorDistanceChargeAfterFreeDistanceRange;
-				 }
-			 }else{
-				 long vendorDistanceFromCustomerLoc  = entry.getValue();
-				 //if(vendorDistanceFromCustomerLoc > freeShippingDistanceRange){
-					 long vendorDistanceCharge = (vendorDistanceFromCustomerLoc) * eachKmDistanceCostInRs;
-					 shippingCost += vendorDistanceCharge;
-				 //}			 
-			 }
-		 }
-		 return null;
-	}
-
-
-	private Map<Long,Long> getVendorDistance(String userPinCode, List<Long> vendorIds, List<String> vendorPostalCodes) {
-		List<Long> distanceInMeters = shippingQuotePrePostProcessModule.getDistnaceBetweenVendorAndCustomer(vendorPostalCodes, userPinCode);
-		 Map<Long,Long> vendorDistanceFromCustomerLocation = new HashMap<Long,Long>();
-		 int vIndex = 0;
-		 for(Long vId : vendorIds){
-			 vendorDistanceFromCustomerLocation.put(vId, distanceInMeters.get(vIndex++));
-		 }
-		 return vendorDistanceFromCustomerLocation;
-	}
-	
+		
     /*
      * preferedShippingAddress can be 0 -> default billing address
      * 								  1 -> delivery address

@@ -1,7 +1,12 @@
 package com.salesmanager.shop.store.controller.shoppingCart;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -10,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,11 +28,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.salesmanager.core.business.services.customer.CustomerService;
+import com.salesmanager.core.business.services.shoppingcart.ShoppingCartCalculationService;
 import com.salesmanager.core.business.services.shoppingcart.ShoppingCartService;
 import com.salesmanager.core.business.utils.ajax.AjaxResponse;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.merchant.MerchantStore;
+import com.salesmanager.core.model.order.OrderTotalSummary;
 import com.salesmanager.core.model.reference.language.Language;
+import com.salesmanager.core.model.shoppingcart.ShoppingCart;
+import com.salesmanager.core.modules.integration.shipping.model.ShippingQuotePrePostProcessModule;
 import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.controller.AbstractController;
 import com.salesmanager.shop.model.shoppingcart.ShoppingCartData;
@@ -92,7 +103,15 @@ public class ShoppingCartController extends AbstractController {
 	@Inject
 	private ShoppingCartFacade shoppingCartFacade;
 
+	@Inject
+	@Qualifier("shippingDistancePreProcessor")
+	ShippingQuotePrePostProcessModule shippingQuotePrePostProcessModule;
 
+	@Inject
+	private CustomerService customerService;
+
+    @Inject
+    ShoppingCartCalculationService shoppingCartCalculationService;
 
 	/**
 	 * Add an item to the ShoppingCart (AJAX exposed method)
@@ -217,5 +236,81 @@ public class ShoppingCartController extends AbstractController {
         return shoppingCart;
 	}
 
+
+    /*
+     * preferedShippingAddress can be 0 -> default billing address
+     * 								  1 -> delivery address
+     * 								  2 -> secondary delivery address
+     */
+
+	// address/addrpref/1?userId=1
+	@RequestMapping(value="/address/addrpref/{preferedShippingAddress}")
+	public OrderTotalSummary calculateShippingCost(@PathVariable("preferedShippingAddress") Integer preferedShippingAddress ,
+			HttpServletRequest request) throws Exception {
+		 Customer customer = getSessionAttribute(  Constants.CUSTOMER, request);
+		 String userPinCode = null;
+		 if(preferedShippingAddress == 0) {
+			 userPinCode = customer.getBilling().getPostalCode();
+		 }else if(preferedShippingAddress == 1) {
+			 userPinCode = customer.getDelivery().getPostalCode();
+		 }else if(preferedShippingAddress == 2) {
+			 userPinCode = customer.getSecondaryDelivery().getPostalCode();
+		 }else {
+			 throw new Exception("invalid preferedShippingAddress value");
+		 }
+		 ShoppingCart shoppingCart = shoppingCartService.getByCustomer(customer);
+		 Set<com.salesmanager.core.model.shoppingcart.ShoppingCartItem> lineItems =  shoppingCart.getLineItems();
+		 List<Long> vendorIds = new ArrayList<Long>();
+		 List<String> vendorPostalCodes = new ArrayList<String>();
+		 for(com.salesmanager.core.model.shoppingcart.ShoppingCartItem item : lineItems) {
+			 vendorIds.add(item.getVendorId());
+			 Customer vendor = customerService.getById(item.getVendorId());
+			 vendorPostalCodes.add(vendor.getBilling().getPostalCode());
+			// String vendorPostalCode = vendor.getBilling().getPostalCode();
+		 }
+		 Map<Long,Long> vendorDistanceMap = getVendorDistance(userPinCode, vendorIds, vendorPostalCodes);
+		 Map<Long,Long> vendorDistanceCostMap = new HashMap<>();
+		 long freeShippingDistanceRange = 10l; // in KMs
+		 long eachKmDistanceCostInRs = 5l; // in RS
+		 long minOrderCostLimit = 100l;	// in RS
+		 //long totalShippingCost =  0l;
+		 for(Map.Entry<Long, Long> entry : vendorDistanceMap.entrySet()) {
+			 if(minOrderCostLimit >= 100 ){
+				// long vendorId = entry.getKey();
+				 long vendorDistanceFromCustomerLoc  = entry.getValue();
+				 if(vendorDistanceFromCustomerLoc > freeShippingDistanceRange){
+					 long vendorDistanceChargeAfterFreeDistanceRange = (vendorDistanceFromCustomerLoc - freeShippingDistanceRange) * eachKmDistanceCostInRs;
+					 vendorDistanceCostMap.put(entry.getKey(), vendorDistanceChargeAfterFreeDistanceRange);
+					 //totalShippingCost += vendorDistanceChargeAfterFreeDistanceRange;
+				 }
+			 }else{
+				 	 long vendorDistanceFromCustomerLoc  = entry.getValue();
+					 long vendorDistanceCharge = (vendorDistanceFromCustomerLoc) * eachKmDistanceCostInRs;
+					 vendorDistanceCostMap.put(entry.getKey(), vendorDistanceCharge);
+			 }
+		 }
+		 long totalShippingCost = vendorDistanceCostMap.values().stream().count();
+		 MerchantStore merchantStore = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
+		 Language language = (Language) request.getAttribute( Constants.LANGUAGE );
+         OrderTotalSummary orderSummary = shoppingCartCalculationService.calculate(shoppingCart,merchantStore, language );
+         BigDecimal total = orderSummary.getTotal();
+         orderSummary.setShippingCharges(new BigDecimal(totalShippingCost));
+         total.add(orderSummary.getShippingCharges());
+         orderSummary.setTotal(total);
+		 //ShoppingCartData cart =  shoppingCartFacade.getShoppingCartData(customer,merchantStore,null);
+		 return orderSummary;
+	}
+
+
+	private Map<Long,Long> getVendorDistance(String userPinCode, List<Long> vendorIds, List<String> vendorPostalCodes) {
+		List<Long> distanceInMeters = shippingQuotePrePostProcessModule.getDistnaceBetweenVendorAndCustomer(vendorPostalCodes, userPinCode);
+		 Map<Long,Long> vendorDistanceFromCustomerLocation = new HashMap<Long,Long>();
+		 int vIndex = 0;
+		 for(Long vId : vendorIds){
+			 vendorDistanceFromCustomerLocation.put(vId, distanceInMeters.get(vIndex++));
+		 }
+		 return vendorDistanceFromCustomerLocation;
+	}
+		
 
 }
