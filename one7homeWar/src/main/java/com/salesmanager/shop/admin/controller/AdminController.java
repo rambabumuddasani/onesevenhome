@@ -1570,6 +1570,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	postRequirement.setCustomerId(customer.getId());
     	postRequirement.setQuery(postRequirementRequest.getQuery());
     	postRequirement.setCategoryId(category.getId());
+    	postRequirement.setPostedDate(new Date());
     	postRequirementService.save(postRequirement);
     	LOGGER.debug("Query saved");
     	final Locale locale  = new Locale("en");
@@ -1614,7 +1615,14 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");
     	
     	Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
-		templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, customer.getVendorAttrs().getVendorName());
+    	if(customer.getCustomerType().equals("0")) {
+		templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, customer.getBilling().getFirstName());
+    	templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, customer.getBilling().getLastName());
+    	} else {
+    		templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, customer.getVendorAttrs().getVendorName());
+        	templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, "");
+    	}
+    		
 		templateTokens.put(EmailConstants.EMAIL_PRODUCT_LABEL, messages.getMessage("email.vendor.add.request.product", locale));
 		templateTokens.put(EmailConstants.EMAIL_CATEGORY, category.getDescription().getName());
 		
@@ -1643,11 +1651,12 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     			PostRequirementVO postRequirementVO = new PostRequirementVO();
     			postRequirementVO.setPostRequirementId(postRequirement.getId());
     			postRequirementVO.setQuery(postRequirement.getQuery());
+    			postRequirementVO.setPostedDate(postRequirement.getPostedDate());
     			Customer customer = customerService.getById(postRequirement.getCustomerId());
     			postRequirementVO.setCustomerId(customer.getId());
     			Category category = categoryService.getById(postRequirement.getCategoryId());
     			postRequirementVO.setCategory(category.getDescription().getName());
-    			if(customer.getCustomerType().equals(null) && customer.getCustomerType().equals("0")) {
+    			if(customer.getCustomerType().equals("0")) {
     				postRequirementVO.setCustomerName(customer.getBilling().getFirstName().concat(" ").concat(customer.getBilling().getLastName()));
     			}else {
     				postRequirementVO.setCustomerName(customer.getVendorAttrs().getVendorName());
@@ -1666,6 +1675,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
         	paginatedResponse.setResponseData(paginatedResponses);
     		return paginatedResponse;
     	}catch (Exception e) {
+    		e.printStackTrace();
     		LOGGER.error("Error while retrieving queries "+e.getMessage());	
     	}
     	LOGGER.debug("Ended getPostRequirements");
