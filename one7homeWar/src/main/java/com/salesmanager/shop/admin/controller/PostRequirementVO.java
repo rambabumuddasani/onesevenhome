@@ -1,5 +1,7 @@
 package com.salesmanager.shop.admin.controller;
 
+import java.util.Date;
+
 public class PostRequirementVO {
 
 	private Long postRequirementId;
@@ -8,6 +10,7 @@ public class PostRequirementVO {
 	private Long customerId;
 	private String customerName;
 	private String category;
+	private Date postedDate;
 	public Long getPostRequirementId() {
 		return postRequirementId;
 	}
@@ -43,5 +46,11 @@ public class PostRequirementVO {
 	}
 	public void setCategory(String category) {
 		this.category = category;
+	}
+	public Date getPostedDate() {
+		return postedDate;
+	}
+	public void setPostedDate(Date postedDate) {
+		this.postedDate = postedDate;
 	}
 }

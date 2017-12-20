@@ -23,7 +23,7 @@
 					    <tbody>
 							<tr>
 								<td style="color:#333333; padding:16px 45px 0px; fomnt-family:Arial,sans-serif;" align="left">
-									<p style="margin:0px 0 10px;font-size:12px;font-weight:normal;line-height:20px;">Dear <b>${EMAIL_USER_FIRSTNAME}</b>,</p>
+									<p style="margin:0px 0 10px;font-size:12px;font-weight:normal;line-height:20px;">Dear <b>${EMAIL_USER_FIRSTNAME} ${EMAIL_USER_LASTNAME}</b>,</p>
 									<p style="color:333;font-size:12px;line-height:15px;margin:0">Greetings from www.onesevenhome.com</p>
 									<p style="color:333;font-size:12px;line-height:15px;margin:10px 0 10px 0;">Your requirement is considered and the requested product was added to catalogue</li></b></p>
 								<!--	<p style="color:333;font-size:12px;line-height:15px;margin:10px 0 10px 0;">Your request is under process. An Email will be sent once the product is approved or declined.</p> -->
