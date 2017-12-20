@@ -42,6 +42,7 @@ import com.salesmanager.core.business.services.catalog.product.price.ProductPric
 import com.salesmanager.core.business.services.catalog.product.type.ProductTypeService;
 import com.salesmanager.core.business.services.customer.CustomerService;
 import com.salesmanager.core.business.services.customer.testmonial.review.CustomerTestmonialService;
+import com.salesmanager.core.business.services.historymanage.HistoryManagementService;
 import com.salesmanager.core.business.services.image.brand.BrandImageService;
 import com.salesmanager.core.business.services.merchant.MerchantStoreService;
 import com.salesmanager.core.business.services.postrequirement.PostRequirementService;
@@ -61,6 +62,7 @@ import com.salesmanager.core.model.catalog.product.price.ProductPrice;
 import com.salesmanager.core.model.catalog.product.type.ProductType;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.customer.CustomerTestimonial;
+import com.salesmanager.core.model.history.HistoryManagement;
 import com.salesmanager.core.model.image.brand.BrandImage;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.postrequirement.PostRequirement;
@@ -152,6 +154,9 @@ public class AdminController extends AbstractController {
 	
 	@Inject
 	PostRequirementService postRequirementService;
+	
+	@Inject
+	HistoryManagementService historyManagementService;
     
     // Admin update store address
 	@RequestMapping(value="/admin/updatestore", method = RequestMethod.POST, 
@@ -889,6 +894,15 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
 								productPrice.saveOrUpdate(price);
 								adminDealOfDayResponse.setSuccessMsg("Deal Of Day is set successfully");
 								adminDealOfDayResponse.setStatus("true");
+								HistoryManagement historyManagement = new HistoryManagement();
+								historyManagement.setProductId(dbProduct.getId());
+								historyManagement.setProductName(dbProduct.getProductDescription().getName());
+								historyManagement.setProductPrice(price.getProductPriceAmount());
+								historyManagement.setProductDiscountPrice(price.getProductPriceSpecialAmount());
+								historyManagement.setProductPriceStartDate(price.getProductPriceSpecialStartDate());
+								historyManagement.setProductPriceEndDate(price.getProductPriceSpecialEndDate());
+								historyManagement.setEnableFor("DOD");
+								historyManagementService.save(historyManagement);
 								}
 							}
 							if(adminDealOfDayReq.getStatus().equals("N")) {
@@ -1069,6 +1083,15 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 					
 					dealUpdateOrRemoveResponse.setSuccessMsg("Deal Updated successfully");
 					dealUpdateOrRemoveResponse.setStatus("true");
+					HistoryManagement historyManagement = new HistoryManagement();
+					historyManagement.setProductId(dbProduct.getId());
+					historyManagement.setProductName(dbProduct.getProductDescription().getName());
+					historyManagement.setProductPrice(price.getProductPriceAmount());
+					historyManagement.setProductDiscountPrice(price.getProductPriceSpecialAmount());
+					historyManagement.setProductPriceStartDate(price.getProductPriceSpecialStartDate());
+					historyManagement.setProductPriceEndDate(price.getProductPriceSpecialEndDate());
+					historyManagement.setEnableFor("TD");
+					historyManagementService.save(historyManagement);
 					}
 					// if status is false removing the product from todaysDeals 
 					else {
