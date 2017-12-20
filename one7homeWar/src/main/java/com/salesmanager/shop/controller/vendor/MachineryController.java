@@ -125,37 +125,7 @@ public class MachineryController extends AbstractController {
     	return machineryResponse;
 	}
 
-    @RequestMapping(value="/updateVendorDescription", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
-  	@ResponseBody
-  	public MachineryResponse updateVendorDescription(@RequestBody MachineryRequest machineryRequest) throws Exception {
-		LOGGER.debug("Entered updateVendorDescription");
-		MachineryResponse machineryResponse = new MachineryResponse();
-		
-		try{
-	
-	    		Customer customer = customerService.getById(machineryRequest.getVendorId());
-	    		if(customer == null){
-	    			LOGGER.error("customer not found while uploading portfolio for customer id=="+machineryRequest.getVendorId());
-	    			machineryResponse.setErrorMessage("Failed while storing image");
-	    			machineryResponse.setStatus(false);
-	    			return machineryResponse;
-	    		}
-	    		customer.getVendorAttrs().setVendorShortDescription(machineryRequest.getVendorShortDescription());
-	    		customer.getVendorAttrs().setVendorDescription(machineryRequest.getVendorDescription());
-	    		customerService.update(customer);
-	    		
-	    		machineryResponse.setStatus(true);
-	    		machineryResponse.setSuccessMessage("Vendor description updated successfully.");
-	    		
-    		}catch(Exception se){
-    			LOGGER.error("Failed while updating Vendor description=="+se.getMessage());
-    			machineryResponse.setErrorMessage("Failed while updating Vendor description=="+machineryRequest.getVendorId());
-    			machineryResponse.setStatus(false);
-    			return machineryResponse;
-    		}
-    	return machineryResponse;
-	}
-    @RequestMapping(value="/getMachineryPortfolio", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
+   @RequestMapping(value="/getMachineryPortfolio", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
   	@ResponseBody
   	public MachineryResponse getMachineryPortfolio(@RequestBody MachineryRequest machineryRequest) throws Exception {
 		MachineryResponse machineryResponse = new MachineryResponse();
