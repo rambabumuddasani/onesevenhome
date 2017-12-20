@@ -240,6 +240,8 @@ public class CustomerPopulator extends
 				vendorAttrs.setVendorVatRegNo(source.getVendor().getVendorVatRegNo());
 				vendorAttrs.setVendorTinNumber(source.getVendor().getVendorTIN());
 				vendorAttrs.setVendorLicense(source.getVendor().getVendorLicense());
+				vendorAttrs.setVendorShortDescription(source.getVendor().getVendorShortDescription());
+				vendorAttrs.setVendorDescription(source.getVendor().getVendorDescription());
 				target.setVendorAttrs(vendorAttrs);
 			}
 			if(source.getActivated() != null){

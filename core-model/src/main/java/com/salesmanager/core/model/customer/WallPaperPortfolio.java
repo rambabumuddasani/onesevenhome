@@ -1,5 +1,6 @@
 package com.salesmanager.core.model.customer;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -48,6 +49,18 @@ public class WallPaperPortfolio extends SalesManagerEntity<Long, WallPaperPortfo
 	@Column (name ="IMAGE_URL", length=200)
 	private String imageURL;
 
+	@Column(name = "PRICE")
+	private BigDecimal price;
+	
+	@Column (name ="SIZE", length=50)
+	private String size;
+	
+	@Column (name ="THICKNESS", length=50)
+	private String thickness;
+	
+	@Column (name ="BRAND", length=50)
+	private String brand;
+
 	public Long getId() {
 		return id;
 	}
@@ -86,6 +99,38 @@ public class WallPaperPortfolio extends SalesManagerEntity<Long, WallPaperPortfo
 
 	public void setImageURL(String imageURL) {
 		this.imageURL = imageURL;
+	}
+
+	public BigDecimal getPrice() {
+		return price;
+	}
+
+	public void setPrice(BigDecimal price) {
+		this.price = price;
+	}
+
+	public String getSize() {
+		return size;
+	}
+
+	public void setSize(String size) {
+		this.size = size;
+	}
+
+	public String getThickness() {
+		return thickness;
+	}
+
+	public void setThickness(String thickness) {
+		this.thickness = thickness;
+	}
+
+	public String getBrand() {
+		return brand;
+	}
+
+	public void setBrand(String brand) {
+		this.brand = brand;
 	}
 
 	

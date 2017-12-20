@@ -25,6 +25,8 @@ public class Vendor implements Serializable {
 	private String vendorTerms;
 	private String vendorVatRegNo;
 	private String vendorTIN;
+	private String vendorDescription;
+	private String vendorShortDescription;
 	
 	public String getVendorName() {
 		return vendorName;
@@ -152,6 +154,22 @@ public class Vendor implements Serializable {
 
 	public void setVendorTIN(String vendorTIN) {
 		this.vendorTIN = vendorTIN;
+	}
+
+	public String getVendorDescription() {
+		return vendorDescription;
+	}
+
+	public void setVendorDescription(String vendorDescription) {
+		this.vendorDescription = vendorDescription;
+	}
+
+	public String getVendorShortDescription() {
+		return vendorShortDescription;
+	}
+
+	public void setVendorShortDescription(String vendorShortDescription) {
+		this.vendorShortDescription = vendorShortDescription;
 	}
 	
 }

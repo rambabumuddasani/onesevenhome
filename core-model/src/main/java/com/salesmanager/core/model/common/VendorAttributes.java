@@ -61,6 +61,12 @@ public class VendorAttributes {
 	@Column (name ="VENDOR_TIN_NUMBER", length=20)
 	private String vendorTinNumber;
 
+	@Column (name ="VENDOR_DESC", length=200)
+	private String vendorDescription;
+
+	@Column (name ="VENDOR_SHORT_DESC", length=100)
+	private String vendorShortDescription;
+
 	public String getVendorName() {
 		return vendorName;
 	}
@@ -187,6 +193,22 @@ public class VendorAttributes {
 
 	public void setVendorTinNumber(String vendorTinNumber) {
 		this.vendorTinNumber = vendorTinNumber;
+	}
+
+	public String getVendorDescription() {
+		return vendorDescription;
+	}
+
+	public void setVendorDescription(String vendorDescription) {
+		this.vendorDescription = vendorDescription;
+	}
+
+	public String getVendorShortDescription() {
+		return vendorShortDescription;
+	}
+
+	public void setVendorShortDescription(String vendorShortDescription) {
+		this.vendorShortDescription = vendorShortDescription;
 	}
 	
 }

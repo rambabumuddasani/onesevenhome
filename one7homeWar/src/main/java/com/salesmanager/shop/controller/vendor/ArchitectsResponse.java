@@ -9,6 +9,9 @@ public class ArchitectsResponse {
 	private String successMessage;
 	private boolean status;
 	List<VendorPortfolioData> vendorPortfolioList;
+	private String vendorDescription;
+	private String vendorShortDescription;
+
 	public Long getPortfolioId() {
 		return portfolioId;
 	}
@@ -38,6 +41,18 @@ public class ArchitectsResponse {
 	}
 	public void setVendorPortfolioList(List<VendorPortfolioData> vendorPortfolioList) {
 		this.vendorPortfolioList = vendorPortfolioList;
+	}
+	public String getVendorDescription() {
+		return vendorDescription;
+	}
+	public void setVendorDescription(String vendorDescription) {
+		this.vendorDescription = vendorDescription;
+	}
+	public String getVendorShortDescription() {
+		return vendorShortDescription;
+	}
+	public void setVendorShortDescription(String vendorShortDescription) {
+		this.vendorShortDescription = vendorShortDescription;
 	}
 	
 }

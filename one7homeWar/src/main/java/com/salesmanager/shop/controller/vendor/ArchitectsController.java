@@ -1,5 +1,6 @@
 package com.salesmanager.shop.controller.vendor;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -114,7 +115,7 @@ public class ArchitectsController extends AbstractController {
 	    		architectsResponse.setStatus(true);
 	    		architectsResponse.setSuccessMessage("New portfolio details uploaded successfully.");
 	    		
-    		}catch(StorageException se){
+    		}catch(Exception se){
     			LOGGER.error("Failed while uploading portfolio for architect=="+se.getMessage());
     			architectsResponse.setErrorMessage("Failed while uploading portfolio for architect=="+architectsRequest.getPortfolioName());
     			architectsResponse.setStatus(false);
@@ -127,10 +128,10 @@ public class ArchitectsController extends AbstractController {
   	@ResponseBody
   	public ArchitectsResponse getArchitectsPortfolio(@RequestBody ArchitectsRequest architectsRequest) throws Exception {
 		ArchitectsResponse architectsResponse = new ArchitectsResponse();
-		ArchitectsPortfolio architectsPortfolio = new ArchitectsPortfolio();
 		List<VendorPortfolioData> vendorPortfolioList = new ArrayList<VendorPortfolioData>();
 		try {
 			
+    		Customer customer = customerService.getById(architectsRequest.getVendorId());
 			List<ArchitectsPortfolio> portfolioList = architectsPortfolioService.findByVendorId(architectsRequest.getVendorId());
 	    	for(ArchitectsPortfolio portfolio:portfolioList){
 	    		VendorPortfolioData vendorPortfolioData = new VendorPortfolioData();
@@ -142,7 +143,12 @@ public class ArchitectsController extends AbstractController {
 	    	}
 			architectsResponse.setStatus(true);
 			architectsResponse.setVendorPortfolioList(vendorPortfolioList);
-		}catch(StorageException se){
+	    	if(customer != null) {
+	    		architectsResponse.setVendorShortDescription(customer.getVendorAttrs().getVendorShortDescription());
+	    		architectsResponse.setVendorDescription(customer.getVendorAttrs().getVendorDescription());
+	    	}
+		}catch(Exception se){
+			System.out.println("Failed while fetching portfolio list for architect=="+se.getMessage());
 			LOGGER.error("Failed while fetching portfolio list for architect=="+se.getMessage());
 			architectsResponse.setErrorMessage("Failed while fetching portfolio list for architect=="+architectsRequest.getVendorId());
 			architectsResponse.setStatus(false);
@@ -167,7 +173,17 @@ public class ArchitectsController extends AbstractController {
 			architectsPortfolioService.delete(architectsPortfolio);
 			architectsResponse.setStatus(true);
 			architectsResponse.setSuccessMessage("Portfolio "+architectsPortfolio.getPortfolioName()+" deleted successfully.");
-		}catch(StorageException se){
+			try {
+				//deleting image from the location
+				File imageFile = new File(architectsPortfolio.getImageURL());
+				if(imageFile.exists()){
+					imageFile.delete();
+				}
+
+			} catch(Exception e){
+				//ignore the error while deletion fails. which is not going to impact the flow.
+			}
+		}catch(Exception se){
 			LOGGER.error("Failed while deleting portfolio for machinery=="+se.getMessage());
 			architectsResponse.setErrorMessage("Failed while deleting portfolio for machinery=="+architectsRequest.getVendorId());
 			architectsResponse.setStatus(false);
@@ -175,5 +191,57 @@ public class ArchitectsController extends AbstractController {
 		}
 		return architectsResponse;
     }
+    
+	@RequestMapping(value="/updateArchitectsPortfolio", method = RequestMethod.POST) 
+	@ResponseBody
+	public ArchitectsResponse updateArchitectsPortfolio(@RequestPart("architectsRequest") String architectsRequestStr,
+			@RequestPart("file") MultipartFile uploadedImage) throws Exception {
+		LOGGER.debug("Entered updateArchitectsPortfolio");
+		ArchitectsRequest architectsRequest = new ObjectMapper().readValue(architectsRequestStr, ArchitectsRequest.class);
+		ArchitectsResponse architectsResponse = new ArchitectsResponse();
+		
+    	String fileName = "";
+    		try{
+    			ArchitectsPortfolio architectsPortfolio = architectsPortfolioService.getById(architectsRequest.getPortfolioId());
+    			if(uploadedImage.getSize() != 0) {
+	    			fileName = storageService.store(uploadedImage,"architect");
+	    			LOGGER.debug("architect portfolio fileName "+fileName);
+    	    	}
+	    		Customer customer = customerService.getById(architectsRequest.getVendorId());
+	    		if(customer == null){
+	    			LOGGER.error("customer not found while uploading portfolio for customer id=="+architectsRequest.getVendorId());
+	    			architectsResponse.setErrorMessage("Failed while storing image");
+	    			architectsResponse.setStatus(false);
+	    			return architectsResponse;
+	    		}
+	    		if(fileName != null) {
+		    		architectsPortfolio.setImageURL(fileName);
+	    		}
+	    		architectsPortfolio.setPortfolioName(architectsRequest.getPortfolioName());
+	    		architectsPortfolioService.update(architectsPortfolio);
+	    		
+	    		architectsResponse.setStatus(true);
+	    		architectsResponse.setSuccessMessage("Portfolio details updated successfully.");
+	    		
+	    		if(fileName != null) {
+					try {
+						//deleting image from the location
+						File imageFile = new File(architectsPortfolio.getImageURL());
+						if(imageFile.exists()){
+							imageFile.delete();
+						}
+
+					} catch(Exception e){
+						//ignore the error while deletion fails. which is not going to impact the flow.
+					}
+	    		}
+    		}catch(Exception se){
+    			LOGGER.error("Failed while uploading portfolio for architect=="+se.getMessage());
+    			architectsResponse.setErrorMessage("Failed while uploading portfolio for architect=="+architectsRequest.getPortfolioName());
+    			architectsResponse.setStatus(false);
+    			return architectsResponse;
+    		}
+    	return architectsResponse;
+	}
 	
 }

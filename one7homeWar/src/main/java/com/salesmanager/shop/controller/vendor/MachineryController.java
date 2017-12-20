@@ -1,5 +1,6 @@
 package com.salesmanager.shop.controller.vendor;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -45,6 +46,7 @@ import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.constants.EmailConstants;
 import com.salesmanager.shop.fileupload.services.StorageException;
 import com.salesmanager.shop.store.controller.AbstractController;
+import com.salesmanager.shop.store.controller.customer.VendorRequest;
 import com.salesmanager.shop.store.controller.customer.VendorResponse;
 import com.salesmanager.shop.utils.EmailUtils;
 import com.salesmanager.shop.utils.LabelUtils;
@@ -113,7 +115,7 @@ public class MachineryController extends AbstractController {
 	    		machineryResponse.setStatus(true);
 	    		machineryResponse.setSuccessMessage("New portfolio details uploaded successfully.");
 	    		
-    		}catch(StorageException se){
+    		}catch(Exception se){
     			LOGGER.error("Failed while uploading portfolio for machinery=="+se.getMessage());
     			machineryResponse.setErrorMessage("Failed while uploading portfolio for machinery=="+machineryRequest.getPortfolioName());
     			machineryResponse.setStatus(false);
@@ -122,15 +124,45 @@ public class MachineryController extends AbstractController {
     	}
     	return machineryResponse;
 	}
+
+    @RequestMapping(value="/updateVendorDescription", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
+  	@ResponseBody
+  	public MachineryResponse updateVendorDescription(@RequestBody MachineryRequest machineryRequest) throws Exception {
+		LOGGER.debug("Entered updateVendorDescription");
+		MachineryResponse machineryResponse = new MachineryResponse();
+		
+		try{
+	
+	    		Customer customer = customerService.getById(machineryRequest.getVendorId());
+	    		if(customer == null){
+	    			LOGGER.error("customer not found while uploading portfolio for customer id=="+machineryRequest.getVendorId());
+	    			machineryResponse.setErrorMessage("Failed while storing image");
+	    			machineryResponse.setStatus(false);
+	    			return machineryResponse;
+	    		}
+	    		customer.getVendorAttrs().setVendorShortDescription(machineryRequest.getVendorShortDescription());
+	    		customer.getVendorAttrs().setVendorDescription(machineryRequest.getVendorDescription());
+	    		customerService.update(customer);
+	    		
+	    		machineryResponse.setStatus(true);
+	    		machineryResponse.setSuccessMessage("Vendor description updated successfully.");
+	    		
+    		}catch(Exception se){
+    			LOGGER.error("Failed while updating Vendor description=="+se.getMessage());
+    			machineryResponse.setErrorMessage("Failed while updating Vendor description=="+machineryRequest.getVendorId());
+    			machineryResponse.setStatus(false);
+    			return machineryResponse;
+    		}
+    	return machineryResponse;
+	}
     @RequestMapping(value="/getMachineryPortfolio", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
   	@ResponseBody
   	public MachineryResponse getMachineryPortfolio(@RequestBody MachineryRequest machineryRequest) throws Exception {
 		MachineryResponse machineryResponse = new MachineryResponse();
-		MachineryPortfolio machineryPortfolio = new MachineryPortfolio();
 		
 		List<VendorPortfolioData> vendorPortfolioList = new ArrayList<VendorPortfolioData>();
 		try {
-			
+    		Customer customer = customerService.getById(machineryRequest.getVendorId());
 			List<MachineryPortfolio> portfolioList = machineryPortfolioService.findByVendorId(machineryRequest.getVendorId());
 	    	for(MachineryPortfolio portfolio:portfolioList){
 	    		VendorPortfolioData vendorPortfolioData = new VendorPortfolioData();
@@ -142,7 +174,11 @@ public class MachineryController extends AbstractController {
 	    	}
 	    	machineryResponse.setStatus(true);
 	    	machineryResponse.setVendorPortfolioList(vendorPortfolioList);
-		}catch(StorageException se){
+	    	if(customer != null) {
+	    		machineryResponse.setVendorShortDescription(customer.getVendorAttrs().getVendorShortDescription());
+	    		machineryResponse.setVendorDescription(customer.getVendorAttrs().getVendorDescription());
+	    	}
+		}catch(Exception se){
 			LOGGER.error("Failed while fetching portfolio list for machinery=="+se.getMessage());
 			machineryResponse.setErrorMessage("Failed while fetching portfolio list for machinery=="+machineryRequest.getVendorId());
 			machineryResponse.setStatus(false);
@@ -167,7 +203,17 @@ public class MachineryController extends AbstractController {
 			machineryPortfolioService.delete(machineryPortfolio);
 			machineryResponse.setStatus(true);
 			machineryResponse.setSuccessMessage("Portfolio "+machineryPortfolio.getPortfolioName()+" deleted successfully.");
-		}catch(StorageException se){
+			try {
+				//deleting image from the location
+				File imageFile = new File(machineryPortfolio.getImageURL());
+				if(imageFile.exists()){
+					imageFile.delete();
+				}
+
+			} catch(Exception e){
+				//ignore the error while deletion fails. which is not going to impact the flow.
+			}
+		}catch(Exception se){
 			LOGGER.error("Failed while deleting portfolio for machinery=="+se.getMessage());
 			machineryResponse.setErrorMessage("Failed while deleting portfolio for machinery=="+machineryRequest.getVendorId());
 			machineryResponse.setStatus(false);
@@ -175,5 +221,57 @@ public class MachineryController extends AbstractController {
 		}
 		return machineryResponse;
     }
+    
+	@RequestMapping(value="/updateMachineryPortfolio", method = RequestMethod.POST) 
+	@ResponseBody
+	public MachineryResponse updateMachineryPortfolio(@RequestPart("machineryRequest") String machineryRequestStr,
+			@RequestPart("file") MultipartFile uploadedImage) throws Exception {
+		LOGGER.debug("Entered addMachineryPortfolio");
+		MachineryRequest machineryRequest = new ObjectMapper().readValue(machineryRequestStr, MachineryRequest.class);
+		MachineryResponse machineryResponse = new MachineryResponse();
+		
+    	String fileName = "";
+    		try{
+    			MachineryPortfolio machineryPortfolio = machineryPortfolioService.getById(machineryRequest.getPortfolioId());
+    			if(uploadedImage.getSize() != 0) {
+	    			fileName = storageService.store(uploadedImage,"architect");
+	    			LOGGER.debug("machinery portfolio fileName "+fileName);
+    	    	}
+	    		Customer customer = customerService.getById(machineryRequest.getVendorId());
+	    		if(customer == null){
+	    			LOGGER.error("customer not found while uploading portfolio for customer id=="+machineryRequest.getVendorId());
+	    			machineryResponse.setErrorMessage("Failed while storing image");
+	    			machineryResponse.setStatus(false);
+	    			return machineryResponse;
+	    		}
+	    		if(fileName != null) {
+	    			machineryPortfolio.setImageURL(fileName);
+	    		}
+	    		machineryPortfolio.setPortfolioName(machineryRequest.getPortfolioName());
+	    		machineryPortfolioService.update(machineryPortfolio);
+	    		
+	    		machineryResponse.setStatus(true);
+	    		machineryResponse.setSuccessMessage("Portfolio details updated successfully.");
+	    		if(fileName != null) {
+					try {
+						//deleting image from the location
+						File imageFile = new File(machineryPortfolio.getImageURL());
+						if(imageFile.exists()){
+							imageFile.delete();
+						}
+
+					} catch(Exception e){
+						//ignore the error while deletion fails. which is not going to impact the flow.
+					}
+	    		}
+	    		
+    		}catch(Exception se){
+    			LOGGER.error("Failed while uploading portfolio for machinery=="+se.getMessage());
+    			machineryResponse.setErrorMessage("Failed while uploading portfolio for machinery=="+machineryRequest.getPortfolioName());
+    			machineryResponse.setStatus(false);
+    			return machineryResponse;
+    		}
+    	return machineryResponse;
+	}
 	
 }

@@ -1,5 +1,6 @@
 package com.salesmanager.shop.controller.vendor;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -96,7 +97,7 @@ public class WallPaperController extends AbstractController {
     	if(uploadedImage.getSize() != 0) {
     		try{
     			fileName = storageService.store(uploadedImage,"wallpaper");
-    			LOGGER.debug("architect portfolio fileName "+fileName);
+    			LOGGER.debug("wall paper portfolio fileName "+fileName);
     		
 	    		Customer customer = customerService.getById(wallPaperRequest.getVendorId());
 	    		if(customer == null){
@@ -109,12 +110,16 @@ public class WallPaperController extends AbstractController {
 	    		wallPaperPortfolio.setImageURL(fileName);
 	    		wallPaperPortfolio.setPortfolioName(wallPaperRequest.getPortfolioName());
 	    		wallPaperPortfolio.setCustomer(customer);
+	    		wallPaperPortfolio.setBrand(wallPaperRequest.getBrand());
+	    		wallPaperPortfolio.setPrice(wallPaperRequest.getPrice());
+	    		wallPaperPortfolio.setSize(wallPaperRequest.getSize());
+	    		wallPaperPortfolio.setThickness(wallPaperRequest.getThickness());
 	    		wallPaperPortfolioService.save(wallPaperPortfolio);
 	    		
 	    		wallPaperResponse.setStatus(true);
 	    		wallPaperResponse.setSuccessMessage("New portfolio details uploaded successfully.");
 	    		
-    		}catch(StorageException se){
+    		}catch(Exception se){
     			LOGGER.error("Failed while uploading portfolio for wall paper=="+se.getMessage());
     			wallPaperResponse.setErrorMessage("Failed while uploading portfolio for wall paper=="+wallPaperRequest.getPortfolioName());
     			wallPaperResponse.setStatus(false);
@@ -128,11 +133,10 @@ public class WallPaperController extends AbstractController {
   	@ResponseBody
   	public WallPaperResponse getWallPaperPortfolio(@RequestBody WallPaperRequest wallPaperRequest) throws Exception {
     	WallPaperResponse wallPaperResponse = new WallPaperResponse();
-    	WallPaperPortfolio wallPaperPortfolio = new WallPaperPortfolio();
 		
 		List<VendorPortfolioData> vendorPortfolioList = new ArrayList<VendorPortfolioData>();
 		try {
-			
+    		Customer customer = customerService.getById(wallPaperRequest.getVendorId());
 			List<WallPaperPortfolio> portfolioList = wallPaperPortfolioService.findByVendorId(wallPaperRequest.getVendorId());
 	    	for(WallPaperPortfolio portfolio:portfolioList){
 	    		VendorPortfolioData vendorPortfolioData = new VendorPortfolioData();
@@ -140,11 +144,19 @@ public class WallPaperController extends AbstractController {
 	    		vendorPortfolioData.setPortfolioName(portfolio.getPortfolioName());
 	    		vendorPortfolioData.setVendorId(wallPaperRequest.getVendorId());
 	    		vendorPortfolioData.setImageURL(portfolio.getImageURL());
+	    		vendorPortfolioData.setBrand(portfolio.getBrand());
+	    		vendorPortfolioData.setPrice(portfolio.getPrice());
+	    		vendorPortfolioData.setSize(portfolio.getSize());
+	    		vendorPortfolioData.setThickness(portfolio.getThickness());
 	    		vendorPortfolioList.add(vendorPortfolioData);
 	    	}
 	    	wallPaperResponse.setStatus(true);
 	    	wallPaperResponse.setVendorPortfolioList(vendorPortfolioList);
-		}catch(StorageException se){
+	    	if(customer != null) {
+		    	wallPaperResponse.setVendorShortDescription(customer.getVendorAttrs().getVendorShortDescription());
+		    	wallPaperResponse.setVendorDescription(customer.getVendorAttrs().getVendorDescription());
+	    	}
+		}catch(Exception se){
 			LOGGER.error("Failed while fetching portfolio list for wall paper=="+se.getMessage());
 			wallPaperResponse.setErrorMessage("Failed while fetching portfolio list for wall paper=="+wallPaperRequest.getVendorId());
 			wallPaperResponse.setStatus(false);
@@ -169,7 +181,17 @@ public class WallPaperController extends AbstractController {
 			wallPaperPortfolioService.delete(wallPaperPortfolio);
 	    	wallPaperResponse.setStatus(true);
 	    	wallPaperResponse.setSuccessMessage("Portfolio "+wallPaperPortfolio.getPortfolioName()+" deleted successfully.");
-		}catch(StorageException se){
+			try {
+				//deleting image from the location
+				File imageFile = new File(wallPaperPortfolio.getImageURL());
+				if(imageFile.exists()){
+					imageFile.delete();
+				}
+
+			} catch(Exception e){
+				//ignore the error while deletion fails. which is not going to impact the flow.
+			}
+		}catch(Exception se){
 			LOGGER.error("Failed while deleting portfolio for wall paper=="+se.getMessage());
 			wallPaperResponse.setErrorMessage("Failed while deleting portfolio for wall paper=="+wallPaperRequest.getVendorId());
 			wallPaperResponse.setStatus(false);
@@ -177,5 +199,61 @@ public class WallPaperController extends AbstractController {
 		}
 		return wallPaperResponse;
     }
+
+	@RequestMapping(value="/updateWallPaperPortfolio", method = RequestMethod.POST) 
+	@ResponseBody
+	public WallPaperResponse updateWallPaperPortfolio(@RequestPart("wallPaperRequest") String wallPaperRequestStr,
+			@RequestPart("file") MultipartFile uploadedImage) throws Exception {
+		LOGGER.debug("Entered addWallPaperPortfolio");
+		WallPaperRequest wallPaperRequest = new ObjectMapper().readValue(wallPaperRequestStr, WallPaperRequest.class);
+		WallPaperResponse wallPaperResponse = new WallPaperResponse();
+		
+    	String fileName = "";
+    		try{
+    			WallPaperPortfolio wallPaperPortfolio = wallPaperPortfolioService.getById(wallPaperRequest.getPortfolioId());
+    	    	if(uploadedImage.getSize() != 0) {
+	    			fileName = storageService.store(uploadedImage,"wallpaper");
+	    			LOGGER.debug("wall paper portfolio fileName "+fileName);
+    	    	}
+	    		Customer customer = customerService.getById(wallPaperRequest.getVendorId());
+	    		if(customer == null){
+	    			LOGGER.error("customer not found while uploading portfolio for customer id=="+wallPaperRequest.getVendorId());
+	    			wallPaperResponse.setErrorMessage("Failed while storing image");
+	    			wallPaperResponse.setStatus(false);
+	    			return wallPaperResponse;
+	    		}
+	    		if(fileName != null) {
+	    			wallPaperPortfolio.setImageURL(fileName);
+	    		}
+	    		wallPaperPortfolio.setBrand(wallPaperRequest.getBrand());
+	    		wallPaperPortfolio.setPrice(wallPaperRequest.getPrice());
+	    		wallPaperPortfolio.setSize(wallPaperRequest.getSize());
+	    		wallPaperPortfolio.setThickness(wallPaperRequest.getThickness());
+	    		wallPaperPortfolio.setPortfolioName(wallPaperRequest.getPortfolioName());
+	    		wallPaperPortfolioService.update(wallPaperPortfolio);
+	    		
+	    		wallPaperResponse.setStatus(true);
+	    		wallPaperResponse.setSuccessMessage("Portfolio details updated successfully.");
+	    		if(fileName != null) {
+					try {
+						//deleting image from the location
+						File imageFile = new File(wallPaperPortfolio.getImageURL());
+						if(imageFile.exists()){
+							imageFile.delete();
+						}
+
+					} catch(Exception e){
+						//ignore the error while deletion fails. which is not going to impact the flow.
+					}
+	    		}
+	    		
+    		}catch(Exception se){
+    			LOGGER.error("Failed while uploading portfolio for wall paper=="+se.getMessage());
+    			wallPaperResponse.setErrorMessage("Failed while uploading portfolio for wall paper=="+wallPaperRequest.getPortfolioName());
+    			wallPaperResponse.setStatus(false);
+    			return wallPaperResponse;
+    		}
+    	return wallPaperResponse;
+	}
     
 }

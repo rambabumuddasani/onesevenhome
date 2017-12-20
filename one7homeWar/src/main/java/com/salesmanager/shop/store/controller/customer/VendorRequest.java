@@ -148,6 +148,5 @@ public class VendorRequest implements Serializable {
 	public void setVendorTIN(String vendorTIN) {
 		this.vendorTIN = vendorTIN;
 	}
-	
 
 }
