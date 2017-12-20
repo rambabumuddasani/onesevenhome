@@ -1576,7 +1576,13 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");
     	
     	Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
-		templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, customer.getVendorAttrs().getVendorName());
+    	if(customer.getCustomerType().equals("0")) {
+		templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, customer.getBilling().getFirstName());
+    	templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, customer.getBilling().getLastName());
+    	} else {
+    		templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, customer.getVendorAttrs().getVendorName());
+        	templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, "");
+    	}
 		templateTokens.put(EmailConstants.EMAIL_PRODUCT_LABEL, messages.getMessage("email.vendor.add.request.product", locale));
 		templateTokens.put(EmailConstants.EMAIL_CATEGORY, category.getDescription().getName());
 		
@@ -1584,13 +1590,13 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		email.setFrom(merchantStore.getStorename());
 		email.setFromEmail(merchantStore.getStoreEmailAddress());
 		email.setSubject(messages.getMessage("email.vendor.request.postrequirement",locale));
-		email.setTo("surendervarmac@gmail.com");
+		email.setTo(customer.getEmailAddress());
 		email.setTemplateName(ADIMIN_ADD_PRODUCT_TMPL);
 		email.setTemplateTokens(templateTokens);
 
 		emailService.sendHtmlEmail(merchantStore, email);
 		sendEmailToCustomer(customer,category);
-    	postReqirementResponse.setSuccessMessage("Query saved successfully");
+    	postReqirementResponse.setSuccessMessage("Query sent successfully");
     	postReqirementResponse.setStatus(TRUE);
     	} catch (Exception e){
     		e.printStackTrace();
@@ -1639,7 +1645,6 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     			postRequirementVO.setQuery(postRequirement.getQuery());
     			Customer customer = customerService.getById(postRequirement.getCustomerId());
     			postRequirementVO.setCustomerId(customer.getId());
-    			postRequirementVO.setCustomerName(customer.getVendorAttrs().getVendorName());
     			Category category = categoryService.getById(postRequirement.getCategoryId());
     			postRequirementVO.setCategory(category.getDescription().getName());
     			if(customer.getCustomerType().equals(null) && customer.getCustomerType().equals("0")) {
