@@ -36,6 +36,7 @@ import com.salesmanager.core.model.catalog.product.image.ProductImage;
 import com.salesmanager.core.model.customer.ArchitectsPortfolio;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.customer.MachineryPortfolio;
+import com.salesmanager.core.model.customer.WallPaperPortfolio;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.product.vendor.VendorProduct;
 import com.salesmanager.shop.admin.controller.products.ProductImageRequest;
@@ -136,6 +137,7 @@ public class MachineryController extends AbstractController {
 	    		vendorPortfolioData.setPortfolioId(portfolio.getId());
 	    		vendorPortfolioData.setPortfolioName(portfolio.getPortfolioName());
 	    		vendorPortfolioData.setVendorId(machineryRequest.getVendorId());
+	    		vendorPortfolioData.setImageURL(portfolio.getImageURL());
 	    		vendorPortfolioList.add(vendorPortfolioData);
 	    	}
 	    	machineryResponse.setStatus(true);
@@ -143,6 +145,31 @@ public class MachineryController extends AbstractController {
 		}catch(StorageException se){
 			LOGGER.error("Failed while fetching portfolio list for machinery=="+se.getMessage());
 			machineryResponse.setErrorMessage("Failed while fetching portfolio list for machinery=="+machineryRequest.getVendorId());
+			machineryResponse.setStatus(false);
+			return machineryResponse;
+		}
+		return machineryResponse;
+    }
+    
+    @RequestMapping(value="/deleteMachineryPortfolio", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
+  	@ResponseBody
+  	public MachineryResponse deleteMachineryPortfolio(@RequestBody MachineryRequest machineryRequest) throws Exception {
+    	MachineryResponse machineryResponse = new MachineryResponse();
+		
+		try {
+			
+			MachineryPortfolio machineryPortfolio = machineryPortfolioService.getById(machineryRequest.getPortfolioId());
+			if(machineryPortfolio == null) {
+				machineryResponse.setErrorMessage("No machinery exists with portfolio id=="+machineryRequest.getPortfolioId());
+				machineryResponse.setStatus(false);
+				return machineryResponse;
+			} 
+			machineryPortfolioService.delete(machineryPortfolio);
+			machineryResponse.setStatus(true);
+			machineryResponse.setSuccessMessage("Portfolio "+machineryPortfolio.getPortfolioName()+" deleted successfully.");
+		}catch(StorageException se){
+			LOGGER.error("Failed while deleting portfolio for machinery=="+se.getMessage());
+			machineryResponse.setErrorMessage("Failed while deleting portfolio for machinery=="+machineryRequest.getVendorId());
 			machineryResponse.setStatus(false);
 			return machineryResponse;
 		}

@@ -34,6 +34,7 @@ import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.catalog.product.image.ProductImage;
 import com.salesmanager.core.model.customer.ArchitectsPortfolio;
 import com.salesmanager.core.model.customer.Customer;
+import com.salesmanager.core.model.customer.MachineryPortfolio;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.product.vendor.VendorProduct;
 import com.salesmanager.shop.admin.controller.products.ProductImageRequest;
@@ -136,6 +137,7 @@ public class ArchitectsController extends AbstractController {
 	    		vendorPortfolioData.setPortfolioId(portfolio.getId());
 	    		vendorPortfolioData.setPortfolioName(portfolio.getPortfolioName());
 	    		vendorPortfolioData.setVendorId(architectsRequest.getVendorId());
+	    		vendorPortfolioData.setImageURL(portfolio.getImageURL());
 	    		vendorPortfolioList.add(vendorPortfolioData);
 	    	}
 			architectsResponse.setStatus(true);
@@ -143,6 +145,31 @@ public class ArchitectsController extends AbstractController {
 		}catch(StorageException se){
 			LOGGER.error("Failed while fetching portfolio list for architect=="+se.getMessage());
 			architectsResponse.setErrorMessage("Failed while fetching portfolio list for architect=="+architectsRequest.getVendorId());
+			architectsResponse.setStatus(false);
+			return architectsResponse;
+		}
+		return architectsResponse;
+    }
+    
+    @RequestMapping(value="/deleteArchitectsPortfolio", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
+  	@ResponseBody
+  	public ArchitectsResponse deleteArchitectsPortfolio(@RequestBody ArchitectsRequest architectsRequest) throws Exception {
+    	ArchitectsResponse architectsResponse = new ArchitectsResponse();
+		
+		try {
+			
+			ArchitectsPortfolio architectsPortfolio = architectsPortfolioService.getById(architectsRequest.getPortfolioId());
+			if(architectsPortfolio == null) {
+				architectsResponse.setErrorMessage("No machinery exists with portfolio id=="+architectsRequest.getPortfolioId());
+				architectsResponse.setStatus(false);
+				return architectsResponse;
+			} 
+			architectsPortfolioService.delete(architectsPortfolio);
+			architectsResponse.setStatus(true);
+			architectsResponse.setSuccessMessage("Portfolio "+architectsPortfolio.getPortfolioName()+" deleted successfully.");
+		}catch(StorageException se){
+			LOGGER.error("Failed while deleting portfolio for machinery=="+se.getMessage());
+			architectsResponse.setErrorMessage("Failed while deleting portfolio for machinery=="+architectsRequest.getVendorId());
 			architectsResponse.setStatus(false);
 			return architectsResponse;
 		}

@@ -139,17 +139,43 @@ public class WallPaperController extends AbstractController {
 	    		vendorPortfolioData.setPortfolioId(portfolio.getId());
 	    		vendorPortfolioData.setPortfolioName(portfolio.getPortfolioName());
 	    		vendorPortfolioData.setVendorId(wallPaperRequest.getVendorId());
+	    		vendorPortfolioData.setImageURL(portfolio.getImageURL());
 	    		vendorPortfolioList.add(vendorPortfolioData);
 	    	}
 	    	wallPaperResponse.setStatus(true);
 	    	wallPaperResponse.setVendorPortfolioList(vendorPortfolioList);
 		}catch(StorageException se){
-			LOGGER.error("Failed while fetching portfolio list for machinery=="+se.getMessage());
+			LOGGER.error("Failed while fetching portfolio list for wall paper=="+se.getMessage());
 			wallPaperResponse.setErrorMessage("Failed while fetching portfolio list for wall paper=="+wallPaperRequest.getVendorId());
 			wallPaperResponse.setStatus(false);
 			return wallPaperResponse;
 		}
 		return wallPaperResponse;
     }
-	
+
+    @RequestMapping(value="/deleteWallPaperPortfolio", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
+  	@ResponseBody
+  	public WallPaperResponse deleteWallPaperPortfolio(@RequestBody WallPaperRequest wallPaperRequest) throws Exception {
+    	WallPaperResponse wallPaperResponse = new WallPaperResponse();
+		
+		try {
+			
+			WallPaperPortfolio wallPaperPortfolio = wallPaperPortfolioService.getById(wallPaperRequest.getPortfolioId());
+			if(wallPaperPortfolio == null) {
+				wallPaperResponse.setErrorMessage("No wall paper exists with portfolio id=="+wallPaperRequest.getPortfolioId());
+				wallPaperResponse.setStatus(false);
+				return wallPaperResponse;
+			} 
+			wallPaperPortfolioService.delete(wallPaperPortfolio);
+	    	wallPaperResponse.setStatus(true);
+	    	wallPaperResponse.setSuccessMessage("Portfolio "+wallPaperPortfolio.getPortfolioName()+" deleted successfully.");
+		}catch(StorageException se){
+			LOGGER.error("Failed while deleting portfolio for wall paper=="+se.getMessage());
+			wallPaperResponse.setErrorMessage("Failed while deleting portfolio for wall paper=="+wallPaperRequest.getVendorId());
+			wallPaperResponse.setStatus(false);
+			return wallPaperResponse;
+		}
+		return wallPaperResponse;
+    }
+    
 }
