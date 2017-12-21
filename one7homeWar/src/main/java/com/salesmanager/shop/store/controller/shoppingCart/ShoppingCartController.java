@@ -245,6 +245,7 @@ public class ShoppingCartController extends AbstractController {
 
 	// address/addrpref/1?userId=1
 	@RequestMapping(value="/address/addrpref/{preferedShippingAddress}")
+	@ResponseBody
 	public OrderTotalSummary calculateShippingCost(@PathVariable("preferedShippingAddress") Integer preferedShippingAddress ,
 			HttpServletRequest request) throws Exception {
 		 Customer customer = getSessionAttribute(  Constants.CUSTOMER, request);
@@ -269,33 +270,36 @@ public class ShoppingCartController extends AbstractController {
 			// String vendorPostalCode = vendor.getBilling().getPostalCode();
 		 }
 		 Map<Long,Long> vendorDistanceMap = getVendorDistance(userPinCode, vendorIds, vendorPostalCodes);
+		 MerchantStore merchantStore = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
+		 Language language = (Language) request.getAttribute( Constants.LANGUAGE );
+         OrderTotalSummary orderSummary = shoppingCartCalculationService.calculate(shoppingCart,merchantStore, language );
+         BigDecimal total = orderSummary.getTotal();
 		 Map<Long,Long> vendorDistanceCostMap = new HashMap<>();
 		 long freeShippingDistanceRange = 10l; // in KMs
-		 long eachKmDistanceCostInRs = 5l; // in RS
+		 long eachKmDistanceCostInRs = 2l; // in RS
 		 long minOrderCostLimit = 100l;	// in RS
-		 //long totalShippingCost =  0l;
+		 long totalShippingCost =  0l;
 		 for(Map.Entry<Long, Long> entry : vendorDistanceMap.entrySet()) {
-			 if(minOrderCostLimit >= 100 ){
+			 if(total.intValue() >= minOrderCostLimit){
 				// long vendorId = entry.getKey();
 				 long vendorDistanceFromCustomerLoc  = entry.getValue();
 				 if(vendorDistanceFromCustomerLoc > freeShippingDistanceRange){
 					 long vendorDistanceChargeAfterFreeDistanceRange = (vendorDistanceFromCustomerLoc - freeShippingDistanceRange) * eachKmDistanceCostInRs;
 					 vendorDistanceCostMap.put(entry.getKey(), vendorDistanceChargeAfterFreeDistanceRange);
-					 //totalShippingCost += vendorDistanceChargeAfterFreeDistanceRange;
+					 totalShippingCost += vendorDistanceChargeAfterFreeDistanceRange;
 				 }
 			 }else{
 				 	 long vendorDistanceFromCustomerLoc  = entry.getValue();
 					 long vendorDistanceCharge = (vendorDistanceFromCustomerLoc) * eachKmDistanceCostInRs;
+					 totalShippingCost += vendorDistanceCharge;
 					 vendorDistanceCostMap.put(entry.getKey(), vendorDistanceCharge);
 			 }
 		 }
-		 long totalShippingCost = vendorDistanceCostMap.values().stream().count();
-		 MerchantStore merchantStore = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
-		 Language language = (Language) request.getAttribute( Constants.LANGUAGE );
-         OrderTotalSummary orderSummary = shoppingCartCalculationService.calculate(shoppingCart,merchantStore, language );
-         BigDecimal total = orderSummary.getTotal();
+		 //long totalShippingCost = vendorDistanceCostMap.values().stream().count();
+		 System.out.println("totalShippingCost "+totalShippingCost);
+         System.out.println("total "+total);
          orderSummary.setShippingCharges(new BigDecimal(totalShippingCost));
-         total.add(orderSummary.getShippingCharges());
+         total = total.add(orderSummary.getShippingCharges());
          orderSummary.setTotal(total);
 		 //ShoppingCartData cart =  shoppingCartFacade.getShoppingCartData(customer,merchantStore,null);
 		 return orderSummary;
