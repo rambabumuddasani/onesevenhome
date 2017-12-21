@@ -10,6 +10,10 @@ public class PaginatedReviewResponse {
 	private List reviewList;
 	private Double avgReview;
 	private Long totalratingCount;
+	private String successMessage;
+	private String errorMessage;
+	private boolean status;
+	
 	public PaginationData getPaginationData() {
 		return paginationData;
 	}
@@ -33,6 +37,24 @@ public class PaginatedReviewResponse {
 	}
 	public void setTotalratingCount(Long totalratingCount) {
 		this.totalratingCount = totalratingCount;
+	}
+	public String getSuccessMessage() {
+		return successMessage;
+	}
+	public void setSuccessMessage(String successMessage) {
+		this.successMessage = successMessage;
+	}
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
+	public boolean isStatus() {
+		return status;
+	}
+	public void setStatus(boolean status) {
+		this.status = status;
 	}
 
 }
