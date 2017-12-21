@@ -17,10 +17,12 @@ import com.salesmanager.core.business.modules.services.WorkerServiceResponse;
 import com.salesmanager.core.business.repositories.customer.CustomerRepository;
 import com.salesmanager.core.business.services.common.generic.SalesManagerEntityServiceImpl;
 import com.salesmanager.core.business.services.customer.attribute.CustomerAttributeService;
+import com.salesmanager.core.business.services.services.ServicesRatingService;
 import com.salesmanager.core.model.common.Address;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.customer.CustomerCriteria;
 import com.salesmanager.core.model.customer.CustomerList;
+import com.salesmanager.core.model.customer.ServicesRating;
 import com.salesmanager.core.model.customer.attribute.CustomerAttribute;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.modules.utils.GeoLocation;
@@ -37,6 +39,9 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 	@Inject
 	private CustomerAttributeService customerAttributeService;
 	
+	@Inject
+	private ServicesRatingService servicesRatingService;
+
 	@Inject
 	private GeoLocation geoLocation;
 
@@ -130,8 +135,10 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 		List<Customer> customer = customerRepository.findByServiceType(serviceType);
 		List<ServicesWorkerVO> servicesWorkerVOSet= new ArrayList<ServicesWorkerVO>();
 		for(Customer eachWorker : customer){
-			int avgRating = 0;
+			Double avgRating = new Double(0);
 			int totalRating= 0;
+			int totalReviews = 0;
+			double totalRate = 0;
 			ServicesWorkerVO servicesWorkerVO = new ServicesWorkerVO();
 			servicesWorkerVO.setId(new Integer(String.valueOf((eachWorker.getId()))));
 			servicesWorkerVO.setCompanyName(eachWorker.getVendorAttrs().getVendorName());
@@ -144,6 +151,17 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 			servicesWorkerVO.setContactNumber(eachWorker.getBilling().getTelephone());
 			servicesWorkerVO.setImageUrl(eachWorker.getVendorAttrs().getVendorAuthCert());
 			servicesWorkerVO.setCountry(eachWorker.getBilling().getCountry().getName());
+			//fetching ratings from services rating
+			List<ServicesRating> servicesRatingList = servicesRatingService.getServicesReviews(eachWorker.getId());
+			if(servicesRatingList != null) {
+				totalReviews = servicesRatingList.size();
+				for(ServicesRating servicesRating:servicesRatingList){
+					totalRating= totalRating + servicesRating.getRating();
+				}
+				totalRate = totalRating;
+				avgRating = Double.valueOf(totalRate / totalReviews);
+				avgRating = Double.valueOf(Math.round(avgRating.doubleValue() * 10D) / 10D);
+			}
 			servicesWorkerVO.setAvgRating(avgRating);
 			servicesWorkerVO.setTotalRating(totalRating);
 			servicesWorkerVOSet.add(servicesWorkerVO);
@@ -173,8 +191,6 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 			servicesWorkerVO.setContactNumber(eachWorker.getBilling().getTelephone());
 			servicesWorkerVO.setImageUrl(eachWorker.getVendorAttrs().getVendorAuthCert());
 			servicesWorkerVO.setCountry(eachWorker.getBilling().getCountry().getName());
-			servicesWorkerVO.setAvgRating(avgRating);
-			servicesWorkerVO.setTotalRating(totalRating);
 			servicesWorkerVOList.add(servicesWorkerVO);
 		}
 		LOGGER.debug("Ended findByVendorType");

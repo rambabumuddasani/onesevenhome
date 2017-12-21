@@ -29,6 +29,12 @@ public class ServicesRatingServiceImpl extends SalesManagerEntityServiceImpl<Lon
 		super(servicesRatingRepository);
 		this.servicesRatingRepository = servicesRatingRepository;
 	}
+	
+	@Override
+	public List<ServicesRating> getServicesReviews(Long serviceId) {
+		
+		return servicesRatingRepository.getServicesReviews(serviceId);
+	}
 
 
 }

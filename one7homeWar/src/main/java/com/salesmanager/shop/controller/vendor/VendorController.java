@@ -250,6 +250,7 @@ public class VendorController extends AbstractController {
 	    	Double avgRating = new Double(0);
 	    	int totalRating = 0;
 	    	int totalReviews = vendorRatingList.size();
+	    	double totalRate = 0;
 	    	for(VendorRating vendorRating:vendorRatingList) {
 	    		ProductReviewVO productReviewVO = new ProductReviewVO();
 	    		productReviewVO.setReviewRating(Double.parseDouble(String.valueOf(vendorRating.getRating())));
@@ -260,7 +261,9 @@ public class VendorController extends AbstractController {
 	    		totalRating = totalRating + vendorRating.getRating();
 	    	}
 	    	
-	    	avgRating = Double.parseDouble(String.valueOf(totalRating / totalReviews));
+			totalRate = totalRating;
+			avgRating = Double.valueOf(totalRate / totalReviews);
+			avgRating = Double.valueOf(Math.round(avgRating.doubleValue() * 10D) / 10D);
 			
 			paginatedReviewResponse.setAvgReview(avgRating);
 			paginatedReviewResponse.setTotalratingCount(Long.parseLong(String.valueOf(totalReviews)));
@@ -276,8 +279,12 @@ public class VendorController extends AbstractController {
 	    	LOGGER.debug("Ended getVendorProducts");
 		} catch (Exception e) {			
 		    LOGGER.error("Error in retrieving Product Reviews",e.getMessage());
+    		paginatedReviewResponse.setErrorMessage("Error in retrieving Product Reviews =="+e.getMessage());
+    		paginatedReviewResponse.setStatus(false);
+        	return paginatedReviewResponse;
 		}	
 		LOGGER.debug("Ended productReviews method");
+		paginatedReviewResponse.setStatus(true);
 		return paginatedReviewResponse;
 	}
 	

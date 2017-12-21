@@ -30,7 +30,7 @@ public class ServicesWorkerVO {
 	private String websiteName;
 	private String contactNumber;
 	private String imageUrl;
-	private Integer avgRating;
+	private Double avgRating;
 	private Integer totalRating;
 	
 	
@@ -101,10 +101,10 @@ public class ServicesWorkerVO {
 	public void setImageUrl(String imageUrl) {
 		this.imageUrl = imageUrl;
 	}
-	public Integer getAvgRating() {
+	public Double getAvgRating() {
 		return avgRating;
 	}
-	public void setAvgRating(Integer avgRating) {
+	public void setAvgRating(Double avgRating) {
 		this.avgRating = avgRating;
 	}
 	public String getContactNumber() {
