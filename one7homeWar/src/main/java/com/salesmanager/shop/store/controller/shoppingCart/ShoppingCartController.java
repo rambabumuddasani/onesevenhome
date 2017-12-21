@@ -301,6 +301,8 @@ public class ShoppingCartController extends AbstractController {
          orderSummary.setShippingCharges(new BigDecimal(totalShippingCost));
          total = total.add(orderSummary.getShippingCharges());
          orderSummary.setTotal(total);
+         shoppingCart.setShippingCharges(totalShippingCost);
+         shoppingCartService.saveOrUpdate(shoppingCart);
 		 //ShoppingCartData cart =  shoppingCartFacade.getShoppingCartData(customer,merchantStore,null);
 		 return orderSummary;
 	}

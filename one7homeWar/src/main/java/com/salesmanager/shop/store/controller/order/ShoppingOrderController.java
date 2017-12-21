@@ -616,7 +616,8 @@ public class ShoppingOrderController extends AbstractController {
 		 Order modelOrder = this.commitOrder(shopOrder, request, locale);
 		 //readableOrder = orderFacade.getReadableOrderByOrder(modelOrder, store, language);
 		 String orderId = modelOrder.getId().toString();
-		 String amount = modelOrder.getTotal().toString();
+		 BigDecimal totalAmt =  modelOrder.getTotal().add(new BigDecimal(cart.getShippingCharges()));
+		 String amount = totalAmt.toString();
 		 System.out.println("Order Id "+orderId+" amount is "+amount);
 		 ccAvenuPaymenteRequestData(model, amount, orderId,customer);
 		 return "payment";

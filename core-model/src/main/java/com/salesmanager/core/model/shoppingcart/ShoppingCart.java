@@ -72,7 +72,10 @@ public class ShoppingCart extends SalesManagerEntity<Long, ShoppingCart> impleme
 	
 	@Column(name = "CUSTOMER_ID", nullable = true)
 	private Long customerId;
-	
+
+	@Column(name = "SHIPPING_CHARGES", nullable = true)
+	private Long shippingCharges;
+
 	@Transient
 	private boolean obsolete = false;//when all items are obsolete
     
@@ -142,6 +145,11 @@ public class ShoppingCart extends SalesManagerEntity<Long, ShoppingCart> impleme
 		return merchantStore;
 	}
 
+	public Long getShippingCharges() {
+		return shippingCharges;
+	}
 
-
+	public void setShippingCharges(Long shippingCharges) {
+		this.shippingCharges = shippingCharges;
+	}
 }

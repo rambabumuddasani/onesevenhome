@@ -148,13 +148,24 @@ public class Order extends SalesManagerEntity<Long, Order> {
 	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
 	@OrderBy(clause = "ORDER_STATUS_HISTORY_ID asc")
 	private Set<OrderStatusHistory> orderHistory = new LinkedHashSet<OrderStatusHistory>();
-	
-	public Order() {
-	}
+
+	@Column(name = "SHIPPING_CHARGES", nullable = true)
+	private Long shippingCharges;
+
 	
 	@Column (name ="CUSTOMER_EMAIL_ADDRESS", length=50, nullable=false)
 	private String customerEmailAddress;
 
+	public Order() {
+	}
+
+	public Long getShippingCharges() {
+		return shippingCharges;
+	}
+
+	public void setShippingCharges(Long shippingCharges) {
+		this.shippingCharges = shippingCharges;
+	}
 
 	@Override
 	public Long getId() {
