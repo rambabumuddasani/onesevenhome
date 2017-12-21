@@ -9,6 +9,9 @@ public class VendorBookingRequest {
 	private Date appointmentDate;
 	private String description;
 	private String address;
+	private Integer rating;
+    private String reviewDescription;
+    private String reviewTitle;
 	
 	public Long getCustomerId() {
 		return customerId;
@@ -39,6 +42,24 @@ public class VendorBookingRequest {
 	}
 	public void setAddress(String address) {
 		this.address = address;
+	}
+	public Integer getRating() {
+		return rating;
+	}
+	public void setRating(Integer rating) {
+		this.rating = rating;
+	}
+	public String getReviewDescription() {
+		return reviewDescription;
+	}
+	public void setReviewDescription(String reviewDescription) {
+		this.reviewDescription = reviewDescription;
+	}
+	public String getReviewTitle() {
+		return reviewTitle;
+	}
+	public void setReviewTitle(String reviewTitle) {
+		this.reviewTitle = reviewTitle;
 	}
 	
 }

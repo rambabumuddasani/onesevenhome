@@ -34,6 +34,7 @@ import com.salesmanager.core.business.services.services.ServicesBookingService;
 import com.salesmanager.core.business.services.services.ServicesRatingService;
 import com.salesmanager.core.business.services.system.EmailService;
 import com.salesmanager.core.business.vendor.VendorBookingService;
+import com.salesmanager.core.business.vendor.VendorRatingService;
 import com.salesmanager.core.business.vendor.product.services.VendorProductService;
 import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.catalog.product.image.ProductImage;
@@ -41,7 +42,9 @@ import com.salesmanager.core.model.customer.ArchitectsPortfolio;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.customer.MachineryPortfolio;
 import com.salesmanager.core.model.customer.ServicesBooking;
+import com.salesmanager.core.model.customer.ServicesRating;
 import com.salesmanager.core.model.customer.VendorBooking;
+import com.salesmanager.core.model.customer.VendorRating;
 import com.salesmanager.core.model.customer.WallPaperPortfolio;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.product.vendor.VendorProduct;
@@ -49,6 +52,7 @@ import com.salesmanager.core.model.services.Services;
 import com.salesmanager.shop.admin.controller.products.ProductImageRequest;
 import com.salesmanager.shop.admin.controller.products.ProductImageResponse;
 import com.salesmanager.shop.admin.controller.services.ServicesBookingRequest;
+import com.salesmanager.shop.admin.controller.services.ServicesRatingRequest;
 import com.salesmanager.shop.admin.controller.services.ServicesRatingResponse;
 import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.constants.EmailConstants;
@@ -82,7 +86,7 @@ public class VendorController extends AbstractController {
 	private EmailUtils emailUtils;
 	
 	@Inject
-	ServicesRatingService servicesRatingService;
+	VendorRatingService vendorRatingService;
 	
 	@Inject
 	VendorBookingService vendorBookingService;
@@ -185,6 +189,36 @@ public class VendorController extends AbstractController {
 		//sendEmailToAdmin(customer,services,merchantStore);
 		LOGGER.debug("Email sent successful");
     	LOGGER.debug("Ended bookServices");
+    	return vendorBookingResponse;
+    }
+    @RequestMapping(value="/vendor/rating", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
+  	@ResponseBody
+  	public VendorBookingResponse vendorRating(@RequestBody VendorBookingRequest vendorBookingRequest) throws Exception {
+    	LOGGER.debug("Entered vendorRating");
+    	VendorBookingResponse vendorBookingResponse = new VendorBookingResponse();
+    	
+    	Customer customer = customerService.getById(vendorBookingRequest.getCustomerId());
+    	Customer vendor = customerService.getById(vendorBookingRequest.getVendorId());
+    	
+    	if(customer == null || vendor == null){
+    		vendorBookingResponse.setErrorMessage("Either customer/vendor invalid.");
+    		vendorBookingResponse.setStatus(false);
+        	LOGGER.debug("Ended vendorRating with errors");
+        	return vendorBookingResponse;
+    	}
+    	VendorRating vendorRating = new VendorRating();
+    	vendorRating.setCreateDate(new Date());
+    	vendorRating.setCustomer(customer);
+    	vendorRating.setVendor(vendor);
+    	
+    	vendorRating.setRating(vendorBookingRequest.getRating());
+    	vendorRating.setReviewTitle(vendorBookingRequest.getReviewTitle());
+    	vendorRating.setReviewDescription(vendorBookingRequest.getReviewDescription());
+    	vendorRatingService.save(vendorRating);
+    	vendorBookingResponse.setSuccessMessage("Rating Saved successfully");
+    	LOGGER.debug("vendorRating saved");
+    	vendorBookingResponse.setStatus(true);
+    	LOGGER.debug("Ended vendorRating");
     	return vendorBookingResponse;
     }
 	
