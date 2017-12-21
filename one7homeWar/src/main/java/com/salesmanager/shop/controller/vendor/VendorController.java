@@ -146,6 +146,9 @@ public class VendorController extends AbstractController {
     	vendorBooking.setVendor(vendor);
     	vendorBooking.setBookingDate(new Date());
     	vendorBooking.setStatus("N");
+    	vendorBooking.setAppointmentDate(vendorBookingRequest.getAppointmentDate());
+    	vendorBooking.setDescription(vendorBookingRequest.getDescription());
+    	vendorBooking.setAddress(vendorBookingRequest.getAddress());
     	
     	vendorBookingService.save(vendorBooking);
     	vendorBookingResponse.setSuccessMessage("Vendor booking accepted.");

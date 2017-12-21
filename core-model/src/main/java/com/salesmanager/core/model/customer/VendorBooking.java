@@ -53,6 +53,16 @@ public class VendorBooking extends SalesManagerEntity<Long, VendorBooking> {
 	private String status;
 
 	@Temporal(TemporalType.DATE)
+	@Column(name="APPOINTMENT_DATE")
+	private Date appointmentDate;
+
+	@Column(name="DESCRIPTION",length=150)
+	private String description;
+
+	@Column(name="ADDRESS",length=250)
+	private String address;
+
+	@Temporal(TemporalType.DATE)
 	@Column(name="CLOSING_DATE")
 	private Date closingDate;
 
@@ -110,6 +120,30 @@ public class VendorBooking extends SalesManagerEntity<Long, VendorBooking> {
 
 	public void setClosingDate(Date closingDate) {
 		this.closingDate = closingDate;
+	}
+
+	public Date getAppointmentDate() {
+		return appointmentDate;
+	}
+
+	public void setAppointmentDate(Date appointmentDate) {
+		this.appointmentDate = appointmentDate;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
 	}
 
 	
