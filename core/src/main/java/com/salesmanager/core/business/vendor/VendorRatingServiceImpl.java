@@ -30,5 +30,9 @@ public class VendorRatingServiceImpl extends SalesManagerEntityServiceImpl<Long,
 		this.vendorRatingRepository = vendorRatingRepository;
 	}
 
-
+	@Override
+	public List<VendorRating> getVendorReviews(Long vendorId) {
+		
+		return vendorRatingRepository.getVendorReviews(vendorId);
+	}
 }

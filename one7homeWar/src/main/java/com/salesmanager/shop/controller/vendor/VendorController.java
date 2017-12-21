@@ -38,6 +38,7 @@ import com.salesmanager.core.business.vendor.VendorRatingService;
 import com.salesmanager.core.business.vendor.product.services.VendorProductService;
 import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.catalog.product.image.ProductImage;
+import com.salesmanager.core.model.catalog.product.review.ProductReview;
 import com.salesmanager.core.model.customer.ArchitectsPortfolio;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.customer.MachineryPortfolio;
@@ -49,8 +50,11 @@ import com.salesmanager.core.model.customer.WallPaperPortfolio;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.product.vendor.VendorProduct;
 import com.salesmanager.core.model.services.Services;
+import com.salesmanager.shop.admin.controller.products.PaginatedReviewResponse;
+import com.salesmanager.shop.admin.controller.products.ProductDetails;
 import com.salesmanager.shop.admin.controller.products.ProductImageRequest;
 import com.salesmanager.shop.admin.controller.products.ProductImageResponse;
+import com.salesmanager.shop.admin.controller.products.ProductReviewVO;
 import com.salesmanager.shop.admin.controller.services.ServicesBookingRequest;
 import com.salesmanager.shop.admin.controller.services.ServicesRatingRequest;
 import com.salesmanager.shop.admin.controller.services.ServicesRatingResponse;
@@ -60,6 +64,7 @@ import com.salesmanager.shop.fileupload.services.StorageException;
 import com.salesmanager.shop.store.controller.AbstractController;
 import com.salesmanager.shop.store.controller.customer.VendorRequest;
 import com.salesmanager.shop.store.controller.customer.VendorResponse;
+import com.salesmanager.shop.store.model.paging.PaginationData;
 import com.salesmanager.shop.utils.EmailUtils;
 import com.salesmanager.shop.utils.LabelUtils;
 import com.salesmanager.shop.fileupload.services.StorageService;
@@ -221,5 +226,59 @@ public class VendorController extends AbstractController {
     	LOGGER.debug("Ended vendorRating");
     	return vendorBookingResponse;
     }
+    
+	@RequestMapping(value="/vendor/{vendorId}/reviews", method = RequestMethod.GET, 
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+  	public PaginatedReviewResponse vendorReviews(@PathVariable Long vendorId, @RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+		PaginatedReviewResponse paginatedReviewResponse = new PaginatedReviewResponse();
+		LOGGER.debug("Entered productReviews method");
+		List<ProductReviewVO> productReviewResponseList =new ArrayList<ProductReviewVO>();		
+		
+		try {
+
+	    	Customer vendor = customerService.getById(vendorId);
+	    	
+	    	if(vendor == null){
+	    		paginatedReviewResponse.setErrorMessage("Vendor is invalid.");
+	    		paginatedReviewResponse.setStatus(false);
+	        	LOGGER.debug("Ended vendorRating with errors");
+	        	return paginatedReviewResponse;
+	    	}
+	    	
+	    	List<VendorRating> vendorRatingList = vendorRatingService.getVendorReviews(vendor.getId());
+	    	Double avgRating = new Double(0);
+	    	int totalRating = 0;
+	    	int totalReviews = vendorRatingList.size();
+	    	for(VendorRating vendorRating:vendorRatingList) {
+	    		ProductReviewVO productReviewVO = new ProductReviewVO();
+	    		productReviewVO.setReviewRating(Double.parseDouble(String.valueOf(vendorRating.getRating())));
+				productReviewVO.setReviewDate(vendorRating.getCreateDate());
+				productReviewVO.setName(vendorRating.getCustomer().getBilling().getFirstName());
+				productReviewVO.setDescription(vendorRating.getReviewDescription());
+				productReviewResponseList.add(productReviewVO);
+	    		totalRating = totalRating + vendorRating.getRating();
+	    	}
+	    	
+	    	avgRating = Double.parseDouble(String.valueOf(totalRating / totalReviews));
+			
+			paginatedReviewResponse.setAvgReview(avgRating);
+			paginatedReviewResponse.setTotalratingCount(Long.parseLong(String.valueOf(totalReviews)));
+			PaginationData paginaionData=createPaginaionData(page,size);
+	    	calculatePaginaionData(paginaionData,size, productReviewResponseList.size());
+	    	paginatedReviewResponse.setPaginationData(paginaionData);
+			if(productReviewResponseList == null || productReviewResponseList.isEmpty() || productReviewResponseList.size() < paginaionData.getCountByPage()){
+				paginatedReviewResponse.setReviewList(productReviewResponseList);
+				return paginatedReviewResponse;
+			}
+	    	List<ProductReviewVO> paginatedResponses = productReviewResponseList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+	    	paginatedReviewResponse.setReviewList(paginatedResponses);
+	    	LOGGER.debug("Ended getVendorProducts");
+		} catch (Exception e) {			
+		    LOGGER.error("Error in retrieving Product Reviews",e.getMessage());
+		}	
+		LOGGER.debug("Ended productReviews method");
+		return paginatedReviewResponse;
+	}
 	
 }
