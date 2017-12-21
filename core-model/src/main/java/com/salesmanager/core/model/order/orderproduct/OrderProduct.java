@@ -57,6 +57,17 @@ public class OrderProduct extends SalesManagerEntity<Long, OrderProduct> {
 	@OneToMany(mappedBy = "orderProduct", cascade = CascadeType.ALL)
 	private Set<OrderProductDownload> downloads = new HashSet<OrderProductDownload>();
 	
+	@Column(name="VENDOR_ID", nullable=false)
+	private Long vendorId;
+	
+	public Long getVendorId() {
+		return vendorId;
+	}
+
+	public void setVendorId(Long vendorId) {
+		this.vendorId = vendorId;
+	}
+
 	public OrderProduct() {
 	}
 

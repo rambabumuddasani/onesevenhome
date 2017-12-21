@@ -127,10 +127,14 @@ public class ShippingDistancePreProcessorImpl implements ShippingQuotePrePostPro
 						.awaitIgnoreError();
 				if(distanceRequest!=null) {
 					DistanceMatrixRow distanceMax = distanceRequest.rows[0];
-					for(DistanceMatrixElement distMatElement : distanceMax.elements){
-						Distance distance = distMatElement.distance;
-						distenceInKm.add(distance.inMeters);
-						System.out.println(" distance in KMs "+distance.humanReadable);
+					if(distanceMax != null ){
+						for(DistanceMatrixElement distMatElement : distanceMax.elements){
+							Distance distance = distMatElement.distance;
+							if(distance != null){
+								distenceInKm.add(distanceInKMs(distance));
+								System.out.println(" distance in KMs "+distance.humanReadable);
+							}
+						}
 					}
 					//Distance distance = distanceMax.elements[0].distance;
 					//quote.getQuoteInformations().put(Constants.DISTANCE_KEY, 0.001 * distance.inMeters);
@@ -141,6 +145,11 @@ public class ShippingDistancePreProcessorImpl implements ShippingQuotePrePostPro
 			LOGGER.error("Exception while calculating the shipping distance",e);
 		}
 		return distenceInKm;
+	}
+
+
+	private long distanceInKMs(Distance distance) {
+		return (long) Math.floor(distance.inMeters/ 1000);
 	}
 
 
@@ -241,7 +250,7 @@ public class ShippingDistancePreProcessorImpl implements ShippingQuotePrePostPro
 				if(distanceRequest!=null) {
 					DistanceMatrixRow distanceMax = distanceRequest.rows[0];
 					Distance distance = distanceMax.elements[0].distance;
-					quote.getQuoteInformations().put(Constants.DISTANCE_KEY, 0.001 * distance.inMeters);
+					quote.getQuoteInformations().put(Constants.DISTANCE_KEY, 0.001 * distanceInKMs(distance));
 				}
 
 			}
