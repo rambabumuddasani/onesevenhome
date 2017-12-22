@@ -100,7 +100,7 @@ public class VendorController extends AbstractController {
 
 	private final static String VENDOR_ADD_PRODUCTS_TPL = "email_template_vendor_add_products.ftl";
 	private final static String SERVICE_BOOKING_TMPL = "email_template_service_booking.ftl";
-
+	private final static String VENDOR_BOOKING_TMPL = "email_template_vendor_booking.ftl";
 	
     @RequestMapping(value="/updateVendorDescription", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
   	@ResponseBody
@@ -178,15 +178,20 @@ public class VendorController extends AbstractController {
         templateTokens.put(EmailConstants.EMAIL_USER_NAME, customer.getEmailAddress());
         vendorBooking = vendorBookingService.getById(vendorBooking.getId());
         templateTokens.put(EmailConstants.EMAIL_SERVICE_TYPE, Constants.customerTypes.get(customer.getCustomerType()));
-        //templateTokens.put(EmailConstants.EMAIL_SERVICEPROVIDER_NAME, serviceBooking.getService().getVendorAttrs().getVendorName());   
+        templateTokens.put(EmailConstants.EMAIL_VENDOR_NAME, vendorBooking.getVendor().getVendorAttrs().getVendorName());
+        templateTokens.put(EmailConstants.EMAIL_VENDOR_IMAGE, vendorBooking.getVendor().getVendorAttrs().getVendorAuthCert());
 		
         Email email = new Email();
 		email.setFrom(merchantStore.getStorename());
 		email.setFromEmail(merchantStore.getStoreEmailAddress());
-		email.setSubject(messages.getMessage("eamil.customer.service.booking",locale));
-		//email.setTo(customer.getEmailAddress());
-		email.setTo("sm19811130@gmail.com");
-		email.setTemplateName(SERVICE_BOOKING_TMPL);
+		email.setSubject(messages.getMessage("email.customer.vendor.booking",locale));
+		if(customer.getCustomerType().equals("0")) {
+		email.setTo(customer.getEmailAddress());
+		}else {
+			email.setTo(vendorBooking.getVendor().getEmailAddress());
+		}
+		//email.setTo("sm19811130@gmail.com");
+		email.setTemplateName(VENDOR_BOOKING_TMPL);
 		email.setTemplateTokens(templateTokens);
 
 		emailService.sendHtmlEmail(merchantStore, email);
@@ -201,7 +206,7 @@ public class VendorController extends AbstractController {
   	public VendorBookingResponse vendorRating(@RequestBody VendorBookingRequest vendorBookingRequest) throws Exception {
     	LOGGER.debug("Entered vendorRating");
     	VendorBookingResponse vendorBookingResponse = new VendorBookingResponse();
-    	
+    	try {
     	Customer customer = customerService.getById(vendorBookingRequest.getCustomerId());
     	Customer vendor = customerService.getById(vendorBookingRequest.getVendorId());
     	
@@ -223,6 +228,10 @@ public class VendorController extends AbstractController {
     	vendorBookingResponse.setSuccessMessage("Rating Saved successfully");
     	LOGGER.debug("vendorRating saved");
     	vendorBookingResponse.setStatus(true);
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    		LOGGER.error("Error while saving vendor rating");
+    	}
     	LOGGER.debug("Ended vendorRating");
     	return vendorBookingResponse;
     }

@@ -982,7 +982,7 @@ public class CustomerRegistrationController extends AbstractController {
 		    LOGGER.debug("Retrieved customer details");
 		 
 	}
-		if(customer.getCustomerType().equals("2")) {
+		else if(customer.getCustomerType().equals("2")) {
 			ServiceDetails serviceDetails = new ServiceDetails();
 			serviceDetails.setEmail(customer.getEmailAddress());
 			serviceDetails.setVendorName(customer.getVendorAttrs().getVendorName());
@@ -1020,7 +1020,7 @@ public class CustomerRegistrationController extends AbstractController {
 			LOGGER.debug("Retrieved service details");
 		
 		} 
-		if(customer.getCustomerType().equals("1")) {
+		else {
 			VendorDetails vendorDetails = new VendorDetails();
 			vendorDetails.setEmail(customer.getEmailAddress());
 			vendorDetails.setVendorName(customer.getVendorAttrs().getVendorName());
