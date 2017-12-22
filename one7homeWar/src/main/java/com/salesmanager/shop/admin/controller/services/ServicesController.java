@@ -38,6 +38,7 @@ import com.salesmanager.core.model.customer.ServicesBooking;
 import com.salesmanager.core.model.customer.ServicesRating;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.services.Services;
+import com.salesmanager.core.model.user.User;
 import com.salesmanager.shop.admin.controller.products.PaginatedResponse;
 import com.salesmanager.shop.constants.EmailConstants;
 import com.salesmanager.shop.controller.AbstractController;
@@ -260,40 +261,51 @@ public class ServicesController extends AbstractController{
         	templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, "");
         }
         templateTokens.put(EmailConstants.EMAIL_USER_NAME, customer.getEmailAddress());
-        ServicesBooking serviceBooking = servicesBookingService.getById(servicesBooking.getId());
-        templateTokens.put(EmailConstants.EMAIL_SERVICE_TYPE, serviceBooking.getServiceType().getServiceType());
-        //templateTokens.put(EmailConstants.EMAIL_SERVICEPROVIDER_NAME, serviceBooking.getService().getVendorAttrs().getVendorName());   
+        //ServicesBooking serviceBooking = servicesBookingService.getById(servicesBooking.getId());
+        templateTokens.put(EmailConstants.EMAIL_SERVICE_TYPE, services.getServiceType());
+        templateTokens.put(EmailConstants.EMAIL_SERVICEPROVIDER_NAME, service.getVendorAttrs().getVendorName());
+        templateTokens.put(EmailConstants.EMAIL_SERVICEPRIVIDER_IMAGE,service.getVendorAttrs().getVendorAuthCert());
 		
         Email email = new Email();
 		email.setFrom(merchantStore.getStorename());
 		email.setFromEmail(merchantStore.getStoreEmailAddress());
 		email.setSubject(messages.getMessage("eamil.customer.service.booking",locale));
-		//email.setTo(customer.getEmailAddress());
-		email.setTo("surendervarmac@gmail.com");
+		email.setTo(customer.getEmailAddress());
+		//email.setTo("surendervarmac@gmail.com");
 		email.setTemplateName(SERVICE_BOOKING_TMPL);
 		email.setTemplateTokens(templateTokens);
 
 		emailService.sendHtmlEmail(merchantStore, email);
 		LOGGER.debug("Email sent to customer");
-		sendEmailToServiceProvider(merchantStore,customer,services,customer);
-		//sendEmailToAdmin(customer,services,merchantStore);
+		sendEmailToServiceProvider(merchantStore,customer,services,service);
+		//sendEmailToAdmin(customer,services,merchantStore,service);
 		LOGGER.debug("Email sent successful");
     	LOGGER.debug("Ended bookServices");
     	return servicesRatingResponse;
     }
 
-  /*  private void sendEmailToAdmin(Customer customer, Services services, MerchantStore merchantStore) throws Exception {
+ /*   private void sendEmailToAdmin(Customer customer, Services services, MerchantStore merchantStore,Customer service) throws Exception {
     	User user = userService.getById(1l);
     	final Locale locale  = new Locale("en");
         Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
-        templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, user.getAdminName());
+        templateTokens.put(EmailConstants.EMAIL_ADMIN_NAME, user.getAdminName());
+        if(customer.getCustomerType().equals("0")) {
+            templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, customer.getBilling().getFirstName());
+            templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, customer.getBilling().getLastName());
+            } else {
+            	templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, customer.getVendorAttrs().getVendorName());
+            	templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, "");
+            }
+        templateTokens.put(EmailConstants.EMAIL_SERVICEPROVIDER_NAME, service.getVendorAttrs().getVendorName());
+        templateTokens.put(EmailConstants.EMAIL_SERVICEPRIVIDER_IMAGE,service.getVendorAttrs().getVendorAuthCert());
         templateTokens.put(EmailConstants.EMAIL_PRODUCT_LABEL, messages.getMessage("email.vendor.add.request.product", locale));
         
 		Email email = new Email();
 		email.setFrom(merchantStore.getStorename());
 		email.setFromEmail(merchantStore.getStoreEmailAddress());
 		email.setSubject(messages.getMessage("eamil.customer.service.booking",locale));
-		email.setTo("surendervarmac@gmail.com");
+		//email.setTo("surendervarmac@gmail.com");
+		email.setTo(user.getAdminEmail());
 		email.setTemplateName(ADMIN_SERVICE_BOOKING_TMPL);
 		email.setTemplateTokens(templateTokens);
 
@@ -306,13 +318,23 @@ public class ServicesController extends AbstractController{
 	private void sendEmailToServiceProvider(MerchantStore merchantStore, Customer customer, Services services,Customer service) throws Exception{
 		final Locale locale  = new Locale("en");
         Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
-        templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, service.getBilling().getFirstName());
-       
+        if(customer.getCustomerType().equals("0")) {
+            templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, customer.getBilling().getFirstName());
+            templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, customer.getBilling().getLastName());
+            } else {
+            	templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, customer.getVendorAttrs().getVendorName());
+            	templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, "");
+            }
+        templateTokens.put(EmailConstants.EMAIL_SERVICEPROVIDER_NAME, service.getVendorAttrs().getVendorName());
+        templateTokens.put(EmailConstants.EMAIL_SERVICEPRIVIDER_IMAGE,service.getVendorAttrs().getVendorAuthCert());
+        templateTokens.put(EmailConstants.EMAIL_SERVICE_TYPE, services.getServiceType());
+        
 		Email email = new Email();
 		email.setFrom(merchantStore.getStorename());
 		email.setFromEmail(merchantStore.getStoreEmailAddress());
 		email.setSubject(messages.getMessage("eamil.customer.service.booking",locale));
-		email.setTo("surendervarmac@gmail.com");
+		//email.setTo("surendervarmac@gmail.com");
+		email.setTo(service.getEmailAddress());
 		email.setTemplateName(SERVICEPROVIDER_SERVICE_BOOKING_TMPL);
 		email.setTemplateTokens(templateTokens);
 

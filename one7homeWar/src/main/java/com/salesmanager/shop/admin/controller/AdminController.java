@@ -894,6 +894,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
 								productPrice.saveOrUpdate(price);
 								adminDealOfDayResponse.setSuccessMsg("Deal Of Day is set successfully");
 								adminDealOfDayResponse.setStatus("true");
+								try {
 								HistoryManagement historyManagement = new HistoryManagement();
 								historyManagement.setProductId(dbProduct.getId());
 								historyManagement.setProductName(dbProduct.getProductDescription().getName());
@@ -903,6 +904,9 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
 								historyManagement.setProductPriceEndDate(price.getProductPriceSpecialEndDate());
 								historyManagement.setEnableFor("DOD");
 								historyManagementService.save(historyManagement);
+								}catch(Exception e) {
+									LOGGER.error("Error in history management "+e.getMessage());
+								}
 								}
 							}
 							if(adminDealOfDayReq.getStatus().equals("N")) {
@@ -1083,6 +1087,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 					
 					dealUpdateOrRemoveResponse.setSuccessMsg("Deal Updated successfully");
 					dealUpdateOrRemoveResponse.setStatus("true");
+					try {
 					HistoryManagement historyManagement = new HistoryManagement();
 					historyManagement.setProductId(dbProduct.getId());
 					historyManagement.setProductName(dbProduct.getProductDescription().getName());
@@ -1092,6 +1097,9 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 					historyManagement.setProductPriceEndDate(price.getProductPriceSpecialEndDate());
 					historyManagement.setEnableFor("TD");
 					historyManagementService.save(historyManagement);
+					}catch(Exception e) {
+						LOGGER.error("Error in history management "+e.getMessage());
+					}
 					}
 					// if status is false removing the product from todaysDeals 
 					else {
@@ -1771,6 +1779,47 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		emailService.sendHtmlEmail(merchantStore, email);
 		LOGGER.debug("Email sent to Admin");
 	}
+	// History management retrieval
+	@RequestMapping(value="/getHistoryOfDeals", method = RequestMethod.GET)
+	@ResponseBody
+	public PaginatedResponse getHistoryOfDeals(@RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) {
+    	LOGGER.debug("Entered getHistoryOfDeals");
+    	PaginatedResponse paginatedResponse = new PaginatedResponse();
+    	List<HistoryManagementVO>	historyManagementVOList = new ArrayList<HistoryManagementVO>();
+    	try {
+    	List<HistoryManagement> historyOfDeals = historyManagementService.getHistoryOfDeals();  
+    	
+    		for(HistoryManagement historyOfDeal : historyOfDeals) {
+    			HistoryManagementVO historyManagementVO = new HistoryManagementVO();
+    			historyManagementVO.setHistoryManagementId(historyOfDeal.getId());
+    			historyManagementVO.setProductId(historyOfDeal.getProductId());
+    			historyManagementVO.setProductName(historyOfDeal.getProductName());
+    			historyManagementVO.setProductPrice(historyOfDeal.getProductPrice());
+    			historyManagementVO.setProductDiscountPrice(historyOfDeal.getProductDiscountPrice());
+    			historyManagementVO.setProductPriceStartDate(historyOfDeal.getProductPriceStartDate());
+    			historyManagementVO.setProductPriceEndDate(historyOfDeal.getProductPriceEndDate());
+    			historyManagementVO.setEnableFor(historyOfDeal.getEnableFor());
+    			historyManagementVOList.add(historyManagementVO);
+        	}
+    		PaginationData paginaionData=createPaginaionData(page,size);
+        	calculatePaginaionData(paginaionData,size, historyManagementVOList.size());
+        	paginatedResponse.setPaginationData(paginaionData);
+    		if(historyManagementVOList == null || historyManagementVOList.isEmpty() || historyManagementVOList.size() < paginaionData.getCountByPage()){
+    			paginatedResponse.setResponseData(historyManagementVOList);
+    			return paginatedResponse;
+    		}
+        	List<HistoryManagementVO> paginatedResponses = historyManagementVOList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+        	paginatedResponse.setResponseData(paginatedResponses);
+    		return paginatedResponse;
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    		LOGGER.error("Error while retrieving history of deals "+e.getMessage());
+    	}
+    	LOGGER.debug("Ended getHistoryOfDeals");
+		return paginatedResponse;
+    	
+	}
+    	
 }
     
  

@@ -35,7 +35,7 @@
 					    <tbody>
 							<tr>
 								<td align="center" style="color:#333333">
-									<p style="margin:45px 0;font-size:22px;font-weight:bold;line-height:20px">Vendor Name </p>
+									<p style="margin:45px 0;font-size:22px;font-weight:bold;line-height:20px">${EMAIL_SERVICEPROVIDER_NAME} </p>
 								</td>
 							</tr>
 					    </tbody>
@@ -55,7 +55,7 @@
 																	<tbody><tr>
 																		<td align="middle" valign="top">
 																		    <a href="#" target="_blank" data-saferedirecturl="#">
-																			   <img src="http://rainiersoft.com/clients/osh2/images/bpic1.png" width="300" height="250" border="0" class="CToWUd">																			</a>																		</td>
+																			   <img src="${EMAIL_SERVICEPRIVIDER_IMAGE}" width="300" height="250" border="0" class="CToWUd">																			</a>																		</td>
 																	</tr>
 																	<tr>
 																		<td width="299" align="middle">

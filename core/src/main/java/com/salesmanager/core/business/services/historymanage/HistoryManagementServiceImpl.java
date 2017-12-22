@@ -1,5 +1,7 @@
 package com.salesmanager.core.business.services.historymanage;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
@@ -18,6 +20,12 @@ public class HistoryManagementServiceImpl extends SalesManagerEntityServiceImpl<
 	HistoryManagementServiceImpl(HistoryManagementRepository historyManagementRepository) {
 		super(historyManagementRepository);
 		this.historyManagementRepository = historyManagementRepository;
+	}
+
+	@Override
+	public List<HistoryManagement> getHistoryOfDeals() {
+		
+		return historyManagementRepository.findAll();
 	}
 	
 }

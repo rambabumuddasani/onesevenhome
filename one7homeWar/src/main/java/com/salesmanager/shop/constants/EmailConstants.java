@@ -98,4 +98,5 @@ public class EmailConstants {
 	public static final String EMAIL_AMIN_RESPONSE_MESSAGE = "EMAIL_AMIN_RESPONSE_MESSAGE";
 	public static final String EMAIL_SERVICE_TYPE = "EMAIL_SERVICE_TYPE";
 	public static final String EMAIL_SERVICEPROVIDER_NAME = "EMAIL_SERVICEPROVIDER_NAME";
+	public static final String EMAIL_SERVICEPRIVIDER_IMAGE = "EMAIL_SERVICEPRIVIDER_IMAGE";
 }
