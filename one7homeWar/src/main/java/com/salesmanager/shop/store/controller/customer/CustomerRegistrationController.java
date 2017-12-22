@@ -1019,7 +1019,8 @@ public class CustomerRegistrationController extends AbstractController {
 			customerDetailsResponse.setServiceDetails(serviceDetails);
 			LOGGER.debug("Retrieved service details");
 		
-		} else {
+		} 
+		if(customer.getCustomerType().equals("1")) {
 			VendorDetails vendorDetails = new VendorDetails();
 			vendorDetails.setEmail(customer.getEmailAddress());
 			vendorDetails.setVendorName(customer.getVendorAttrs().getVendorName());
