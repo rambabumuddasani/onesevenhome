@@ -172,7 +172,7 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
         List<OrderTotal> orderTotals = new ArrayList<OrderTotal>();
         Map<String,OrderTotal> otherPricesTotals = new HashMap<String,OrderTotal>();
 
-        ShippingConfiguration shippingConfiguration = null;
+        //ShippingConfiguration shippingConfiguration = null;
 
         BigDecimal grandTotal = new BigDecimal(0);
         grandTotal.setScale(2, RoundingMode.HALF_UP);
@@ -268,8 +268,6 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
 
         //shipping
         if(summary.getShippingSummary()!=null) {
-
-
 	            OrderTotal shippingSubTotal = new OrderTotal();
 	            shippingSubTotal.setModule(Constants.OT_SHIPPING_MODULE_CODE);
 	            shippingSubTotal.setOrderTotalType(OrderTotalType.SHIPPING);
@@ -277,9 +275,7 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
 	            shippingSubTotal.setTitle(Constants.OT_SHIPPING_MODULE_CODE);
 	            //shippingSubTotal.setText("order.total.shipping");
 	            shippingSubTotal.setSortOrder(100);
-	
 	            orderTotals.add(shippingSubTotal);
-
             if(!summary.getShippingSummary().isFreeShipping()) {
                 shippingSubTotal.setValue(summary.getShippingSummary().getShipping());
                 grandTotal=grandTotal.add(summary.getShippingSummary().getShipping());
@@ -289,7 +285,7 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
             }
 
             //check handling fees
-            shippingConfiguration = shippingService.getShippingConfiguration(store);
+/*            shippingConfiguration = shippingService.getShippingConfiguration(store);
             if(summary.getShippingSummary().getHandling()!=null && summary.getShippingSummary().getHandling().doubleValue()>0) {
                 if(shippingConfiguration.getHandlingFees()!=null && shippingConfiguration.getHandlingFees().doubleValue()>0) {
                     OrderTotal handlingubTotal = new OrderTotal();
@@ -304,7 +300,7 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
                     grandTotal=grandTotal.add(summary.getShippingSummary().getHandling());
                 }
             }
-        }
+*/        }
 
         //tax
 /*        List<TaxItem> taxes = taxService.calculateTax(summary, customer, store, language);

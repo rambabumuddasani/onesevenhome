@@ -1,12 +1,22 @@
 package com.salesmanager.shop.populator.order;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+
 import com.salesmanager.core.business.exception.ConversionException;
 import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.services.catalog.product.PricingService;
 import com.salesmanager.core.business.services.catalog.product.ProductService;
+import com.salesmanager.core.business.services.customer.CustomerService;
 import com.salesmanager.core.business.utils.AbstractDataPopulator;
 import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.catalog.product.image.ProductImage;
+import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.order.orderproduct.OrderProduct;
 import com.salesmanager.core.model.order.orderproduct.OrderProductAttribute;
@@ -15,14 +25,8 @@ import com.salesmanager.shop.model.catalog.product.ReadableProduct;
 import com.salesmanager.shop.model.order.ReadableOrderProduct;
 import com.salesmanager.shop.model.order.ReadableOrderProductAttribute;
 import com.salesmanager.shop.populator.catalog.ReadableProductPopulator;
+import com.salesmanager.shop.store.controller.customer.VendorResponse;
 import com.salesmanager.shop.utils.ImageFilePath;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 public class ReadableOrderProductPopulator extends
 		AbstractDataPopulator<OrderProduct, ReadableOrderProduct> {
@@ -30,8 +34,15 @@ public class ReadableOrderProductPopulator extends
 	private ProductService productService;
 	private PricingService pricingService;
 	private ImageFilePath imageUtils;
+	private CustomerService customerService;
 
+	public CustomerService getCustomerService() {
+		return customerService;
+	}
 
+	public void setCustomerService(CustomerService customerService) {
+		this.customerService = customerService;
+	}
 
 	public ImageFilePath getimageUtils() {
 		return imageUtils;
@@ -58,7 +69,13 @@ public class ReadableOrderProductPopulator extends
 		}
 		target.setProductName(source.getProductName());
 		target.setSku(source.getSku());
-		
+		if(!org.springframework.util.StringUtils.isEmpty(source.getVendorId())){
+            Customer vendor = customerService.getById(source.getVendorId());
+			VendorResponse vendorResponse = new VendorResponse();
+			VendorPopulator vendorPopulator  = new VendorPopulator();
+			vendorPopulator.populate(vendor, vendorResponse, null, null);
+			target.setVendorDetails(vendorResponse);
+		}
 		//subtotal = price * quantity
 		BigDecimal subTotal = source.getOneTimeCharge();
 		subTotal = subTotal.multiply(new BigDecimal(source.getProductQuantity()));

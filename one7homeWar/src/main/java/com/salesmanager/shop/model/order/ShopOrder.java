@@ -32,7 +32,7 @@ public class ShopOrder extends PersistableOrder implements Serializable {
 	
 	private String defaultPaymentMethodCode = null;
 	
-	
+	private Long shippingCharges;
 	private String paymentMethodType = null;//user selected payment type
 	private Map<String,String> payment;//user payment information
 	
@@ -40,7 +40,14 @@ public class ShopOrder extends PersistableOrder implements Serializable {
 	//private Address deliveryAddress = null;
 	private Integer preferedShippingAddress;
 	private String ipAddress;
-	
+
+	public Long getShippingCharges() {
+		return shippingCharges;
+	}
+	public void setShippingCharges(Long shippingCharges) {
+		this.shippingCharges = shippingCharges;
+	}
+
 	public void setShoppingCartItems(List<ShoppingCartItem> shoppingCartItems) {
 		this.shoppingCartItems = shoppingCartItems;
 	}

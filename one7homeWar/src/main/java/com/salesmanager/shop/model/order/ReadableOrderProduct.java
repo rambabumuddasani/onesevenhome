@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.salesmanager.shop.store.controller.customer.VendorResponse;
 
 public class ReadableOrderProduct extends OrderProductEntity implements
 		Serializable {
@@ -15,7 +16,8 @@ public class ReadableOrderProduct extends OrderProductEntity implements
 	private String productName;
 	private String price;
 	private String subTotal;
-
+	private VendorResponse vendorDetails;
+	
 	@JsonIgnore
 	private List<ReadableOrderProductAttribute> attributes = null;
 	
@@ -56,6 +58,12 @@ public class ReadableOrderProduct extends OrderProductEntity implements
 	}
 	public void setAttributes(List<ReadableOrderProductAttribute> attributes) {
 		this.attributes = attributes;
+	}
+	public VendorResponse getVendorDetails() {
+		return vendorDetails;
+	}
+	public void setVendorDetails(VendorResponse vendorDetails) {
+		this.vendorDetails = vendorDetails;
 	}
 
 

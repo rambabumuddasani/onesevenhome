@@ -602,7 +602,8 @@ public class ShoppingOrderController extends AbstractController {
 	     if(shopOrder==null) {
 	    	 shopOrder = orderFacade.initializeOrder(store, customer, cart, language);
 			 super.setSessionAttribute(Constants.ORDER, shopOrder, request);
-		 }
+		 }	
+	     shopOrder.setShippingCharges(cart.getShippingCharges());
 	     //shopOrder.setCustomerAgreed(true);
 	     shopOrder.setPaymentType(PaymentType.CCAvenue);
 	     shopOrder.setPreferedShippingAddress(preferedShippingAddress);
@@ -616,7 +617,8 @@ public class ShoppingOrderController extends AbstractController {
 		 Order modelOrder = this.commitOrder(shopOrder, request, locale);
 		 //readableOrder = orderFacade.getReadableOrderByOrder(modelOrder, store, language);
 		 String orderId = modelOrder.getId().toString();
-		 BigDecimal totalAmt =  modelOrder.getTotal().add(new BigDecimal(cart.getShippingCharges()));
+		 //BigDecimal totalAmt =  modelOrder.getTotal().add(new BigDecimal(cart.getShippingCharges()));
+		 BigDecimal totalAmt =  modelOrder.getTotal();
 		 String amount = totalAmt.toString();
 		 System.out.println("Order Id "+orderId+" amount is "+amount);
 		 ccAvenuPaymenteRequestData(model, amount, orderId,customer);

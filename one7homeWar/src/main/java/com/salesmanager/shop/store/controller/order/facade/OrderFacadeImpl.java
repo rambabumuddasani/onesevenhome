@@ -1,5 +1,6 @@
 package com.salesmanager.shop.store.controller.order.facade;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -125,7 +126,6 @@ public class OrderFacadeImpl implements OrderFacade {
 	@Qualifier("img")
 	private ImageFilePath imageUtils;
 
-
 	@Override
 	public ShopOrder initializeOrder(MerchantStore store, Customer customer,
 			ShoppingCart shoppingCart, Language language) throws Exception {
@@ -181,10 +181,25 @@ public class OrderFacadeImpl implements OrderFacade {
 		if(order instanceof ShopOrder) {
 			ShopOrder o = (ShopOrder)order;
 			summary.setProducts(o.getShoppingCartItems());
+			ShippingSummary shippingSummary = new ShippingSummary();
 			
-			if(o.getShippingSummary()!=null) {
-				summary.setShippingSummary(o.getShippingSummary());
+			if(!org.springframework.util.StringUtils.isEmpty(o.getShippingCharges()) && o.getShippingCharges() <= 0) {
+				shippingSummary.setFreeShipping(false);
+				shippingSummary.setTaxOnShipping(false);
+				//shippingSummary.setHandling(quote.getHandlingFees());
+				shippingSummary.setShipping(new BigDecimal(o.getShippingCharges()));
+				shippingSummary.setShippingOption("Vendor Vechile Transport");
+				//shippingSummary.setShippingModule(quote.getShippingModuleCode());
+				//shippingSummary.setShippingOptionCode(quote.getSelectedShippingOption().getOptionCode());
+			}else{
+				shippingSummary.setFreeShipping(true);
+				shippingSummary.setTaxOnShipping(false);
+				//shippingSummary.setHandling(quote.getHandlingFees());
+				shippingSummary.setShipping(new BigDecimal(0));
+				shippingSummary.setShippingOption("No Vechile Transport");
 			}
+			summary.setShippingSummary(shippingSummary);
+
 			orderTotalSummary = orderService.caculateOrderTotal(summary, customer, store, language);
 		} else {
 			//need Set of ShoppingCartItem
@@ -290,9 +305,11 @@ public class OrderFacadeImpl implements OrderFacade {
 			//customer object
 			orderCustomer(order,customer, modelOrder, language);
 			//populate shipping information
-			if(!StringUtils.isBlank(order.getShippingModule())) {
+/*			if(!StringUtils.isBlank(order.getShippingModule())) {
 				modelOrder.setShippingModuleCode(order.getShippingModule());
 			}
+*/				
+			//modelOrder.setShippingCharges(order.getShippingCharges());	// set the shipping charges, if it is zero mean, it is free shipping
 			modelOrder.setIpAddress(order.getIpAddress());
 			//String paymentType = order.getPaymentMethodType();
 			modelOrder.setPaymentType(PaymentType.CCAvenue);
@@ -793,6 +810,8 @@ public class OrderFacadeImpl implements OrderFacade {
             orderProductPopulator.setProductService(productService);
             orderProductPopulator.setPricingService(pricingService);
             orderProductPopulator.setimageUtils(imageUtils);
+			orderProductPopulator.setCustomerService(customerService);
+
             ReadableOrderProduct orderProduct = new ReadableOrderProduct();
             orderProductPopulator.populate(p, orderProduct, store, language);
             //image
@@ -878,7 +897,7 @@ public class OrderFacadeImpl implements OrderFacade {
 			orderProductPopulator.setProductService(productService);
 			orderProductPopulator.setPricingService(pricingService);
 			orderProductPopulator.setimageUtils(imageUtils);
-			
+			orderProductPopulator.setCustomerService(customerService);
 			ReadableOrderProduct orderProduct = new ReadableOrderProduct();
 			orderProductPopulator.populate(p, orderProduct, store, language);
 			orderProducts.add(orderProduct);
@@ -921,7 +940,8 @@ public class OrderFacadeImpl implements OrderFacade {
 			orderProductPopulator.setProductService(productService);
 			orderProductPopulator.setPricingService(pricingService);
 			orderProductPopulator.setimageUtils(imageUtils);
-			
+			orderProductPopulator.setCustomerService(customerService);
+
 			ReadableOrderProduct orderProduct = new ReadableOrderProduct();
 			orderProductPopulator.populate(p, orderProduct, store, language);
 			orderProducts.add(orderProduct);

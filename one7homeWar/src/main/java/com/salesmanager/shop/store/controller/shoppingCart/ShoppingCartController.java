@@ -272,8 +272,10 @@ public class ShoppingCartController extends AbstractController {
 		 Map<Long,Long> vendorDistanceMap = getVendorDistance(userPinCode, vendorIds, vendorPostalCodes);
 		 MerchantStore merchantStore = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
 		 Language language = (Language) request.getAttribute( Constants.LANGUAGE );
-         OrderTotalSummary orderSummary = shoppingCartCalculationService.calculate(shoppingCart,merchantStore, language );
-         BigDecimal total = orderSummary.getTotal();
+
+		 OrderTotalSummary orderSummary = shoppingCartCalculationService.calculate(shoppingCart,merchantStore, language );
+         
+		 BigDecimal total = orderSummary.getTotal();
 		 Map<Long,Long> vendorDistanceCostMap = new HashMap<>();
 		 long freeShippingDistanceRange = 10l; // in KMs
 		 long eachKmDistanceCostInRs = 2l; // in RS
@@ -295,11 +297,14 @@ public class ShoppingCartController extends AbstractController {
 					 vendorDistanceCostMap.put(entry.getKey(), vendorDistanceCharge);
 			 }
 		 }
+		 if(totalShippingCost <= 0){
+			 totalShippingCost = 0; // which means it is free shipping 
+		 }
 		 //long totalShippingCost = vendorDistanceCostMap.values().stream().count();
 		 System.out.println("totalShippingCost "+totalShippingCost);
          System.out.println("total "+total);
          orderSummary.setShippingCharges(new BigDecimal(totalShippingCost));
-         total = total.add(orderSummary.getShippingCharges());
+         //total = total.add(orderSummary.getShippingCharges());
          orderSummary.setTotal(total);
          shoppingCart.setShippingCharges(totalShippingCost);
          shoppingCartService.saveOrUpdate(shoppingCart);
