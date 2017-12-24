@@ -797,6 +797,36 @@ public class ShoppingOrderController extends AbstractController {
 		orderResponse.setTotalPages(pageOrders.getTotalPages());
 		return orderResponse;
 	}
+
+	// url/allOrderDetails?userId=1
+	@RequestMapping(value="/vendorOrderDetails/{vendorId}", method = RequestMethod.POST)
+	@ResponseBody
+	//public List<ReadableOrder> getAllCustomerOrders(HttpServletRequest request, Locale locale,Pageable pageable) throws Exception {
+	public OrderResponse getVendorOrders(@PathVariable Long vendorId, HttpServletRequest request, Locale locale,@RequestParam(value="page",defaultValue = "1") int page, 
+				@RequestParam(value="size",defaultValue="5")int size) throws Exception {
+		OrderResponse orderResponse = new OrderResponse();
+		MerchantStore store = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
+	    //Customer customer = getSessionAttribute(  Constants.CUSTOMER, request );
+	    //Long customerId = customer.getId();
+        Pageable pageable = createPageRequest(page,size);
+		Language language = (Language)request.getAttribute("LANGUAGE");
+		Page<Order> pageOrders = orderService.findVendorPaginatedOrders(vendorId,pageable);
+		//List<Order> orders = orderService.findOrdersByCustomer(customerId);
+		List<ReadableOrder> allOrders = new ArrayList<ReadableOrder>();
+		for(Order o : pageOrders){
+			allOrders.add(orderFacade.getReadableOrderByOrder(o, store, language));
+		}
+		orderResponse.setFirst(pageOrders.isFirst());
+		orderResponse.setLast(pageOrders.isLast());
+		orderResponse.setNumber(pageOrders.getNumber());
+		orderResponse.setNumberOfElements(pageOrders.getNumberOfElements());
+		orderResponse.setOrders(allOrders);
+		orderResponse.setSize(pageOrders.getSize());
+		orderResponse.setTotalPages(pageOrders.getTotalPages());
+		return orderResponse;
+	}
+
+	
 	
 	// url/allOrderDetails?userId=1
 	@RequestMapping(value="/adminViewOrders", method = RequestMethod.POST)

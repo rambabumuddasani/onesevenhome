@@ -121,4 +121,6 @@ public interface OrderService extends SalesManagerEntityService<Long, Order> {
 	Page<Order> findPaginatedOrdersByCustomer(Long id, Pageable pageable);
 
 	Page<Order> findByDatePurchasedBetween(Date startDate, Date endDate, Pageable pageable);
+
+	Page<Order> findVendorPaginatedOrders(Long id, Pageable pageable);
 }
