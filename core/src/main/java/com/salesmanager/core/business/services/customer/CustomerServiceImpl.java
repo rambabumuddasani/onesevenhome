@@ -18,11 +18,13 @@ import com.salesmanager.core.business.repositories.customer.CustomerRepository;
 import com.salesmanager.core.business.services.common.generic.SalesManagerEntityServiceImpl;
 import com.salesmanager.core.business.services.customer.attribute.CustomerAttributeService;
 import com.salesmanager.core.business.services.services.ServicesRatingService;
+import com.salesmanager.core.business.vendor.VendorRatingService;
 import com.salesmanager.core.model.common.Address;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.customer.CustomerCriteria;
 import com.salesmanager.core.model.customer.CustomerList;
 import com.salesmanager.core.model.customer.ServicesRating;
+import com.salesmanager.core.model.customer.VendorRating;
 import com.salesmanager.core.model.customer.attribute.CustomerAttribute;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.modules.utils.GeoLocation;
@@ -44,7 +46,9 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 
 	@Inject
 	private GeoLocation geoLocation;
-
+	
+	@Inject
+    private VendorRatingService vendorRatingService;
 	
 	@Inject
 	public CustomerServiceImpl(CustomerRepository customerRepository) {
@@ -177,8 +181,11 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 		List<Customer> customer = customerRepository.findByVendorType(userType);
 		List<ServicesWorkerVO> servicesWorkerVOList= new ArrayList<ServicesWorkerVO>();
 		for(Customer eachWorker : customer){
-			int avgRating = 0;
+			//int avgRating = 0;
+			Double avgRating = new Double(0);
 			int totalRating= 0;
+			int totalReviews = 0;
+			double totalRate = 0;
 			ServicesWorkerVO servicesWorkerVO = new ServicesWorkerVO();
 			servicesWorkerVO.setId(new Integer(String.valueOf((eachWorker.getId()))));
 			servicesWorkerVO.setCompanyName(eachWorker.getVendorAttrs().getVendorName());
@@ -191,6 +198,20 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 			servicesWorkerVO.setContactNumber(eachWorker.getBilling().getTelephone());
 			servicesWorkerVO.setImageUrl(eachWorker.getVendorAttrs().getVendorAuthCert());
 			servicesWorkerVO.setCountry(eachWorker.getBilling().getCountry().getName());
+			servicesWorkerVO.setShortDescription(eachWorker.getVendorAttrs().getVendorShortDescription());
+			servicesWorkerVO.setDescription(eachWorker.getVendorAttrs().getVendorDescription());
+			List<VendorRating> vendorRatingList = vendorRatingService.getVendorReviews(eachWorker.getId());
+			if(vendorRatingList != null) {
+				totalReviews = vendorRatingList.size();
+				for(VendorRating vendorRating:vendorRatingList){
+					totalRating= totalRating + vendorRating.getRating();
+				}
+				totalRate = totalRating;
+				avgRating = Double.valueOf(totalRate / totalReviews);
+				avgRating = Double.valueOf(Math.round(avgRating.doubleValue() * 10D) / 10D);
+			}
+			servicesWorkerVO.setAvgRating(avgRating);
+			servicesWorkerVO.setTotalRating(totalReviews);
 			servicesWorkerVOList.add(servicesWorkerVO);
 		}
 		LOGGER.debug("Ended findByVendorType");

@@ -32,6 +32,8 @@ public class ServicesWorkerVO {
 	private String imageUrl;
 	private Double avgRating;
 	private Integer totalRating;
+	private String shortDescription;
+	private String description;
 	
 	
 	
@@ -118,6 +120,18 @@ public class ServicesWorkerVO {
 	}
 	public void setTotalRating(Integer totalRating) {
 		this.totalRating = totalRating;
+	}
+	public String getShortDescription() {
+		return shortDescription;
+	}
+	public void setShortDescription(String shortDescription) {
+		this.shortDescription = shortDescription;
+	}
+	public String getDescription() {
+		return description;
+	}
+	public void setDescription(String description) {
+		this.description = description;
 	}
 	
 
