@@ -13,6 +13,8 @@ public class ArchitectsResponse {
 	private String vendorImageURL;
 	private String vendorDescription;
 	private String vendorShortDescription;
+	private String vendorPortfolioName;
+	private String vendorPortfolioDocument;
 
 	public Long getPortfolioId() {
 		return portfolioId;
@@ -67,6 +69,18 @@ public class ArchitectsResponse {
 	}
 	public void setVendorImageURL(String vendorImageURL) {
 		this.vendorImageURL = vendorImageURL;
+	}
+	public String getVendorPortfolioDocument() {
+		return vendorPortfolioDocument;
+	}
+	public void setVendorPortfolioDocument(String vendorPortfolioDocument) {
+		this.vendorPortfolioDocument = vendorPortfolioDocument;
+	}
+	public String getVendorPortfolioName() {
+		return vendorPortfolioName;
+	}
+	public void setVendorPortfolioName(String vendorPortfolioName) {
+		this.vendorPortfolioName = vendorPortfolioName;
 	}
 	
 }

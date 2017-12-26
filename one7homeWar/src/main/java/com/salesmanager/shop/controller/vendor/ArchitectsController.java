@@ -10,6 +10,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -134,12 +135,34 @@ public class ArchitectsController extends AbstractController {
     		Customer customer = customerService.getById(architectsRequest.getVendorId());
 			List<ArchitectsPortfolio> portfolioList = architectsPortfolioService.findByVendorId(architectsRequest.getVendorId());
 	    	for(ArchitectsPortfolio portfolio:portfolioList){
+
 	    		VendorPortfolioData vendorPortfolioData = new VendorPortfolioData();
-	    		vendorPortfolioData.setPortfolioId(portfolio.getId());
-	    		vendorPortfolioData.setPortfolioName(portfolio.getPortfolioName());
-	    		vendorPortfolioData.setVendorId(architectsRequest.getVendorId());
-	    		vendorPortfolioData.setImageURL(portfolio.getImageURL());
-	    		vendorPortfolioList.add(vendorPortfolioData);
+	    		
+	    		if (portfolio.getImageURL() != null) {
+		    		
+		    		// Check whether there are any PDF/DOC portfolios uploaded by Architect
+	    			// If exists, add portfolio name and document under attribute
+	    			
+	    			if((FilenameUtils.isExtension(portfolio.getImageURL(),"pdf")) || 
+	    					(FilenameUtils.isExtension(portfolio.getImageURL(),"doc"))) {
+	    				
+	    				architectsResponse.setVendorPortfolioName(portfolio.getPortfolioName());
+	    				architectsResponse.setVendorPortfolioDocument(portfolio.getImageURL());
+	    				
+	    			} else {
+	    				
+	    				// If doesn't exists, add images to the vendor portfolio list
+
+	    				vendorPortfolioData.setImageURL(portfolio.getImageURL());
+	    	    		vendorPortfolioData.setPortfolioId(portfolio.getId());
+	    	    		vendorPortfolioData.setPortfolioName(portfolio.getPortfolioName());
+	    	    		vendorPortfolioData.setVendorId(architectsRequest.getVendorId());
+	    	    		vendorPortfolioList.add(vendorPortfolioData);
+
+	    			}
+	    			
+	    		}
+	    		
 	    	}
 			architectsResponse.setStatus(true);
 			architectsResponse.setVendorPortfolioList(vendorPortfolioList);
@@ -148,7 +171,18 @@ public class ArchitectsController extends AbstractController {
 	    		architectsResponse.setVendorImageURL(customer.getVendorAttrs().getVendorAuthCert());
 	    		architectsResponse.setVendorShortDescription(customer.getVendorAttrs().getVendorShortDescription());
 	    		architectsResponse.setVendorDescription(customer.getVendorAttrs().getVendorDescription());
+	    		
+	    		// Set common return attributes to NULL if any of PDF/DOC portfolios are not uploaded by Architect
+	    		
+	    		if (architectsResponse.getVendorPortfolioDocument() == null) {
+	    			
+	    			architectsResponse.setVendorPortfolioName(null);
+    				architectsResponse.setVendorPortfolioDocument(null);
+    				
+	    		}
+	    		
 	    	}
+	    	
 		}catch(Exception se){
 			System.out.println("Failed while fetching portfolio list for architect=="+se.getMessage());
 			LOGGER.error("Failed while fetching portfolio list for architect=="+se.getMessage());
