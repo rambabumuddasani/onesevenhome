@@ -47,6 +47,9 @@ public class ArchitectsPortfolio extends SalesManagerEntity<Long, ArchitectsPort
 	
 	@Column (name ="IMAGE_URL", length=200)
 	private String imageURL;
+	
+	@Column (name ="ADMIN_APPROVE_STATUS", length=5)
+	private String status = "N";
 
 	public Long getId() {
 		return id;
@@ -86,6 +89,14 @@ public class ArchitectsPortfolio extends SalesManagerEntity<Long, ArchitectsPort
 
 	public void setImageURL(String imageURL) {
 		this.imageURL = imageURL;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 	

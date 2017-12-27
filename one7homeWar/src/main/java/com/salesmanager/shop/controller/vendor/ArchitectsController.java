@@ -39,6 +39,8 @@ import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.customer.MachineryPortfolio;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.product.vendor.VendorProduct;
+import com.salesmanager.shop.admin.controller.CustomerTestimonialVO;
+import com.salesmanager.shop.admin.controller.products.PaginatedResponse;
 import com.salesmanager.shop.admin.controller.products.ProductImageRequest;
 import com.salesmanager.shop.admin.controller.products.ProductImageResponse;
 import com.salesmanager.shop.admin.controller.services.ServicesRatingRequest;
@@ -48,6 +50,7 @@ import com.salesmanager.shop.constants.EmailConstants;
 import com.salesmanager.shop.fileupload.services.StorageException;
 import com.salesmanager.shop.store.controller.AbstractController;
 import com.salesmanager.shop.store.controller.customer.VendorResponse;
+import com.salesmanager.shop.store.model.paging.PaginationData;
 import com.salesmanager.shop.utils.EmailUtils;
 import com.salesmanager.shop.utils.LabelUtils;
 import com.salesmanager.shop.fileupload.services.StorageService;
@@ -114,7 +117,7 @@ public class ArchitectsController extends AbstractController {
 	    		architectsPortfolioService.save(architectsPortfolio);
 	    		
 	    		architectsResponse.setStatus(true);
-	    		architectsResponse.setSuccessMessage("New portfolio details uploaded successfully.");
+	    		architectsResponse.setSuccessMessage("Portfolio added successfully. Awaiting for Admin approval.");
 	    		
     		}catch(Exception se){
     			LOGGER.error("Failed while uploading portfolio for architect=="+se.getMessage());
@@ -133,8 +136,10 @@ public class ArchitectsController extends AbstractController {
 		try {
 			
     		Customer customer = customerService.getById(architectsRequest.getVendorId());
-			List<ArchitectsPortfolio> portfolioList = architectsPortfolioService.findByVendorId(architectsRequest.getVendorId());
-	    	for(ArchitectsPortfolio portfolio:portfolioList){
+			List<ArchitectsPortfolio> portfolioList = 
+					architectsPortfolioService.getApprovedVendor(architectsRequest.getVendorId());
+	    	
+			for(ArchitectsPortfolio portfolio:portfolioList) {
 
 	    		VendorPortfolioData vendorPortfolioData = new VendorPortfolioData();
 	    		
@@ -168,7 +173,7 @@ public class ArchitectsController extends AbstractController {
 			architectsResponse.setVendorPortfolioList(vendorPortfolioList);
 	    	if(customer != null) {
 	    		architectsResponse.setVendorName(customer.getVendorAttrs().getVendorName());
-	    		architectsResponse.setVendorImageURL(customer.getVendorAttrs().getVendorAuthCert());
+	    		architectsResponse.setVendorImageURL(customer.getUserProfile());
 	    		architectsResponse.setVendorShortDescription(customer.getVendorAttrs().getVendorShortDescription());
 	    		architectsResponse.setVendorDescription(customer.getVendorAttrs().getVendorDescription());
 	    		
@@ -254,10 +259,14 @@ public class ArchitectsController extends AbstractController {
 		    		architectsPortfolio.setImageURL(fileName);
 	    		}
 	    		architectsPortfolio.setPortfolioName(architectsRequest.getPortfolioName());
+	    		
+	    		// Since there is an update of Image or Description, setting the status to "N" for Admin approval
+	    		architectsPortfolio.setStatus("N");
+	    		
 	    		architectsPortfolioService.update(architectsPortfolio);
 	    		
 	    		architectsResponse.setStatus(true);
-	    		architectsResponse.setSuccessMessage("Portfolio details updated successfully.");
+	    		architectsResponse.setSuccessMessage("Portfolio updated successfully. Awaiting for Admin approval.");
 	    		
 	    		if(fileName != null) {
 					try {
@@ -279,5 +288,116 @@ public class ArchitectsController extends AbstractController {
     		}
     	return architectsResponse;
 	}
-	
+	    // Admin Architects Portfolios
+	    @RequestMapping(value="/admin/getAdminArchitectsPortfolio", method=RequestMethod.POST)
+	  	@ResponseBody
+	  	public PaginatedResponse getAdminArchitectsPortfolio(@RequestBody AdminArchitectsRequest adminArchitectsRequest, @RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+	    	LOGGER.debug("Entered getAdminArchitectsPortfolio");
+	    	PaginatedResponse paginatedResponse = new PaginatedResponse();
+			List<ArchitectsPortfolioVO> architectsPortfolioList = new ArrayList<ArchitectsPortfolioVO>();
+			List<ArchitectsPortfolio> architectsPortfolios = null;
+			
+			// By default, retrieve all the vendor related portfolio details
+			
+			if(adminArchitectsRequest.getStatus().equals("ALL")) {
+				
+				architectsPortfolios = architectsPortfolioService.getAllPortfolios();
+				
+				for(ArchitectsPortfolio architectsPortfolio : architectsPortfolios) {
+				
+					ArchitectsPortfolioVO architectsPortfolioVO = new ArchitectsPortfolioVO();
+					architectsPortfolioVO.setArchitectPortfolioId(architectsPortfolio.getId());
+					architectsPortfolioVO.setCreatedate(architectsPortfolio.getCreateDate());
+					architectsPortfolioVO.setImageURL(architectsPortfolio.getImageURL());
+					architectsPortfolioVO.setPortfolioName(architectsPortfolio.getPortfolioName());
+					architectsPortfolioVO.setVendorName(architectsPortfolio.getCustomer().getVendorAttrs().getVendorName());
+					architectsPortfolioVO.setVendorDescription(architectsPortfolio.getCustomer().getVendorAttrs().getVendorDescription());
+					architectsPortfolioVO.setVendorShortDescription(architectsPortfolio.getCustomer().getVendorAttrs().getVendorShortDescription());
+					architectsPortfolioVO.setVendorImageURL(architectsPortfolio.getCustomer().getUserProfile());
+					architectsPortfolioList.add(architectsPortfolioVO);
+					
+				}
+				
+			} else {
+				
+				architectsPortfolios = architectsPortfolioService.getPortfoliosBasedOnStatus(adminArchitectsRequest.getStatus());
+				
+				for(ArchitectsPortfolio architectsPortfolio : architectsPortfolios) {
+				
+					ArchitectsPortfolioVO architectsPortfolioVO = new ArchitectsPortfolioVO();
+					architectsPortfolioVO.setArchitectPortfolioId(architectsPortfolio.getId());
+					architectsPortfolioVO.setCreatedate(architectsPortfolio.getCreateDate());
+					architectsPortfolioVO.setImageURL(architectsPortfolio.getImageURL());
+					architectsPortfolioVO.setPortfolioName(architectsPortfolio.getPortfolioName());
+					architectsPortfolioVO.setVendorName(architectsPortfolio.getCustomer().getVendorAttrs().getVendorName());
+					architectsPortfolioVO.setVendorDescription(architectsPortfolio.getCustomer().getVendorAttrs().getVendorDescription());
+					architectsPortfolioVO.setVendorShortDescription(architectsPortfolio.getCustomer().getVendorAttrs().getVendorShortDescription());
+					architectsPortfolioVO.setVendorImageURL(architectsPortfolio.getCustomer().getVendorAttrs().getVendorAuthCert());
+					architectsPortfolioList.add(architectsPortfolioVO);
+					
+				}
+				
+			}
+			
+			PaginationData paginaionData=createPaginaionData(page,size);
+	    	calculatePaginaionData(paginaionData,size, architectsPortfolioList.size());
+	    	paginatedResponse.setPaginationData(paginaionData);
+	    	
+			if(architectsPortfolioList == null || architectsPortfolioList.isEmpty() || architectsPortfolioList.size() < paginaionData.getCountByPage()){
+				paginatedResponse.setResponseData(architectsPortfolioList);
+				LOGGER.debug("Ended getAdminArchitectsPortfolio");
+				return paginatedResponse;
+			}
+			
+	    	List<ArchitectsPortfolioVO> paginatedResponses = architectsPortfolioList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+	    	paginatedResponse.setResponseData(paginatedResponses);
+			
+			return paginatedResponse;
+	    }
+	    // Manage admin architect portfolio
+	    @RequestMapping(value="/admin/manageAdminArchitectPortfolios", method=RequestMethod.POST)
+	  	@ResponseBody
+	  	public AdminArchitectsPortfolioResponse manageAdminArchitectPortfolios
+	  		(@RequestBody AdminArchitectsRequest adminArchitectsRequest, 
+	  		@RequestParam(value="pageNumber", defaultValue = "1") int page, 
+	  		@RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+	    	LOGGER.debug("Entered manageAdminArchitectPortfolios");
+	    	AdminArchitectsPortfolioResponse adminArchitectsPortfolioResponse = new AdminArchitectsPortfolioResponse();
+	    	try {
+	    	ArchitectsPortfolio architectsPortfolio = 
+	    				architectsPortfolioService.getById(adminArchitectsRequest.getPortfolioId());
+	    	
+	    	if (architectsPortfolio == null) {
+	    		
+	    		adminArchitectsPortfolioResponse.setErrorMessgae
+	    			("Error finding record with portfolio = " + adminArchitectsRequest.getPortfolioId());
+	    		adminArchitectsPortfolioResponse.setStatus(false);
+    			return adminArchitectsPortfolioResponse;
+	    		
+	    	}
+	    	
+	    	architectsPortfolio.setStatus(adminArchitectsRequest.getStatus());
+	    	architectsPortfolioService.update(architectsPortfolio);
+	    	
+	    	if (adminArchitectsRequest.getStatus().equals("Y")) {
+	    		adminArchitectsPortfolioResponse.setSuccessMessage
+	    			("Approval of portfolio " + adminArchitectsRequest.getPortfolioId() + " is successful");
+	    	    LOGGER.debug("Approval of portfolio is successful");	
+	    	}
+	    	else {
+	    		adminArchitectsPortfolioResponse.setSuccessMessage
+    				("Portfolio " + adminArchitectsRequest.getPortfolioId() + " is declined");
+	    		LOGGER.debug("Approval of portfolio is declined");
+	    	}
+	    	adminArchitectsPortfolioResponse.setStatus(true);
+	    	
+	    	} catch(Exception e) {
+	    		e.printStackTrace();
+	    		LOGGER.error("Error while updating portfolio status:" + e.getMessage());
+	    		
+	    	}
+	    	LOGGER.debug("Ended manageAdminArchitectPortfolios");
+	    	return adminArchitectsPortfolioResponse;
+	    	
+	    }
 }

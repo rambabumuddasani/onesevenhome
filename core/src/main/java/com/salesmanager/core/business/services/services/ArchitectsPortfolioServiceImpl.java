@@ -30,4 +30,16 @@ public class ArchitectsPortfolioServiceImpl extends SalesManagerEntityServiceImp
 	public List<ArchitectsPortfolio> findByVendorId(Long vendorId) {
 		return architectsPortfolioRepository.findByVendorId(vendorId);
 	}
+	@Override
+	public List<ArchitectsPortfolio> getAllPortfolios() {
+		return architectsPortfolioRepository.findAll();
+	}
+	@Override
+	public List<ArchitectsPortfolio> getPortfoliosBasedOnStatus(String status) {
+		return architectsPortfolioRepository.getPortfoliosBasedOnStatus(status);
+	}
+	@Override
+	public List<ArchitectsPortfolio> getApprovedVendor(Long vendorId) {
+		return architectsPortfolioRepository.getApprovedVendor(vendorId);
+	}
 }
