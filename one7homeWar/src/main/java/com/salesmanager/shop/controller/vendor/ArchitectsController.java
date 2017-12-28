@@ -314,6 +314,7 @@ public class ArchitectsController extends AbstractController {
 					architectsPortfolioVO.setVendorDescription(architectsPortfolio.getCustomer().getVendorAttrs().getVendorDescription());
 					architectsPortfolioVO.setVendorShortDescription(architectsPortfolio.getCustomer().getVendorAttrs().getVendorShortDescription());
 					architectsPortfolioVO.setVendorImageURL(architectsPortfolio.getCustomer().getUserProfile());
+					architectsPortfolioVO.setStatus(architectsPortfolio.getStatus());
 					architectsPortfolioList.add(architectsPortfolioVO);
 					
 				}
@@ -333,6 +334,7 @@ public class ArchitectsController extends AbstractController {
 					architectsPortfolioVO.setVendorDescription(architectsPortfolio.getCustomer().getVendorAttrs().getVendorDescription());
 					architectsPortfolioVO.setVendorShortDescription(architectsPortfolio.getCustomer().getVendorAttrs().getVendorShortDescription());
 					architectsPortfolioVO.setVendorImageURL(architectsPortfolio.getCustomer().getVendorAttrs().getVendorAuthCert());
+					architectsPortfolioVO.setStatus(architectsPortfolio.getStatus());
 					architectsPortfolioList.add(architectsPortfolioVO);
 					
 				}
@@ -354,6 +356,7 @@ public class ArchitectsController extends AbstractController {
 			
 			return paginatedResponse;
 	    }
+	    
 	    // Manage admin architect portfolio
 	    @RequestMapping(value="/admin/manageAdminArchitectPortfolios", method=RequestMethod.POST)
 	  	@ResponseBody
@@ -376,19 +379,27 @@ public class ArchitectsController extends AbstractController {
 	    		
 	    	}
 	    	
-	    	architectsPortfolio.setStatus(adminArchitectsRequest.getStatus());
-	    	architectsPortfolioService.update(architectsPortfolio);
-	    	
 	    	if (adminArchitectsRequest.getStatus().equals("Y")) {
+	    		
+	    		// If the request is to Approve, then update table entry with "Y"
+	    		architectsPortfolio.setStatus(adminArchitectsRequest.getStatus());
+	    		architectsPortfolioService.update(architectsPortfolio);
+	    		
 	    		adminArchitectsPortfolioResponse.setSuccessMessage
 	    			("Approval of portfolio " + adminArchitectsRequest.getPortfolioId() + " is successful");
-	    	    LOGGER.debug("Approval of portfolio is successful");	
-	    	}
-	    	else {
+	    	    LOGGER.debug("Approval of portfolio is successful");
+	    	    
+	    	} else {
+	    		
+	    		// If the request is to Decline, then remove the corresponding entry from table
+	    		architectsPortfolioService.delete(architectsPortfolio);
+	    		
 	    		adminArchitectsPortfolioResponse.setSuccessMessage
-    				("Portfolio " + adminArchitectsRequest.getPortfolioId() + " is declined");
+    				("Portfolio " + adminArchitectsRequest.getPortfolioId() + " is declined and the entry is removed from the table");
 	    		LOGGER.debug("Approval of portfolio is declined");
+	    		
 	    	}
+	    	
 	    	adminArchitectsPortfolioResponse.setStatus(true);
 	    	
 	    	} catch(Exception e) {

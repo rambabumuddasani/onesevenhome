@@ -12,6 +12,7 @@ public class ArchitectsPortfolioVO {
 	private String vendorImageURL;
 	private String vendorDescription;
 	private String vendorShortDescription;
+	private String status;
 	public Long getArchitectPortfolioId() {
 		return architectPortfolioId;
 	}
@@ -59,5 +60,11 @@ public class ArchitectsPortfolioVO {
 	}
 	public void setVendorShortDescription(String vendorShortDescription) {
 		this.vendorShortDescription = vendorShortDescription;
+	}
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
 	}
 }
