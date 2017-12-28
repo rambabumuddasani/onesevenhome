@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,16 +29,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.salesmanager.core.business.services.customer.CustomerService;
 import com.salesmanager.core.business.services.shoppingcart.ShoppingCartCalculationService;
 import com.salesmanager.core.business.services.shoppingcart.ShoppingCartService;
+import com.salesmanager.core.business.services.system.SystemConfigurationService;
 import com.salesmanager.core.business.utils.ajax.AjaxResponse;
+import com.salesmanager.core.constants.SchemaConstant;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.order.OrderTotalSummary;
 import com.salesmanager.core.model.reference.language.Language;
 import com.salesmanager.core.model.shoppingcart.ShoppingCart;
+import com.salesmanager.core.model.system.SystemConfiguration;
 import com.salesmanager.core.modules.integration.shipping.model.ShippingQuotePrePostProcessModule;
+import com.salesmanager.shop.admin.controller.system.ShippingModuleConfig;
 import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.controller.AbstractController;
 import com.salesmanager.shop.model.shoppingcart.ShoppingCartData;
@@ -112,6 +118,9 @@ public class ShoppingCartController extends AbstractController {
 
     @Inject
     ShoppingCartCalculationService shoppingCartCalculationService;
+
+	@Inject
+	private SystemConfigurationService systemConfigurationService;
 
 	/**
 	 * Add an item to the ShoppingCart (AJAX exposed method)
@@ -277,16 +286,23 @@ public class ShoppingCartController extends AbstractController {
          
 		 BigDecimal total = orderSummary.getTotal();
 		 Map<Long,Long> vendorDistanceCostMap = new HashMap<>();
-		 long freeShippingDistanceRange = 10l; // in KMs
-		 long eachKmDistanceCostInRs = 2l; // in RS
-		 long minOrderCostLimit = 100l;	// in RS
+		 SystemConfiguration configuration = systemConfigurationService.getByKey(SchemaConstant.SHIPPING_DISTANCE_CONFIG);
+		 ObjectMapper mapper = new ObjectMapper();	
+		 ShippingModuleConfig config = mapper.readValue(configuration.getValue(), ShippingModuleConfig.class);
+		 
+		 long freeShippingDistanceRange = config.getFreeShippingDistanceRange(); // in KMs
+		 //long eachKmDistanceCostInRs = 2l; // in RS
+		 long minOrderCostLimit = config.getMinOrderPrice();	// in RS
+		 long beyandDistancePrice = config.getBeyandDistancePrice();
+		 Map<Integer, Long>  priceByDistance = config.getPriceByDistance();
 		 long totalShippingCost =  0l;
-		 for(Map.Entry<Long, Long> entry : vendorDistanceMap.entrySet()) {
+		 /*for(Map.Entry<Long, Long> entry : vendorDistanceMap.entrySet()) {
 			 if(total.intValue() >= minOrderCostLimit){
 				// long vendorId = entry.getKey();
 				 long vendorDistanceFromCustomerLoc  = entry.getValue();
 				 if(vendorDistanceFromCustomerLoc > freeShippingDistanceRange){
-					 long vendorDistanceChargeAfterFreeDistanceRange = (vendorDistanceFromCustomerLoc - freeShippingDistanceRange) * eachKmDistanceCostInRs;
+					 //long vendorDistanceChargeAfterFreeDistanceRange = (vendorDistanceFromCustomerLoc - freeShippingDistanceRange);
+					 if()
 					 vendorDistanceCostMap.put(entry.getKey(), vendorDistanceChargeAfterFreeDistanceRange);
 					 totalShippingCost += vendorDistanceChargeAfterFreeDistanceRange;
 				 }
@@ -296,7 +312,7 @@ public class ShoppingCartController extends AbstractController {
 					 totalShippingCost += vendorDistanceCharge;
 					 vendorDistanceCostMap.put(entry.getKey(), vendorDistanceCharge);
 			 }
-		 }
+		 }*/
 		 if(totalShippingCost <= 0){
 			 totalShippingCost = 0; // which means it is free shipping 
 		 }
@@ -322,6 +338,30 @@ public class ShoppingCartController extends AbstractController {
 		 }
 		 return vendorDistanceFromCustomerLocation;
 	}
+	
+	private static long compuatePriceByDistanceRange(Map<Integer, Long> priceByDistance,long vendorDistanceFromCustomer){
+		long vendorShippingPrice = 0l;
+		for(Map.Entry<Integer, Long> entry : priceByDistance.entrySet()){
+			int distance = entry.getKey();
+			//long price = entry.getValue();
+			if(distance <= vendorDistanceFromCustomer){
+				vendorShippingPrice = entry.getValue();
+				break;
+			}
+		}
+		return vendorShippingPrice;
+	}
+/*	public static void main(String[] args) {
+		Map<Integer, Long> priceByDistance = new LinkedHashMap<>();
+		priceByDistance.put(10, 1l);
+		priceByDistance.put(20, 2l);
+		priceByDistance.put(30, 3l);
+		priceByDistance.put(40, 5l);
 		
+		long vendorDistanceFromCustomer = 28;
+		long price = compuatePriceByDistanceRange(priceByDistance, vendorDistanceFromCustomer);
+		System.out.println("shipping cost "+price);
+	}	
+*/		
 
 }
