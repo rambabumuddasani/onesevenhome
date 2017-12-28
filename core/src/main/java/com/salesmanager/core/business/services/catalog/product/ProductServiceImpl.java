@@ -405,4 +405,8 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 		return productRepository.getProductsListBySearch(searchString);
 	}
 
+	@Override
+	public Long getMaxProductPrice(String categoryCode)  {
+		return productRepository.getMaxProductPrice(categoryCode);
+	}
 }

@@ -74,5 +74,7 @@ public interface ProductService extends SalesManagerEntityService<Long, Product>
 
 	List<Product> getVendorNotAssociatedProductsListByCategory(String categoryCode, List<Long> productIds) throws ServiceException;
 
+	Long getMaxProductPrice(String categoryCode);
+
 }
 	

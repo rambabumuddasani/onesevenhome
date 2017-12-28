@@ -1687,4 +1687,12 @@ public CreateProductResponse updateProductDiscount(@RequestBody ProductDiscountR
 		return filteredProducts;
 	}
 
+	@RequestMapping(value="/getMaxProductPrice/{categoryCode}", method = RequestMethod.GET)
+	@ResponseBody
+	public Long getMaxProductPrice(@PathVariable String categoryCode) throws Exception {
+		return productService.getMaxProductPrice(categoryCode);
+	}
+
+		
+	
 }
