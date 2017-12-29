@@ -12,6 +12,7 @@ public class VendorPortfolioData {
 	private String size;
 	private String thickness;
 	private String brand;
+	private String status;
 	
 	public Long getPortfolioId() {
 		return portfolioId;
@@ -75,6 +76,14 @@ public class VendorPortfolioData {
 
 	public void setBrand(String brand) {
 		this.brand = brand;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 	
 }

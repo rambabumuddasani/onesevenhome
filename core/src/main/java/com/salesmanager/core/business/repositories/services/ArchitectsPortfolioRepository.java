@@ -16,7 +16,7 @@ public interface ArchitectsPortfolioRepository extends JpaRepository<ArchitectsP
 	@Query("select pf from ArchitectsPortfolio pf where pf.status = ?1")
 	public List<ArchitectsPortfolio> getPortfoliosBasedOnStatus(String status);
 
-	@Query("select pf from ArchitectsPortfolio pf where pf.status = 'Y' and pf.customer.id=?1")
+	@Query("select pf from ArchitectsPortfolio pf where pf.customer.id=?1")
 	public List<ArchitectsPortfolio> getApprovedVendor(Long vendorId);
 
 }

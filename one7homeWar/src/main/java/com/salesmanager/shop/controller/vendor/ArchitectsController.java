@@ -161,6 +161,7 @@ public class ArchitectsController extends AbstractController {
 	    				vendorPortfolioData.setImageURL(portfolio.getImageURL());
 	    	    		vendorPortfolioData.setPortfolioId(portfolio.getId());
 	    	    		vendorPortfolioData.setPortfolioName(portfolio.getPortfolioName());
+	    	    		vendorPortfolioData.setStatus(portfolio.getStatus());
 	    	    		vendorPortfolioData.setVendorId(architectsRequest.getVendorId());
 	    	    		vendorPortfolioList.add(vendorPortfolioData);
 
