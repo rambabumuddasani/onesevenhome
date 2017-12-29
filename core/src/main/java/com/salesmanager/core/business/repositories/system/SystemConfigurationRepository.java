@@ -8,5 +8,5 @@ public interface SystemConfigurationRepository extends JpaRepository<SystemConfi
 
 
 	SystemConfiguration findByKey(String key);
-
+	
 }

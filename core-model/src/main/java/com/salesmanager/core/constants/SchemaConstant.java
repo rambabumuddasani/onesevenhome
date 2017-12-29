@@ -19,6 +19,7 @@ public class SchemaConstant {
 	 */
 	public static final String ALL_REGIONS = "*";
 
+	public static final String SHIPPING_DISTANCE_CONFIG = "SHIPPING_DISTANCE_CONFIG";
 	/**
 	 * Country iso codes
 	 */

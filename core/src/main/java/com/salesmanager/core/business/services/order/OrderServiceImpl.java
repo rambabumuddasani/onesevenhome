@@ -535,7 +535,8 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
 		return orderRepository.findVendorPaginatedOrders(id,pageable);	
 	}
 
-	
+
+
 	@Override
 	public Page<Order> findByDatePurchasedBetween( Date startDate,Date endDate,Pageable pageable) {
 		return orderRepository.findByDatePurchasedBetween(startDate,endDate,pageable);	
