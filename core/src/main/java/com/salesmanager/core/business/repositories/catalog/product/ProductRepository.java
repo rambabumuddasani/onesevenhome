@@ -21,9 +21,9 @@ public interface ProductRepository extends JpaRepository<Product, Long>, Product
     +"left join fetch manuf.descriptions manufd left join fetch p.type type left join fetch p.taxClass tx where pap.productPriceSpecialStartDate=?1")
 	List<Product> findTodayDeals(Date date);
     
-    @Query(value = "SELECT MAX(PRODUCT_PRICE_AMOUNT) FROM rainiers_shoppizer.PRODUCT_PRICE PRICE WHERE PRODUCT_PRICE_ID IN "
-    		+ "(SELECT PRODUCT_PRICE_ID FROM rainiers_shoppizer.PRODUCT_PRICE PRICE INNER JOIN rainiers_shoppizer.PRODUCT_AVAILABILITY AVAIL "
-    		+ "WHERE PRICE.PRODUCT_AVAIL_ID = AVAIL.PRODUCT_AVAIL_ID AND  PRODUCT_ID IN (SELECT PRODUCT_ID FROM rainiers_shoppizer.PRODUCT_CATEGORY "
-    		+ "WHERE CATEGORY_ID = (SELECT CATEGORY_ID FROM rainiers_shoppizer.CATEGORY WHERE CODE = ?1)))",nativeQuery=true)
+    @Query(value = "SELECT MAX(PRODUCT_PRICE_AMOUNT) FROM PRODUCT_PRICE PRICE WHERE PRODUCT_PRICE_ID IN "
+    		+ "(SELECT PRODUCT_PRICE_ID FROM PRODUCT_PRICE PRICE INNER JOIN PRODUCT_AVAILABILITY AVAIL "
+    		+ "WHERE PRICE.PRODUCT_AVAIL_ID = AVAIL.PRODUCT_AVAIL_ID AND  PRODUCT_ID IN (SELECT PRODUCT_ID FROM PRODUCT_CATEGORY "
+    		+ "WHERE CATEGORY_ID = (SELECT CATEGORY_ID FROM CATEGORY WHERE CODE = ?1)))",nativeQuery=true)
     Long getMaxProductPrice(String categoryCode);
 }

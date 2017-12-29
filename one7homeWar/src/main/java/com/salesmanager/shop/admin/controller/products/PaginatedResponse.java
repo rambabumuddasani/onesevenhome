@@ -9,6 +9,7 @@ public class PaginatedResponse {
 	private PaginationData paginationData;
 	private List responseData;
 	private String errorMsg;
+	private Long maxProductPrice;
 	public PaginationData getPaginationData() {
 		return paginationData;
 	}
@@ -26,6 +27,12 @@ public class PaginatedResponse {
 	}
 	public void setErrorMsg(String errorMsg) {
 		this.errorMsg = errorMsg;
+	}
+	public Long getMaxProductPrice() {
+		return maxProductPrice;
+	}
+	public void setMaxProductPrice(Long maxProductPrice) {
+		this.maxProductPrice = maxProductPrice;
 	}
 	
 }

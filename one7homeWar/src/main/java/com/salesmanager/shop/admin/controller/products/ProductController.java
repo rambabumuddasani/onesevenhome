@@ -814,6 +814,10 @@ public class ProductController extends AbstractController {
 		}
     	List<ProductResponse> paginatedResponses = responses.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
     	paginatedResponse.setResponseData(paginatedResponses);
+    	
+    	Long maxProductPrice = getMaxProductPrice(categoryId);
+    	paginatedResponse.setMaxProductPrice(maxProductPrice);
+    	
     	LOGGER.debug("Ended getProductForCat");
 		return paginatedResponse;
 		
@@ -1687,9 +1691,7 @@ public CreateProductResponse updateProductDiscount(@RequestBody ProductDiscountR
 		return filteredProducts;
 	}
 
-	@RequestMapping(value="/getMaxProductPrice/{categoryCode}", method = RequestMethod.GET)
-	@ResponseBody
-	public Long getMaxProductPrice(@PathVariable String categoryCode) throws Exception {
+	public Long getMaxProductPrice(String categoryCode) throws Exception {
 		return productService.getMaxProductPrice(categoryCode);
 	}
 
