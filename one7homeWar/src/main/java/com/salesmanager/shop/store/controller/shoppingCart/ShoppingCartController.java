@@ -296,6 +296,12 @@ public class ShoppingCartController extends AbstractController {
 		 long beyandDistancePrice = config.getBeyandDistancePrice();
 		 Map<Integer, Long>  priceByDistance = config.getPriceByDistance();
 		 long totalShippingCost =  0l;
+		 if(total.intValue() >= minOrderCostLimit){
+			 for(Map.Entry<Long, Long> entry : vendorDistanceMap.entrySet()) {
+				 long vendorDistanceFromCustomerLoc  = entry.getValue();
+				 
+			}
+		 }
 		 /*for(Map.Entry<Long, Long> entry : vendorDistanceMap.entrySet()) {
 			 if(total.intValue() >= minOrderCostLimit){
 				// long vendorId = entry.getKey();
@@ -353,15 +359,13 @@ public class ShoppingCartController extends AbstractController {
 	}
 /*	public static void main(String[] args) {
 		Map<Integer, Long> priceByDistance = new LinkedHashMap<>();
-		priceByDistance.put(10, 1l);
-		priceByDistance.put(20, 2l);
-		priceByDistance.put(30, 3l);
 		priceByDistance.put(40, 5l);
-		
-		long vendorDistanceFromCustomer = 28;
+		priceByDistance.put(30, 3l);
+		priceByDistance.put(20, 2l);
+		priceByDistance.put(10, 1l);
+		long vendorDistanceFromCustomer = 60;
 		long price = compuatePriceByDistanceRange(priceByDistance, vendorDistanceFromCustomer);
 		System.out.println("shipping cost "+price);
 	}	
-*/		
-
-}
+*/
+	}
