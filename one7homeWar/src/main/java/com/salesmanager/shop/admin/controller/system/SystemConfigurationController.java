@@ -47,7 +47,8 @@ public class SystemConfigurationController {
 		
 		Map<Integer,Long> priceByDistance  = shippingModuleConfig.getPriceByDistance();
         Map<Integer, Long> sortedpriceByDistanceMap = priceByDistance.entrySet().stream()
-                .sorted(Map.Entry. <Integer, Long> comparingByKey().reversed())
+                .sorted(Map.Entry. <Integer, Long> comparingByKey())
+                //.sorted(Map.Entry. <Integer, Long> comparingByKey().reversed())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                         (oldValue, newValue) -> oldValue, LinkedHashMap::new));
 

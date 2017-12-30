@@ -296,37 +296,38 @@ public class ShoppingCartController extends AbstractController {
 		 long beyandDistancePrice = config.getBeyandDistancePrice();
 		 Map<Integer, Long>  priceByDistance = config.getPriceByDistance();
 		 long totalShippingCost =  0l;
-		 if(total.intValue() >= minOrderCostLimit){
-			 for(Map.Entry<Long, Long> entry : vendorDistanceMap.entrySet()) {
-				 long vendorDistanceFromCustomerLoc  = entry.getValue();
-				 
-			}
-		 }
-		 /*for(Map.Entry<Long, Long> entry : vendorDistanceMap.entrySet()) {
-			 if(total.intValue() >= minOrderCostLimit){
-				// long vendorId = entry.getKey();
-				 long vendorDistanceFromCustomerLoc  = entry.getValue();
-				 if(vendorDistanceFromCustomerLoc > freeShippingDistanceRange){
-					 //long vendorDistanceChargeAfterFreeDistanceRange = (vendorDistanceFromCustomerLoc - freeShippingDistanceRange);
-					 if()
-					 vendorDistanceCostMap.put(entry.getKey(), vendorDistanceChargeAfterFreeDistanceRange);
-					 totalShippingCost += vendorDistanceChargeAfterFreeDistanceRange;
-				 }
-			 }else{
-				 	 long vendorDistanceFromCustomerLoc  = entry.getValue();
-					 long vendorDistanceCharge = (vendorDistanceFromCustomerLoc) * eachKmDistanceCostInRs;
-					 totalShippingCost += vendorDistanceCharge;
-					 vendorDistanceCostMap.put(entry.getKey(), vendorDistanceCharge);
+		 /* if total = 5000 and minOrderCostLimit is 3000, then 
+				if vendor to cutomer distance is in given configured free shipping range, 
+					then shipping charges will be zero
+				else
+				 	calculate the shipping price based on configured shipping range values and vendor to cusotmer range.
+			else (i.e. orderTotal is not more than given minOrderCostLimit
+				 	calculate the shipping price based on configured shipping range values and vendor to cusotmer range.
+		 	
+		 */	
+		 // else , shipping charge will be applicable.
+		 if(total.intValue() >= minOrderCostLimit){	
+		 for(Map.Entry<Long, Long> entry : vendorDistanceMap.entrySet()) {
+			 long vendorDistanceFromCustomerLoc  = entry.getValue();
+			 if(vendorDistanceFromCustomerLoc > freeShippingDistanceRange){
+					long price = compuatePriceByDistanceRange(priceByDistance, vendorDistanceFromCustomerLoc,beyandDistancePrice);
+					totalShippingCost += price;
 			 }
-		 }*/
+		 	}
+		 }else{
+			 for(Map.Entry<Long, Long> entry : vendorDistanceMap.entrySet()) {
+				 	long vendorDistanceFromCustomerLoc  = entry.getValue();
+					long price = compuatePriceByDistanceRange(priceByDistance, vendorDistanceFromCustomerLoc,beyandDistancePrice);
+					totalShippingCost += price;
+			 }
+		 }
 		 if(totalShippingCost <= 0){
 			 totalShippingCost = 0; // which means it is free shipping 
 		 }
-		 //long totalShippingCost = vendorDistanceCostMap.values().stream().count();
 		 System.out.println("totalShippingCost "+totalShippingCost);
          System.out.println("total "+total);
          orderSummary.setShippingCharges(new BigDecimal(totalShippingCost));
-         //total = total.add(orderSummary.getShippingCharges());
+         total = total.add(orderSummary.getShippingCharges());
          orderSummary.setTotal(total);
          shoppingCart.setShippingCharges(totalShippingCost);
          shoppingCartService.saveOrUpdate(shoppingCart);
@@ -345,27 +346,34 @@ public class ShoppingCartController extends AbstractController {
 		 return vendorDistanceFromCustomerLocation;
 	}
 	
-	private static long compuatePriceByDistanceRange(Map<Integer, Long> priceByDistance,long vendorDistanceFromCustomer){
+	private static long compuatePriceByDistanceRange(Map<Integer, Long> priceByDistance,long vendorDistanceFromCustomer,long beyandDistancePrice){
 		long vendorShippingPrice = 0l;
+		if(vendorDistanceFromCustomer == 0){ // if vendor and customer lies in same pin code, then distance would be zero.
+			return vendorShippingPrice;
+		}
 		for(Map.Entry<Integer, Long> entry : priceByDistance.entrySet()){
 			int distance = entry.getKey();
 			//long price = entry.getValue();
-			if(distance <= vendorDistanceFromCustomer){
+			if(vendorDistanceFromCustomer <= distance){
 				vendorShippingPrice = entry.getValue();
 				break;
 			}
 		}
+		if(vendorShippingPrice == 0){
+			vendorShippingPrice =  beyandDistancePrice; // which means, vendorDistanceFromCustomer is beyond our configured data.
+		}
 		return vendorShippingPrice;
 	}
 /*	public static void main(String[] args) {
+		long beyandDistancePrice = 100l;
 		Map<Integer, Long> priceByDistance = new LinkedHashMap<>();
-		priceByDistance.put(40, 5l);
-		priceByDistance.put(30, 3l);
-		priceByDistance.put(20, 2l);
 		priceByDistance.put(10, 1l);
-		long vendorDistanceFromCustomer = 60;
-		long price = compuatePriceByDistanceRange(priceByDistance, vendorDistanceFromCustomer);
-		System.out.println("shipping cost "+price);
+		priceByDistance.put(20, 2l);
+		priceByDistance.put(30, 3l);
+		priceByDistance.put(40, 4l);
+		long vendorDistanceFromCustomer = 41;
+		long price = compuatePriceByDistanceRange(priceByDistance, vendorDistanceFromCustomer,beyandDistancePrice);
+		System.out.println("shipping cost "+price+" Rs");
 	}	
-*/
-	}
+
+*/	}
