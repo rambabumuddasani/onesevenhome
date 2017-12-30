@@ -321,7 +321,7 @@ public class ODSInvoiceModule implements InvoiceModule {
 			Set<OrderTotal> totals = order.getOrderTotal();
 			for(OrderTotal orderTotal : totals) {
 				
-				String totalName = orderTotal.getText();
+				String totalName = orderTotal.getOrderTotalType().name();
 				if(totalName.contains(".")) {
 					totalName = orderTotal.getTitle();
 				}
