@@ -8,4 +8,8 @@ import com.salesmanager.core.model.customer.MachineryPortfolio;
 public interface MachineryPortfolioService extends SalesManagerEntityService<Long, MachineryPortfolio> {
 
 	List<MachineryPortfolio> findByVendorId(Long vendorId);
+
+	List<MachineryPortfolio> getAllPortfoios();
+
+	List<MachineryPortfolio> getPortfoliosBasedOnStatus(String status);
 }

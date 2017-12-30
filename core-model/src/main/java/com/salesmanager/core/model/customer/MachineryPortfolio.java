@@ -1,5 +1,6 @@
 package com.salesmanager.core.model.customer;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -47,6 +48,18 @@ public class MachineryPortfolio extends SalesManagerEntity<Long, MachineryPortfo
 	
 	@Column (name ="IMAGE_URL", length=200)
 	private String imageURL;
+	
+	@Column (name ="ADMIN_APPROVE_STATUS", length=5)
+	private String status = "N";
+	
+	@Column (name ="EQUIPMENT_NAME", length=20)
+	private String equipmentName;
+	
+	@Column (name ="EQUIPMENT_PRICE")
+	private BigDecimal equipmentPrice;
+	
+	@Column (name ="HIRING_TYPE", length=20)
+	private String hiringType;
 
 	public Long getId() {
 		return id;
@@ -86,6 +99,38 @@ public class MachineryPortfolio extends SalesManagerEntity<Long, MachineryPortfo
 
 	public void setImageURL(String imageURL) {
 		this.imageURL = imageURL;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public String getEquipmentName() {
+		return equipmentName;
+	}
+
+	public void setEquipmentName(String equipmentName) {
+		this.equipmentName = equipmentName;
+	}
+
+	public BigDecimal getEquipmentPrice() {
+		return equipmentPrice;
+	}
+
+	public void setEquipmentPrice(BigDecimal equipmentPrice) {
+		this.equipmentPrice = equipmentPrice;
+	}
+
+	public String getHiringType() {
+		return hiringType;
+	}
+
+	public void setHiringType(String hiringType) {
+		this.hiringType = hiringType;
 	}
 
 	

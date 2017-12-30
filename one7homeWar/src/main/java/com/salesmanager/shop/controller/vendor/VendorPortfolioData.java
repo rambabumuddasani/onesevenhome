@@ -13,6 +13,9 @@ public class VendorPortfolioData {
 	private String thickness;
 	private String brand;
 	private String status;
+	private String equipmentName;
+	private BigDecimal equipmentPrice;
+	private String hiringType;
 	
 	public Long getPortfolioId() {
 		return portfolioId;
@@ -84,6 +87,30 @@ public class VendorPortfolioData {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public String getEquipmentName() {
+		return equipmentName;
+	}
+
+	public void setEquipmentName(String equipmentName) {
+		this.equipmentName = equipmentName;
+	}
+
+	public BigDecimal getEquipmentPrice() {
+		return equipmentPrice;
+	}
+
+	public void setEquipmentPrice(BigDecimal equipmentPrice) {
+		this.equipmentPrice = equipmentPrice;
+	}
+
+	public String getHiringType() {
+		return hiringType;
+	}
+
+	public void setHiringType(String hiringType) {
+		this.hiringType = hiringType;
 	}
 	
 }

@@ -31,4 +31,14 @@ public class MachineryPortfolioServiceImpl extends SalesManagerEntityServiceImpl
 	public List<MachineryPortfolio> findByVendorId(Long vendorId) {
 		return machineryPortfolioRepository.findByVendorId(vendorId);
 	}
+
+	@Override
+	public List<MachineryPortfolio> getAllPortfoios() {
+		return machineryPortfolioRepository.findAll();
+	}
+
+	@Override
+	public List<MachineryPortfolio> getPortfoliosBasedOnStatus(String status) {
+		return machineryPortfolioRepository.getPortfoliosBasedOnStatus(status);
+	}
 }
