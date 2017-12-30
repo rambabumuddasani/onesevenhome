@@ -1,5 +1,9 @@
 package com.salesmanager.core.business.services.system;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -13,6 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.repositories.system.ModuleConfigurationRepository;
@@ -92,9 +98,7 @@ public class ModuleConfigurationServiceImpl extends
 					
 					String configs = mod.getConfiguration();
 					if(configs!=null) {
-						
 						//Map objects = mapper.readValue(config, Map.class);
-
 						Object objConfigs=JSONValue.parse(configs); 
 						JSONArray arrayConfigs=(JSONArray)objConfigs;
 						
@@ -142,6 +146,28 @@ public class ModuleConfigurationServiceImpl extends
 		
 	}
 
+/*	public static void main(String[] args) throws JsonParseException, JsonMappingException, IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		String json = new String(Files.readAllBytes(Paths.get("D://fileData.txt")));
+		String json = {
+				"module": "PAYMENT",
+				"code": "stripe",
+				"type":"creditcard",
+				"version":"",
+				"regions": ["US","CA","GB","AU","FI","DK","IE","NO","SE"],
+				"image":"stripe.png",
+				"configuration":[{"env":"TEST","scheme":"https","host":"www.stripe.com","port":"443","uri":"/"},{"env":"PROD","scheme":"https","host":"www.stripe.com","port":"443","uri":"/"}]
+			};	
+		
+		Map<String,Object> map = mapper.readValue(json, Map.class);
+		for(Map.Entry<String, Object> entry : map.entrySet()){
+			System.out.println(entry.getKey()+" "+entry.getValue());
+		}
+		String s = mapper.writeValueAsString(map.get("configuration"));
+		System.out.println("string data "+s);
+		//System.out.println(map);
+	}	
+*/	
 	@Override
 	public void createOrUpdateModule(String json) throws ServiceException {
 		
