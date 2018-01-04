@@ -169,6 +169,7 @@ public class CustomerRegistrationController extends AbstractController {
 	
 	//private final static String NEW_USER_ACTIVATION_TMPL = "email_template_new_user_activate.ftl";
 	private final static String NEW_USER_ACTIVATION_TMPL = "email_template_customer_registration.ftl";
+	private final static String VENDOR_REGISTRATION_TMPL = "email_template_vendor_registration.ftl";
 
 	@RequestMapping(value="/registration.html", method=RequestMethod.GET)
 	public String displayRegistration(final Model model, final HttpServletRequest request, final HttpServletResponse response) throws Exception {
@@ -1570,7 +1571,7 @@ public class CustomerRegistrationController extends AbstractController {
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_USERNAME_LABEL, messages.getMessage("label.generic.username",locale));
 		templateTokens.put(EmailConstants.EMAIL_TEXT_NEW_USER_ACTIVATION, messages.getMessage("email.newuser.text.activation",locale));
 		//templateTokens.put(EmailConstants.EMAIL_TEXT_NEW_USER_ACTIVATION_LINK, messages.getMessage("email.newuser.text.activation.link",activationURLArg,locale));
-		templateTokens.put(EmailConstants.EMAIL_TEXT_NEW_USER_ACTIVATION_LINK, activationURL);
+		//templateTokens.put(EmailConstants.EMAIL_TEXT_NEW_USER_ACTIVATION_LINK, activationURL);
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_PASSWORD_LABEL, messages.getMessage("label.generic.password",locale));
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
@@ -1581,7 +1582,7 @@ public class CustomerRegistrationController extends AbstractController {
 		email.setFromEmail(merchantStore.getStoreEmailAddress());
 		email.setSubject(messages.getMessage("email.newuser.text.activation",locale));
 		email.setTo(userRequest.getEmail());
-		email.setTemplateName(NEW_USER_ACTIVATION_TMPL);
+		email.setTemplateName(VENDOR_REGISTRATION_TMPL);
 		email.setTemplateTokens(templateTokens);
 
 
