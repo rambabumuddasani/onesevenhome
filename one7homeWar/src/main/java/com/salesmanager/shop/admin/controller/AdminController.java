@@ -52,6 +52,7 @@ import com.salesmanager.core.business.services.reference.language.LanguageServic
 import com.salesmanager.core.business.services.system.EmailService;
 import com.salesmanager.core.business.services.user.UserService;
 import com.salesmanager.core.business.utils.ProductPriceUtils;
+import com.salesmanager.core.business.vendor.VendorBookingService;
 import com.salesmanager.core.business.vendor.product.services.VendorProductService;
 import com.salesmanager.core.model.catalog.category.Category;
 import com.salesmanager.core.model.catalog.category.SubCategoryImage;
@@ -63,6 +64,7 @@ import com.salesmanager.core.model.catalog.product.price.ProductPrice;
 import com.salesmanager.core.model.catalog.product.type.ProductType;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.customer.CustomerTestimonial;
+import com.salesmanager.core.model.customer.VendorBooking;
 import com.salesmanager.core.model.history.HistoryManagement;
 import com.salesmanager.core.model.image.brand.BrandImage;
 import com.salesmanager.core.model.merchant.MerchantStore;
@@ -92,6 +94,7 @@ public class AdminController extends AbstractController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AdminController.class);
 	private static final String ADIMIN_APPROVE_PRODUCT_TMPL = "email_template_vendor_approve_products.ftl";
 	private static final String ADIMIN_ADD_PRODUCT_TMPL = "email_template_admin_vendor_postrequirement.ftl";
+	private static final String VENDOR_REGISTRATION_ADMIN_APPROVE_TMPL = "email_template_vendor_registration_admin_approve.ftl";
 	@Inject
 	private MerchantStoreService merchantStoreService;
 	
@@ -159,6 +162,9 @@ public class AdminController extends AbstractController {
 	@Inject
 	HistoryManagementService historyManagementService;
     
+	@Inject
+	VendorBookingService vendorBookingService;
+	
     // Admin update store address
 	@RequestMapping(value="/admin/updatestore", method = RequestMethod.POST, 
 			produces = MediaType.APPLICATION_JSON_VALUE,consumes=MediaType.APPLICATION_JSON_VALUE)
@@ -667,14 +673,22 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     @RequestMapping(value="/admin/vendor/products/{vendorId}", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public AdminVendorProductResponse getAdminVendorProducts(@PathVariable String vendorId) throws Exception {
+	public PaginatedResponse getAdminVendorProducts(
+			@PathVariable String vendorId, 
+			@RequestParam(value="pageNumber", defaultValue = "1") int page ,
+            @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+    	
     	LOGGER.debug("Entered getAdminVendorProducts");
-    	AdminVendorProductResponse adminVendorProductResponse = new AdminVendorProductResponse();
+    	
+    	PaginatedResponse paginatedResponse = new PaginatedResponse();
+    	
     	Long  vId = Long.parseLong(vendorId);
+    	
+    	try {
     	List<VendorProduct> vendorProducts = vendorProductService.findProductsByVendor(vId);
     	if(vendorProducts==null) {
-    		adminVendorProductResponse.setErrorMsg("Vendor products not found");
-    		return adminVendorProductResponse;
+    		paginatedResponse.setErrorMsg("Vendor products not found");
+    		return paginatedResponse;
     	}
     	
     	List<VendorProductVO> vproductList = new ArrayList<VendorProductVO>();
@@ -683,6 +697,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     		
     		vendorProductVO.setVendorProductId(vendorProduct.getId());
     		vendorProductVO.setVendorId(vendorProduct.getCustomer().getId());
+    		vendorProductVO.setStatus(vendorProduct.isAdminActivated());
     		
     		if (!(vendorProduct.getCustomer().getVendorAttrs().getVendorName().equals(null))){
     		vendorProductVO.setVendorName(vendorProduct.getCustomer().getVendorAttrs().getVendorName());
@@ -702,9 +717,25 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     		vproductList.add(vendorProductVO);
     	}
     	
-    	adminVendorProductResponse.setVendorProducts(vproductList);
+    	PaginationData paginaionData=createPaginaionData(page,size);
+    	calculatePaginaionData(paginaionData,size, vproductList.size());
+    	paginatedResponse.setPaginationData(paginaionData);
+		if(vproductList == null || vproductList.isEmpty() || vproductList.size() < paginaionData.getCountByPage()){
+			paginatedResponse.setResponseData(vproductList);
+			return paginatedResponse;
+		}
+		
+    	List<VendorProductVO> paginatedResponses = vproductList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+    	paginatedResponse.setResponseData(paginatedResponses);
+    	
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    		LOGGER.error("Error while listing vendor products "+e.getMessage());
+    		paginatedResponse.setErrorMsg("Error while listing vendor products");
+    	}
     	LOGGER.debug("Ended getAdminVendorProducts");
-    	return adminVendorProductResponse;
+    	
+    	return paginatedResponse;
     	
     }
     
@@ -1907,10 +1938,10 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 			}
 			
 			if(approveVendorProductRequest.isStatus()==true) {
-	    		activateProductResponse.setSuccessMsg("Products Approved");
+	    		activateProductResponse.setSuccessMsg("Product(s) Approved");
 	    		activateProductResponse.setStatus(TRUE);
 	    	} else {
-	    		activateProductResponse.setSuccessMsg("Productd Declined");
+	    		activateProductResponse.setSuccessMsg("Product(s) Declined");
 	    		activateProductResponse.setStatus(TRUE);
 	    	}
 			
@@ -1921,12 +1952,12 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    	return activateProductResponse;
 		 
 	 }
-	
+	    // Registered vendors listing who are going to be approved by admin
 	    @RequestMapping(value="/getVendorForAdmin", method = RequestMethod.POST)
 		@ResponseBody
 		public PaginatedResponse getVendorForAdmin(@RequestParam(value="pageNumber", defaultValue = "1") int page ,
 				                  @RequestParam(value="pageSize", defaultValue="15") int size,
-				                  @RequestBody AdminApprovedVendorsRequest adminApprovedVendorsRequest) {
+				                  @RequestBody AdminApprovedVendorsRequest adminApprovedVendorsRequest) throws Exception{
 			LOGGER.debug("Entered getAdminApprovedVendors");
 			
 			PaginatedResponse paginatedResponse = new PaginatedResponse();
@@ -1976,10 +2007,11 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 			return paginatedResponse;
 			
 	    }
+	    // Listing vendors who are requested for products
 	    @RequestMapping(value="/getRequestedVendorForAdmin", method = RequestMethod.GET)
 		@ResponseBody
 		public PaginatedResponse getRequestedVendorForAdmin(@RequestParam(value="pageNumber", defaultValue = "1") int page ,
-				                  @RequestParam(value="pageSize", defaultValue="15") int size) {
+				                  @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception{
 			
 	    	LOGGER.debug("Entered getRequestedVendorForAdmin");
 	    	PaginatedResponse paginatedResponse = new PaginatedResponse();
@@ -2018,24 +2050,28 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    	return paginatedResponse;
 	    	
 	    }
-	    // Admin Approving vendors 
+	    // Admin Approving registered vendors 
 	    @RequestMapping(value="/approveVendorByAdmin", method = RequestMethod.POST)
 		@ResponseBody
 		public AdminApprovedVendorsResponse approveVendorByAdmin(@RequestParam(value="pageNumber", defaultValue = "1") int page ,
 				                  @RequestParam(value="pageSize", defaultValue="15") int size,
-				                  @RequestBody AdminApprovedVendorsRequest adminApprovedVendorsRequest) {
+				                  @RequestBody AdminApprovedVendorsRequest adminApprovedVendorsRequest) throws Exception {
 			LOGGER.debug("Entered approveVendorByAdmin");
 	    	
 			AdminApprovedVendorsResponse adminApprovedVendorsResponse = new AdminApprovedVendorsResponse();
+			Customer vendor =null;
 			try {
-			Customer vendor = customerService.getById(adminApprovedVendorsRequest.getVendorId());
+			vendor = customerService.getById(adminApprovedVendorsRequest.getVendorId());
 			
 			if(vendor==null) {
 				adminApprovedVendorsResponse.setErrorMessage("vendor not found for id "+adminApprovedVendorsRequest.getVendorId());
 				adminApprovedVendorsResponse.setStatus(FALSE);
 				return adminApprovedVendorsResponse;
 			}
+			
 			vendor.setActivated(adminApprovedVendorsRequest.getStatus());
+			customerService.update(vendor);
+			LOGGER.debug("Updated vendor status");
 			
 			if(adminApprovedVendorsRequest.getStatus().equals("1")) {
 				LOGGER.debug("Vendor activated");
@@ -2050,11 +2086,48 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 			}catch(Exception e) {
 				e.printStackTrace();
 				LOGGER.error("Error while approving vendor"+e.getMessage());
+				adminApprovedVendorsResponse.setErrorMessage("Error while approving vendor");
+				adminApprovedVendorsResponse.setStatus(TRUE);
+				return adminApprovedVendorsResponse;
 			}
+			
+			MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");  //i will come back here
+	    	final Locale locale  = new Locale("en");
+	    	
+	    	//String activationURL = userRequest.getActivationURL()+"?email="+userRequest.getEmail();
+	        //sending email
+	        //String[] activationURLArg = {activationURL};
+	        Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
+			templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, vendor.getVendorAttrs().getVendorName());
+			templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, "");
+			templateTokens.put(EmailConstants.EMAIL_USER_NAME, vendor.getEmailAddress());
+			templateTokens.put(EmailConstants.EMAIL_ADMIN_USERNAME_LABEL, messages.getMessage("label.generic.username",locale));
+			templateTokens.put(EmailConstants.EMAIL_TEXT_NEW_USER_ACTIVATION, messages.getMessage("email.newuser.text.activation",locale));
+			//templateTokens.put(EmailConstants.EMAIL_TEXT_NEW_USER_ACTIVATION_LINK, messages.getMessage("email.newuser.text.activation.link",activationURLArg,locale));
+			//templateTokens.put(EmailConstants.EMAIL_TEXT_NEW_USER_ACTIVATION_LINK, activationURL);
+			templateTokens.put(EmailConstants.EMAIL_ADMIN_PASSWORD_LABEL, messages.getMessage("label.generic.password",locale));
+			templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
+			templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
+
+			
+			Email email = new Email();
+			email.setFrom(merchantStore.getStorename());
+			email.setFromEmail(merchantStore.getStoreEmailAddress());
+			email.setSubject(messages.getMessage("email.newuser.text.activation",locale));
+			email.setTo(vendor.getEmailAddress());
+			email.setTemplateName(VENDOR_REGISTRATION_ADMIN_APPROVE_TMPL);
+			email.setTemplateTokens(templateTokens);
+
+
+			
+			emailService.sendHtmlEmail(merchantStore, email);
+			LOGGER.debug("Email sent successful");
+	    	
 			LOGGER.debug("Ended approveVendorByAdmin");
 	    	return adminApprovedVendorsResponse;
 	    	
 	    }
+	    
 }
     
  

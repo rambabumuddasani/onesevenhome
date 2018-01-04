@@ -21,6 +21,7 @@ public class VendorProductVO {
 	private String state;
 	private String pinCode;
 	private String vendorTelephone;
+	private Boolean status;
 	public Long getVendorId() {
 		return vendorId;
 	}
@@ -110,6 +111,12 @@ public class VendorProductVO {
 	}
 	public void setVendorTelephone(String vendorTelephone) {
 		this.vendorTelephone = vendorTelephone;
+	}
+	public Boolean getStatus() {
+		return status;
+	}
+	public void setStatus(Boolean status) {
+		this.status = status;
 	}
 	
 	
