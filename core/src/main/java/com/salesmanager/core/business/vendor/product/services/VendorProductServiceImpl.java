@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.salesmanager.core.business.repositories.vendor.product.VendorProductRepository;
 import com.salesmanager.core.business.services.common.generic.SalesManagerEntityServiceImpl;
+import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.product.vendor.VendorProduct;
 
 @Service("vendorProductService")
@@ -72,6 +73,11 @@ public class VendorProductServiceImpl extends SalesManagerEntityServiceImpl<Long
 	public List<VendorProduct> findProductVendorsByProductIdAndCustomerPinCode(Long productId, String postalCode) {
 		LOGGER.debug("fetching admin activated vendor products");
 		return vendorProductRepository.findProductVendorsByProductIdAndCustomerPinCode(productId,postalCode);
+	}
+
+	@Override
+	public List<Customer> getRequestedVendors() {
+		return vendorProductRepository.getRequestedVendors();
 	}
 
 }

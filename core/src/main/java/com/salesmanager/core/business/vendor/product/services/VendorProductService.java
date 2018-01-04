@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.services.common.generic.SalesManagerEntityService;
+import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.product.vendor.VendorProduct;
 
 
@@ -16,4 +17,5 @@ public interface VendorProductService extends SalesManagerEntityService<Long, Ve
 	VendorProduct getVendorProductById(Long vendorProductId);
 	List<VendorProduct> findProductVendors(Long productId);
 	List<VendorProduct> findProductVendorsByProductIdAndCustomerPinCode(Long productId, String postalCode);
+	List<Customer> getRequestedVendors();
 }

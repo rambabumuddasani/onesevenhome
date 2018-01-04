@@ -218,4 +218,19 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 		return servicesWorkerVOList;
 	}
 
+	@Override
+	public List<Customer> getActivatedVendors() {
+		return customerRepository.getActivatedVendors();
+	}
+
+	@Override
+	public List<Customer> getAllVendors() {
+		return customerRepository.getAllVendors();
+	}
+
+	@Override
+	public List<Customer> getVendorsBasedOnStatus(String status) {
+		return customerRepository.getVendorsBasedOnStatus(status);
+	}
+
 }

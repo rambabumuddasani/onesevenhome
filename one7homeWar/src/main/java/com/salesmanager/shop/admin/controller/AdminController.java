@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -679,10 +680,25 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
     	List<VendorProductVO> vproductList = new ArrayList<VendorProductVO>();
     	for(VendorProduct vendorProduct : vendorProducts) {
     		VendorProductVO vendorProductVO = new VendorProductVO();
+    		
+    		vendorProductVO.setVendorProductId(vendorProduct.getId());
     		vendorProductVO.setVendorId(vendorProduct.getCustomer().getId());
-    		vendorProductVO.setVendorName(vendorProduct.getCustomer().getNick());
+    		
+    		if (!(vendorProduct.getCustomer().getVendorAttrs().getVendorName().equals(null))){
+    		vendorProductVO.setVendorName(vendorProduct.getCustomer().getVendorAttrs().getVendorName());
+    		}
     		vendorProductVO.setProductId(vendorProduct.getProduct().getId());
     		vendorProductVO.setProductName(vendorProduct.getProduct().getProductDescription().getName());
+    		vendorProductVO.setProductDescription(vendorProduct.getProduct().getProductDescription().getDescription());
+    		vendorProductVO.setImageURL(vendorProduct.getProduct().getProductImage().getProductImageUrl());
+    		//vendorProductVO.setVendorMobile(vendorProduct.getCustomer().getVendorAttrs().getVendorMobile());
+    		vendorProductVO.setVendorTelephone(vendorProduct.getCustomer().getVendorAttrs().getVendorTelephone());
+    		vendorProductVO.setHouseNumber(vendorProduct.getCustomer().getVendorAttrs().getVendorOfficeAddress());
+    		vendorProductVO.setStreet(vendorProduct.getCustomer().getBilling().getAddress());
+    		vendorProductVO.setCity(vendorProduct.getCustomer().getBilling().getCity());
+    		vendorProductVO.setArea(vendorProduct.getCustomer().getArea());
+    		vendorProductVO.setState(vendorProduct.getCustomer().getBilling().getState());
+    		vendorProductVO.setPinCode(vendorProduct.getCustomer().getBilling().getPostalCode());
     		vproductList.add(vendorProductVO);
     	}
     	
@@ -1819,7 +1835,226 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		return paginatedResponse;
     	
 	}
-    	
+	@RequestMapping(value="/getHistoryOfDealsByDate", method = RequestMethod.POST)
+	@ResponseBody
+	public PaginatedResponse getHistoryOfDealsByDate(
+	            @RequestParam(value="pageNumber", defaultValue = "1") int page , 
+	            @RequestParam(value="pageSize", defaultValue="15") int size,
+	            @RequestParam("fromDate") @DateTimeFormat(pattern="yyyy-MM-dd") Date fromDate,
+				@RequestParam("toDate")   @DateTimeFormat(pattern="yyyy-MM-dd") Date toDate) {
+		LOGGER.debug("Entered getHistoryOfDealsByDate");
+		PaginatedResponse paginatedResponse = new PaginatedResponse();
+		
+		List<HistoryManagementVO>	historyManagementVOList = new ArrayList<HistoryManagementVO>();
+		
+		try {
+			// retrieving history of deals by start date and end date
+	    	List<HistoryManagement> historyOfDeals = historyManagementService.getHistoryOfDealsByDate(fromDate,toDate);  
+	    	
+	    		for(HistoryManagement historyOfDeal : historyOfDeals) {
+	    			HistoryManagementVO historyManagementVO = new HistoryManagementVO();
+	    			historyManagementVO.setHistoryManagementId(historyOfDeal.getId());
+	    			historyManagementVO.setProductId(historyOfDeal.getProductId());
+	    			historyManagementVO.setProductName(historyOfDeal.getProductName());
+	    			historyManagementVO.setProductPrice(historyOfDeal.getProductPrice());
+	    			historyManagementVO.setProductDiscountPrice(historyOfDeal.getProductDiscountPrice());
+	    			historyManagementVO.setProductPriceStartDate(historyOfDeal.getProductPriceStartDate());
+	    			historyManagementVO.setProductPriceEndDate(historyOfDeal.getProductPriceEndDate());
+	    			historyManagementVO.setEnableFor(historyOfDeal.getEnableFor());
+	    			historyManagementVOList.add(historyManagementVO);
+	        	}
+	    		PaginationData paginaionData=createPaginaionData(page,size);
+	        	calculatePaginaionData(paginaionData,size, historyManagementVOList.size());
+	        	paginatedResponse.setPaginationData(paginaionData);
+	    		if(historyManagementVOList == null || historyManagementVOList.isEmpty() || historyManagementVOList.size() < paginaionData.getCountByPage()){
+	    			paginatedResponse.setResponseData(historyManagementVOList);
+	    			return paginatedResponse;
+	    		}
+	        	List<HistoryManagementVO> paginatedResponses = historyManagementVOList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+	        	paginatedResponse.setResponseData(paginatedResponses);
+	    		return paginatedResponse;
+	    	}catch(Exception e) {
+	    		e.printStackTrace();
+	    		LOGGER.error("Error while retrieving history of deals "+e.getMessage());
+	    	}
+		LOGGER.debug("Ended getHistoryOfDealsByDate");
+		return paginatedResponse;
+		
+	}
+	    @RequestMapping(value="/admin/vendorproducts/activate", method = RequestMethod.POST)
+		@ResponseBody
+		public ActivateProductResponse adminApproveProductsByVendor(@RequestBody ApproveVendorProductRequest approveVendorProductRequest) throws Exception {
+			LOGGER.debug("Entered adminApproveProductsByVendor");
+			
+			ActivateProductResponse activateProductResponse = new ActivateProductResponse();
+			
+			try {
+				
+			List<Long> vendorProductIds = approveVendorProductRequest.getVendorProductIds();
+			
+			for(Long vendorProductId : vendorProductIds) {
+				 VendorProduct vendorProduct = vendorProductService.getVendorProductById(vendorProductId);
+			    	if(vendorProduct==null) {
+			    		activateProductResponse.setErrorMesg("Vendor product not found");
+			    		activateProductResponse.setStatus(FALSE);
+			    		return activateProductResponse;
+			    	}
+			    	// Approving and updating vendor product
+			    	vendorProduct.setAdminActivatedDate(new Date());
+			    	vendorProduct.setAdminActivated(approveVendorProductRequest.isStatus());
+			    	vendorProductService.update(vendorProduct);
+	
+			}
+			
+			if(approveVendorProductRequest.isStatus()==true) {
+	    		activateProductResponse.setSuccessMsg("Products Approved");
+	    		activateProductResponse.setStatus(TRUE);
+	    	} else {
+	    		activateProductResponse.setSuccessMsg("Productd Declined");
+	    		activateProductResponse.setStatus(TRUE);
+	    	}
+			
+			} catch (Exception e) {
+				e.printStackTrace();
+				LOGGER.error("Error while approving/declining products"+e.getMessage());
+			}
+	    	return activateProductResponse;
+		 
+	 }
+	
+	    @RequestMapping(value="/getVendorForAdmin", method = RequestMethod.POST)
+		@ResponseBody
+		public PaginatedResponse getVendorForAdmin(@RequestParam(value="pageNumber", defaultValue = "1") int page ,
+				                  @RequestParam(value="pageSize", defaultValue="15") int size,
+				                  @RequestBody AdminApprovedVendorsRequest adminApprovedVendorsRequest) {
+			LOGGER.debug("Entered getAdminApprovedVendors");
+			
+			PaginatedResponse paginatedResponse = new PaginatedResponse();
+			
+			List<VendorDetailsVO> vendorDetailsVOList = new ArrayList<VendorDetailsVO>();
+			
+			List<Customer> vendorsList = null;
+			try {
+			if(adminApprovedVendorsRequest.getStatus().equals("ALL")) {
+				
+				vendorsList = customerService.getAllVendors();
+				
+				for(Customer vendor : vendorsList) {
+					VendorDetailsVO vendorDetailsVO = new VendorDetailsVO();
+					vendorDetailsVO.setVendorId(vendor.getId());
+					vendorDetailsVO.setVendorName(vendor.getVendorAttrs().getVendorName());
+					vendorDetailsVO.setVendorUserProfile(vendor.getUserProfile());
+					vendorDetailsVO.setStatus(vendor.getActivated());
+					vendorDetailsVOList.add(vendorDetailsVO);
+				}
+			} else {
+				vendorsList = customerService.getVendorsBasedOnStatus(adminApprovedVendorsRequest.getStatus());
+				
+				for(Customer vendor : vendorsList) {
+					VendorDetailsVO vendorDetailsVO = new VendorDetailsVO();
+					vendorDetailsVO.setVendorId(vendor.getId());
+					vendorDetailsVO.setVendorName(vendor.getVendorAttrs().getVendorName());
+					vendorDetailsVO.setVendorUserProfile(vendor.getUserProfile());
+					vendorDetailsVO.setStatus(vendor.getActivated());
+					vendorDetailsVOList.add(vendorDetailsVO);
+			   }
+			}
+				PaginationData paginaionData=createPaginaionData(page,size);
+	        	calculatePaginaionData(paginaionData,size, vendorDetailsVOList.size());
+	        	paginatedResponse.setPaginationData(paginaionData);
+	    		if(vendorDetailsVOList == null || vendorDetailsVOList.isEmpty() || vendorDetailsVOList.size() < paginaionData.getCountByPage()){
+	    			paginatedResponse.setResponseData(vendorDetailsVOList);
+	    			return paginatedResponse;
+	    		}
+	        	List<VendorDetailsVO> paginatedResponses = vendorDetailsVOList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+	        	paginatedResponse.setResponseData(paginatedResponses);
+			}catch(Exception e) {
+				e.printStackTrace();
+				LOGGER.error("error while retrieving"+e.getMessage());
+			}
+			LOGGER.debug("Ended getAdminApprovedVendors");
+			return paginatedResponse;
+			
+	    }
+	    @RequestMapping(value="/getRequestedVendorForAdmin", method = RequestMethod.GET)
+		@ResponseBody
+		public PaginatedResponse getRequestedVendorForAdmin(@RequestParam(value="pageNumber", defaultValue = "1") int page ,
+				                  @RequestParam(value="pageSize", defaultValue="15") int size) {
+			
+	    	LOGGER.debug("Entered getRequestedVendorForAdmin");
+	    	PaginatedResponse paginatedResponse = new PaginatedResponse();
+	    	
+	    	List<AdminVendorDetailsVO> adminVendorDetailsVOList = new ArrayList<AdminVendorDetailsVO>();
+	    	try {
+	    	List<Customer> requestedVendorList = vendorProductService.getRequestedVendors();
+	    	
+	    	for(Customer vendorProduct:requestedVendorList) {
+	    		
+	    		AdminVendorDetailsVO adminvendorDetailsVO = new AdminVendorDetailsVO();
+	    		adminvendorDetailsVO.setVendorId(vendorProduct.getId());
+				adminvendorDetailsVO.setVendorName(vendorProduct.getVendorAttrs().getVendorName());
+				adminvendorDetailsVO.setVendorUserProfile(vendorProduct.getUserProfile());
+				adminVendorDetailsVOList.add(adminvendorDetailsVO);
+	    		
+	    	}
+	    	
+	    	PaginationData paginaionData=createPaginaionData(page,size);
+        	calculatePaginaionData(paginaionData,size, adminVendorDetailsVOList.size());
+        	paginatedResponse.setPaginationData(paginaionData);
+    		if(adminVendorDetailsVOList == null || adminVendorDetailsVOList.isEmpty() || adminVendorDetailsVOList.size() < paginaionData.getCountByPage()){
+    			paginatedResponse.setResponseData(adminVendorDetailsVOList);
+    			return paginatedResponse;
+    		}
+    		
+        	List<AdminVendorDetailsVO> paginatedResponses = adminVendorDetailsVOList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+        	paginatedResponse.setResponseData(paginatedResponses);
+        	
+		}catch(Exception e) {
+			e.printStackTrace();
+			LOGGER.error("error while retrieving vendors "+e.getMessage());
+			paginatedResponse.setErrorMsg("Error while retrieving vendors");
+		}
+	    	LOGGER.debug("Ended getRequestedVendorForAdmin");
+	    	return paginatedResponse;
+	    	
+	    }
+	    // Admin Approving vendors 
+	    @RequestMapping(value="/approveVendorByAdmin", method = RequestMethod.POST)
+		@ResponseBody
+		public AdminApprovedVendorsResponse approveVendorByAdmin(@RequestParam(value="pageNumber", defaultValue = "1") int page ,
+				                  @RequestParam(value="pageSize", defaultValue="15") int size,
+				                  @RequestBody AdminApprovedVendorsRequest adminApprovedVendorsRequest) {
+			LOGGER.debug("Entered approveVendorByAdmin");
+	    	
+			AdminApprovedVendorsResponse adminApprovedVendorsResponse = new AdminApprovedVendorsResponse();
+			try {
+			Customer vendor = customerService.getById(adminApprovedVendorsRequest.getVendorId());
+			
+			if(vendor==null) {
+				adminApprovedVendorsResponse.setErrorMessage("vendor not found for id "+adminApprovedVendorsRequest.getVendorId());
+				adminApprovedVendorsResponse.setStatus(FALSE);
+				return adminApprovedVendorsResponse;
+			}
+			vendor.setActivated(adminApprovedVendorsRequest.getStatus());
+			
+			if(adminApprovedVendorsRequest.getStatus().equals("1")) {
+				LOGGER.debug("Vendor activated");
+				adminApprovedVendorsResponse.setSuccessMessage("Vendor activated");
+				adminApprovedVendorsResponse.setStatus(TRUE);
+			}
+			else {
+				LOGGER.debug("Vendor declined");
+				adminApprovedVendorsResponse.setSuccessMessage("Vendor declined");
+				adminApprovedVendorsResponse.setStatus(TRUE);
+			}
+			}catch(Exception e) {
+				e.printStackTrace();
+				LOGGER.error("Error while approving vendor"+e.getMessage());
+			}
+			LOGGER.debug("Ended approveVendorByAdmin");
+	    	return adminApprovedVendorsResponse;
+	    	
+	    }
 }
     
  

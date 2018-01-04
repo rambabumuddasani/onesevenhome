@@ -1,5 +1,6 @@
 package com.salesmanager.core.business.services.historymanage;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -26,6 +27,12 @@ public class HistoryManagementServiceImpl extends SalesManagerEntityServiceImpl<
 	public List<HistoryManagement> getHistoryOfDeals() {
 		
 		return historyManagementRepository.findAll();
+	}
+
+	@Override
+	public List<HistoryManagement> getHistoryOfDealsByDate(Date fromDate,Date toDate) {
+
+		return historyManagementRepository.getHistoryOfDealsByDate(fromDate,toDate);
 	}
 	
 }

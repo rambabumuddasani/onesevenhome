@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class VendorProductVO {
 
 	private Long vendorProductId;
+	@JsonIgnore
 	private Long vendorId;
 	private String vendorName;
 	private Long productId;

@@ -44,4 +44,10 @@ public interface CustomerService  extends SalesManagerEntityService<Long, Custom
 	List<Customer> findByServiceId(Integer serviceId);
 	List<ServicesWorkerVO> findByVendorType(String userType);
 
+	public List<Customer> getActivatedVendors();
+
+	public List<Customer> getAllVendors();
+
+	public List<Customer> getVendorsBasedOnStatus(String status);
+
 }

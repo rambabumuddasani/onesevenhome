@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.product.vendor.VendorProduct;
 
 
@@ -39,6 +40,9 @@ public interface VendorProductRepository extends JpaRepository<VendorProduct, Lo
 	@Query("select distinct vp from VendorProduct vp join fetch vp.product pd join fetch vp.customer customer"
 			+ " where vp.adminActivated = TRUE and pd.id=?1 and customer.billing.postalCode = ?2")
 	public List<VendorProduct> findProductVendorsByProductIdAndCustomerPinCode(Long productId,String postalCode);
+
+	@Query("select distinct vp.customer from VendorProduct vp")
+	public List<Customer> getRequestedVendors();
 	
 	/*	@Query("select vp from VendorProduct vp where vp.id=?1")
 	public VendorProduct findVendorProductById(Long vendorProductId);
