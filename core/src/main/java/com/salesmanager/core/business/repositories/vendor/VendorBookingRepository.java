@@ -15,4 +15,10 @@ public interface VendorBookingRepository extends JpaRepository<VendorBooking, Lo
 	@Query("select sb from VendorBooking sb where sb.status = 'N'")
 	List<VendorBooking> getOpenedVendorBookings();
 
+	@Query("select vb from VendorBooking vb where vb.vendor.customerType = ?1")
+	List<VendorBooking> getVendorBookingsByVendorType(String vendorType);
+
+	@Query("select vb from VendorBooking vb where vb.status = ?1 and vb.vendor.customerType = ?2")
+	List<VendorBooking> getVendorBookingBasedOnStatus(String status,String vendorType);
+
 }

@@ -123,6 +123,15 @@ public class Constants {
     
     public final static String DEBUG_MODE = "debugMode";
     
+    public final static String PENDING_FOR_APPROVAL = "Pending for Approval";
+	public final static String APPROVED = "Approved";
+	
+	public final static String PRODUCT_VENDORS = "Product Vendors";
+	public final static String SERVICE_PROVIDER = "Service Provider";
+	public final static String ARCHITECTS = "Architects";
+	public final static String WALLPAPER = "WallPaper Vendors";
+	public final static String MACHINERY_EQUIPMENT = "Machinery & Equipment";
+	
     public static Map<String,String> customerTypes = new HashMap<String,String>();
 	
 	static {

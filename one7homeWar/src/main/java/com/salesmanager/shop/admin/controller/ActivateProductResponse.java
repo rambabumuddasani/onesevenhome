@@ -5,6 +5,7 @@ public class ActivateProductResponse {
 	private String errorMesg;
 	private String successMsg;
 	private String status;
+	private int approvedProducts;
 	public String getErrorMesg() {
 		return errorMesg;
 	}
@@ -22,6 +23,12 @@ public class ActivateProductResponse {
 	}
 	public void setStatus(String status) {
 		this.status = status;
+	}
+	public int getApprovedProducts() {
+		return approvedProducts;
+	}
+	public void setApprovedProducts(int approvedProducts) {
+		this.approvedProducts = approvedProducts;
 	}
 
 }

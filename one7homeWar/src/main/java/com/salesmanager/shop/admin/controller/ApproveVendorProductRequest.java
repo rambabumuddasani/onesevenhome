@@ -6,6 +6,7 @@ public class ApproveVendorProductRequest {
 
 	List<Long> vendorProductIds;
 	private boolean status;
+	private Long vendorId;
 
 	public List<Long> getVendorProductIds() {
 		return vendorProductIds;
@@ -21,5 +22,13 @@ public class ApproveVendorProductRequest {
 
 	public void setStatus(boolean status) {
 		this.status = status;
+	}
+
+	public Long getVendorId() {
+		return vendorId;
+	}
+
+	public void setVendorId(Long vendorId) {
+		this.vendorId = vendorId;
 	}
 }

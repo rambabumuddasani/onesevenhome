@@ -49,4 +49,17 @@ public class VendorBookingServiceImpl extends SalesManagerEntityServiceImpl<Long
 	}
 
 
+	@Override
+	public List<VendorBooking> getVendorBookingsByVendorType(String vendorType) {
+		return vendorBookingRepository.getVendorBookingsByVendorType(vendorType) ;
+	}
+
+
+	@Override
+	public List<VendorBooking> getVendorBookingBasedOnStatus(String status,String vendorType) {
+		// TODO Auto-generated method stub
+		return vendorBookingRepository.getVendorBookingBasedOnStatus(status,vendorType);
+	}
+
+
 }

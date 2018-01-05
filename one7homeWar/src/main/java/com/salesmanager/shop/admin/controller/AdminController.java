@@ -1923,6 +1923,8 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 				
 			List<Long> vendorProductIds = approveVendorProductRequest.getVendorProductIds();
 			
+			//List<VendorProduct> vendorProductsList = vendorProductService.findProductsByVendor(approveVendorProductRequest.getVendorId());
+			
 			for(Long vendorProductId : vendorProductIds) {
 				 VendorProduct vendorProduct = vendorProductService.getVendorProductById(vendorProductId);
 			    	if(vendorProduct==null) {
@@ -1944,7 +1946,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    		activateProductResponse.setSuccessMsg("Product(s) Declined");
 	    		activateProductResponse.setStatus(TRUE);
 	    	}
-			
+		
 			} catch (Exception e) {
 				e.printStackTrace();
 				LOGGER.error("Error while approving/declining products"+e.getMessage());
@@ -1958,7 +1960,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		public PaginatedResponse getVendorForAdmin(@RequestParam(value="pageNumber", defaultValue = "1") int page ,
 				                  @RequestParam(value="pageSize", defaultValue="15") int size,
 				                  @RequestBody AdminApprovedVendorsRequest adminApprovedVendorsRequest) throws Exception{
-			LOGGER.debug("Entered getAdminApprovedVendors");
+			LOGGER.debug("Entered getVendorForAdmin");
 			
 			PaginatedResponse paginatedResponse = new PaginatedResponse();
 			
@@ -1975,7 +1977,23 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 					vendorDetailsVO.setVendorId(vendor.getId());
 					vendorDetailsVO.setVendorName(vendor.getVendorAttrs().getVendorName());
 					vendorDetailsVO.setVendorUserProfile(vendor.getUserProfile());
-					vendorDetailsVO.setStatus(vendor.getActivated());
+					if(vendor.getActivated().equals("0")) {
+					vendorDetailsVO.setStatus(Constants.PENDING_FOR_APPROVAL);
+					}else {
+						vendorDetailsVO.setStatus(Constants.APPROVED);
+					}
+					
+					if(vendor.getCustomerType().equals("1"))
+						vendorDetailsVO.setVendorType(Constants.PRODUCT_VENDORS);
+					else if(vendor.getCustomerType().equals("2")) 
+						vendorDetailsVO.setVendorType(Constants.SERVICE_PROVIDER);
+					else if(vendor.getCustomerType().equals("3")) 
+						vendorDetailsVO.setVendorType(Constants.ARCHITECTS);
+					else if(vendor.getCustomerType().equals("4")) 
+						vendorDetailsVO.setVendorType(Constants.WALLPAPER);
+					else
+					    vendorDetailsVO.setVendorType(Constants.MACHINERY_EQUIPMENT);
+					
 					vendorDetailsVOList.add(vendorDetailsVO);
 				}
 			} else {
@@ -1986,7 +2004,23 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 					vendorDetailsVO.setVendorId(vendor.getId());
 					vendorDetailsVO.setVendorName(vendor.getVendorAttrs().getVendorName());
 					vendorDetailsVO.setVendorUserProfile(vendor.getUserProfile());
-					vendorDetailsVO.setStatus(vendor.getActivated());
+					if(vendor.getActivated().equals("0")) {
+						vendorDetailsVO.setStatus(Constants.PENDING_FOR_APPROVAL);
+						}else {
+							vendorDetailsVO.setStatus(Constants.APPROVED);
+						}
+					
+					if(vendor.getCustomerType().equals("1"))
+						vendorDetailsVO.setVendorType(Constants.PRODUCT_VENDORS);
+					else if(vendor.getCustomerType().equals("2")) 
+						vendorDetailsVO.setVendorType(Constants.SERVICE_PROVIDER);
+					else if(vendor.getCustomerType().equals("3")) 
+						vendorDetailsVO.setVendorType(Constants.ARCHITECTS);
+					else if(vendor.getCustomerType().equals("4")) 
+						vendorDetailsVO.setVendorType(Constants.WALLPAPER);
+					else
+					    vendorDetailsVO.setVendorType(Constants.MACHINERY_EQUIPMENT);
+					
 					vendorDetailsVOList.add(vendorDetailsVO);
 			   }
 			}
@@ -2003,7 +2037,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 				e.printStackTrace();
 				LOGGER.error("error while retrieving"+e.getMessage());
 			}
-			LOGGER.debug("Ended getAdminApprovedVendors");
+			LOGGER.debug("Ended getVendorForAdmin");
 			return paginatedResponse;
 			
 	    }
@@ -2024,6 +2058,11 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    		
 	    		AdminVendorDetailsVO adminvendorDetailsVO = new AdminVendorDetailsVO();
 	    		adminvendorDetailsVO.setVendorId(vendorProduct.getId());
+	    		
+	    		int totalCount = getVendorAddedProductsCount(vendorProduct.getId());
+	    		int approvedCount = getVendorAprovedProductsCount(vendorProduct.getId());
+	    		adminvendorDetailsVO.setCount("Total:"+totalCount+"  "+"Approved:"+approvedCount);
+	    		
 				adminvendorDetailsVO.setVendorName(vendorProduct.getVendorAttrs().getVendorName());
 				adminvendorDetailsVO.setVendorUserProfile(vendorProduct.getUserProfile());
 				adminVendorDetailsVOList.add(adminvendorDetailsVO);
@@ -2050,6 +2089,28 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    	return paginatedResponse;
 	    	
 	    }
+	    
+	    public int getVendorAprovedProductsCount(Long vendorId) throws Exception{
+			
+	    	int count =0;
+	  
+	    	List<VendorProduct> approvedProducts = vendorProductService.getVendorApprovedProductsByVendorId(vendorId);
+	    	
+	    	count = approvedProducts.size();
+	    	return count;
+	    	
+	    }
+	    
+		public int getVendorAddedProductsCount(Long vendorId) throws Exception{
+			
+	    	int count =0;
+	    	
+	    	List<VendorProduct>  vendorProducts = vendorProductService.getVendorproductsByVendorId(vendorId);
+	    	
+	    	count = vendorProducts.size();
+	    	return count;
+	    	
+	    }
 	    // Admin Approving registered vendors 
 	    @RequestMapping(value="/approveVendorByAdmin", method = RequestMethod.POST)
 		@ResponseBody
@@ -2057,7 +2118,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 				                  @RequestParam(value="pageSize", defaultValue="15") int size,
 				                  @RequestBody AdminApprovedVendorsRequest adminApprovedVendorsRequest) throws Exception {
 			LOGGER.debug("Entered approveVendorByAdmin");
-	    	
+			String status = null;
 			AdminApprovedVendorsResponse adminApprovedVendorsResponse = new AdminApprovedVendorsResponse();
 			Customer vendor =null;
 			try {
@@ -2068,12 +2129,16 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 				adminApprovedVendorsResponse.setStatus(FALSE);
 				return adminApprovedVendorsResponse;
 			}
-			
-			vendor.setActivated(adminApprovedVendorsRequest.getStatus());
+			if(adminApprovedVendorsRequest.getStatus().equals(Constants.APPROVED)) {
+				status = "1";
+			}else {
+				status = "0";
+			}
+			vendor.setActivated(status);
 			customerService.update(vendor);
 			LOGGER.debug("Updated vendor status");
 			
-			if(adminApprovedVendorsRequest.getStatus().equals("1")) {
+			if(adminApprovedVendorsRequest.getStatus().equals(Constants.APPROVED)) {
 				LOGGER.debug("Vendor activated");
 				adminApprovedVendorsResponse.setSuccessMessage("Vendor activated");
 				adminApprovedVendorsResponse.setStatus(TRUE);
@@ -2127,7 +2192,79 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    	return adminApprovedVendorsResponse;
 	    	
 	    }
-	    
+	    // Vendor booking for admin (Archtects and machinery & equipment)
+	    @RequestMapping(value="/getVendorBookingsForAdmin", method = RequestMethod.POST)
+		@ResponseBody
+		public PaginatedResponse getVendorBookingsForAdmin(@RequestBody AdminVendorBokingRequest adminVendorBokingRequest, 
+				                  @RequestParam(value="pageNumber", defaultValue = "1") int page ,
+				                  @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception{
+			
+	    	LOGGER.debug("Entered getVendorBookingsForAdmin");
+	    	
+	    	PaginatedResponse paginatedResponse = new PaginatedResponse();
+	    	
+	    	List<VendorBooking> vendorBookingList = null;
+	    	
+	    	List<VendorBookingVO> vendorBookingVOList = new ArrayList<VendorBookingVO>();
+	    	try {
+	    	//vendorBookingList = vendorBookingService.getAllVendorBookings();
+	    		vendorBookingList = vendorBookingService.getVendorBookingsByVendorType(adminVendorBokingRequest.getVendorType());
+	    	for(VendorBooking vendorBooking : vendorBookingList) {
+	    		
+	    		VendorBookingVO vendorBookingVO = new VendorBookingVO();
+	    		
+	    		if(vendorBooking.getVendor().getCustomerType().equals(adminVendorBokingRequest.getVendorType())){
+	    			
+	    			if(adminVendorBokingRequest.getStatus().equals("ALL")) {
+	    			vendorBookingVO.setId(vendorBooking.getId());
+	    			vendorBookingVO.setCustomerName(vendorBooking.getCustomer().getBilling().getFirstName().concat(" ").concat(vendorBooking.getCustomer().getBilling().getLastName()));
+	    			vendorBookingVO.setVendorName(vendorBooking.getVendor().getVendorAttrs().getVendorName());
+	    			vendorBookingVO.setVendorId(vendorBooking.getVendor().getId());
+	    			vendorBookingVO.setBookingDate(vendorBooking.getBookingDate());
+	    			vendorBookingVO.setAppointmentDate(vendorBooking.getAppointmentDate());
+	    			vendorBookingVO.setClosingDate(vendorBooking.getClosingDate());
+	    			vendorBookingVO.setAddress(vendorBooking.getAddress());
+	    			vendorBookingVO.setDescription(vendorBooking.getDescription());
+	    			vendorBookingVO.setComment(vendorBooking.getComment());
+	    			vendorBookingVO.setStatus(vendorBooking.getStatus());
+	    			
+	    			if(vendorBooking.getCustomer().getCustomerType().equals("1"))
+	    			vendorBookingVO.setBookingType(Constants.PRODUCT_VENDORS);
+	    			else if(vendorBooking.getCustomer().getCustomerType().equals("2"))
+	    				vendorBookingVO.setBookingType(Constants.SERVICE_PROVIDER);
+	    			else if(vendorBooking.getCustomer().getCustomerType().equals("3"))
+	    				vendorBookingVO.setBookingType(Constants.ARCHITECTS);
+	    			else if(vendorBooking.getCustomer().getCustomerType().equals("4"))
+	    				vendorBookingVO.setBookingType(Constants.WALLPAPER);
+	    			else
+	    				vendorBookingVO.setBookingType(Constants.MACHINERY_EQUIPMENT);
+	    			
+	    			vendorBookingVOList.add(vendorBookingVO);
+	    			}else {
+	    				vendorBookingList = vendorBookingService.getVendorBookingBasedOnStatus(adminVendorBokingRequest.getStatus(),adminVendorBokingRequest.getVendorType());
+	    			}
+	    		}
+	    	}
+	    	
+	    	PaginationData paginaionData=createPaginaionData(page,size);
+        	calculatePaginaionData(paginaionData,size, vendorBookingVOList.size());
+        	paginatedResponse.setPaginationData(paginaionData);
+    		if(vendorBookingVOList == null || vendorBookingVOList.isEmpty() || vendorBookingVOList.size() < paginaionData.getCountByPage()){
+    			paginatedResponse.setResponseData(vendorBookingVOList);
+    			return paginatedResponse;
+    		}
+    		
+        	List<VendorBookingVO> paginatedResponses = vendorBookingVOList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+        	paginatedResponse.setResponseData(paginatedResponses);
+	    	return paginatedResponse;
+	    }catch(Exception e) {
+	    	e.printStackTrace();
+	    	LOGGER.error("Error while retrieving vendor bookings "+e.getMessage());
+	    }
+	    	LOGGER.debug("Ended getVendorBookingsForAdmin");
+	    	return paginatedResponse;
+	    }
+	   	
 }
     
  

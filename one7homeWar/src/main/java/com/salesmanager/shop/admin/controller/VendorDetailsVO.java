@@ -1,11 +1,15 @@
 package com.salesmanager.shop.admin.controller;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class VendorDetailsVO {
 
 	private Long vendorId;
 	private String vendorName;
+	@JsonIgnore
 	private String vendorUserProfile;
 	private String status;
+	private String vendorType;
 	public Long getVendorId() {
 		return vendorId;
 	}
@@ -29,5 +33,11 @@ public class VendorDetailsVO {
 	}
 	public void setStatus(String status) {
 		this.status = status;
+	}
+	public String getVendorType() {
+		return vendorType;
+	}
+	public void setVendorType(String vendorType) {
+		this.vendorType = vendorType;
 	}
 }
