@@ -2213,7 +2213,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    		
 	    		VendorBookingVO vendorBookingVO = new VendorBookingVO();
 	    		
-	    		if(vendorBooking.getVendor().getCustomerType().equals(adminVendorBokingRequest.getVendorType())){
+	    		//if(vendorBooking.getVendor().getCustomerType().equals(adminVendorBokingRequest.getVendorType())){
 	    			
 	    			if(adminVendorBokingRequest.getStatus().equals("ALL")) {
 	    			vendorBookingVO.setId(vendorBooking.getId());
@@ -2230,21 +2230,46 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    			
 	    			if(vendorBooking.getCustomer().getCustomerType().equals("1"))
 	    			vendorBookingVO.setBookingType(Constants.PRODUCT_VENDORS);
-	    			else if(vendorBooking.getCustomer().getCustomerType().equals("2"))
+	    			if(vendorBooking.getCustomer().getCustomerType().equals("2"))
 	    				vendorBookingVO.setBookingType(Constants.SERVICE_PROVIDER);
-	    			else if(vendorBooking.getCustomer().getCustomerType().equals("3"))
+	    			if(vendorBooking.getCustomer().getCustomerType().equals("3"))
 	    				vendorBookingVO.setBookingType(Constants.ARCHITECTS);
-	    			else if(vendorBooking.getCustomer().getCustomerType().equals("4"))
+	    			if(vendorBooking.getCustomer().getCustomerType().equals("4"))
 	    				vendorBookingVO.setBookingType(Constants.WALLPAPER);
-	    			else
+	    			if(vendorBooking.getCustomer().getCustomerType().equals("5")) 
 	    				vendorBookingVO.setBookingType(Constants.MACHINERY_EQUIPMENT);
-	    			
+	    		
 	    			vendorBookingVOList.add(vendorBookingVO);
+	    			
 	    			}else {
 	    				vendorBookingList = vendorBookingService.getVendorBookingBasedOnStatus(adminVendorBokingRequest.getStatus(),adminVendorBokingRequest.getVendorType());
+	    				vendorBookingVO.setId(vendorBooking.getId());
+		    			vendorBookingVO.setCustomerName(vendorBooking.getCustomer().getBilling().getFirstName().concat(" ").concat(vendorBooking.getCustomer().getBilling().getLastName()));
+		    			vendorBookingVO.setVendorName(vendorBooking.getVendor().getVendorAttrs().getVendorName());
+		    			vendorBookingVO.setVendorId(vendorBooking.getVendor().getId());
+		    			vendorBookingVO.setBookingDate(vendorBooking.getBookingDate());
+		    			vendorBookingVO.setAppointmentDate(vendorBooking.getAppointmentDate());
+		    			vendorBookingVO.setClosingDate(vendorBooking.getClosingDate());
+		    			vendorBookingVO.setAddress(vendorBooking.getAddress());
+		    			vendorBookingVO.setDescription(vendorBooking.getDescription());
+		    			vendorBookingVO.setComment(vendorBooking.getComment());
+		    			vendorBookingVO.setStatus(vendorBooking.getStatus());
+		    			
+		    			if(vendorBooking.getCustomer().getCustomerType().equals("1"))
+		    			vendorBookingVO.setBookingType(Constants.PRODUCT_VENDORS);
+		    			if(vendorBooking.getCustomer().getCustomerType().equals("2"))
+		    				vendorBookingVO.setBookingType(Constants.SERVICE_PROVIDER);
+		    			if(vendorBooking.getCustomer().getCustomerType().equals("3"))
+		    				vendorBookingVO.setBookingType(Constants.ARCHITECTS);
+		    			if(vendorBooking.getCustomer().getCustomerType().equals("4"))
+		    				vendorBookingVO.setBookingType(Constants.WALLPAPER);
+		    			if(vendorBooking.getCustomer().getCustomerType().equals("5")) 
+		    				vendorBookingVO.setBookingType(Constants.MACHINERY_EQUIPMENT);
+		    		
+		    			vendorBookingVOList.add(vendorBookingVO);
 	    			}
 	    		}
-	    	}
+	    //	}
 	    	
 	    	PaginationData paginaionData=createPaginaionData(page,size);
         	calculatePaginaionData(paginaionData,size, vendorBookingVOList.size());

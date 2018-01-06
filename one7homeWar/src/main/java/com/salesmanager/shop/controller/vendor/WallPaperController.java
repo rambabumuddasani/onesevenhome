@@ -154,7 +154,7 @@ public class WallPaperController extends AbstractController {
 	    	wallPaperResponse.setVendorPortfolioList(vendorPortfolioList);
 	    	if(customer != null) {
 	    		wallPaperResponse.setVendorName(customer.getVendorAttrs().getVendorName());
-	    		wallPaperResponse.setVendorImageURL(customer.getVendorAttrs().getVendorAuthCert());
+	    		wallPaperResponse.setVendorImageURL(customer.getUserProfile());
 		    	wallPaperResponse.setVendorShortDescription(customer.getVendorAttrs().getVendorShortDescription());
 		    	wallPaperResponse.setVendorDescription(customer.getVendorAttrs().getVendorDescription());
 	    	}

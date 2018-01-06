@@ -155,7 +155,7 @@ public class MachineryController extends AbstractController {
 	    	machineryResponse.setVendorPortfolioList(vendorPortfolioList);
 	    	if(customer != null) {
 	    		machineryResponse.setVendorName(customer.getVendorAttrs().getVendorName());
-	    		machineryResponse.setVendorImageURL(customer.getVendorAttrs().getVendorAuthCert());
+	    		machineryResponse.setVendorImageURL(customer.getUserProfile());
 	    		machineryResponse.setVendorShortDescription(customer.getVendorAttrs().getVendorShortDescription());
 	    		machineryResponse.setVendorDescription(customer.getVendorAttrs().getVendorDescription());
 	    	}
