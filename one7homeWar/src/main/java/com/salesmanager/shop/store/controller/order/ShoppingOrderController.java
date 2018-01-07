@@ -774,7 +774,7 @@ public class ShoppingOrderController extends AbstractController {
 	@RequestMapping(value="/allOrderDetails", method = RequestMethod.POST)
 	@ResponseBody
 	//public List<ReadableOrder> getAllCustomerOrders(HttpServletRequest request, Locale locale,Pageable pageable) throws Exception {
-	public OrderResponse getAllCustomerOrders(HttpServletRequest request, Locale locale,@RequestParam(value="page",defaultValue = "1") int page, 
+	public OrderResponse getAllCustomerOrders(HttpServletRequest request, Locale locale,@RequestParam(value="page",defaultValue = "0") int page, 
 				@RequestParam(value="size",defaultValue="5")int size) throws Exception {
 		OrderResponse orderResponse = new OrderResponse();
 		MerchantStore store = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
@@ -802,7 +802,7 @@ public class ShoppingOrderController extends AbstractController {
 	@RequestMapping(value="/vendorOrderDetails/{vendorId}", method = RequestMethod.POST)
 	@ResponseBody
 	//public List<ReadableOrder> getAllCustomerOrders(HttpServletRequest request, Locale locale,Pageable pageable) throws Exception {
-	public OrderResponse getVendorOrders(@PathVariable Long vendorId, HttpServletRequest request, Locale locale,@RequestParam(value="page",defaultValue = "1") int page, 
+	public OrderResponse getVendorOrders(@PathVariable Long vendorId, HttpServletRequest request, Locale locale,@RequestParam(value="page",defaultValue = "0") int page, 
 				@RequestParam(value="size",defaultValue="5")int size) throws Exception {
 		OrderResponse orderResponse = new OrderResponse();
 		MerchantStore store = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
@@ -815,7 +815,7 @@ public class ShoppingOrderController extends AbstractController {
 		List<ReadableOrder> allOrders = new ArrayList<ReadableOrder>();
 		for(Order o : pageOrders){
 			allOrders.add(orderFacade.getReadableOrderByOrder(o, store, language));
-		}
+		}	
 		orderResponse.setFirst(pageOrders.isFirst());
 		orderResponse.setLast(pageOrders.isLast());
 		orderResponse.setNumber(pageOrders.getNumber());
@@ -832,7 +832,7 @@ public class ShoppingOrderController extends AbstractController {
 	@RequestMapping(value="/adminViewOrders", method = RequestMethod.POST)
 	@ResponseBody
 	public OrderResponse getAllCustomerOrdersForAdmin(HttpServletRequest request, Locale locale,
-				@RequestParam(value="page",defaultValue = "1") int page, 
+				@RequestParam(value="page",defaultValue = "0") int page, 
 				@RequestParam(value="size",defaultValue="5")int size,
 				@RequestParam("fromDate") @DateTimeFormat(pattern="yyyy-MM-dd") Date fromDate,
 				@RequestParam("toDate")   @DateTimeFormat(pattern="yyyy-MM-dd") Date toDate) throws Exception {
