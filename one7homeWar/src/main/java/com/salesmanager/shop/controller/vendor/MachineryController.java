@@ -306,6 +306,9 @@ public class MachineryController extends AbstractController {
 				machineryPortfolioVO.setImageURL(machineryPortfolio.getImageURL());
 				machineryPortfolioVO.setPortfolioName(machineryPortfolio.getPortfolioName());
 				machineryPortfolioVO.setStatus(machineryPortfolio.getStatus());
+				machineryPortfolioVO.setEquipmentName(machineryPortfolio.getEquipmentName());
+				machineryPortfolioVO.setEquipmentPrice(machineryPortfolio.getEquipmentPrice());
+				machineryPortfolioVO.setHiringType(machineryPortfolio.getHiringType());
 				machineryPortfolioVO.setVendorName(machineryPortfolio.getCustomer().getVendorAttrs().getVendorName());
 				machineryPortfolioVO.setVendorImageURL(machineryPortfolio.getCustomer().getUserProfile());
 				machineryPortfolioVO.setVendorDescription(machineryPortfolio.getCustomer().getVendorAttrs().getVendorDescription());

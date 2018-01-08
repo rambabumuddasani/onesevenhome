@@ -14,4 +14,8 @@ public interface ArchitectsPortfolioService extends SalesManagerEntityService<Lo
 	List<ArchitectsPortfolio> getPortfoliosBasedOnStatus(String status);
 
 	List<ArchitectsPortfolio> getApprovedVendor(Long vendorId);
+
+	List<ArchitectsPortfolio> getPortFoliosByVendorId(Long vendorId);
+
+	List<ArchitectsPortfolio> getPortfoliosBasedOnStatusAndVendorId(String status, Long vendorId);
 }

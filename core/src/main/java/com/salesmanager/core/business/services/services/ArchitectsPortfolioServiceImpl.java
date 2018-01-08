@@ -42,4 +42,13 @@ public class ArchitectsPortfolioServiceImpl extends SalesManagerEntityServiceImp
 	public List<ArchitectsPortfolio> getApprovedVendor(Long vendorId) {
 		return architectsPortfolioRepository.getApprovedVendor(vendorId);
 	}
+	@Override
+	public List<ArchitectsPortfolio> getPortFoliosByVendorId(Long vendorId) {
+		return architectsPortfolioRepository.findByVendorId(vendorId);
+	}
+	@Override
+	public List<ArchitectsPortfolio> getPortfoliosBasedOnStatusAndVendorId(String status, Long vendorId) {
+		// TODO Auto-generated method stub
+		return architectsPortfolioRepository.findPortfoliosBasedOnStatusAndVendorId(status,vendorId);
+	}
 }

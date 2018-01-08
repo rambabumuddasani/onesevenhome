@@ -358,4 +358,67 @@ public class VendorProductController extends AbstractController {
 		LOGGER.error("getProductVendors");
 		return vendorsList;
 	}
+	@RequestMapping(value="/addWishListProductsToProductList", method = RequestMethod.POST) 
+	@ResponseBody
+	public VendorProductResponse addWishListProductsToProductList(@RequestBody VendorProductRequest vendorProductRequest ) throws Exception {
+
+		LOGGER.debug("Entered addWishListProductsToProductList:");
+		String vendorId = vendorProductRequest.getVendorId();
+	
+		Customer customer = customerService.getById(Long.parseLong(vendorId));
+
+		List<String> productIds = vendorProductRequest.getProductId();
+
+		VendorProductResponse vendorProductResponse = new VendorProductResponse(); 
+
+		List<VendorProduct> vpList = new ArrayList<VendorProduct>();
+		List<ProductsInfo> vList = new ArrayList<ProductsInfo>();
+
+		for(String productId : productIds){
+			
+			VendorProduct vendorProduct = vendorProductService.getById(Long.parseLong(productId));
+
+			
+			ProductsInfo productsInfo = new ProductsInfo();
+			
+			vendorProduct.setCreatedDate(new Date());
+			vendorProduct.setVendorWishListed(Boolean.FALSE);
+			vendorProductService.update(vendorProduct);
+			
+			productsInfo.setProductId(vendorProduct.getId());
+			productsInfo.setProductName(vendorProduct.getProduct().getProductDescription().getName());
+			vpList.add(vendorProduct);
+			vList.add(productsInfo);
+		}
+		LOGGER.debug("vpList:"+vpList.size());
+		vendorProductService.save(vpList);
+		LOGGER.debug("Added products");
+		vendorProductResponse.setVenderId(vendorId);
+		vendorProductResponse.setVendorProducts(vList);
+
+		//sending email
+		/*MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");  
+		final Locale locale  = new Locale("en");
+		String[] vendorName = {customer.getVendorAttrs().getVendorName()};
+		Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
+		templateTokens.put(EmailConstants.EMAIL_ADMIN_USERNAME_LABEL, messages.getMessage("label.generic.username",locale));
+		templateTokens.put(EmailConstants.EMAIL_VENDOR_ADD_PRODUCTS_TXT, messages.getMessage("email.vendor.addproducts.text",vendorName,locale));
+		templateTokens.put(EmailConstants.EMAIL_ADMIN_PASSWORD_LABEL, messages.getMessage("label.generic.password",locale));
+		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
+		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
+
+
+		Email email = new Email();
+		email.setFrom(merchantStore.getStorename());
+		email.setFromEmail(merchantStore.getStoreEmailAddress());
+		email.setSubject(messages.getMessage("email.vendor.addproducts.text.subject",locale));
+		email.setTo(merchantStore.getStoreEmailAddress());
+		email.setTemplateName(VENDOR_ADD_PRODUCTS_TPL);
+		email.setTemplateTokens(templateTokens);
+
+		emailService.sendHtmlEmail(merchantStore, email);
+*/
+		LOGGER.debug("Ended addWishListProductsToProductList");
+		return vendorProductResponse;
+	}
 }

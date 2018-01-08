@@ -412,4 +412,83 @@ public class ArchitectsController extends AbstractController {
 	    	return adminArchitectsPortfolioResponse;
 	    	
 	    }
+	    @RequestMapping(value="/getUserArchitectsPortfolio", method=RequestMethod.POST)
+	  	@ResponseBody
+	  	public PaginatedResponse getUserArchitectsPortfolio(@RequestBody UserArchitectsRequest userArchitectsRequest, @RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+	    	LOGGER.debug("Entered getAdminArchitectsPortfolio");
+	    	PaginatedResponse paginatedResponse = new PaginatedResponse();
+			List<ArchitectsPortfolioVO> architectsPortfolioList = new ArrayList<ArchitectsPortfolioVO>();
+			List<ArchitectsPortfolio> architectsPortfolios = null;
+			
+			// By default, retrieve all the vendor related portfolio details
+			
+			if(userArchitectsRequest.getStatus().equals("ALL")) {
+				
+				architectsPortfolios = architectsPortfolioService.getPortFoliosByVendorId(userArchitectsRequest.getVendorId());
+				
+				for(ArchitectsPortfolio architectsPortfolio : architectsPortfolios) {
+				
+					ArchitectsPortfolioVO architectsPortfolioVO = new ArchitectsPortfolioVO();
+					architectsPortfolioVO.setArchitectPortfolioId(architectsPortfolio.getId());
+					architectsPortfolioVO.setCreatedate(architectsPortfolio.getCreateDate());
+					if((!FilenameUtils.isExtension(architectsPortfolio.getImageURL(),"pdf")) || 
+	    					(!FilenameUtils.isExtension(architectsPortfolio.getImageURL(),"doc"))) {
+	    				
+						architectsPortfolioVO.setImageURL(architectsPortfolio.getImageURL());
+	    				
+	    			}
+					//architectsPortfolioVO.setImageURL(architectsPortfolio.getImageURL());
+					architectsPortfolioVO.setPortfolioName(architectsPortfolio.getPortfolioName());
+					architectsPortfolioVO.setVendorName(architectsPortfolio.getCustomer().getVendorAttrs().getVendorName());
+					architectsPortfolioVO.setVendorDescription(architectsPortfolio.getCustomer().getVendorAttrs().getVendorDescription());
+					architectsPortfolioVO.setVendorShortDescription(architectsPortfolio.getCustomer().getVendorAttrs().getVendorShortDescription());
+					architectsPortfolioVO.setVendorImageURL(architectsPortfolio.getCustomer().getUserProfile());
+					architectsPortfolioVO.setStatus(architectsPortfolio.getStatus());
+					architectsPortfolioList.add(architectsPortfolioVO);
+					
+				}
+				
+			} else {
+				
+				architectsPortfolios = architectsPortfolioService.getPortfoliosBasedOnStatusAndVendorId(userArchitectsRequest.getStatus(),userArchitectsRequest.getVendorId());
+				
+				for(ArchitectsPortfolio architectsPortfolio : architectsPortfolios) {
+				
+					ArchitectsPortfolioVO architectsPortfolioVO = new ArchitectsPortfolioVO();
+					architectsPortfolioVO.setArchitectPortfolioId(architectsPortfolio.getId());
+					architectsPortfolioVO.setCreatedate(architectsPortfolio.getCreateDate());
+					if((!FilenameUtils.isExtension(architectsPortfolio.getImageURL(),"pdf")) || 
+	    					(!FilenameUtils.isExtension(architectsPortfolio.getImageURL(),"doc"))) {
+	    				
+						architectsPortfolioVO.setImageURL(architectsPortfolio.getImageURL());
+	    				
+	    			}
+					//architectsPortfolioVO.setImageURL(architectsPortfolio.getImageURL());
+					architectsPortfolioVO.setPortfolioName(architectsPortfolio.getPortfolioName());
+					architectsPortfolioVO.setVendorName(architectsPortfolio.getCustomer().getVendorAttrs().getVendorName());
+					architectsPortfolioVO.setVendorDescription(architectsPortfolio.getCustomer().getVendorAttrs().getVendorDescription());
+					architectsPortfolioVO.setVendorShortDescription(architectsPortfolio.getCustomer().getVendorAttrs().getVendorShortDescription());
+					architectsPortfolioVO.setVendorImageURL(architectsPortfolio.getCustomer().getVendorAttrs().getVendorAuthCert());
+					architectsPortfolioVO.setStatus(architectsPortfolio.getStatus());
+					architectsPortfolioList.add(architectsPortfolioVO);
+					
+				}
+				
+			}
+			
+			PaginationData paginaionData=createPaginaionData(page,size);
+	    	calculatePaginaionData(paginaionData,size, architectsPortfolioList.size());
+	    	paginatedResponse.setPaginationData(paginaionData);
+	    	
+			if(architectsPortfolioList == null || architectsPortfolioList.isEmpty() || architectsPortfolioList.size() < paginaionData.getCountByPage()){
+				paginatedResponse.setResponseData(architectsPortfolioList);
+				LOGGER.debug("Ended getAdminArchitectsPortfolio");
+				return paginatedResponse;
+			}
+			
+	    	List<ArchitectsPortfolioVO> paginatedResponses = architectsPortfolioList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+	    	paginatedResponse.setResponseData(paginatedResponses);
+			
+			return paginatedResponse;
+	    }
 }

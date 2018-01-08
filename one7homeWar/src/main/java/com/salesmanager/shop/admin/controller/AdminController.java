@@ -2105,7 +2105,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 			
 	    	int count =0;
 	    	
-	    	List<VendorProduct>  vendorProducts = vendorProductService.getVendorproductsByVendorId(vendorId);
+	    	List<VendorProduct>  vendorProducts = vendorProductService.getVendorAddedProductsByVendorId(vendorId);
 	    	
 	    	count = vendorProducts.size();
 	    	return count;
@@ -2269,7 +2269,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		    			vendorBookingVOList.add(vendorBookingVO);
 	    			}
 	    		}
-	    //	}
+	    	
 	    	
 	    	PaginationData paginaionData=createPaginaionData(page,size);
         	calculatePaginaionData(paginaionData,size, vendorBookingVOList.size());
