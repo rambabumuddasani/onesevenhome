@@ -215,6 +215,7 @@ public class VendorProductController extends AbstractController {
 				vpData.setProductCode(product.getSku());
 				vpData.setProductId(product.getId());
 				vpData.setProductName(product.getProductDescription().getName());
+				vpData.setVendorProuctId(vendorProduct.getId());
 				try {
 					vpData.setProductPrice(pricingService.calculateProductPrice(product).getOriginalPrice().toString());
 				} catch (ServiceException e) {

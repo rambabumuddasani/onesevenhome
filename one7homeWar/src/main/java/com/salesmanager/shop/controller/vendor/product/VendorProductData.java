@@ -7,6 +7,7 @@ public class VendorProductData {
 	private String productImg;
 	private long productId;
 	private String productCode;
+	private Long vendorProuctId;
 
 	public String getProductName() {
 		return productName;
@@ -37,6 +38,12 @@ public class VendorProductData {
 	}
 	public void setProductCode(String productCode) {
 		this.productCode = productCode;
+	}
+	public Long getVendorProuctId() {
+		return vendorProuctId;
+	}
+	public void setVendorProuctId(Long vendorProuctId) {
+		this.vendorProuctId = vendorProuctId;
 	}
 
 	
