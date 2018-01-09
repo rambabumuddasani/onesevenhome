@@ -2281,7 +2281,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     		
         	List<VendorBookingVO> paginatedResponses = vendorBookingVOList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
         	paginatedResponse.setResponseData(paginatedResponses);
-	    	return paginatedResponse;
+	    	
 	    }catch(Exception e) {
 	    	e.printStackTrace();
 	    	LOGGER.error("Error while retrieving vendor bookings "+e.getMessage());

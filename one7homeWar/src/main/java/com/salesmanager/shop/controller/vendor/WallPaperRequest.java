@@ -11,6 +11,7 @@ public class WallPaperRequest {
 	private String size;
 	private String thickness;
 	private String brand;
+	private String status; 
 	
 	public String getPortfolioName() {
 		return portfolioName;
@@ -66,6 +67,14 @@ public class WallPaperRequest {
 
 	public void setBrand(String brand) {
 		this.brand = brand;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 	
 }

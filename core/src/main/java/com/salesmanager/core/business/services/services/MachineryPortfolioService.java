@@ -12,4 +12,6 @@ public interface MachineryPortfolioService extends SalesManagerEntityService<Lon
 	List<MachineryPortfolio> getAllPortfoios();
 
 	List<MachineryPortfolio> getPortfoliosBasedOnStatus(String status);
+
+	List<MachineryPortfolio> getMachineryPortfolioBasedonStatusAndVendorId(Long vendorId, String status);
 }

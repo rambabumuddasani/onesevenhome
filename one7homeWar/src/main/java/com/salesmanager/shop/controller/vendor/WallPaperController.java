@@ -41,6 +41,7 @@ import com.salesmanager.core.model.customer.MachineryPortfolio;
 import com.salesmanager.core.model.customer.WallPaperPortfolio;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.product.vendor.VendorProduct;
+import com.salesmanager.shop.admin.controller.products.PaginatedResponse;
 import com.salesmanager.shop.admin.controller.products.ProductImageRequest;
 import com.salesmanager.shop.admin.controller.products.ProductImageResponse;
 import com.salesmanager.shop.constants.Constants;
@@ -48,6 +49,7 @@ import com.salesmanager.shop.constants.EmailConstants;
 import com.salesmanager.shop.fileupload.services.StorageException;
 import com.salesmanager.shop.store.controller.AbstractController;
 import com.salesmanager.shop.store.controller.customer.VendorResponse;
+import com.salesmanager.shop.store.model.paging.PaginationData;
 import com.salesmanager.shop.utils.EmailUtils;
 import com.salesmanager.shop.utils.LabelUtils;
 import com.salesmanager.shop.fileupload.services.StorageService;
@@ -131,7 +133,9 @@ public class WallPaperController extends AbstractController {
 	
     @RequestMapping(value="/getWallPaperPortfolio", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
   	@ResponseBody
-  	public WallPaperResponse getWallPaperPortfolio(@RequestBody WallPaperRequest wallPaperRequest) throws Exception {
+  	public WallPaperResponse getWallPaperPortfolio(@RequestBody WallPaperRequest wallPaperRequest,
+  			 @RequestParam(value="pageNumber", defaultValue = "1") int page , 
+ 			 @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
     	WallPaperResponse wallPaperResponse = new WallPaperResponse();
 		
 		List<VendorPortfolioData> vendorPortfolioList = new ArrayList<VendorPortfolioData>();
@@ -257,5 +261,243 @@ public class WallPaperController extends AbstractController {
     		}
     	return wallPaperResponse;
 	}
-    
+	@RequestMapping(value="/admin/getAdminWallPaperPortfolio", method=RequestMethod.POST)
+  	@ResponseBody
+  	public PaginatedResponse getAdminWallPaperPortfolio(@RequestBody AdminWallPaperRequest adminWallPaperRequest,
+  			 @RequestParam(value="pageNumber", defaultValue = "1") int page , 
+ 			 @RequestParam(value="pageSize", defaultValue="15") int size) {
+			
+		LOGGER.debug("Entered getAdminWallPaperPortfolio");
+		
+		PaginatedResponse paginatedResponse = new PaginatedResponse();
+		
+		List<WallPaperPortfolio> wallPaperPortfolios = null;
+		
+		List<WallPaperPortfolioVO> wallPaperPortfolioList = new ArrayList<WallPaperPortfolioVO>();
+		
+		try {
+			
+		if(adminWallPaperRequest.getStatus().equals("ALL")) {
+			
+			wallPaperPortfolios = wallPaperPortfolioService.getAllPortfolios();
+			
+			for(WallPaperPortfolio wallPaperPortfolio : wallPaperPortfolios) {
+				
+				WallPaperPortfolioVO wallPaperPortfolioVO = new WallPaperPortfolioVO();
+				
+				wallPaperPortfolioVO.setPortfolioId(wallPaperPortfolio.getId());
+				wallPaperPortfolioVO.setPortfolioName(wallPaperPortfolio.getPortfolioName());
+				wallPaperPortfolioVO.setBrand(wallPaperPortfolio.getBrand());
+				wallPaperPortfolioVO.setSize(wallPaperPortfolio.getSize());
+				wallPaperPortfolioVO.setThickness(wallPaperPortfolio.getThickness());
+				wallPaperPortfolioVO.setPrice(wallPaperPortfolio.getPrice());
+				wallPaperPortfolioVO.setStatus(wallPaperPortfolio.getStatus());
+				
+				wallPaperPortfolioVO.setVendorId(wallPaperPortfolio.getCustomer().getId());
+				wallPaperPortfolioVO.setVendorName(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorName());
+				wallPaperPortfolioVO.setVendorImageURL(wallPaperPortfolio.getCustomer().getUserProfile());
+				wallPaperPortfolioVO.setVendorDescription(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorDescription());
+				wallPaperPortfolioVO.setVendorShortDescription(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorShortDescription());
+				
+				wallPaperPortfolioList.add(wallPaperPortfolioVO);
+				
+			} 
+		}else {
+				
+				wallPaperPortfolios = wallPaperPortfolioService.getPortfoliosBasedOnStatus(adminWallPaperRequest.getStatus());
+				
+				for(WallPaperPortfolio wallPaperPortfolio : wallPaperPortfolios) {
+					
+					WallPaperPortfolioVO wallPaperPortfolioVO = new WallPaperPortfolioVO();
+					
+					wallPaperPortfolioVO.setPortfolioId(wallPaperPortfolio.getId());
+					wallPaperPortfolioVO.setPortfolioName(wallPaperPortfolio.getPortfolioName());
+					wallPaperPortfolioVO.setBrand(wallPaperPortfolio.getBrand());
+					wallPaperPortfolioVO.setSize(wallPaperPortfolio.getSize());
+					wallPaperPortfolioVO.setThickness(wallPaperPortfolio.getThickness());
+					wallPaperPortfolioVO.setPrice(wallPaperPortfolio.getPrice());
+					wallPaperPortfolioVO.setStatus(wallPaperPortfolio.getStatus());
+					
+					wallPaperPortfolioVO.setVendorId(wallPaperPortfolio.getCustomer().getId());
+					wallPaperPortfolioVO.setVendorName(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorName());
+					wallPaperPortfolioVO.setVendorImageURL(wallPaperPortfolio.getCustomer().getUserProfile());
+					wallPaperPortfolioVO.setVendorDescription(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorDescription());
+					wallPaperPortfolioVO.setVendorShortDescription(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorShortDescription());
+					
+					wallPaperPortfolioList.add(wallPaperPortfolioVO);
+						
+			}
+		}
+				PaginationData paginaionData=createPaginaionData(page,size);
+		    	calculatePaginaionData(paginaionData,size, wallPaperPortfolioList.size());
+		    	paginatedResponse.setPaginationData(paginaionData);
+		    	
+				if(wallPaperPortfolioList == null || wallPaperPortfolioList.isEmpty() || wallPaperPortfolioList.size() < paginaionData.getCountByPage()){
+					paginatedResponse.setResponseData(wallPaperPortfolioList);
+				
+					return paginatedResponse;
+				}
+				
+		    	List<WallPaperPortfolioVO> paginatedResponses = wallPaperPortfolioList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+		    	paginatedResponse.setResponseData(paginatedResponses);
+		    	
+		}catch(Exception e) {
+			e.printStackTrace();
+			LOGGER.error("Error while retrieving portfolios "+e.getMessage());
+			paginatedResponse.setErrorMsg("Error while retrieving portfolios");
+			return paginatedResponse;
+		}
+		
+		LOGGER.debug("Ended getAdminWallPaperPortfolio");
+		return paginatedResponse;
+		
+	}
+	@RequestMapping(value="/admin/manageAdminWallPaperPortfolios", method=RequestMethod.POST)
+  	@ResponseBody
+  	public AdminMachineryPortfolioResponse manageAdminWallPaperPortfolios(   
+  		            @RequestBody AdminWallPaperRequest adminWallPaperRequest, 
+  		            @RequestParam(value="pageNumber", defaultValue = "1") int page, 
+  		            @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+			
+		LOGGER.debug("Entered manageAdminWallPortfolios");
+		
+		AdminMachineryPortfolioResponse adminMachineryPortfolioResponse = new AdminMachineryPortfolioResponse();
+    	try {
+    		WallPaperPortfolio wallPaperPortfolio = 
+    				wallPaperPortfolioService.getById(adminWallPaperRequest.getPortfolioId());
+    	
+    	if (wallPaperPortfolio == null) {
+    		
+    		adminMachineryPortfolioResponse.setErrorMessgae
+    			("Error finding record with portfolio = " + adminWallPaperRequest.getPortfolioId());
+    		adminMachineryPortfolioResponse.setStatus(false);
+			return adminMachineryPortfolioResponse;
+    		
+    	}
+    	
+    	if (adminWallPaperRequest.getStatus().equals("Y")) {
+    		
+    		// If the request is to Approve, then update table entry with "Y"
+    		wallPaperPortfolio.setStatus(adminWallPaperRequest.getStatus());
+    		wallPaperPortfolioService.update(wallPaperPortfolio);
+    		
+    		adminMachineryPortfolioResponse.setSuccessMessage
+    			("Approval of portfolio " + adminWallPaperRequest.getPortfolioId() + " is successful");
+    	    LOGGER.debug("Approval of portfolio is successful");
+    	    
+    	} else {
+    		
+    		// If the request is to Decline, then remove the corresponding entry from table
+    		wallPaperPortfolioService.delete(wallPaperPortfolio);
+    		
+    		adminMachineryPortfolioResponse.setSuccessMessage
+				("Portfolio " + adminWallPaperRequest.getPortfolioId() + " is declined and the entry is removed from the table");
+    		LOGGER.debug("Approval of portfolio is declined");
+    		
+    	}
+    	
+    	adminMachineryPortfolioResponse.setStatus(true);
+    	
+    	} catch(Exception e) {
+    		e.printStackTrace();
+    		LOGGER.error("Error while updating portfolio status:" + e.getMessage());
+    		adminMachineryPortfolioResponse.setErrorMessgae("Error while updating portfolio status"+e.getMessage());
+    		adminMachineryPortfolioResponse.setStatus(false);
+    		return adminMachineryPortfolioResponse;
+    	}
+    	
+    	LOGGER.debug("Ended manageAdminWallPortfolios");
+    	
+    	return adminMachineryPortfolioResponse;
+    	
+	}
+	@RequestMapping(value="/getUserWallPaperPortfolio", method=RequestMethod.POST)
+  	@ResponseBody
+  	public PaginatedResponse getUserWallPaperPortfolio(@RequestBody WallPaperRequest wallPaperRequest,
+  			 @RequestParam(value="pageNumber", defaultValue = "1") int page , 
+ 			 @RequestParam(value="pageSize", defaultValue="15") int size) {
+			
+		LOGGER.debug("Entered getUserWallPaperPortfolio");
+		
+		PaginatedResponse paginatedResponse = new PaginatedResponse();
+		
+        List<WallPaperPortfolio> wallPaperPortfolios = null;
+		
+		List<WallPaperPortfolioVO> wallPaperPortfolioList = new ArrayList<WallPaperPortfolioVO>();
+		try {
+		if(wallPaperRequest.getStatus().equals("ALL")) {
+			
+			wallPaperPortfolios = wallPaperPortfolioService.findByVendorId(wallPaperRequest.getVendorId());
+			
+			for(WallPaperPortfolio wallPaperPortfolio : wallPaperPortfolios) {
+				
+				WallPaperPortfolioVO wallPaperPortfolioVO = new WallPaperPortfolioVO();
+				
+				wallPaperPortfolioVO.setPortfolioId(wallPaperPortfolio.getId());
+				wallPaperPortfolioVO.setPortfolioName(wallPaperPortfolio.getPortfolioName());
+				wallPaperPortfolioVO.setBrand(wallPaperPortfolio.getBrand());
+				wallPaperPortfolioVO.setSize(wallPaperPortfolio.getSize());
+				wallPaperPortfolioVO.setThickness(wallPaperPortfolio.getThickness());
+				wallPaperPortfolioVO.setPrice(wallPaperPortfolio.getPrice());
+				wallPaperPortfolioVO.setStatus(wallPaperPortfolio.getStatus());
+				
+				wallPaperPortfolioVO.setVendorId(wallPaperPortfolio.getCustomer().getId());
+				wallPaperPortfolioVO.setVendorName(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorName());
+				wallPaperPortfolioVO.setVendorImageURL(wallPaperPortfolio.getCustomer().getUserProfile());
+				wallPaperPortfolioVO.setVendorDescription(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorDescription());
+				wallPaperPortfolioVO.setVendorShortDescription(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorShortDescription());
+				
+				wallPaperPortfolioList.add(wallPaperPortfolioVO);
+				
+			} 
+		}else {
+				
+				wallPaperPortfolios = wallPaperPortfolioService.getPortfoliosBasedOnStatusAndVendorId(wallPaperRequest.getVendorId(),wallPaperRequest.getStatus());
+				
+				for(WallPaperPortfolio wallPaperPortfolio : wallPaperPortfolios) {
+					
+					WallPaperPortfolioVO wallPaperPortfolioVO = new WallPaperPortfolioVO();
+					
+					wallPaperPortfolioVO.setPortfolioId(wallPaperPortfolio.getId());
+					wallPaperPortfolioVO.setPortfolioName(wallPaperPortfolio.getPortfolioName());
+					wallPaperPortfolioVO.setBrand(wallPaperPortfolio.getBrand());
+					wallPaperPortfolioVO.setSize(wallPaperPortfolio.getSize());
+					wallPaperPortfolioVO.setThickness(wallPaperPortfolio.getThickness());
+					wallPaperPortfolioVO.setPrice(wallPaperPortfolio.getPrice());
+					wallPaperPortfolioVO.setStatus(wallPaperPortfolio.getStatus());
+					
+					wallPaperPortfolioVO.setVendorId(wallPaperPortfolio.getCustomer().getId());
+					wallPaperPortfolioVO.setVendorName(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorName());
+					wallPaperPortfolioVO.setVendorImageURL(wallPaperPortfolio.getCustomer().getUserProfile());
+					wallPaperPortfolioVO.setVendorDescription(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorDescription());
+					wallPaperPortfolioVO.setVendorShortDescription(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorShortDescription());
+					
+					wallPaperPortfolioList.add(wallPaperPortfolioVO);
+						
+			}
+		}
+				PaginationData paginaionData=createPaginaionData(page,size);
+		    	calculatePaginaionData(paginaionData,size, wallPaperPortfolioList.size());
+		    	paginatedResponse.setPaginationData(paginaionData);
+		    	
+				if(wallPaperPortfolioList == null || wallPaperPortfolioList.isEmpty() || wallPaperPortfolioList.size() < paginaionData.getCountByPage()){
+					paginatedResponse.setResponseData(wallPaperPortfolioList);
+				
+					return paginatedResponse;
+				}
+				
+		    	List<WallPaperPortfolioVO> paginatedResponses = wallPaperPortfolioList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+		    	paginatedResponse.setResponseData(paginatedResponses);
+		    	
+		}catch(Exception e) {
+			e.printStackTrace();
+			LOGGER.error("Error while retrieving portfolios "+e.getMessage());
+			paginatedResponse.setErrorMsg("Error while retrieving portfolios");
+		}
+		
+		LOGGER.debug("Ended getUserWallPaperPortfolio");
+		
+		return paginatedResponse;
+		
+	}
 }

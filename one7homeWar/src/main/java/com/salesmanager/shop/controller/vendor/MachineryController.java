@@ -323,7 +323,7 @@ public class MachineryController extends AbstractController {
     	
 		if(machineryPortfolioList == null || machineryPortfolioList.isEmpty() || machineryPortfolioList.size() < paginaionData.getCountByPage()){
 			paginatedResponse.setResponseData(machineryPortfolioList);
-			LOGGER.debug("Ended getAdminArchitectsPortfolio");
+		
 			return paginatedResponse;
 		}
 		
@@ -387,5 +387,82 @@ public class MachineryController extends AbstractController {
     	LOGGER.debug("Ended manageAdminMachineryPortfolios");
     	return adminMachineryPortfolioResponse;
     	
+    }
+	// Machinery portfolios Retrieval vendorwise and status 
+	@RequestMapping(value="/getUserMachineryPortfolio", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
+  	@ResponseBody
+  	public PaginatedResponse getUserMachineryPortfolio(@RequestBody MachineryRequest machineryRequest,
+  			@RequestParam(value="pageNumber", defaultValue = "1") int page , 
+ 			@RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+		
+		LOGGER.debug("Entered getUserMachineryPortfolio");
+		PaginatedResponse paginatedResponse = new PaginatedResponse();
+	
+		List<MachineryPortfolioVO> machineryPortfolioList = new ArrayList<MachineryPortfolioVO>();
+		List<MachineryPortfolio> portfolioList = null;
+		
+		try {
+    		
+			if(machineryRequest.getStatus().equals("ALL")) {
+			portfolioList = machineryPortfolioService.findByVendorId(machineryRequest.getVendorId());
+	    	for(MachineryPortfolio machineryPortfolio:portfolioList){
+	    		
+	    		MachineryPortfolioVO machineryPortfolioVO = new MachineryPortfolioVO();
+				machineryPortfolioVO.setMachineryPortfolioId(machineryPortfolio.getId());
+				machineryPortfolioVO.setCreatedate(machineryPortfolio.getCreateDate());
+				machineryPortfolioVO.setImageURL(machineryPortfolio.getImageURL());
+				machineryPortfolioVO.setPortfolioName(machineryPortfolio.getPortfolioName());
+				machineryPortfolioVO.setStatus(machineryPortfolio.getStatus());
+				machineryPortfolioVO.setEquipmentName(machineryPortfolio.getEquipmentName());
+				machineryPortfolioVO.setEquipmentPrice(machineryPortfolio.getEquipmentPrice());
+				machineryPortfolioVO.setHiringType(machineryPortfolio.getHiringType());
+				machineryPortfolioVO.setVendorName(machineryPortfolio.getCustomer().getVendorAttrs().getVendorName());
+				machineryPortfolioVO.setVendorImageURL(machineryPortfolio.getCustomer().getUserProfile());
+				machineryPortfolioVO.setVendorDescription(machineryPortfolio.getCustomer().getVendorAttrs().getVendorDescription());
+				machineryPortfolioVO.setVendorShortDescription(machineryPortfolio.getCustomer().getVendorAttrs().getVendorShortDescription());
+				machineryPortfolioList.add(machineryPortfolioVO);
+	    	}
+			} else {
+	    		
+				portfolioList = machineryPortfolioService.getMachineryPortfolioBasedonStatusAndVendorId(machineryRequest.getVendorId(),machineryRequest.getStatus());
+		    	for(MachineryPortfolio machineryPortfolio:portfolioList){
+		    		MachineryPortfolioVO machineryPortfolioVO = new MachineryPortfolioVO();
+					machineryPortfolioVO.setMachineryPortfolioId(machineryPortfolio.getId());
+					machineryPortfolioVO.setCreatedate(machineryPortfolio.getCreateDate());
+					machineryPortfolioVO.setImageURL(machineryPortfolio.getImageURL());
+					machineryPortfolioVO.setPortfolioName(machineryPortfolio.getPortfolioName());
+					machineryPortfolioVO.setStatus(machineryPortfolio.getStatus());
+					machineryPortfolioVO.setEquipmentName(machineryPortfolio.getEquipmentName());
+					machineryPortfolioVO.setEquipmentPrice(machineryPortfolio.getEquipmentPrice());
+					machineryPortfolioVO.setHiringType(machineryPortfolio.getHiringType());
+					machineryPortfolioVO.setVendorName(machineryPortfolio.getCustomer().getVendorAttrs().getVendorName());
+					machineryPortfolioVO.setVendorImageURL(machineryPortfolio.getCustomer().getUserProfile());
+					machineryPortfolioVO.setVendorDescription(machineryPortfolio.getCustomer().getVendorAttrs().getVendorDescription());
+					machineryPortfolioVO.setVendorShortDescription(machineryPortfolio.getCustomer().getVendorAttrs().getVendorShortDescription());
+					machineryPortfolioList.add(machineryPortfolioVO);
+		    	}
+	    	}
+			
+			PaginationData paginaionData=createPaginaionData(page,size);
+	    	calculatePaginaionData(paginaionData,size, machineryPortfolioList.size());
+	    	paginatedResponse.setPaginationData(paginaionData);
+	    	
+			if(machineryPortfolioList == null || machineryPortfolioList.isEmpty() || machineryPortfolioList.size() < paginaionData.getCountByPage()){
+				paginatedResponse.setResponseData(machineryPortfolioList);
+				LOGGER.debug("Ended getAdminArchitectsPortfolio");
+				return paginatedResponse;
+			}
+			
+	    	List<MachineryPortfolioVO> paginatedResponses = machineryPortfolioList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+	    	paginatedResponse.setResponseData(paginatedResponses);
+	    	
+		}catch(Exception se){
+			LOGGER.error("Failed while fetching portfolio list for machinery=="+se.getMessage());
+			paginatedResponse.setErrorMsg("Failed while fetching portfolio list for machinery=="+machineryRequest.getVendorId());
+			return paginatedResponse;
+		}
+		
+		LOGGER.debug("Ended getUserMachineryPortfolio");
+		return paginatedResponse;
     }
 }

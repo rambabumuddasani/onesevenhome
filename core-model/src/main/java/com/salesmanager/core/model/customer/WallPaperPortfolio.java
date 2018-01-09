@@ -60,6 +60,9 @@ public class WallPaperPortfolio extends SalesManagerEntity<Long, WallPaperPortfo
 	
 	@Column (name ="BRAND", length=50)
 	private String brand;
+	
+	@Column (name ="ADMIN_APPROVE_STATUS", length=5)
+	private String status = "N";
 
 	public Long getId() {
 		return id;
@@ -131,6 +134,14 @@ public class WallPaperPortfolio extends SalesManagerEntity<Long, WallPaperPortfo
 
 	public void setBrand(String brand) {
 		this.brand = brand;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 	

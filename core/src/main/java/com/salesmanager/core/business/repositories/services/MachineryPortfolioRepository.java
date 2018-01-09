@@ -16,5 +16,8 @@ public interface MachineryPortfolioRepository extends JpaRepository<MachineryPor
 
 	@Query("select pf from MachineryPortfolio pf where pf.status = ?1")
 	public List<MachineryPortfolio> getPortfoliosBasedOnStatus(String status);
+	
+	@Query("select pf from MachineryPortfolio pf where pf.customer.id=?1 and pf.status = ?2")
+	public List<MachineryPortfolio> findMachineryPortfolioBasedonStatusAndVendorId(Long vendorId, String status);
 
 }
