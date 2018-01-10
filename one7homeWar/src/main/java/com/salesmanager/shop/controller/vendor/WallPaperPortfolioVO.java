@@ -16,6 +16,7 @@ public class WallPaperPortfolioVO {
 	private String vendorDescription;
 	private String vendorShortDescription;
 	private String status;
+	private String imageURL;
 	public String getPortfolioName() {
 		return portfolioName;
 	}
@@ -87,5 +88,11 @@ public class WallPaperPortfolioVO {
 	}
 	public void setStatus(String status) {
 		this.status = status;
+	}
+	public String getImageURL() {
+		return imageURL;
+	}
+	public void setImageURL(String imageURL) {
+		this.imageURL = imageURL;
 	}
 }

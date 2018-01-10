@@ -2206,14 +2206,14 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    	List<VendorBooking> vendorBookingList = null;
 	    	
 	    	List<VendorBookingVO> vendorBookingVOList = new ArrayList<VendorBookingVO>();
+	    	
 	    	try {
-	    	//vendorBookingList = vendorBookingService.getAllVendorBookings();
-	    		vendorBookingList = vendorBookingService.getVendorBookingsByVendorType(adminVendorBokingRequest.getVendorType());
+	    	      
+	    	vendorBookingList = vendorBookingService.getVendorBookingsByVendorType(adminVendorBokingRequest.getVendorType());
+	    		
 	    	for(VendorBooking vendorBooking : vendorBookingList) {
 	    		
-	    		VendorBookingVO vendorBookingVO = new VendorBookingVO();
-	    		
-	    		//if(vendorBooking.getVendor().getCustomerType().equals(adminVendorBokingRequest.getVendorType())){
+	    		    VendorBookingVO vendorBookingVO = new VendorBookingVO();
 	    			
 	    			if(adminVendorBokingRequest.getStatus().equals("ALL")) {
 	    			vendorBookingVO.setId(vendorBooking.getId());
@@ -2228,15 +2228,15 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    			vendorBookingVO.setComment(vendorBooking.getComment());
 	    			vendorBookingVO.setStatus(vendorBooking.getStatus());
 	    			
-	    			if(vendorBooking.getCustomer().getCustomerType().equals("1"))
+	    			if(vendorBooking.getVendor().getCustomerType().equals("1"))
 	    			vendorBookingVO.setBookingType(Constants.PRODUCT_VENDORS);
-	    			if(vendorBooking.getCustomer().getCustomerType().equals("2"))
+	    			if(vendorBooking.getVendor().getCustomerType().equals("2"))
 	    				vendorBookingVO.setBookingType(Constants.SERVICE_PROVIDER);
-	    			if(vendorBooking.getCustomer().getCustomerType().equals("3"))
+	    			if(vendorBooking.getVendor().getCustomerType().equals("3"))
 	    				vendorBookingVO.setBookingType(Constants.ARCHITECTS);
-	    			if(vendorBooking.getCustomer().getCustomerType().equals("4"))
+	    			if(vendorBooking.getVendor().getCustomerType().equals("4"))
 	    				vendorBookingVO.setBookingType(Constants.WALLPAPER);
-	    			if(vendorBooking.getCustomer().getCustomerType().equals("5")) 
+	    			if(vendorBooking.getVendor().getCustomerType().equals("5")) 
 	    				vendorBookingVO.setBookingType(Constants.MACHINERY_EQUIPMENT);
 	    		
 	    			vendorBookingVOList.add(vendorBookingVO);
@@ -2255,21 +2255,20 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		    			vendorBookingVO.setComment(vendorBooking.getComment());
 		    			vendorBookingVO.setStatus(vendorBooking.getStatus());
 		    			
-		    			if(vendorBooking.getCustomer().getCustomerType().equals("1"))
-		    			vendorBookingVO.setBookingType(Constants.PRODUCT_VENDORS);
-		    			if(vendorBooking.getCustomer().getCustomerType().equals("2"))
-		    				vendorBookingVO.setBookingType(Constants.SERVICE_PROVIDER);
-		    			if(vendorBooking.getCustomer().getCustomerType().equals("3"))
-		    				vendorBookingVO.setBookingType(Constants.ARCHITECTS);
-		    			if(vendorBooking.getCustomer().getCustomerType().equals("4"))
-		    				vendorBookingVO.setBookingType(Constants.WALLPAPER);
-		    			if(vendorBooking.getCustomer().getCustomerType().equals("5")) 
-		    				vendorBookingVO.setBookingType(Constants.MACHINERY_EQUIPMENT);
+		    			if(vendorBooking.getVendor().getCustomerType().equals("1"))
+			    			vendorBookingVO.setBookingType(Constants.PRODUCT_VENDORS);
+			    		if(vendorBooking.getVendor().getCustomerType().equals("2"))
+			    			vendorBookingVO.setBookingType(Constants.SERVICE_PROVIDER);
+			    		if(vendorBooking.getVendor().getCustomerType().equals("3"))
+			    			vendorBookingVO.setBookingType(Constants.ARCHITECTS);
+			    		if(vendorBooking.getVendor().getCustomerType().equals("4"))
+			    			vendorBookingVO.setBookingType(Constants.WALLPAPER);
+			    		if(vendorBooking.getVendor().getCustomerType().equals("5")) 
+			    			vendorBookingVO.setBookingType(Constants.MACHINERY_EQUIPMENT);;
 		    		
 		    			vendorBookingVOList.add(vendorBookingVO);
 	    			}
 	    		}
-	    	
 	    	
 	    	PaginationData paginaionData=createPaginaionData(page,size);
         	calculatePaginaionData(paginaionData,size, vendorBookingVOList.size());
