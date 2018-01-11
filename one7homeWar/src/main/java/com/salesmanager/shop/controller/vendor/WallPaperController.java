@@ -504,4 +504,47 @@ public class WallPaperController extends AbstractController {
 		return paginatedResponse;
 		
 	}
+	@RequestMapping(value="/getWallPaperDetails", method=RequestMethod.POST)
+  	@ResponseBody
+  	public WallPaperDetailsResponse getWallPaperDetails(@RequestBody WallPaperRequest wallPaperRequest,
+  			 @RequestParam(value="pageNumber", defaultValue = "1") int page , 
+ 			 @RequestParam(value="pageSize", defaultValue="15") int size) {
+			
+		LOGGER.debug("Entered getWallPaperDetails");
+		
+		WallPaperDetailsResponse wallPaperDetailsResponse = new WallPaperDetailsResponse();
+		
+		WallPaperDetails wallPaperDetails = new WallPaperDetails();
+		
+		try {
+			
+		WallPaperPortfolio wallPaperPortfolio = wallPaperPortfolioService.getById(wallPaperRequest.getPortfolioId());
+		
+		wallPaperDetails.setPortfolioId(wallPaperPortfolio.getId());
+		wallPaperDetails.setPortfolioName(wallPaperPortfolio.getPortfolioName());
+		wallPaperDetails.setBrand(wallPaperPortfolio.getBrand());
+		wallPaperDetails.setImageURL(wallPaperPortfolio.getImageURL());
+		wallPaperDetails.setSize(wallPaperPortfolio.getSize());
+		wallPaperDetails.setThickness(wallPaperPortfolio.getThickness());
+		wallPaperDetails.setPrice(wallPaperPortfolio.getPrice());
+		wallPaperDetails.setStatus(wallPaperPortfolio.getStatus());
+		wallPaperDetails.setVendorId(wallPaperPortfolio.getCustomer().getId());
+		
+		wallPaperDetailsResponse.setWallPaperDetails(wallPaperDetails);
+		
+		wallPaperDetailsResponse.setSuccessmessage("WallPaperDetials retrieved successfully");
+		wallPaperDetailsResponse.setStatus("true");
+		
+		}catch(Exception e) {
+			e.printStackTrace();
+			LOGGER.debug("Error while retrieving wallpaper details "+e.getMessage());
+			wallPaperDetailsResponse.setErrorMessage("Error while retrieving wallpaper details ");
+			wallPaperDetailsResponse.setStatus("false");
+			return wallPaperDetailsResponse;
+		}
+		
+		LOGGER.debug("Ended getWallPaperDetails");
+		return wallPaperDetailsResponse;
+		
+	}
 }
