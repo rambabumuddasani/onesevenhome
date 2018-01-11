@@ -16,7 +16,10 @@ public class VendorBookingVO {
 	private Date bookingDate;
 	private String comment;
 	private String bookingType;
-	
+	private String customerEmailId;
+	private String customerMobileNumber;
+	private String vendorEmailId;
+	private String vendorMobileNumber;
 	public Long getId() {
 		return id;
 	}
@@ -88,6 +91,30 @@ public class VendorBookingVO {
 	}
 	public void setBookingType(String bookingType) {
 		this.bookingType = bookingType;
+	}
+	public String getCustomerEmailId() {
+		return customerEmailId;
+	}
+	public void setCustomerEmailId(String customerEmailId) {
+		this.customerEmailId = customerEmailId;
+	}
+	public String getCustomerMobileNumber() {
+		return customerMobileNumber;
+	}
+	public void setCustomerMobileNumber(String customerMobileNumber) {
+		this.customerMobileNumber = customerMobileNumber;
+	}
+	public String getVendorEmailId() {
+		return vendorEmailId;
+	}
+	public void setVendorEmailId(String vendorEmailId) {
+		this.vendorEmailId = vendorEmailId;
+	}
+	public String getVendorMobileNumber() {
+		return vendorMobileNumber;
+	}
+	public void setVendorMobileNumber(String vendorMobileNumber) {
+		this.vendorMobileNumber = vendorMobileNumber;
 	}
 	
 }

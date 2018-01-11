@@ -2192,7 +2192,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    	return adminApprovedVendorsResponse;
 	    	
 	    }
-	    // Vendor booking for admin (Archtects and machinery & equipment)
+	    // Vendor booking for admin (Archtects and Machinery & Equipment)
 	    @RequestMapping(value="/getVendorBookingsForAdmin", method = RequestMethod.POST)
 		@ResponseBody
 		public PaginatedResponse getVendorBookingsForAdmin(@RequestBody AdminVendorBokingRequest adminVendorBokingRequest, 
@@ -2208,14 +2208,16 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    	List<VendorBookingVO> vendorBookingVOList = new ArrayList<VendorBookingVO>();
 	    	
 	    	try {
-	    	      
+	    	
+	    	if(adminVendorBokingRequest.getStatus().equals("ALL")) { 
+	    		
+	    	
 	    	vendorBookingList = vendorBookingService.getVendorBookingsByVendorType(adminVendorBokingRequest.getVendorType());
 	    		
 	    	for(VendorBooking vendorBooking : vendorBookingList) {
 	    		
 	    		    VendorBookingVO vendorBookingVO = new VendorBookingVO();
 	    			
-	    			if(adminVendorBokingRequest.getStatus().equals("ALL")) {
 	    			vendorBookingVO.setId(vendorBooking.getId());
 	    			vendorBookingVO.setCustomerName(vendorBooking.getCustomer().getBilling().getFirstName().concat(" ").concat(vendorBooking.getCustomer().getBilling().getLastName()));
 	    			vendorBookingVO.setVendorName(vendorBooking.getVendor().getVendorAttrs().getVendorName());
@@ -2227,6 +2229,10 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    			vendorBookingVO.setDescription(vendorBooking.getDescription());
 	    			vendorBookingVO.setComment(vendorBooking.getComment());
 	    			vendorBookingVO.setStatus(vendorBooking.getStatus());
+	    			vendorBookingVO.setCustomerEmailId(vendorBooking.getCustomer().getEmailAddress());
+	    			vendorBookingVO.setCustomerMobileNumber(vendorBooking.getCustomer().getBilling().getTelephone());
+	    			vendorBookingVO.setVendorEmailId(vendorBooking.getVendor().getEmailAddress());
+	    			vendorBookingVO.setVendorMobileNumber(vendorBooking.getVendor().getVendorAttrs().getVendorMobile());
 	    			
 	    			if(vendorBooking.getVendor().getCustomerType().equals("1"))
 	    			vendorBookingVO.setBookingType(Constants.PRODUCT_VENDORS);
@@ -2241,8 +2247,15 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    		
 	    			vendorBookingVOList.add(vendorBookingVO);
 	    			
-	    			}else {
+	    	 } 
+	    	
+	    	} else {
 	    				vendorBookingList = vendorBookingService.getVendorBookingBasedOnStatus(adminVendorBokingRequest.getStatus(),adminVendorBokingRequest.getVendorType());
+	    				
+	    				for(VendorBooking vendorBooking : vendorBookingList) {
+	    					
+	    				VendorBookingVO vendorBookingVO = new VendorBookingVO();
+	    				
 	    				vendorBookingVO.setId(vendorBooking.getId());
 		    			vendorBookingVO.setCustomerName(vendorBooking.getCustomer().getBilling().getFirstName().concat(" ").concat(vendorBooking.getCustomer().getBilling().getLastName()));
 		    			vendorBookingVO.setVendorName(vendorBooking.getVendor().getVendorAttrs().getVendorName());
@@ -2254,6 +2267,10 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		    			vendorBookingVO.setDescription(vendorBooking.getDescription());
 		    			vendorBookingVO.setComment(vendorBooking.getComment());
 		    			vendorBookingVO.setStatus(vendorBooking.getStatus());
+		    			vendorBookingVO.setCustomerEmailId(vendorBooking.getCustomer().getEmailAddress());
+		    			vendorBookingVO.setCustomerMobileNumber(vendorBooking.getCustomer().getBilling().getTelephone());
+		    			vendorBookingVO.setVendorEmailId(vendorBooking.getVendor().getEmailAddress());
+		    			vendorBookingVO.setVendorMobileNumber(vendorBooking.getVendor().getVendorAttrs().getVendorMobile());
 		    			
 		    			if(vendorBooking.getVendor().getCustomerType().equals("1"))
 			    			vendorBookingVO.setBookingType(Constants.PRODUCT_VENDORS);
@@ -2268,6 +2285,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		    		
 		    			vendorBookingVOList.add(vendorBookingVO);
 	    			}
+	    	
 	    		}
 	    	
 	    	PaginationData paginaionData=createPaginaionData(page,size);
