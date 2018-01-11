@@ -101,7 +101,7 @@ public class VendorController extends AbstractController {
 	private final static String VENDOR_ADD_PRODUCTS_TPL = "email_template_vendor_add_products.ftl";
 	private final static String SERVICE_BOOKING_TMPL = "email_template_service_booking.ftl";
 	private final static String VENDOR_BOOKING_TMPL = "email_template_vendor_booking.ftl";
-	
+	//private final static String ADMIN_VENDOR_BOOKING_CLOSE_TMPL = "email_template_vendor_booking_close.ftl";
     @RequestMapping(value="/updateVendorDescription", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
   	@ResponseBody
   	public MachineryResponse updateVendorDescription(@RequestBody MachineryRequest machineryRequest) throws Exception {
@@ -296,5 +296,111 @@ public class VendorController extends AbstractController {
 		paginatedReviewResponse.setStatus(true);
 		return paginatedReviewResponse;
 	}
-	
+	@RequestMapping(value="/adminVendorBookingClose", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
+  	@ResponseBody
+  	public AdminVendorBookingResponse adminVendorBookingClose(@RequestBody AdminVendorBookingRequest adminVendorBookingRequest) throws Exception {
+		LOGGER.debug("Entered adminVendorBooking");
+		
+		AdminVendorBookingResponse adminVendorBookingResponse = new AdminVendorBookingResponse();
+		
+		try {
+		
+		VendorBooking vendorBooking = vendorBookingService.getById(adminVendorBookingRequest.getBookingId());
+		
+		if(vendorBooking==null) {
+			
+			adminVendorBookingResponse.setSuccessMessage("Vendor booking not found");
+			adminVendorBookingResponse.setStatus("true");
+			return adminVendorBookingResponse;
+			
+		}
+		
+		vendorBooking.setComment(adminVendorBookingRequest.getComment());
+		vendorBooking.setClosingDate(new Date());
+		vendorBooking.setStatus(adminVendorBookingRequest.getStatus());
+		
+		vendorBookingService.update(vendorBooking);
+		
+		adminVendorBookingResponse.setSuccessMessage("Vendor booking closed successfully");
+		adminVendorBookingResponse.setStatus("true");
+		
+		/*MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");
+    	final Locale locale  = new Locale("en");
+    	
+        Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
+        if(vendorBooking.getCustomer().getCustomerType().equals("0")) {
+        templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, vendorBooking.getCustomer().getBilling().getFirstName());
+        templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, vendorBooking.getCustomer().getBilling().getLastName());
+        } else {
+        	templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, vendorBooking.getCustomer().getVendorAttrs().getVendorName());
+        	templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, "");
+        }
+        templateTokens.put(EmailConstants.EMAIL_USER_NAME, vendorBooking.getCustomer().getEmailAddress());
+       
+        templateTokens.put(EmailConstants.EMAIL_SERVICE_TYPE, Constants.customerTypes.get(vendorBooking.getCustomer().getCustomerType()));
+        templateTokens.put(EmailConstants.EMAIL_VENDOR_NAME, vendorBooking.getVendor().getVendorAttrs().getVendorName());
+        templateTokens.put(EmailConstants.EMAIL_VENDOR_IMAGE, vendorBooking.getVendor().getVendorAttrs().getVendorAuthCert());
+        templateTokens.put(EmailConstants.ADMIN_VENDOR_BOOKING_COMMENT, vendorBooking.getComment());
+		
+        Email email = new Email();
+		email.setFrom(merchantStore.getStorename());
+		email.setFromEmail(merchantStore.getStoreEmailAddress());
+		email.setSubject(messages.getMessage("email.customer.vendor.booking",locale));
+		
+		email.setTo(vendorBooking.getCustomer().getEmailAddress());
+		
+		//email.setTo("sm19811130@gmail.com");
+		email.setTemplateName(ADMIN_VENDOR_BOOKING_CLOSE_TMPL);
+		email.setTemplateTokens(templateTokens);
+
+		emailService.sendHtmlEmail(merchantStore, email);
+		LOGGER.debug("Email sent to customer");
+		sendEmailToVendor(vendorBooking,merchantStore);
+		LOGGER.debug("Email sent to vendor");*/
+		
+		}catch(Exception e){
+			e.printStackTrace();
+			LOGGER.error("Error while closing vendor booking "+e.getMessage());
+			adminVendorBookingResponse.setSuccessMessage("Error while closing vendor booking");
+			adminVendorBookingResponse.setStatus("false");
+			return adminVendorBookingResponse;
+		}
+		
+		return adminVendorBookingResponse;
+		
+		
+	}
+
+	/*private void sendEmailToVendor(VendorBooking vendorBooking, MerchantStore merchantStore) throws Exception{
+
+        final Locale locale  = new Locale("en");
+    	
+        Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
+        if(vendorBooking.getCustomer().getCustomerType().equals("0")) {
+        templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, vendorBooking.getCustomer().getBilling().getFirstName());
+        templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, vendorBooking.getCustomer().getBilling().getLastName());
+        } else {
+        	templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, vendorBooking.getVendor().getVendorAttrs().getVendorName());
+        	templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, "");
+        }
+        templateTokens.put(EmailConstants.EMAIL_USER_NAME, vendorBooking.getCustomer().getEmailAddress());
+        
+        templateTokens.put(EmailConstants.EMAIL_SERVICE_TYPE, Constants.customerTypes.get(vendorBooking.getCustomer().getCustomerType()));
+        templateTokens.put(EmailConstants.EMAIL_VENDOR_NAME, vendorBooking.getVendor().getVendorAttrs().getVendorName());
+        templateTokens.put(EmailConstants.EMAIL_VENDOR_IMAGE, vendorBooking.getVendor().getVendorAttrs().getVendorAuthCert());
+        templateTokens.put(EmailConstants.ADMIN_VENDOR_BOOKING_COMMENT, vendorBooking.getComment());
+		
+        Email email = new Email();
+		email.setFrom(merchantStore.getStorename());
+		email.setFromEmail(merchantStore.getStoreEmailAddress());
+		email.setSubject(messages.getMessage("email.customer.vendor.booking",locale));
+		
+		email.setTo(vendorBooking.getCustomer().getEmailAddress());
+		
+		//email.setTo("sm19811130@gmail.com");
+		email.setTemplateName(ADMIN_VENDOR_BOOKING_CLOSE_TMPL);
+		email.setTemplateTokens(templateTokens);
+
+		emailService.sendHtmlEmail(merchantStore, email);
+	}*/
 }
