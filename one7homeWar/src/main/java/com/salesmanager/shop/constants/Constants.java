@@ -141,5 +141,8 @@ public class Constants {
 		customerTypes.put("4", "WALL PAPER");
 		customerTypes.put("5", "MACHINERY & EQUIPMENT");
 	}
+	private static final String DEFAULT = "DEFAULT";
+
+	private static final String WALLPAPER_CAT = "Wallpaper";
 
 }

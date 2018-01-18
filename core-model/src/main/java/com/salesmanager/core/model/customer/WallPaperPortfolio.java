@@ -15,8 +15,10 @@ import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import com.salesmanager.core.constants.SchemaConstant;
+import com.salesmanager.core.model.catalog.product.price.FinalPrice;
 import com.salesmanager.core.model.generic.SalesManagerEntity;
 import com.salesmanager.core.model.services.Services;
 
@@ -63,6 +65,17 @@ public class WallPaperPortfolio extends SalesManagerEntity<Long, WallPaperPortfo
 	
 	@Column (name ="ADMIN_APPROVE_STATUS", length=5)
 	private String status = "N";
+
+	@Transient
+	private Integer quantity = new Integer(0);
+
+	public Integer getQuantity() {
+		return quantity;
+	}
+
+	public void setQuantity(Integer quantity) {
+		this.quantity = quantity;
+	}
 
 	public Long getId() {
 		return id;

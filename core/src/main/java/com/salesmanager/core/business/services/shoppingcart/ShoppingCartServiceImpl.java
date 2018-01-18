@@ -1,5 +1,21 @@
 package com.salesmanager.core.business.services.shoppingcart;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
 import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.repositories.shoppingcart.ShoppingCartAttributeRepository;
 import com.salesmanager.core.business.repositories.shoppingcart.ShoppingCartItemRepository;
@@ -8,32 +24,26 @@ import com.salesmanager.core.business.services.catalog.product.PricingService;
 import com.salesmanager.core.business.services.catalog.product.ProductService;
 import com.salesmanager.core.business.services.catalog.product.attribute.ProductAttributeService;
 import com.salesmanager.core.business.services.common.generic.SalesManagerEntityServiceImpl;
+import com.salesmanager.core.business.services.services.WallPaperPortfolioService;
+import com.salesmanager.core.business.utils.ProductPriceUtils;
 import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.catalog.product.attribute.ProductAttribute;
 import com.salesmanager.core.model.catalog.product.price.FinalPrice;
 import com.salesmanager.core.model.customer.Customer;
+import com.salesmanager.core.model.customer.WallPaperPortfolio;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.shipping.ShippingProduct;
 import com.salesmanager.core.model.shoppingcart.ShoppingCart;
 import com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem;
 import com.salesmanager.core.model.shoppingcart.ShoppingCartItem;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.inject.Inject;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 @Service("shoppingCartService")
 public class ShoppingCartServiceImpl extends SalesManagerEntityServiceImpl<Long, ShoppingCart>
 		implements ShoppingCartService {
+
+	private static final String DEFAULT = "DEFAULT";
+
+	private static final String WALLPAPER = "Wallpaper";
 
 	private ShoppingCartRepository shoppingCartRepository;
 
@@ -52,8 +62,12 @@ public class ShoppingCartServiceImpl extends SalesManagerEntityServiceImpl<Long,
 	@Inject
 	private ProductAttributeService productAttributeService;
 	
+	@Inject
+	WallPaperPortfolioService wallPaperPortfolioService;
 
-
+	@Inject
+	private ProductPriceUtils priceUtil;
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ShoppingCartServiceImpl.class);
 
 	@Inject
@@ -293,73 +307,104 @@ public class ShoppingCartServiceImpl extends SalesManagerEntityServiceImpl<Long,
 
 	}
 
+	@Override
+	public ShoppingCartItem populateShoppingCartItemWallpaperPortfolio(final WallPaperPortfolio wallPaperPortfolio) throws ServiceException {
+		Validate.notNull(wallPaperPortfolio, "WallPaperPortfolio should not be null");
+
+		ShoppingCartItem item = new ShoppingCartItem();
+		//item.setProductVirtual(product.isProductVirtual());
+		// set item price
+		item.setProductId(wallPaperPortfolio.getId());
+		FinalPrice price = priceUtil.getWallpaperPortfolioPrice(wallPaperPortfolio);
+		item.setProductCategory(WALLPAPER);
+		item.setItemPrice(price.getFinalPrice());
+		return item;
+	}
+
+	
 	@Transactional
 	private void getPopulatedItem(final ShoppingCartItem item) throws Exception {
 
 		Product product = null;
+		WallPaperPortfolio wallPaperPortfolio = null;
+		if(StringUtils.isEmpty(item.getProductCategory()) || DEFAULT.equals(item.getProductCategory())) {
+			Long productId = item.getProductId();
+			product = productService.getById(productId);
+			if (product == null) {
+				item.setObsolete(true);
+				return;
+			}
 
-		Long productId = item.getProductId();
-		product = productService.getById(productId);
+			item.setProduct(product);
 
-		if (product == null) {
-			item.setObsolete(true);
-			return;
-		}
+			if (product.isProductVirtual()) {
+				item.setProductVirtual(true);
+			}
+			
+			Set<ShoppingCartAttributeItem> cartAttributes = item.getAttributes();
+			Set<ProductAttribute> productAttributes = product.getAttributes();
+			List<ProductAttribute> attributesList = new ArrayList<ProductAttribute>();//attributes maintained
+			List<ShoppingCartAttributeItem> removeAttributesList = new ArrayList<ShoppingCartAttributeItem>();//attributes to remove
+			//DELETE ORPHEANS MANUALLY
+			if ( (productAttributes != null && productAttributes.size() > 0) || (cartAttributes != null && cartAttributes.size() > 0)) {
+				for (ShoppingCartAttributeItem attribute : cartAttributes) {
+					long attributeId = attribute.getProductAttributeId().longValue();
+					boolean existingAttribute = false;
+					for (ProductAttribute productAttribute : productAttributes) {
 
-		item.setProduct(product);
-
-		if (product.isProductVirtual()) {
-			item.setProductVirtual(true);
-		}
-
-		Set<ShoppingCartAttributeItem> cartAttributes = item.getAttributes();
-		Set<ProductAttribute> productAttributes = product.getAttributes();
-		List<ProductAttribute> attributesList = new ArrayList<ProductAttribute>();//attributes maintained
-		List<ShoppingCartAttributeItem> removeAttributesList = new ArrayList<ShoppingCartAttributeItem>();//attributes to remove
-		//DELETE ORPHEANS MANUALLY
-		if ( (productAttributes != null && productAttributes.size() > 0) || (cartAttributes != null && cartAttributes.size() > 0)) {
-			for (ShoppingCartAttributeItem attribute : cartAttributes) {
-				long attributeId = attribute.getProductAttributeId().longValue();
-				boolean existingAttribute = false;
-				for (ProductAttribute productAttribute : productAttributes) {
-
-					if (productAttribute.getId().longValue() == attributeId) {
-						attribute.setProductAttribute(productAttribute);
-						attributesList.add(productAttribute);
-						existingAttribute = true;
-						break;
+						if (productAttribute.getId().longValue() == attributeId) {
+							attribute.setProductAttribute(productAttribute);
+							attributesList.add(productAttribute);
+							existingAttribute = true;
+							break;
+						}
 					}
+					
+					if(!existingAttribute) {
+						removeAttributesList.add(attribute);
+					}
+
 				}
-				
-				if(!existingAttribute) {
-					removeAttributesList.add(attribute);
+			}
+			
+			//cleanup orphean item
+			if(CollectionUtils.isNotEmpty(removeAttributesList)) {
+				for(ShoppingCartAttributeItem attr : removeAttributesList) {
+					shoppingCartAttributeItemRepository.delete(attr);
 				}
-
 			}
-		}
-		
-		//cleanup orphean item
-		if(CollectionUtils.isNotEmpty(removeAttributesList)) {
-			for(ShoppingCartAttributeItem attr : removeAttributesList) {
-				shoppingCartAttributeItemRepository.delete(attr);
+			
+			//cleanup detached attributes
+			if(CollectionUtils.isEmpty(attributesList)) {
+				item.setAttributes(null);
 			}
+			
+			// set item price
+			FinalPrice price = pricingService.calculateProductPrice(product, attributesList);
+			item.setItemPrice(price.getFinalPrice());
+			item.setFinalPrice(price);
+
+			BigDecimal subTotal = item.getItemPrice().multiply(new BigDecimal(item.getQuantity().intValue()));
+			item.setSubTotal(subTotal);
+
+		}else if(WALLPAPER.equals(item.getProductCategory())){
+			Long wallpaperPortfolio = item.getProductId();
+			wallPaperPortfolio = wallPaperPortfolioService.getById(wallpaperPortfolio);
+
+			if (wallPaperPortfolio == null) {
+				item.setObsolete(true);
+				return;
+			}
+			item.setWallPaperPortfolio(wallPaperPortfolio);
+			wallPaperPortfolio.setQuantity(item.getQuantity());
+			// set item price
+			FinalPrice price = priceUtil.getWallpaperPortfolioPrice(wallPaperPortfolio);
+			item.setItemPrice(price.getFinalPrice());
+			item.setFinalPrice(price);
+
+			BigDecimal subTotal = item.getItemPrice().multiply(new BigDecimal(item.getQuantity().intValue()));
+			item.setSubTotal(subTotal);
 		}
-		
-		//cleanup detached attributes
-		if(CollectionUtils.isEmpty(attributesList)) {
-			item.setAttributes(null);
-		}
-		
-		
-
-		// set item price
-		FinalPrice price = pricingService.calculateProductPrice(product, attributesList);
-		item.setItemPrice(price.getFinalPrice());
-		item.setFinalPrice(price);
-
-		BigDecimal subTotal = item.getItemPrice().multiply(new BigDecimal(item.getQuantity().intValue()));
-		item.setSubTotal(subTotal);
-
 	}
 
 	@Override

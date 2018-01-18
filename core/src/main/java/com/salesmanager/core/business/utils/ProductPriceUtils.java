@@ -27,6 +27,7 @@ import com.salesmanager.core.model.catalog.product.attribute.ProductAttribute;
 import com.salesmanager.core.model.catalog.product.availability.ProductAvailability;
 import com.salesmanager.core.model.catalog.product.price.FinalPrice;
 import com.salesmanager.core.model.catalog.product.price.ProductPrice;
+import com.salesmanager.core.model.customer.WallPaperPortfolio;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.order.orderproduct.OrderProduct;
 
@@ -74,9 +75,34 @@ public class ProductPriceUtils {
 		
 		return defaultPrice;
 	}
-	
+
 	/**
 	 * This method calculates the final price taking into account
+	 * all attributes included having a specified default attribute with an attribute price gt 0
+	 * in the product object. The calculation is based
+	 * on the default price.
+	 * Attributes may be null
+	 * @param Product
+	 * @param List<ProductAttribute>
+	 * @return FinalPrice
+	 */
+	public FinalPrice getWallpaperPortfolioPrice(WallPaperPortfolio wallPaperPortfolio) {
+		FinalPrice finalPrice = new FinalPrice();
+		BigDecimal price = wallPaperPortfolio.getPrice();
+		String size = wallPaperPortfolio.getSize();
+		Integer iSize = Integer.parseInt(size);
+		Integer qty = wallPaperPortfolio.getQuantity();
+		
+		BigDecimal fPrice = new BigDecimal(iSize).multiply(new BigDecimal(qty)).multiply(price); // qty * price * per square feet
+		finalPrice.setFinalPrice(fPrice);
+		finalPrice.setOriginalPrice(fPrice);
+		finalPrice.setDefaultPrice(true);
+		return finalPrice;
+	}
+
+	
+	/**
+	 * This method calculates the final price taking into aWaccount
 	 * all attributes included having a specified default attribute with an attribute price gt 0
 	 * in the product object. The calculation is based
 	 * on the default price.

@@ -6,6 +6,7 @@ import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.services.common.generic.SalesManagerEntityService;
 import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.customer.Customer;
+import com.salesmanager.core.model.customer.WallPaperPortfolio;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.shipping.ShippingProduct;
 import com.salesmanager.core.model.shoppingcart.ShoppingCart;
@@ -82,5 +83,8 @@ public interface ShoppingCartService extends SalesManagerEntityService<Long, Sho
 	 * @param item
 	 */
 	void deleteShoppingCartItem(Long id);
+
+	ShoppingCartItem populateShoppingCartItemWallpaperPortfolio(WallPaperPortfolio wallPaperPortfolio)
+			throws ServiceException;
 
 }

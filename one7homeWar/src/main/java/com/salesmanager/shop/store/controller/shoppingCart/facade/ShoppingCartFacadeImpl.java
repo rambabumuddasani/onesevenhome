@@ -27,8 +27,7 @@ import com.salesmanager.core.business.services.catalog.product.PricingService;
 import com.salesmanager.core.business.services.catalog.product.ProductService;
 import com.salesmanager.core.business.services.catalog.product.attribute.ProductAttributeService;
 import com.salesmanager.core.business.services.customer.CustomerService;
-import com.salesmanager.core.business.services.merchant.MerchantStoreService;
-import com.salesmanager.core.business.services.reference.language.LanguageService;
+import com.salesmanager.core.business.services.services.WallPaperPortfolioService;
 import com.salesmanager.core.business.services.shoppingcart.ShoppingCartCalculationService;
 import com.salesmanager.core.business.services.shoppingcart.ShoppingCartService;
 import com.salesmanager.core.business.utils.ProductPriceUtils;
@@ -36,6 +35,7 @@ import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.catalog.product.attribute.ProductAttribute;
 import com.salesmanager.core.model.catalog.product.price.FinalPrice;
 import com.salesmanager.core.model.customer.Customer;
+import com.salesmanager.core.model.customer.WallPaperPortfolio;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
 import com.salesmanager.core.model.shoppingcart.ShoppingCart;
@@ -85,7 +85,9 @@ public class ShoppingCartFacadeImpl
 	@Inject
 	private CustomerService customerService;
 	
-
+	@Inject
+	WallPaperPortfolioService wallPaperPortfolioService;
+	 
 
     public void deleteShoppingCart(final Long id, final MerchantStore store) throws Exception {
     	ShoppingCart cart = shoppingCartService.getById(id, store);
@@ -131,12 +133,20 @@ public class ShoppingCartFacadeImpl
         	//get duplicate item from the cart
         	Set<com.salesmanager.core.model.shoppingcart.ShoppingCartItem> cartModelItems = cartModel.getLineItems();
         	for(com.salesmanager.core.model.shoppingcart.ShoppingCartItem cartItem : cartModelItems) {
-        		if(cartItem.getProduct().getId().longValue()==shoppingCartItem.getProduct().getId().longValue()) {
+        		if(shoppingCartItem.getProduct() != null && cartItem.getProduct().getId().longValue()==shoppingCartItem.getProduct().getId().longValue()) {
         			if(CollectionUtils.isEmpty(cartItem.getAttributes())) {
         				if(!duplicateFound) {
         					if(!shoppingCartItem.isProductVirtual()) {
 	        					cartItem.setQuantity(cartItem.getQuantity() + shoppingCartItem.getQuantity());
         					}
+        					duplicateFound = true;
+        					break;
+        				}
+        			}
+        		}else if(shoppingCartItem.getWallPaperPortfolio() != null && cartItem.getWallPaperPortfolio().getId().longValue()==shoppingCartItem.getWallPaperPortfolio().getId().longValue()) {
+        			if(CollectionUtils.isEmpty(cartItem.getAttributes())) {
+        				if(!duplicateFound) {
+	      					cartItem.setQuantity(shoppingCartItem.getQuantity());
         					duplicateFound = true;
         					break;
         				}
@@ -170,47 +180,51 @@ public class ShoppingCartFacadeImpl
                                                                                                final MerchantStore store )
         throws Exception
     {
+        com.salesmanager.core.model.shoppingcart.ShoppingCartItem item = null;
+    	if(org.springframework.util.StringUtils.isEmpty(shoppingCartItem.getCategory())){
+	        Product product = productService.getById( shoppingCartItem.getProductId() );	
+	        if ( product == null ) {
+	            throw new Exception( "Item with id " + shoppingCartItem.getProductId() + " does not exist" );
+	        }
+	
+	        if ( product.getMerchantStore().getId().intValue() != store.getId().intValue() )
+	        {
+	            throw new Exception( "Item with id " + shoppingCartItem.getProductId() + " does not belong to merchant "
+	                + store.getId() );
+	        }
+	
+	        item = shoppingCartService.populateShoppingCartItem( product );
+	        // attributes
+	        List<ShoppingCartAttribute> cartAttributes = shoppingCartItem.getShoppingCartAttributes();
+	        if ( !CollectionUtils.isEmpty( cartAttributes ) )
+	        {
+	            for ( ShoppingCartAttribute attribute : cartAttributes )
+	            {
+	                ProductAttribute productAttribute = productAttributeService.getById( attribute.getAttributeId() );
+	                if ( productAttribute != null
+	                    && productAttribute.getProduct().getId().longValue() == product.getId().longValue() )
+	                {
+	                    com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem attributeItem =
+	                        new com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem( item,
+	                                                                                                         productAttribute );
 
-        Product product = productService.getById( shoppingCartItem.getProductId() );
+	                    item.addAttributes( attributeItem );
+	                }
+	            }
+	        }
 
-        if ( product == null )
-        {
-            throw new Exception( "Item with id " + shoppingCartItem.getProductId() + " does not exist" );
-        }
-
-        if ( product.getMerchantStore().getId().intValue() != store.getId().intValue() )
-        {
-            throw new Exception( "Item with id " + shoppingCartItem.getProductId() + " does not belong to merchant "
-                + store.getId() );
-        }
-
-        com.salesmanager.core.model.shoppingcart.ShoppingCartItem item =
-            shoppingCartService.populateShoppingCartItem( product );
-        
+    	}else {
+    		WallPaperPortfolio wallPaperPortfolio = wallPaperPortfolioService.getById(shoppingCartItem.getProductId());
+    		if ( wallPaperPortfolio == null ) {
+	            throw new Exception( "Item with id " + shoppingCartItem.getProductId() + " does not exist" );
+	        }
+    		wallPaperPortfolio.setQuantity(shoppingCartItem.getQuantity());
+    		item = shoppingCartService.populateShoppingCartItemWallpaperPortfolio(wallPaperPortfolio);
+    	}
         item.setVendorId(shoppingCartItem.getVendorId());
         item.setQuantity( shoppingCartItem.getQuantity() );
         item.setShoppingCart( cartModel );
-
-        // attributes
-        List<ShoppingCartAttribute> cartAttributes = shoppingCartItem.getShoppingCartAttributes();
-        if ( !CollectionUtils.isEmpty( cartAttributes ) )
-        {
-            for ( ShoppingCartAttribute attribute : cartAttributes )
-            {
-                ProductAttribute productAttribute = productAttributeService.getById( attribute.getAttributeId() );
-                if ( productAttribute != null
-                    && productAttribute.getProduct().getId().longValue() == product.getId().longValue() )
-                {
-                    com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem attributeItem =
-                        new com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem( item,
-                                                                                                         productAttribute );
-
-                    item.addAttributes( attributeItem );
-                }
-            }
-        }
         return item;
-
     }
 
     @Override
@@ -219,12 +233,9 @@ public class ShoppingCartFacadeImpl
     {
         final Long CustomerId = customer != null ? customer.getId() : null;
         ShoppingCart cartModel = new ShoppingCart();
-        if ( StringUtils.isNotBlank( shoppingCartCode ) )
-        {
+        if ( StringUtils.isNotBlank( shoppingCartCode ) ) {
             cartModel.setShoppingCartCode( shoppingCartCode );
-        }
-        else
-        {
+        } else {
             cartModel.setShoppingCartCode( UUID.randomUUID().toString().replaceAll( "-", "" ) );
         }
 

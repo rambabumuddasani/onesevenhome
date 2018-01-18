@@ -28,6 +28,7 @@ import com.salesmanager.core.model.catalog.product.price.FinalPrice;
 import com.salesmanager.core.model.common.audit.AuditListener;
 import com.salesmanager.core.model.common.audit.AuditSection;
 import com.salesmanager.core.model.common.audit.Auditable;
+import com.salesmanager.core.model.customer.WallPaperPortfolio;
 import com.salesmanager.core.model.generic.SalesManagerEntity;
 
 
@@ -82,13 +83,35 @@ public class ShoppingCartItem extends SalesManagerEntity<Long, ShoppingCartItem>
 	private Product product;
 	
 	@Transient
+	private WallPaperPortfolio wallPaperPortfolio;
+	
+
+	@Transient
 	private boolean obsolete = false;
+
+	@Column(name="PRODUCT_CATEGORY", length=100)
+	private String productCategory; // added specific to products like Wallpapers 
 
 	public ShoppingCartItem(ShoppingCart shoppingCart, Product product) {
 		this.product = product;
 		this.productId = product.getId();
 		this.quantity = 1;
 		this.shoppingCart = shoppingCart;
+	}
+	public WallPaperPortfolio getWallPaperPortfolio() {
+		return wallPaperPortfolio;
+	}
+
+	public void setWallPaperPortfolio(WallPaperPortfolio wallPaperPortfolio) {
+		this.wallPaperPortfolio = wallPaperPortfolio;
+	}
+
+	public String getProductCategory() {
+		return productCategory;
+	}
+
+	public void setProductCategory(String productCategory) {
+		this.productCategory = productCategory;
 	}
 	
 	public Long getVendorId() {

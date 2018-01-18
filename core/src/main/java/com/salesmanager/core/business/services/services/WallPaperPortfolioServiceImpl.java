@@ -8,8 +8,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.repositories.services.WallPaperPortfolioRepository;
 import com.salesmanager.core.business.services.common.generic.SalesManagerEntityServiceImpl;
+import com.salesmanager.core.model.catalog.product.Product;
+import com.salesmanager.core.model.catalog.product.price.FinalPrice;
+import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.customer.WallPaperPortfolio;
 
 @Service("wallPaperPortfolioService")
@@ -46,5 +50,6 @@ public class WallPaperPortfolioServiceImpl extends SalesManagerEntityServiceImpl
 	public List<WallPaperPortfolio> getPortfoliosBasedOnStatusAndVendorId(Long vendorId, String status) {
 		return wallPaperPortfolioRepository.findPortfoliosBasedOnStatusAndVendorId(vendorId, status);
 	}
+
 
 }

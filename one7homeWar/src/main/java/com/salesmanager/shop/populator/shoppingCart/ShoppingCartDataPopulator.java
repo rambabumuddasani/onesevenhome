@@ -91,50 +91,10 @@ public class ShoppingCartDataPopulator extends AbstractDataPopulator<ShoppingCar
 						vendorPopulator.populate(vendor, vendorResponse, null, null);
 						shoppingCartItem.setVendorDetails(vendorResponse);
                     }
-                    
-					shoppingCartItem.setProductCode(item.getProduct().getSku());
-                    shoppingCartItem.setProductVirtual(item.isProductVirtual())	;
-                    shoppingCartItem.setProductId(item.getProductId());
-                    shoppingCartItem.setId(item.getId());
-                    shoppingCartItem.setName(item.getProduct().getProductDescription().getName());
-                    shoppingCartItem.setPrice(pricingService.getDisplayAmount(item.getItemPrice(),store));
-                    shoppingCartItem.setQuantity(item.getQuantity());
-                    
-                    /*int itemQty = item.getQuantity().intValue();
-                    int itemPrice = item.getItemPrice().intValue();
-                    shoppingCartItem.setTotalPriceOfEachItem(itemQty*itemPrice);
-                    cartQuantity = cartQuantity + item.getQuantity();*/
-                    //shoppingCartItem.setTotalPriceOfEachItem(itemQty*itemPrice);
-                    cartQuantity = cartQuantity + item.getQuantity();
-                    shoppingCartItem.setProductPrice(item.getItemPrice());
-                    shoppingCartItem.setSubTotal(pricingService.getDisplayAmount(item.getSubTotal(), store));
-                    if(item.getFinalPrice().isDiscounted()){
-                    	shoppingCartItem.setDiscountPrice(pricingService.getDisplayAmount(item.getFinalPrice().getDiscountedPrice(),store));
-                    }
-                    ProductImage image = item.getProduct().getProductImage();
-                    if(image!=null && imageUtils!=null) {
-                        //String imagePath = imageUtils.buildProductImageUtils(store, item.getProduct().getSku(), image.getProductImage());
-                    	String imagePath = image.getProductImageUrl();
-                        shoppingCartItem.setImage(imagePath);
-                    }
-                    Set<com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem> attributes = item.getAttributes();
-                    if(attributes!=null) {
-                        List<ShoppingCartAttribute> cartAttributes = new ArrayList<ShoppingCartAttribute>();
-                        for(com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem attribute : attributes) {
-                            ShoppingCartAttribute cartAttribute = new ShoppingCartAttribute();
-                            cartAttribute.setId(attribute.getId());
-                            cartAttribute.setAttributeId(attribute.getProductAttributeId());
-                            cartAttribute.setOptionId(attribute.getProductAttribute().getProductOption().getId());
-                            cartAttribute.setOptionValueId(attribute.getProductAttribute().getProductOptionValue().getId());
-                            List<ProductOptionDescription> optionDescriptions = attribute.getProductAttribute().getProductOption().getDescriptionsSettoList();
-                            List<ProductOptionValueDescription> optionValueDescriptions = attribute.getProductAttribute().getProductOptionValue().getDescriptionsSettoList();
-                            if(!CollectionUtils.isEmpty(optionDescriptions) && !CollectionUtils.isEmpty(optionValueDescriptions)) {
-                            	cartAttribute.setOptionName(optionDescriptions.get(0).getName());
-                            	cartAttribute.setOptionValue(optionValueDescriptions.get(0).getName());
-                            	cartAttributes.add(cartAttribute);
-                            }
-                        }
-                        shoppingCartItem.setShoppingCartAttributes(cartAttributes);
+                    if(StringUtils.isEmpty(item.getProductCategory()) || "DEFAULT".equals(item.getProductCategory()) ){
+    					cartQuantity = productTypeCartItem(store, cartQuantity, item, shoppingCartItem);                    	
+                    }else if("Wallpaper".equals(item.getProductCategory())){
+                    	cartQuantity = wallpaperTypeCartItem(store, cartQuantity, item, shoppingCartItem);
                     }
                     shoppingCartItemsList.add(shoppingCartItem);
                 }
@@ -175,7 +135,78 @@ public class ShoppingCartDataPopulator extends AbstractDataPopulator<ShoppingCar
         return cart;	
 
 
-    };
+    }
+
+	private int wallpaperTypeCartItem(final MerchantStore store, int cartQuantity,
+			com.salesmanager.core.model.shoppingcart.ShoppingCartItem item, ShoppingCartItem shoppingCartItem)
+			throws ServiceException {
+		shoppingCartItem.setProductCode(item.getWallPaperPortfolio().getPortfolioName());
+		shoppingCartItem.setProductVirtual(item.isProductVirtual())	;
+		shoppingCartItem.setProductId(item.getProductId());
+		shoppingCartItem.setId(item.getId());
+		shoppingCartItem.setName(item.getWallPaperPortfolio().getPortfolioName());
+		shoppingCartItem.setPrice(pricingService.getDisplayAmount(item.getItemPrice(),store));
+		shoppingCartItem.setQuantity(item.getQuantity());
+		cartQuantity = cartQuantity + 1; // considering each wallpaper size is 1
+		shoppingCartItem.setProductPrice(item.getItemPrice());
+		shoppingCartItem.setSubTotal(pricingService.getDisplayAmount(item.getSubTotal(), store));
+		if(item.getFinalPrice().isDiscounted()){
+			shoppingCartItem.setDiscountPrice(pricingService.getDisplayAmount(item.getFinalPrice().getDiscountedPrice(),store));
+		}
+			String imagePath = item.getWallPaperPortfolio().getImageURL();
+		    shoppingCartItem.setImage(imagePath);
+		    return cartQuantity;
+	}
+    
+	private int productTypeCartItem(final MerchantStore store, int cartQuantity,
+			com.salesmanager.core.model.shoppingcart.ShoppingCartItem item, ShoppingCartItem shoppingCartItem)
+			throws ServiceException {
+		shoppingCartItem.setProductCode(item.getProduct().getSku());
+		shoppingCartItem.setProductVirtual(item.isProductVirtual())	;
+		shoppingCartItem.setProductId(item.getProductId());
+		shoppingCartItem.setId(item.getId());
+		shoppingCartItem.setName(item.getProduct().getProductDescription().getName());
+		shoppingCartItem.setPrice(pricingService.getDisplayAmount(item.getItemPrice(),store));
+		shoppingCartItem.setQuantity(item.getQuantity());
+		
+		/*int itemQty = item.getQuantity().intValue();
+		int itemPrice = item.getItemPrice().intValue();
+		shoppingCartItem.setTotalPriceOfEachItem(itemQty*itemPrice);
+		cartQuantity = cartQuantity + item.getQuantity();*/
+		//shoppingCartItem.setTotalPriceOfEachItem(itemQty*itemPrice);
+		cartQuantity = cartQuantity + item.getQuantity();
+		shoppingCartItem.setProductPrice(item.getItemPrice());
+		shoppingCartItem.setSubTotal(pricingService.getDisplayAmount(item.getSubTotal(), store));
+		if(item.getFinalPrice().isDiscounted()){
+			shoppingCartItem.setDiscountPrice(pricingService.getDisplayAmount(item.getFinalPrice().getDiscountedPrice(),store));
+		}
+		ProductImage image = item.getProduct().getProductImage();
+		if(image!=null && imageUtils!=null) {
+		    //String imagePath = imageUtils.buildProductImageUtils(store, item.getProduct().getSku(), image.getProductImage());
+			String imagePath = image.getProductImageUrl();
+		    shoppingCartItem.setImage(imagePath);
+		}
+		Set<com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem> attributes = item.getAttributes();
+		if(attributes!=null) {
+		    List<ShoppingCartAttribute> cartAttributes = new ArrayList<ShoppingCartAttribute>();
+		    for(com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem attribute : attributes) {
+		        ShoppingCartAttribute cartAttribute = new ShoppingCartAttribute();
+		        cartAttribute.setId(attribute.getId());
+		        cartAttribute.setAttributeId(attribute.getProductAttributeId());
+		        cartAttribute.setOptionId(attribute.getProductAttribute().getProductOption().getId());
+		        cartAttribute.setOptionValueId(attribute.getProductAttribute().getProductOptionValue().getId());
+		        List<ProductOptionDescription> optionDescriptions = attribute.getProductAttribute().getProductOption().getDescriptionsSettoList();
+		        List<ProductOptionValueDescription> optionValueDescriptions = attribute.getProductAttribute().getProductOptionValue().getDescriptionsSettoList();
+		        if(!CollectionUtils.isEmpty(optionDescriptions) && !CollectionUtils.isEmpty(optionValueDescriptions)) {
+		        	cartAttribute.setOptionName(optionDescriptions.get(0).getName());
+		        	cartAttribute.setOptionValue(optionValueDescriptions.get(0).getName());
+		        	cartAttributes.add(cartAttribute);
+		        }
+		    }
+		    shoppingCartItem.setShoppingCartAttributes(cartAttributes);
+		}
+		return cartQuantity;
+	}
 
 
 
