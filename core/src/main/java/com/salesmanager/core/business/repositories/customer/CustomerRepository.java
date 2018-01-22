@@ -1,9 +1,11 @@
 package com.salesmanager.core.business.repositories.customer;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.salesmanager.core.model.customer.Customer;
 
@@ -42,4 +44,10 @@ public interface CustomerRepository extends JpaRepository<Customer, Long>, Custo
 
 	@Query("select c from Customer c join fetch c.merchantStore cm left join fetch c.defaultLanguage cl left join fetch c.attributes ca left join fetch ca.customerOption cao left join fetch ca.customerOptionValue cav left join fetch cao.descriptions caod left join fetch cav.descriptions where c.customerType != '0' and c.activated = ?1")
 	List<Customer> getVendorsBasedOnStatus(String status);
+	
+	@Query("select c from Customer c join fetch c.merchantStore cm left join fetch c.defaultLanguage cl left join fetch c.attributes ca left join fetch ca.customerOption cao left join fetch ca.customerOptionValue cav left join fetch cao.descriptions caod left join fetch cav.descriptions where c.avgReview <= ?1 and c.customerType = ?2")
+	List<Customer> findWallPaperVendorsByRating(BigDecimal rating,String vendorType);
+ 
+	@Query(value="SELECT * FROM CUSTOMER WHERE CUSTOMER_TYPE = (CONCAT('',:customerType)) AND (BILLING_STREET_ADDRESS LIKE CONCAT('%',:searchString,'%') OR BILLING_CITY LIKE CONCAT('%',:searchString,'%')  OR BILLING_COMPANY LIKE CONCAT('%',:searchString,'%') OR CUSTOMER_AREA LIKE CONCAT('%',:searchString,'%'))", nativeQuery = true) 
+	List<Customer> findVendorsByLocation(@Param("customerType") String customerType,@Param("searchString") String searchString);
 }

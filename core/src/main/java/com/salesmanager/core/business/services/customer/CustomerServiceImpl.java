@@ -1,5 +1,6 @@
 package com.salesmanager.core.business.services.customer;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -232,5 +233,16 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 	public List<Customer> getVendorsBasedOnStatus(String status) {
 		return customerRepository.getVendorsBasedOnStatus(status);
 	}
+	
+	@Override
+	public List<Customer> getWallPaperVendorsByRating(BigDecimal rating,String vendorType) {
+		return customerRepository.findWallPaperVendorsByRating(rating,vendorType);
+	}
+
+	@Override
+	public List<Customer> getVendorsByLocation(String customerType,String searchString) {
+		return customerRepository.findVendorsByLocation(customerType,searchString);
+	}
+
 
 }

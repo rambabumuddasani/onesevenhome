@@ -1,5 +1,6 @@
 package com.salesmanager.core.model.customer;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -189,6 +190,9 @@ public class Customer extends SalesManagerEntity<Long, Customer> {
 	
 	@Column(name="GST",length=20)
 	private String gst;
+	
+	@Column(name="REVIEW_AVG")
+	private BigDecimal avgReview;
 
 	public Customer() {
 	}
@@ -445,6 +449,14 @@ public class Customer extends SalesManagerEntity<Long, Customer> {
 
 	public void setGst(String gst) {
 		this.gst = gst;
+	}
+
+	public BigDecimal getAvgReview() {
+		return avgReview;
+	}
+
+	public void setAvgReview(BigDecimal avgReview) {
+		this.avgReview = avgReview;
 	}
 	
 }

@@ -1,6 +1,6 @@
 package com.salesmanager.shop.controller.vendor;
 
-import java.io.File;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -8,10 +8,10 @@ import java.util.Locale;
 import java.util.Map;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,56 +20,26 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.http.MediaType;
 
-import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.modules.email.Email;
-import com.salesmanager.core.business.services.catalog.product.PricingService;
-import com.salesmanager.core.business.services.catalog.product.ProductService;
 import com.salesmanager.core.business.services.customer.CustomerService;
 import com.salesmanager.core.business.services.merchant.MerchantStoreService;
-import com.salesmanager.core.business.services.services.MachineryPortfolioService;
-import com.salesmanager.core.business.services.services.ServicesBookingService;
-import com.salesmanager.core.business.services.services.ServicesRatingService;
 import com.salesmanager.core.business.services.system.EmailService;
 import com.salesmanager.core.business.vendor.VendorBookingService;
 import com.salesmanager.core.business.vendor.VendorRatingService;
-import com.salesmanager.core.business.vendor.product.services.VendorProductService;
-import com.salesmanager.core.model.catalog.product.Product;
-import com.salesmanager.core.model.catalog.product.image.ProductImage;
-import com.salesmanager.core.model.catalog.product.review.ProductReview;
-import com.salesmanager.core.model.customer.ArchitectsPortfolio;
 import com.salesmanager.core.model.customer.Customer;
-import com.salesmanager.core.model.customer.MachineryPortfolio;
-import com.salesmanager.core.model.customer.ServicesBooking;
-import com.salesmanager.core.model.customer.ServicesRating;
 import com.salesmanager.core.model.customer.VendorBooking;
 import com.salesmanager.core.model.customer.VendorRating;
-import com.salesmanager.core.model.customer.WallPaperPortfolio;
 import com.salesmanager.core.model.merchant.MerchantStore;
-import com.salesmanager.core.model.product.vendor.VendorProduct;
-import com.salesmanager.core.model.services.Services;
+import com.salesmanager.shop.admin.controller.products.PaginatedResponse;
 import com.salesmanager.shop.admin.controller.products.PaginatedReviewResponse;
-import com.salesmanager.shop.admin.controller.products.ProductDetails;
-import com.salesmanager.shop.admin.controller.products.ProductImageRequest;
-import com.salesmanager.shop.admin.controller.products.ProductImageResponse;
 import com.salesmanager.shop.admin.controller.products.ProductReviewVO;
-import com.salesmanager.shop.admin.controller.services.ServicesBookingRequest;
-import com.salesmanager.shop.admin.controller.services.ServicesRatingRequest;
-import com.salesmanager.shop.admin.controller.services.ServicesRatingResponse;
 import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.constants.EmailConstants;
-import com.salesmanager.shop.fileupload.services.StorageException;
 import com.salesmanager.shop.store.controller.AbstractController;
-import com.salesmanager.shop.store.controller.customer.VendorRequest;
-import com.salesmanager.shop.store.controller.customer.VendorResponse;
 import com.salesmanager.shop.store.model.paging.PaginationData;
 import com.salesmanager.shop.utils.EmailUtils;
 import com.salesmanager.shop.utils.LabelUtils;
-import com.salesmanager.shop.fileupload.services.StorageService;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 @CrossOrigin
@@ -274,6 +244,9 @@ public class VendorController extends AbstractController {
 			avgRating = Double.valueOf(totalRate / totalReviews);
 			avgRating = Double.valueOf(Math.round(avgRating.doubleValue() * 10D) / 10D);
 			
+			vendor.setAvgReview(new BigDecimal(avgRating));
+			customerService.saveOrUpdate(vendor);
+			
 			paginatedReviewResponse.setAvgReview(avgRating);
 			paginatedReviewResponse.setTotalratingCount(Long.parseLong(String.valueOf(totalReviews)));
 			PaginationData paginaionData=createPaginaionData(page,size);
@@ -297,9 +270,10 @@ public class VendorController extends AbstractController {
 		return paginatedReviewResponse;
 	}
 	@RequestMapping(value="/adminVendorBookingClose", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
-  	@ResponseBody
-  	public AdminVendorBookingResponse adminVendorBookingClose(@RequestBody AdminVendorBookingRequest adminVendorBookingRequest) throws Exception {
-		LOGGER.debug("Entered adminVendorBooking");
+	@ResponseBody
+	public AdminVendorBookingResponse adminVendorBookingClose(@RequestBody AdminVendorBookingRequest adminVendorBookingRequest) throws Exception {
+		
+		LOGGER.debug("Entered adminVendorBookingClose");
 		
 		AdminVendorBookingResponse adminVendorBookingResponse = new AdminVendorBookingResponse();
 		
@@ -325,34 +299,34 @@ public class VendorController extends AbstractController {
 		adminVendorBookingResponse.setStatus("true");
 		
 		/*MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");
-    	final Locale locale  = new Locale("en");
-    	
-        Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
-        if(vendorBooking.getCustomer().getCustomerType().equals("0")) {
-        templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, vendorBooking.getCustomer().getBilling().getFirstName());
-        templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, vendorBooking.getCustomer().getBilling().getLastName());
-        } else {
-        	templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, vendorBooking.getCustomer().getVendorAttrs().getVendorName());
-        	templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, "");
-        }
-        templateTokens.put(EmailConstants.EMAIL_USER_NAME, vendorBooking.getCustomer().getEmailAddress());
-       
-        templateTokens.put(EmailConstants.EMAIL_SERVICE_TYPE, Constants.customerTypes.get(vendorBooking.getCustomer().getCustomerType()));
-        templateTokens.put(EmailConstants.EMAIL_VENDOR_NAME, vendorBooking.getVendor().getVendorAttrs().getVendorName());
-        templateTokens.put(EmailConstants.EMAIL_VENDOR_IMAGE, vendorBooking.getVendor().getVendorAttrs().getVendorAuthCert());
-        templateTokens.put(EmailConstants.ADMIN_VENDOR_BOOKING_COMMENT, vendorBooking.getComment());
+		final Locale locale  = new Locale("en");
 		
-        Email email = new Email();
+	    Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
+	    if(vendorBooking.getCustomer().getCustomerType().equals("0")) {
+	    templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, vendorBooking.getCustomer().getBilling().getFirstName());
+	    templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, vendorBooking.getCustomer().getBilling().getLastName());
+	    } else {
+	    	templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, vendorBooking.getCustomer().getVendorAttrs().getVendorName());
+	    	templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, "");
+	    }
+	    templateTokens.put(EmailConstants.EMAIL_USER_NAME, vendorBooking.getCustomer().getEmailAddress());
+	
+	    templateTokens.put(EmailConstants.EMAIL_SERVICE_TYPE, Constants.customerTypes.get(vendorBooking.getCustomer().getCustomerType()));
+	    templateTokens.put(EmailConstants.EMAIL_VENDOR_NAME, vendorBooking.getVendor().getVendorAttrs().getVendorName());
+	    templateTokens.put(EmailConstants.EMAIL_VENDOR_IMAGE, vendorBooking.getVendor().getVendorAttrs().getVendorAuthCert());
+	    templateTokens.put(EmailConstants.ADMIN_VENDOR_BOOKING_COMMENT, vendorBooking.getComment());
+		
+	    Email email = new Email();
 		email.setFrom(merchantStore.getStorename());
 		email.setFromEmail(merchantStore.getStoreEmailAddress());
 		email.setSubject(messages.getMessage("email.customer.vendor.booking",locale));
 		
 		email.setTo(vendorBooking.getCustomer().getEmailAddress());
 		
-		//email.setTo("sm19811130@gmail.com");
+		
 		email.setTemplateName(ADMIN_VENDOR_BOOKING_CLOSE_TMPL);
 		email.setTemplateTokens(templateTokens);
-
+	
 		emailService.sendHtmlEmail(merchantStore, email);
 		LOGGER.debug("Email sent to customer");
 		sendEmailToVendor(vendorBooking,merchantStore);
@@ -361,11 +335,11 @@ public class VendorController extends AbstractController {
 		}catch(Exception e){
 			e.printStackTrace();
 			LOGGER.error("Error while closing vendor booking "+e.getMessage());
-			adminVendorBookingResponse.setSuccessMessage("Error while closing vendor booking");
+			adminVendorBookingResponse.setErrorMessage("Error while closing vendor booking");
 			adminVendorBookingResponse.setStatus("false");
 			return adminVendorBookingResponse;
 		}
-		
+		LOGGER.debug("Ended adminVendorBookingClose");
 		return adminVendorBookingResponse;
 		
 		
@@ -395,12 +369,78 @@ public class VendorController extends AbstractController {
 		email.setFromEmail(merchantStore.getStoreEmailAddress());
 		email.setSubject(messages.getMessage("email.customer.vendor.booking",locale));
 		
-		email.setTo(vendorBooking.getCustomer().getEmailAddress());
+		email.setTo(vendorBooking.getVendor().getEmailAddress());
 		
-		//email.setTo("sm19811130@gmail.com");
+		
 		email.setTemplateName(ADMIN_VENDOR_BOOKING_CLOSE_TMPL);
 		email.setTemplateTokens(templateTokens);
 
 		emailService.sendHtmlEmail(merchantStore, email);
 	}*/
+	
+	// Search vendors by location
+	@RequestMapping(value="/getVendorsByLocation", method=RequestMethod.POST)
+	@ResponseBody
+	public PaginatedResponse getVendorsByLocation(@RequestBody VendorSearchRequest vendorSearchRequest,
+			@RequestParam(value="pageNumber", defaultValue = "1") int page , 
+			@RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+		
+		LOGGER.debug("Entered getVendorsByLocation");
+		
+		PaginatedResponse paginatedResponse = new PaginatedResponse();
+		
+		List<VendorSearchDetails> vendorSearchDetailsList = new ArrayList<VendorSearchDetails>();
+		
+		try {
+			
+		if(vendorSearchRequest.getSearchString() != null) {
+			
+			List<Customer> vendors = customerService.getVendorsByLocation(vendorSearchRequest.getCustomerType(),vendorSearchRequest.getSearchString());
+			
+			for(Customer vendor : vendors) {
+
+				VendorSearchDetails vendorSearchDetails = new VendorSearchDetails();
+				
+				vendorSearchDetails.setId(vendor.getId().intValue());
+				vendorSearchDetails.setCompanyName(vendor.getVendorAttrs().getVendorName());
+				vendorSearchDetails.setHouseNumber(vendor.getVendorAttrs().getVendorOfficeAddress());
+				vendorSearchDetails.setStreet(vendor.getBilling().getAddress());
+				vendorSearchDetails.setArea(vendor.getArea());
+				vendorSearchDetails.setCity(vendor.getBilling().getCity());
+				vendorSearchDetails.setState(vendor.getBilling().getState());
+				vendorSearchDetails.setPinCode(vendor.getBilling().getPostalCode());
+				vendorSearchDetails.setContactNumber(vendor.getBilling().getTelephone());
+				vendorSearchDetails.setCountry(vendor.getBilling().getCountry().getName());
+				vendorSearchDetails.setImageUrl(vendor.getUserProfile());
+				vendorSearchDetails.setAvgRating(vendor.getAvgReview());
+				
+				List<VendorRating> vendorRatings = vendorRatingService.getVendorReviews(vendor.getId());
+				vendorSearchDetails.setTotalRating(vendorRatings.size());
+				
+				vendorSearchDetails.setDescription(vendor.getVendorAttrs().getVendorDescription());
+				vendorSearchDetails.setShortDescription(vendor.getVendorAttrs().getVendorShortDescription());
+				vendorSearchDetailsList.add(vendorSearchDetails);
+			}
+		}
+		
+		PaginationData paginaionData=createPaginaionData(page,size);
+    	calculatePaginaionData(paginaionData,size, vendorSearchDetailsList.size());
+    	paginatedResponse.setPaginationData(paginaionData);
+		if(vendorSearchDetailsList == null || vendorSearchDetailsList.isEmpty() || vendorSearchDetailsList.size() < paginaionData.getCountByPage()){
+			paginatedResponse.setResponseData(vendorSearchDetailsList);
+			return paginatedResponse;
+		}
+    	List<VendorSearchDetails> paginatedResponses = vendorSearchDetailsList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+    	paginatedResponse.setResponseData(paginatedResponses);
+    	
+		}catch(Exception e) {
+			e.printStackTrace();
+			LOGGER.debug("Error while searching vendors by location "+e.getMessage());
+			paginatedResponse.setErrorMsg("Error while searching vendors by location");
+		}
+		
+		LOGGER.debug("Ended getVendorsByLocation");
+		return paginatedResponse;
+		
+	}
 }

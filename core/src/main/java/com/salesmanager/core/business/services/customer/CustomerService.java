@@ -1,6 +1,7 @@
 package com.salesmanager.core.business.services.customer;
 
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.salesmanager.core.business.exception.ServiceException;
@@ -49,5 +50,9 @@ public interface CustomerService  extends SalesManagerEntityService<Long, Custom
 	public List<Customer> getAllVendors();
 
 	public List<Customer> getVendorsBasedOnStatus(String status);
+	
+	public List<Customer> getWallPaperVendorsByRating(BigDecimal rating,String vendorType);
+
+	public List<Customer> getVendorsByLocation(String customerType,String searchString);
 
 }
