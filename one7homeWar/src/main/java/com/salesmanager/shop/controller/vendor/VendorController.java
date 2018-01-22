@@ -443,4 +443,72 @@ public class VendorController extends AbstractController {
 		return paginatedResponse;
 		
 	}
+	// Search vendors(Archtects/wallpaper/machinery) by rating
+	@RequestMapping(value="/getVendorPortFoliosByRating", method = RequestMethod.POST) 
+	@ResponseBody
+	public PaginatedResponse getVendorPortFoliosByRating(@RequestBody VendorFilterRequest vendorFilterRequest,
+ 			 @RequestParam(value="pageNumber", defaultValue = "1") int page , 
+			 @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+				
+		LOGGER.debug("Entered getVendorPortFoliosByRating");
+		
+		PaginatedResponse paginatedResponse = new PaginatedResponse();
+		
+		List<FilteredVendors> filteredVendorsList = new ArrayList<FilteredVendors>();
+		
+		try {
+			
+		if(vendorFilterRequest.getRating() != null && (vendorFilterRequest.getRating().doubleValue() >=1 && vendorFilterRequest.getRating().doubleValue() <= 5)){
+			
+		List<Customer> vendors = customerService.getWallPaperVendorsByRating(vendorFilterRequest.getRating(),vendorFilterRequest.getVendorType());
+		
+		for(Customer vendor : vendors) {
+			
+			FilteredVendors filteredVendors = new FilteredVendors();
+			
+			filteredVendors.setId(vendor.getId());
+			filteredVendors.setCompanyName(vendor.getVendorAttrs().getVendorName());
+			filteredVendors.setHouseNumber(vendor.getVendorAttrs().getVendorOfficeAddress());
+			filteredVendors.setStreet(vendor.getBilling().getAddress());
+			filteredVendors.setArea(vendor.getArea());
+			filteredVendors.setCity(vendor.getBilling().getCity());
+			filteredVendors.setState(vendor.getBilling().getState());
+			filteredVendors.setPinCode(vendor.getBilling().getPostalCode());
+			filteredVendors.setCountry(vendor.getBilling().getCountry().getName());
+			filteredVendors.setContactNumber(vendor.getBilling().getTelephone());
+			filteredVendors.setImageUrl(vendor.getUserProfile());
+			filteredVendors.setAvgRating(vendor.getAvgReview());
+			
+			List<VendorRating> vendorRatings = vendorRatingService.getVendorReviews(vendor.getId());
+			filteredVendors.setTotalRating(vendorRatings.size());
+			
+			filteredVendors.setDescription(vendor.getVendorAttrs().getVendorDescription());
+			filteredVendors.setShortDescription(vendor.getVendorAttrs().getVendorShortDescription());
+			filteredVendorsList.add(filteredVendors);
+		}
+	}
+		
+		PaginationData paginaionData=createPaginaionData(page,size);
+    	calculatePaginaionData(paginaionData,size, filteredVendorsList.size());
+    	paginatedResponse.setPaginationData(paginaionData);
+    	
+		if(filteredVendorsList == null || filteredVendorsList.isEmpty() || filteredVendorsList.size() < paginaionData.getCountByPage()){
+			paginatedResponse.setResponseData(filteredVendorsList);
+		
+			return paginatedResponse;
+		}
+		
+    	List<FilteredVendors> paginatedResponses = filteredVendorsList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+    	paginatedResponse.setResponseData(paginatedResponses);
+    	
+		}catch(Exception e) {
+			e.printStackTrace();
+			LOGGER.error("Error while retrieving VendorPortFoliosByRating "+e.getMessage());
+			paginatedResponse.setErrorMsg("Error while retrieving VendorPortFoliosByRating");
+		}
+		
+		LOGGER.debug("Ended getVendorPortFoliosByRating");
+		return paginatedResponse;
+		
+	}
 }
