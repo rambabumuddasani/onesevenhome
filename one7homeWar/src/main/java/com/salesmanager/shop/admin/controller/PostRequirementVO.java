@@ -10,7 +10,8 @@ public class PostRequirementVO {
 	private Long customerId;
 	private String customerName;
 	private String category;
-	private Date postedDate;
+	//private Date postedDate;
+	private Date dateAndTime;
 	public Long getPostRequirementId() {
 		return postRequirementId;
 	}
@@ -47,10 +48,16 @@ public class PostRequirementVO {
 	public void setCategory(String category) {
 		this.category = category;
 	}
-	public Date getPostedDate() {
+	/*public Date getPostedDate() {
 		return postedDate;
 	}
 	public void setPostedDate(Date postedDate) {
 		this.postedDate = postedDate;
+	}*/
+	public Date getDateAndTime() {
+		return dateAndTime;
+	}
+	public void setDateAndTime(Date dateAndTime) {
+		this.dateAndTime = dateAndTime;
 	}
 }

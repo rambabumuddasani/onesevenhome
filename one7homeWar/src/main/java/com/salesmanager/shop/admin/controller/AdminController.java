@@ -1729,7 +1729,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     			PostRequirementVO postRequirementVO = new PostRequirementVO();
     			postRequirementVO.setPostRequirementId(postRequirement.getId());
     			postRequirementVO.setQuery(postRequirement.getQuery());
-    			postRequirementVO.setPostedDate(postRequirement.getPostedDate());
+    			postRequirementVO.setDateAndTime(postRequirement.getPostedDate());
     			Customer customer = customerService.getById(postRequirement.getCustomerId());
     			postRequirementVO.setCustomerId(customer.getId());
     			Category category = categoryService.getById(postRequirement.getCategoryId());

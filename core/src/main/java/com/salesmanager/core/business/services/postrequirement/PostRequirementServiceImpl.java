@@ -22,9 +22,13 @@ public class PostRequirementServiceImpl extends SalesManagerEntityServiceImpl<Lo
 		this.postRequirementRepository = postRequirementRepository;
 	}
 
-	@Override
+	/*@Override
 	public List<PostRequirement> getAllPostRequirements() {
 		// TODO Auto-generated method stub
 		return postRequirementRepository.findAll();
+	}*/
+	@Override
+	public List<PostRequirement> getAllPostRequirements() {
+		return postRequirementRepository.findAllPostRequirements();
 	}
 }
