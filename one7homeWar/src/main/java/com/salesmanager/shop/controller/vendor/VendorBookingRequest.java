@@ -12,6 +12,7 @@ public class VendorBookingRequest {
 	private Integer rating;
     private String reviewDescription;
     private String reviewTitle;
+    private Long portfolioId;
 	
 	public Long getCustomerId() {
 		return customerId;
@@ -60,6 +61,12 @@ public class VendorBookingRequest {
 	}
 	public void setReviewTitle(String reviewTitle) {
 		this.reviewTitle = reviewTitle;
+	}
+	public Long getPortfolioId() {
+		return portfolioId;
+	}
+	public void setPortfolioId(Long portfolioId) {
+		this.portfolioId = portfolioId;
 	}
 	
 }

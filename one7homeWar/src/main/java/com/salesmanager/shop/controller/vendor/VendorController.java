@@ -71,7 +71,7 @@ public class VendorController extends AbstractController {
 	private final static String VENDOR_ADD_PRODUCTS_TPL = "email_template_vendor_add_products.ftl";
 	private final static String SERVICE_BOOKING_TMPL = "email_template_service_booking.ftl";
 	private final static String VENDOR_BOOKING_TMPL = "email_template_vendor_booking.ftl";
-	//private final static String ADMIN_VENDOR_BOOKING_CLOSE_TMPL = "email_template_vendor_booking_close.ftl";
+	private final static String ADMIN_VENDOR_BOOKING_CLOSE_TMPL = "email_template_vendor_booking_close.ftl";
     @RequestMapping(value="/updateVendorDescription", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
   	@ResponseBody
   	public MachineryResponse updateVendorDescription(@RequestBody MachineryRequest machineryRequest) throws Exception {
@@ -129,6 +129,9 @@ public class VendorController extends AbstractController {
     	vendorBooking.setDescription(vendorBookingRequest.getDescription());
     	vendorBooking.setAddress(vendorBookingRequest.getAddress());
     	
+    	if(vendor.getCustomerType().equals("5"))
+    	vendorBooking.setPortfolioId(vendorBookingRequest.getPortfolioId());
+    	
     	vendorBookingService.save(vendorBooking);
     	vendorBookingResponse.setSuccessMessage("Vendor booking accepted.");
     	LOGGER.debug("bookServices saved");
@@ -147,7 +150,7 @@ public class VendorController extends AbstractController {
         }
         templateTokens.put(EmailConstants.EMAIL_USER_NAME, customer.getEmailAddress());
         vendorBooking = vendorBookingService.getById(vendorBooking.getId());
-        templateTokens.put(EmailConstants.EMAIL_SERVICE_TYPE, Constants.customerTypes.get(customer.getCustomerType()));
+        templateTokens.put(EmailConstants.EMAIL_SERVICE_TYPE, Constants.customerTypes.get(vendor.getCustomerType()));
         templateTokens.put(EmailConstants.EMAIL_VENDOR_NAME, vendorBooking.getVendor().getVendorAttrs().getVendorName());
         templateTokens.put(EmailConstants.EMAIL_VENDOR_IMAGE, vendorBooking.getVendor().getVendorAttrs().getVendorAuthCert());
 		
@@ -298,7 +301,7 @@ public class VendorController extends AbstractController {
 		adminVendorBookingResponse.setSuccessMessage("Vendor booking closed successfully");
 		adminVendorBookingResponse.setStatus("true");
 		
-		/*MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");
+		MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");
 		final Locale locale  = new Locale("en");
 		
 	    Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
@@ -330,7 +333,7 @@ public class VendorController extends AbstractController {
 		emailService.sendHtmlEmail(merchantStore, email);
 		LOGGER.debug("Email sent to customer");
 		sendEmailToVendor(vendorBooking,merchantStore);
-		LOGGER.debug("Email sent to vendor");*/
+		LOGGER.debug("Email sent to vendor");
 		
 		}catch(Exception e){
 			e.printStackTrace();
@@ -345,7 +348,7 @@ public class VendorController extends AbstractController {
 		
 	}
 
-	/*private void sendEmailToVendor(VendorBooking vendorBooking, MerchantStore merchantStore) throws Exception{
+	private void sendEmailToVendor(VendorBooking vendorBooking, MerchantStore merchantStore) throws Exception{
 
         final Locale locale  = new Locale("en");
     	
@@ -376,7 +379,7 @@ public class VendorController extends AbstractController {
 		email.setTemplateTokens(templateTokens);
 
 		emailService.sendHtmlEmail(merchantStore, email);
-	}*/
+	}
 	
 	// Search vendors by location
 	@RequestMapping(value="/getVendorsByLocation", method=RequestMethod.POST)

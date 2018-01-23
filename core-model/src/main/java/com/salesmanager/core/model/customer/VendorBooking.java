@@ -65,6 +65,9 @@ public class VendorBooking extends SalesManagerEntity<Long, VendorBooking> {
 	@Temporal(TemporalType.DATE)
 	@Column(name="CLOSING_DATE")
 	private Date closingDate;
+	
+	@Column(name="PORTFOLIO_ID")
+	private Long portfolioId;
 
 	public Long getId() {
 		return id;
@@ -144,6 +147,14 @@ public class VendorBooking extends SalesManagerEntity<Long, VendorBooking> {
 
 	public void setAddress(String address) {
 		this.address = address;
+	}
+
+	public Long getPortfolioId() {
+		return portfolioId;
+	}
+
+	public void setPortfolioId(Long portfolioId) {
+		this.portfolioId = portfolioId;
 	}
 
 	
