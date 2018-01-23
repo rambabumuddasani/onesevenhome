@@ -10,6 +10,7 @@ public class VendorDetailsVO {
 	private String vendorUserProfile;
 	private String status;
 	private String vendorType;
+	private String customerName;
 	public Long getVendorId() {
 		return vendorId;
 	}
@@ -39,5 +40,11 @@ public class VendorDetailsVO {
 	}
 	public void setVendorType(String vendorType) {
 		this.vendorType = vendorType;
+	}
+	public String getCustomerName() {
+		return customerName;
+	}
+	public void setCustomerName(String customerName) {
+		this.customerName = customerName;
 	}
 }

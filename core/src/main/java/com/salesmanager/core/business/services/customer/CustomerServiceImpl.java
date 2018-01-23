@@ -244,5 +244,15 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 		return customerRepository.findVendorsByLocation(customerType,searchString);
 	}
 
+	@Override
+	public List<Customer> getVendorsByCustomerType(String customerType) {
+		return customerRepository.findVendorsByCustomerType(customerType);
+	}
+
+	@Override
+	public List<Customer> getVendorsBasedOnStatusAndCustomerType(String status, String customerType) {
+		return customerRepository.findVendorsBasedOnStatusAndCustomerType(status,customerType);
+	}
+
 
 }

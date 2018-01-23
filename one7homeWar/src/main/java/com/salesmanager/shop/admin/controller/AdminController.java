@@ -49,6 +49,7 @@ import com.salesmanager.core.business.services.merchant.MerchantStoreService;
 import com.salesmanager.core.business.services.postrequirement.PostRequirementService;
 import com.salesmanager.core.business.services.reference.country.CountryService;
 import com.salesmanager.core.business.services.reference.language.LanguageService;
+import com.salesmanager.core.business.services.services.MachineryPortfolioService;
 import com.salesmanager.core.business.services.system.EmailService;
 import com.salesmanager.core.business.services.user.UserService;
 import com.salesmanager.core.business.utils.ProductPriceUtils;
@@ -64,6 +65,7 @@ import com.salesmanager.core.model.catalog.product.price.ProductPrice;
 import com.salesmanager.core.model.catalog.product.type.ProductType;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.customer.CustomerTestimonial;
+import com.salesmanager.core.model.customer.MachineryPortfolio;
 import com.salesmanager.core.model.customer.VendorBooking;
 import com.salesmanager.core.model.history.HistoryManagement;
 import com.salesmanager.core.model.image.brand.BrandImage;
@@ -164,6 +166,9 @@ public class AdminController extends AbstractController {
     
 	@Inject
 	VendorBookingService vendorBookingService;
+	
+	@Inject
+	MachineryPortfolioService machineryPortfolioService;
 	
     // Admin update store address
 	@RequestMapping(value="/admin/updatestore", method = RequestMethod.POST, 
@@ -1967,58 +1972,87 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 			List<VendorDetailsVO> vendorDetailsVOList = new ArrayList<VendorDetailsVO>();
 			
 			List<Customer> vendorsList = null;
+			
 			try {
+				
 			if(adminApprovedVendorsRequest.getStatus().equals("ALL")) {
 				
+				if(adminApprovedVendorsRequest.getCustomerType().equals("ALL")){
 				vendorsList = customerService.getAllVendors();
+				}
+				else {
+					vendorsList = customerService.getVendorsByCustomerType(adminApprovedVendorsRequest.getCustomerType());
+				}
 				
 				for(Customer vendor : vendorsList) {
+					
 					VendorDetailsVO vendorDetailsVO = new VendorDetailsVO();
 					vendorDetailsVO.setVendorId(vendor.getId());
+					
+					if(vendor.getCustomerType().equals("0"))
+						vendorDetailsVO.setCustomerName(vendor.getBilling().getFirstName().concat(" ").concat(vendor.getBilling().getLastName()));
+					else
 					vendorDetailsVO.setVendorName(vendor.getVendorAttrs().getVendorName());
+					
 					vendorDetailsVO.setVendorUserProfile(vendor.getUserProfile());
 					if(vendor.getActivated().equals("0")) {
 					vendorDetailsVO.setStatus(Constants.PENDING_FOR_APPROVAL);
 					}else {
 						vendorDetailsVO.setStatus(Constants.APPROVED);
 					}
-					
+					if(vendor.getCustomerType().equals("0"))
+						vendorDetailsVO.setVendorType(Constants.CUSTOMERS);
 					if(vendor.getCustomerType().equals("1"))
 						vendorDetailsVO.setVendorType(Constants.PRODUCT_VENDORS);
-					else if(vendor.getCustomerType().equals("2")) 
+					if(vendor.getCustomerType().equals("2")) 
 						vendorDetailsVO.setVendorType(Constants.SERVICE_PROVIDER);
-					else if(vendor.getCustomerType().equals("3")) 
+					if(vendor.getCustomerType().equals("3")) 
 						vendorDetailsVO.setVendorType(Constants.ARCHITECTS);
-					else if(vendor.getCustomerType().equals("4")) 
+					if(vendor.getCustomerType().equals("4")) 
 						vendorDetailsVO.setVendorType(Constants.WALLPAPER);
-					else
+					if(vendor.getCustomerType().equals("5"))
 					    vendorDetailsVO.setVendorType(Constants.MACHINERY_EQUIPMENT);
 					
 					vendorDetailsVOList.add(vendorDetailsVO);
 				}
 			} else {
+				
+				if(adminApprovedVendorsRequest.getCustomerType().equals("ALL")) {
 				vendorsList = customerService.getVendorsBasedOnStatus(adminApprovedVendorsRequest.getStatus());
+				}
+				else{
+					vendorsList = customerService.getVendorsBasedOnStatusAndCustomerType(adminApprovedVendorsRequest.getStatus(),adminApprovedVendorsRequest.getCustomerType());
+				}
 				
 				for(Customer vendor : vendorsList) {
+					
 					VendorDetailsVO vendorDetailsVO = new VendorDetailsVO();
 					vendorDetailsVO.setVendorId(vendor.getId());
+					
+					if(vendor.getCustomerType().equals("0"))
+						vendorDetailsVO.setCustomerName(vendor.getBilling().getFirstName().concat(" ").concat(vendor.getBilling().getLastName()));
+					else
 					vendorDetailsVO.setVendorName(vendor.getVendorAttrs().getVendorName());
+					
 					vendorDetailsVO.setVendorUserProfile(vendor.getUserProfile());
+					
 					if(vendor.getActivated().equals("0")) {
 						vendorDetailsVO.setStatus(Constants.PENDING_FOR_APPROVAL);
 						}else {
 							vendorDetailsVO.setStatus(Constants.APPROVED);
 						}
 					
+					if(vendor.getCustomerType().equals("0"))
+						vendorDetailsVO.setVendorType(Constants.CUSTOMERS);
 					if(vendor.getCustomerType().equals("1"))
 						vendorDetailsVO.setVendorType(Constants.PRODUCT_VENDORS);
-					else if(vendor.getCustomerType().equals("2")) 
+					if(vendor.getCustomerType().equals("2")) 
 						vendorDetailsVO.setVendorType(Constants.SERVICE_PROVIDER);
-					else if(vendor.getCustomerType().equals("3")) 
+					if(vendor.getCustomerType().equals("3")) 
 						vendorDetailsVO.setVendorType(Constants.ARCHITECTS);
-					else if(vendor.getCustomerType().equals("4")) 
+					if(vendor.getCustomerType().equals("4")) 
 						vendorDetailsVO.setVendorType(Constants.WALLPAPER);
-					else
+					if(vendor.getCustomerType().equals("5"))
 					    vendorDetailsVO.setVendorType(Constants.MACHINERY_EQUIPMENT);
 					
 					vendorDetailsVOList.add(vendorDetailsVO);
@@ -2035,7 +2069,8 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	        	paginatedResponse.setResponseData(paginatedResponses);
 			}catch(Exception e) {
 				e.printStackTrace();
-				LOGGER.error("error while retrieving"+e.getMessage());
+				LOGGER.error("error while retrieving vendors"+e.getMessage());
+				paginatedResponse.setErrorMsg("error while retrieving vendors");
 			}
 			LOGGER.debug("Ended getVendorForAdmin");
 			return paginatedResponse;
@@ -2234,6 +2269,13 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    			vendorBookingVO.setVendorEmailId(vendorBooking.getVendor().getEmailAddress());
 	    			vendorBookingVO.setVendorMobileNumber(vendorBooking.getVendor().getVendorAttrs().getVendorMobile());
 	    			
+	    			if(vendorBooking.getVendor().getCustomerType().equals("5") && vendorBooking.getPortfolioId() != null) {
+	    			MachineryPortfolio  machineryPortfoilio = machineryPortfolioService.getById(vendorBooking.getPortfolioId());
+	    			vendorBookingVO.setEquipmentName(machineryPortfoilio.getEquipmentName());
+	    			vendorBookingVO.setEquipmentPrice(machineryPortfoilio.getEquipmentPrice());
+	    			vendorBookingVO.setHiringtype(machineryPortfoilio.getHiringType());
+	    			}
+	    			
 	    			if(vendorBooking.getVendor().getCustomerType().equals("1"))
 	    			vendorBookingVO.setBookingType(Constants.PRODUCT_VENDORS);
 	    			if(vendorBooking.getVendor().getCustomerType().equals("2"))
@@ -2271,7 +2313,12 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		    			vendorBookingVO.setCustomerMobileNumber(vendorBooking.getCustomer().getBilling().getTelephone());
 		    			vendorBookingVO.setVendorEmailId(vendorBooking.getVendor().getEmailAddress());
 		    			vendorBookingVO.setVendorMobileNumber(vendorBooking.getVendor().getVendorAttrs().getVendorMobile());
-		    			
+		    			if(vendorBooking.getVendor().getCustomerType().equals("5") && vendorBooking.getPortfolioId() != null) {
+		    			MachineryPortfolio  machineryPortfoilio = machineryPortfolioService.getById(vendorBooking.getPortfolioId());
+		    			vendorBookingVO.setEquipmentName(machineryPortfoilio.getEquipmentName());
+		    			vendorBookingVO.setEquipmentPrice(machineryPortfoilio.getEquipmentPrice());
+		    			vendorBookingVO.setHiringtype(machineryPortfoilio.getHiringType());
+		    			}
 		    			if(vendorBooking.getVendor().getCustomerType().equals("1"))
 			    			vendorBookingVO.setBookingType(Constants.PRODUCT_VENDORS);
 			    		if(vendorBooking.getVendor().getCustomerType().equals("2"))

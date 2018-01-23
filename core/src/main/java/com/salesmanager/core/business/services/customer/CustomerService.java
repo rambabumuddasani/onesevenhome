@@ -55,4 +55,8 @@ public interface CustomerService  extends SalesManagerEntityService<Long, Custom
 
 	public List<Customer> getVendorsByLocation(String customerType,String searchString);
 
+	public List<Customer> getVendorsByCustomerType(String customerType);
+
+	public List<Customer> getVendorsBasedOnStatusAndCustomerType(String status, String customerType);
+
 }

@@ -131,6 +131,7 @@ public class Constants {
 	public final static String ARCHITECTS = "Architects";
 	public final static String WALLPAPER = "WallPaper Vendors";
 	public final static String MACHINERY_EQUIPMENT = "Machinery & Equipment";
+	public final static String CUSTOMERS = "Customer";
 	
     public static Map<String,String> customerTypes = new HashMap<String,String>();
 	
