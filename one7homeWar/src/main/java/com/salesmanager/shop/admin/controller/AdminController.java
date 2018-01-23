@@ -2313,12 +2313,14 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		    			vendorBookingVO.setCustomerMobileNumber(vendorBooking.getCustomer().getBilling().getTelephone());
 		    			vendorBookingVO.setVendorEmailId(vendorBooking.getVendor().getEmailAddress());
 		    			vendorBookingVO.setVendorMobileNumber(vendorBooking.getVendor().getVendorAttrs().getVendorMobile());
+		    			
 		    			if(vendorBooking.getVendor().getCustomerType().equals("5") && vendorBooking.getPortfolioId() != null) {
 		    			MachineryPortfolio  machineryPortfoilio = machineryPortfolioService.getById(vendorBooking.getPortfolioId());
 		    			vendorBookingVO.setEquipmentName(machineryPortfoilio.getEquipmentName());
 		    			vendorBookingVO.setEquipmentPrice(machineryPortfoilio.getEquipmentPrice());
 		    			vendorBookingVO.setHiringtype(machineryPortfoilio.getHiringType());
 		    			}
+		    			
 		    			if(vendorBooking.getVendor().getCustomerType().equals("1"))
 			    			vendorBookingVO.setBookingType(Constants.PRODUCT_VENDORS);
 			    		if(vendorBooking.getVendor().getCustomerType().equals("2"))

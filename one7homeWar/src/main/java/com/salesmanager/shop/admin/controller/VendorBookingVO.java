@@ -1,5 +1,6 @@
 package com.salesmanager.shop.admin.controller;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 public class VendorBookingVO {
@@ -20,6 +21,9 @@ public class VendorBookingVO {
 	private String customerMobileNumber;
 	private String vendorEmailId;
 	private String vendorMobileNumber;
+	private String equipmentName;
+	private BigDecimal equipmentPrice;
+	private String hiringtype;
 	public Long getId() {
 		return id;
 	}
@@ -115,6 +119,24 @@ public class VendorBookingVO {
 	}
 	public void setVendorMobileNumber(String vendorMobileNumber) {
 		this.vendorMobileNumber = vendorMobileNumber;
+	}
+	public String getEquipmentName() {
+		return equipmentName;
+	}
+	public void setEquipmentName(String equipmentName) {
+		this.equipmentName = equipmentName;
+	}
+	public BigDecimal getEquipmentPrice() {
+		return equipmentPrice;
+	}
+	public void setEquipmentPrice(BigDecimal equipmentPrice) {
+		this.equipmentPrice = equipmentPrice;
+	}
+	public String getHiringtype() {
+		return hiringtype;
+	}
+	public void setHiringtype(String hiringtype) {
+		this.hiringtype = hiringtype;
 	}
 	
 }

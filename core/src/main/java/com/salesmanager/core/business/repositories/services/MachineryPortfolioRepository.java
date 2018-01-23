@@ -20,4 +20,7 @@ public interface MachineryPortfolioRepository extends JpaRepository<MachineryPor
 	@Query("select pf from MachineryPortfolio pf where pf.customer.id=?1 and pf.status = ?2")
 	public List<MachineryPortfolio> findMachineryPortfolioBasedonStatusAndVendorId(Long vendorId, String status);
 
+	@Query(value= "SELECT m.* FROM VENDOR_BOOKING as v join MACHINERY_PORTFOLIO as m on m.MACHINERY_ID = v.SERVICE_ID WHERE v.CUSTOMER_ID= ?1 and m.MACHINERY_ID=?2",nativeQuery = true)
+	public MachineryPortfolio findgetMachineryPortfolio(Long id, Long id2);
+
 }
