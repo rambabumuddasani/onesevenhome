@@ -33,11 +33,14 @@ import com.salesmanager.core.model.catalog.product.image.ProductImage;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.product.vendor.VendorProduct;
+import com.salesmanager.shop.admin.controller.VendorBookingVO;
+import com.salesmanager.shop.admin.controller.products.PaginatedResponse;
 import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.constants.EmailConstants;
 import com.salesmanager.shop.populator.order.VendorPopulator;
 import com.salesmanager.shop.store.controller.AbstractController;
 import com.salesmanager.shop.store.controller.customer.VendorResponse;
+import com.salesmanager.shop.store.model.paging.PaginationData;
 import com.salesmanager.shop.utils.EmailUtils;
 import com.salesmanager.shop.utils.LabelUtils;
 
@@ -165,19 +168,21 @@ public class VendorProductController extends AbstractController {
 			vList.add(productsInfo);
 		}
 
-		System.out.println("vpList:"+vpList.size());
+		LOGGER.debug("product list size : "+vpList.size());
 		vendorProductService.save(vpList);
 		LOGGER.debug("Products added to wishList");
 		vendorProductResponse.setVenderId(vendorId);
 		vendorProductResponse.setVendorProducts(vList);
 
+		/* Commenting code to send email which is not required for adding products into wish list*/
+		
 		//sending email
-		MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");  
+		/* MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");  
 		final Locale locale  = new Locale("en");
 		String[] vendorName = {customer.getVendorAttrs().getVendorName()};
 		Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_USERNAME_LABEL, messages.getMessage("label.generic.username",locale));
-		templateTokens.put(EmailConstants.EMAIL_VENDOR_ADD_PRODUCTS_TXT, messages.getMessage("email.vendor.addproducts.text",vendorName,locale));
+		//templateTokens.put(EmailConstants.EMAIL_VENDOR_ADD_PRODUCTS_TXT, messages.getMessage("email.vendor.addproducts.text",vendorName,locale));
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_PASSWORD_LABEL, messages.getMessage("label.generic.password",locale));
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
@@ -189,8 +194,7 @@ public class VendorProductController extends AbstractController {
 		email.setTo(merchantStore.getStoreEmailAddress());
 		email.setTemplateName(VENDOR_ADD_PRODUCTS_TPL);
 		email.setTemplateTokens(templateTokens);
-		emailService.sendHtmlEmail(merchantStore, email);
-
+		emailService.sendHtmlEmail(merchantStore, email); */
 
 		LOGGER.debug("Ended addVendorWishListProducts:");
 		return vendorProductResponse;
@@ -198,9 +202,12 @@ public class VendorProductController extends AbstractController {
 
 	@RequestMapping(value={"/wishlist/{vendorId}"},  method = { RequestMethod.GET })
 	@ResponseBody	
-	public VendortProductList getWishListProducts(@PathVariable Long vendorId){
+	public PaginatedResponse getWishListProducts(@PathVariable Long vendorId,
+			@RequestParam(value="pageNumber", defaultValue = "1") int page ,
+            @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+		PaginatedResponse paginatedResponse = new PaginatedResponse();
 		LOGGER.debug("Entered getWishListProducts");
-		VendortProductList vendorProductList = new VendortProductList();
+		//VendortProductList vendorProductList = new VendortProductList();
 		List<VendorProductData> vendorProductData = new ArrayList<VendorProductData>();
 		List<VendorProduct> dbVendorProductList = vendorProductService.findProductWishListByVendor(vendorId);
 		for(VendorProduct vendorProduct : dbVendorProductList){
@@ -224,16 +231,29 @@ public class VendorProductController extends AbstractController {
 				vendorProductData.add(vpData);
 			}
 		}
-		vendorProductList.setVendorProductData(vendorProductData);
+		//vendorProductList.setVendorProductData(vendorProductData);
+		PaginationData paginaionData=createPaginaionData(page,size);
+    	calculatePaginaionData(paginaionData,size, vendorProductData.size());
+    	paginatedResponse.setPaginationData(paginaionData);
+		if(vendorProductData == null || vendorProductData.isEmpty() || vendorProductData.size() < paginaionData.getCountByPage()){
+			paginatedResponse.setResponseData(vendorProductData);
+			return paginatedResponse;
+		}
+		
+    	List<VendorProductData> paginatedResponses = vendorProductData.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+    	paginatedResponse.setResponseData(paginatedResponses);
 		LOGGER.debug("Ended getWishListProducts");
-		return vendorProductList;
+		return paginatedResponse;
 	}
 
 	@RequestMapping(value={"/productList/{vendorId}"},  method = { RequestMethod.GET })
 	@ResponseBody	
-	public VendortProductList getVendorProductList(@PathVariable Long vendorId){
+	public PaginatedResponse getVendorProductList(@PathVariable Long vendorId,
+			@RequestParam(value="pageNumber", defaultValue = "1") int page ,
+            @RequestParam(value="pageSize", defaultValue="15") int size){
+		PaginatedResponse paginatedResponse = new PaginatedResponse();
 		LOGGER.debug("Entered getVendorProductList");
-		VendortProductList vendorProductList = new VendortProductList();
+		//VendortProductList vendorProductList = new VendortProductList();
 		List<VendorProductData> vendorProductData = new ArrayList<VendorProductData>();
 		List<VendorProduct> dbVendorProductList = vendorProductService.findProductsByVendor(vendorId);
 		for(VendorProduct vendorProduct : dbVendorProductList){
@@ -256,9 +276,19 @@ public class VendorProductController extends AbstractController {
 				vendorProductData.add(vpData);
 			}
 		}
-		vendorProductList.setVendorProductData(vendorProductData);
+		//vendorProductList.setVendorProductData(vendorProductData);
+		PaginationData paginaionData=createPaginaionData(page,size);
+    	calculatePaginaionData(paginaionData,size, vendorProductData.size());
+    	paginatedResponse.setPaginationData(paginaionData);
+		if(vendorProductData == null || vendorProductData.isEmpty() || vendorProductData.size() < paginaionData.getCountByPage()){
+			paginatedResponse.setResponseData(vendorProductData);
+			return paginatedResponse;
+		}
+		
+    	List<VendorProductData> paginatedResponses = vendorProductData.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+    	paginatedResponse.setResponseData(paginatedResponses);
 		LOGGER.debug("Ended getVendorProductList");
-		return vendorProductList;
+		return paginatedResponse;
 	}
 
 
