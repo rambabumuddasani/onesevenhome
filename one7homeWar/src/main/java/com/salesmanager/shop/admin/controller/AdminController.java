@@ -2355,7 +2355,69 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    	LOGGER.debug("Ended getVendorBookingsForAdmin");
 	    	return paginatedResponse;
 	    }
-	   	
+	    
+	    // Calculate discount price or discount percentage
+	    @RequestMapping(value="/getDiscountPriceOrPercentage", method = RequestMethod.POST)
+		@ResponseBody
+		public PriceResponse getDiscountPriceOrPercentage(@RequestBody PriceRequest priceRequest) {
+			
+	    	PriceResponse priceResponse = new PriceResponse();
+	    
+	    	Product dbProduct = productService.getById(priceRequest.getProductId());
+	    	
+	    	ProductAvailability productAvailability = null;
+			ProductPrice productPrice = null;
+	    	
+	    	Set<ProductAvailability> availabilities = dbProduct.getAvailabilities();
+			if(availabilities!=null && availabilities.size()>0) {
+				
+				for(ProductAvailability availability : availabilities) {
+					if(availability.getRegion().equals(com.salesmanager.core.business.constants.Constants.ALL_REGIONS)) {
+						productAvailability = availability;
+						Set<ProductPrice> prices = availability.getPrices();
+						for(ProductPrice price : prices) {
+							if(price.isDefaultPrice()) {
+								productPrice = price;
+							} 
+						}
+					}
+				}
+			}
+			
+			String discountedValue = getDiscountedvalue(productPrice.getProductPriceAmount(),priceRequest.getDiscountValue(),priceRequest.isStatus());
+			
+			priceResponse.setDiscountedvalue(discountedValue);
+			
+	    	return priceResponse;
+	    	
+	    }
+
+	    private String getDiscountedvalue(BigDecimal productPriceAmount, BigDecimal discountValue, boolean status) {
+
+			BigDecimal discount = new BigDecimal(0);
+			DecimalFormat df = new DecimalFormat();
+			df.setMaximumFractionDigits(2); //Sets the maximum number of digits after the decimal point
+			df.setMinimumFractionDigits(0); //Sets the minimum number of digits after the decimal point
+			df.setGroupingUsed(false);
+			
+			if(productPriceAmount.intValue() > 0 && discountValue.intValue() > 0) {
+				
+               if(status==true) {
+                //discountPrice=(100-discountValue)*productPriceAmount/100;
+            	discount = new BigDecimal(100).subtract(discountValue);
+            	discount = discount.multiply(productPriceAmount);
+            	discount = discount.divide(new BigDecimal(100));
+                }
+                else {
+             	//discountPrice = 100*(productPriceAmount-discountValue)/productPriceAmount;
+            	discount = productPriceAmount.subtract(discountValue);
+            	discount = discount.multiply(new BigDecimal(100));
+            	discount = discount.divide(productPriceAmount,2,4);
+               }
+            
+			}
+	         return df.format(discount);
+		}
 }
     
  
