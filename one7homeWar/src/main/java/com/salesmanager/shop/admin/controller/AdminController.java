@@ -2274,6 +2274,9 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    			vendorBookingVO.setEquipmentName(machineryPortfoilio.getEquipmentName());
 	    			vendorBookingVO.setEquipmentPrice(machineryPortfoilio.getEquipmentPrice());
 	    			vendorBookingVO.setHiringtype(machineryPortfoilio.getHiringType());
+	    			vendorBookingVO.setImageURL(machineryPortfoilio.getImageURL());
+	    			vendorBookingVO.setPortfolioName(machineryPortfoilio.getPortfolioName());
+	    			vendorBookingVO.setMachineryPortfolioId(machineryPortfoilio.getId());
 	    			}
 	    			
 	    			if(vendorBooking.getVendor().getCustomerType().equals("1"))
@@ -2319,6 +2322,9 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		    			vendorBookingVO.setEquipmentName(machineryPortfoilio.getEquipmentName());
 		    			vendorBookingVO.setEquipmentPrice(machineryPortfoilio.getEquipmentPrice());
 		    			vendorBookingVO.setHiringtype(machineryPortfoilio.getHiringType());
+		    			vendorBookingVO.setImageURL(machineryPortfoilio.getImageURL());
+		    			vendorBookingVO.setPortfolioName(machineryPortfoilio.getPortfolioName());
+		    			vendorBookingVO.setMachineryPortfolioId(machineryPortfoilio.getId());
 		    			}
 		    			
 		    			if(vendorBooking.getVendor().getCustomerType().equals("1"))

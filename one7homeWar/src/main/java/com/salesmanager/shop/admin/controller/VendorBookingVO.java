@@ -23,7 +23,11 @@ public class VendorBookingVO {
 	private String vendorMobileNumber;
 	private String equipmentName;
 	private BigDecimal equipmentPrice;
-	private String hiringtype;
+	private String hiringType;
+	private String imageURL;
+	private String portfolioName;
+	private Long machineryPortfolioId;
+	
 	public Long getId() {
 		return id;
 	}
@@ -132,11 +136,32 @@ public class VendorBookingVO {
 	public void setEquipmentPrice(BigDecimal equipmentPrice) {
 		this.equipmentPrice = equipmentPrice;
 	}
-	public String getHiringtype() {
-		return hiringtype;
+	public String getHiringType() {
+		return hiringType;
 	}
-	public void setHiringtype(String hiringtype) {
-		this.hiringtype = hiringtype;
+	public void setHiringtype(String hiringType) {
+		this.hiringType = hiringType;
+	}
+	public String getImageURL() {
+		return imageURL;
+	}
+	public void setImageURL(String imageURL) {
+		this.imageURL = imageURL;
+	}
+	public String getPortfolioName() {
+		return portfolioName;
+	}
+	public void setPortfolioName(String portfolioName) {
+		this.portfolioName = portfolioName;
+	}
+	public void setHiringType(String hiringType) {
+		this.hiringType = hiringType;
+	}
+	public Long getMachineryPortfolioId() {
+		return machineryPortfolioId;
+	}
+	public void setMachineryPortfolioId(Long machineryPortfolioId) {
+		this.machineryPortfolioId = machineryPortfolioId;
 	}
 	
 }
