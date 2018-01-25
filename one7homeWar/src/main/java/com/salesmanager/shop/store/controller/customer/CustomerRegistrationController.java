@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,9 +44,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.salesmanager.core.business.exception.ConversionException;
 import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.modules.email.Email;
+import com.salesmanager.core.business.services.catalog.category.CategoryService;
 import com.salesmanager.core.business.services.catalog.product.PricingService;
 import com.salesmanager.core.business.services.customer.CustomerService;
 import com.salesmanager.core.business.services.merchant.MerchantStoreService;
+import com.salesmanager.core.business.services.postrequirement.PostRequirementService;
 import com.salesmanager.core.business.services.reference.country.CountryService;
 import com.salesmanager.core.business.services.reference.language.LanguageService;
 import com.salesmanager.core.business.services.reference.zone.ZoneService;
@@ -53,15 +56,19 @@ import com.salesmanager.core.business.services.services.ServicesService;
 import com.salesmanager.core.business.services.shoppingcart.ShoppingCartCalculationService;
 import com.salesmanager.core.business.services.system.EmailService;
 import com.salesmanager.core.business.utils.CoreConfiguration;
+import com.salesmanager.core.model.catalog.category.Category;
 import com.salesmanager.core.model.common.Billing;
 import com.salesmanager.core.model.common.VendorAttributes;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.merchant.MerchantStore;
+import com.salesmanager.core.model.postrequirement.PostRequirement;
 import com.salesmanager.core.model.reference.country.Country;
 import com.salesmanager.core.model.reference.language.Language;
 import com.salesmanager.core.model.reference.zone.Zone;
 import com.salesmanager.core.model.services.Services;
 import com.salesmanager.core.model.shoppingcart.ShoppingCart;
+import com.salesmanager.shop.admin.controller.PostRequirementVO;
+import com.salesmanager.shop.admin.controller.products.PaginatedResponse;
 import com.salesmanager.shop.constants.ApplicationConstants;
 import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.constants.EmailConstants;
@@ -77,6 +84,7 @@ import com.salesmanager.shop.populator.shoppingCart.ShoppingCartDataPopulator;
 import com.salesmanager.shop.store.controller.AbstractController;
 import com.salesmanager.shop.store.controller.ControllerConstants;
 import com.salesmanager.shop.store.controller.customer.facade.CustomerFacade;
+import com.salesmanager.shop.store.model.paging.PaginationData;
 import com.salesmanager.shop.utils.CaptchaRequestUtils;
 import com.salesmanager.shop.utils.DateUtil;
 import com.salesmanager.shop.utils.EmailTemplatesUtils;
@@ -161,6 +169,12 @@ public class CustomerRegistrationController extends AbstractController {
 	
 	@Inject
 	ServicesService servicesService;
+	
+	@Inject
+	PostRequirementService postRequirementService;
+	
+	@Inject
+	CategoryService categoryService;
 	
 	private final static String RESET_PASSWORD_TPL = "email_template_password_reset_user.ftl";	
 	private final static String NEW_USER_TMPL = "email_template_new_user.ftl";
@@ -1841,5 +1855,58 @@ public class CustomerRegistrationController extends AbstractController {
 		return vendorAttrs;
 		
 	}
+	
+	/* Method to retrieve post a requirement messages*/
+	
+	@RequestMapping(value="/getMessages/{customerId}", method = RequestMethod.GET)
+	@ResponseBody
+	public PaginatedResponse getPostRequirements(@RequestParam(value="pageNumber", defaultValue = "1") int page,
+			@RequestParam(value="pageSize", defaultValue="15") int size, @PathVariable Long customerId) {
+    	
+		LOGGER.debug("Entered getMessges");
+    	PaginatedResponse paginatedResponse = new PaginatedResponse();
+    	List<PostRequirementVO> postRequirementVOList = new ArrayList<PostRequirementVO>();
+    	
+    	try {
+    		List<PostRequirement> postRequirements = 
+    				postRequirementService.getPostRequirementsByCustomerId(customerId);
+    		
+    		for(PostRequirement postRequirement: postRequirements) {
+    			
+    			PostRequirementVO postRequirementVO = new PostRequirementVO();
+    			postRequirementVO.setPostRequirementId(postRequirement.getId());
+    			postRequirementVO.setQuery(postRequirement.getQuery());
+    			postRequirementVO.setDateAndTime(postRequirement.getPostedDate());
+    			postRequirementVO.setState(postRequirement.getState());
+    			postRequirementVO.setResponseMessage(postRequirement.getResponseMessage());
+    			
+    			Category category = categoryService.getById(postRequirement.getCategoryId());
+    			postRequirementVO.setCategory(category.getDescription().getName());
+    			
+    			postRequirementVOList.add(postRequirementVO);
+    			
+    		}
+    		
+    		PaginationData paginaionData=createPaginaionData(page,size);
+        	calculatePaginaionData(paginaionData,size, postRequirementVOList.size());
+        	paginatedResponse.setPaginationData(paginaionData);
+        	
+    		if(postRequirementVOList == null || postRequirementVOList.isEmpty() || postRequirementVOList.size() < paginaionData.getCountByPage()){
+    			paginatedResponse.setResponseData(postRequirementVOList);
+    			return paginatedResponse;
+    		}
+        	List<PostRequirementVO> paginatedResponses = postRequirementVOList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+        	paginatedResponse.setResponseData(paginatedResponses);
+    		return paginatedResponse;
+    		
+    	}catch (Exception e) {
+    		e.printStackTrace();
+    		LOGGER.error("Error while retrieving queries "+e.getMessage());
+    		paginatedResponse.setErrorMsg("Error while retrieving messages");
+    	}
+    	LOGGER.debug("Ended getMessages");
+		return paginatedResponse;
+    	
+    }
 	
 }

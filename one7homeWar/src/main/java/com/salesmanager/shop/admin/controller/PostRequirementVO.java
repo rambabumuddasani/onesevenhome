@@ -12,6 +12,10 @@ public class PostRequirementVO {
 	private String category;
 	//private Date postedDate;
 	private Date dateAndTime;
+	private String state;
+	private String responseMessage;
+
+	
 	public Long getPostRequirementId() {
 		return postRequirementId;
 	}
@@ -59,5 +63,17 @@ public class PostRequirementVO {
 	}
 	public void setDateAndTime(Date dateAndTime) {
 		this.dateAndTime = dateAndTime;
+	}
+	public String getState() {
+		return state;
+	}
+	public void setState(String state) {
+		this.state = state;
+	}
+	public String getResponseMessage() {
+		return responseMessage;
+	}
+	public void setResponseMessage(String responseMessage) {
+		this.responseMessage = responseMessage;
 	}
 }

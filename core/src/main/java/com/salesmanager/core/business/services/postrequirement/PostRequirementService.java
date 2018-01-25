@@ -9,4 +9,6 @@ public interface PostRequirementService extends SalesManagerEntityService<Long,P
 
 	List<PostRequirement> getAllPostRequirements();
 
+	List<PostRequirement> getPostRequirementsByCustomerId(Long customerId);
+
 }

@@ -31,4 +31,9 @@ public class PostRequirementServiceImpl extends SalesManagerEntityServiceImpl<Lo
 	public List<PostRequirement> getAllPostRequirements() {
 		return postRequirementRepository.findAllPostRequirements();
 	}
+
+	@Override
+	public List<PostRequirement> getPostRequirementsByCustomerId(Long customerId) {
+		return postRequirementRepository.findPostRequirementsByCustomerId(customerId);
+	}
 }

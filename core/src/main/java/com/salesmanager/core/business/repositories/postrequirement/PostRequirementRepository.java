@@ -11,4 +11,7 @@ public interface PostRequirementRepository extends JpaRepository<PostRequirement
 
 	@Query("select pr from PostRequirement pr order by pr.postedDate desc")
 	List<PostRequirement> findAllPostRequirements();
+
+	@Query("select pr from PostRequirement pr where pr.customerId = ?1 order by pr.postedDate desc")
+	List<PostRequirement> findPostRequirementsByCustomerId(Long customerId);
 }
