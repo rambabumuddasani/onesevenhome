@@ -147,7 +147,7 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 			ServicesWorkerVO servicesWorkerVO = new ServicesWorkerVO();
 			servicesWorkerVO.setId(new Integer(String.valueOf((eachWorker.getId()))));
 			servicesWorkerVO.setCompanyName(eachWorker.getVendorAttrs().getVendorName());
-			servicesWorkerVO.setHouseNumber(eachWorker.getVendorAttrs().getVendorOfficeAddress());
+			/*servicesWorkerVO.setHouseNumber(eachWorker.getVendorAttrs().getVendorOfficeAddress());
 			servicesWorkerVO.setStreet(eachWorker.getBilling().getAddress());
 			servicesWorkerVO.setArea(eachWorker.getArea());
 			servicesWorkerVO.setCity(eachWorker.getBilling().getCity());
@@ -155,7 +155,7 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 			servicesWorkerVO.setPinCode(eachWorker.getBilling().getPostalCode());
 			servicesWorkerVO.setContactNumber(eachWorker.getBilling().getTelephone());
 			servicesWorkerVO.setImageUrl(eachWorker.getVendorAttrs().getVendorAuthCert());
-			servicesWorkerVO.setCountry(eachWorker.getBilling().getCountry().getName());
+			servicesWorkerVO.setCountry(eachWorker.getBilling().getCountry().getName());*/
 			//fetching ratings from services rating
 			List<ServicesRating> servicesRatingList = servicesRatingService.getServicesReviews(eachWorker.getId());
 			if(servicesRatingList != null) {
@@ -168,7 +168,8 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 				avgRating = Double.valueOf(Math.round(avgRating.doubleValue() * 10D) / 10D);
 			}
 			servicesWorkerVO.setAvgRating(avgRating);
-			servicesWorkerVO.setTotalRating(totalRating);
+			//servicesWorkerVO.setTotalRating(totalRating);
+			servicesWorkerVO.setTotalRating(totalReviews);
 			servicesWorkerVOSet.add(servicesWorkerVO);
 		}
 		LOGGER.debug("Ended findByVendorType");
@@ -252,6 +253,11 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 	@Override
 	public List<Customer> getVendorsBasedOnStatusAndCustomerType(String status, String customerType) {
 		return customerRepository.findVendorsBasedOnStatusAndCustomerType(status,customerType);
+	}
+
+	@Override
+	public List<Customer> getServiceProvidersByLocation(String customerType,String searchString) {
+		return customerRepository.findServiceProvidersByLocation(customerType,searchString);
 	}
 
 

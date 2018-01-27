@@ -56,4 +56,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Long>, Custo
 
 	@Query("select c from Customer c join fetch c.merchantStore cm left join fetch c.defaultLanguage cl left join fetch c.attributes ca left join fetch ca.customerOption cao left join fetch ca.customerOptionValue cav left join fetch cao.descriptions caod left join fetch cav.descriptions where c.activated = ?1 and c.customerType = ?2")
 	List<Customer> findVendorsBasedOnStatusAndCustomerType(String status, String customerType);
+
+	@Query("select c from Customer c join fetch c.services cs where cs.serviceType = ?1 and (c.area like %?2% or c.billing.address like %?2% or c.billing.city like %?2% or c.billing.state like %?2% or c.billing.company like %?2%)")
+	List<Customer> findServiceProvidersByLocation(String customerType, String searchString);
 }

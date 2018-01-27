@@ -24,7 +24,6 @@ import com.salesmanager.core.business.modules.email.Email;
 import com.salesmanager.core.business.modules.services.ServicesResponse;
 import com.salesmanager.core.business.modules.services.ServicesWorkerVO;
 import com.salesmanager.core.business.modules.services.WorkerRatingResponse;
-import com.salesmanager.core.business.modules.services.WorkerServiceResponse;
 import com.salesmanager.core.business.services.customer.CustomerService;
 import com.salesmanager.core.business.services.merchant.MerchantStoreService;
 import com.salesmanager.core.business.services.services.ServicesBookingService;
@@ -38,10 +37,10 @@ import com.salesmanager.core.model.customer.ServicesBooking;
 import com.salesmanager.core.model.customer.ServicesRating;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.services.Services;
-import com.salesmanager.core.model.user.User;
 import com.salesmanager.shop.admin.controller.products.PaginatedResponse;
 import com.salesmanager.shop.constants.EmailConstants;
 import com.salesmanager.shop.controller.AbstractController;
+import com.salesmanager.shop.controller.vendor.VendorSearchRequest;
 import com.salesmanager.shop.store.model.paging.PaginationData;
 import com.salesmanager.shop.utils.EmailTemplatesUtils;
 import com.salesmanager.shop.utils.EmailUtils;
@@ -563,6 +562,69 @@ public class ServicesController extends AbstractController{
 			LOGGER.error("Error while delting services booking"+e.getMessage());
 		}
 		return deleteServicesBookingResponse;
+		
+	}
+	
+	// Service Providers search based on location 
+	@RequestMapping(value="/getServiceProvidersByLocation", method = RequestMethod.POST)
+	@ResponseBody
+	public PaginatedResponse getServiceProvidersByLocation(
+			@RequestBody VendorSearchRequest vendorSearchRequest,
+			@RequestParam(value="pageNumber", defaultValue = "1") int page, 
+            @RequestParam(value="pageSize", defaultValue="15") int size) {
+		
+		PaginatedResponse paginatedResponse = new PaginatedResponse();
+		
+		List<ServicesWorkerVO> servicesWorkerVOList= new ArrayList<ServicesWorkerVO>();
+		
+		List<Customer> serviceProviders = customerService.getServiceProvidersByLocation(vendorSearchRequest.getCustomerType(),vendorSearchRequest.getSearchString());
+		
+		for(Customer serviceProvider : serviceProviders) {
+			
+			Double avgRating = new Double(0);
+			int totalRating= 0;
+			int totalReviews = 0;
+			double totalRate = 0;
+			
+			ServicesWorkerVO servicesWorkerVO = new ServicesWorkerVO();
+			servicesWorkerVO.setId(new Integer(String.valueOf((serviceProvider.getId()))));
+			servicesWorkerVO.setCompanyName(serviceProvider.getVendorAttrs().getVendorName());
+			/*servicesWorkerVO.setHouseNumber(serviceProvider.getVendorAttrs().getVendorOfficeAddress());
+			servicesWorkerVO.setStreet(serviceProvider.getBilling().getAddress());
+			servicesWorkerVO.setArea(serviceProvider.getArea());
+			servicesWorkerVO.setCity(serviceProvider.getBilling().getCity());
+			servicesWorkerVO.setState(serviceProvider.getBilling().getState());
+			servicesWorkerVO.setPinCode(serviceProvider.getBilling().getPostalCode());
+			servicesWorkerVO.setContactNumber(serviceProvider.getBilling().getTelephone());
+			servicesWorkerVO.setImageUrl(serviceProvider.getVendorAttrs().getVendorAuthCert());
+			servicesWorkerVO.setCountry(serviceProvider.getBilling().getCountry().getName());*/
+			//servicesWorkerVOList.add(servicesWorkerVO);
+			//fetching ratings from services rating
+			List<ServicesRating> servicesRatingList = servicesRatingService.getServicesReviews(serviceProvider.getId());
+			if(servicesRatingList != null) {
+				totalReviews = servicesRatingList.size();
+				for(ServicesRating servicesRating:servicesRatingList){
+					totalRating= totalRating + servicesRating.getRating();
+				}
+				totalRate = totalRating;
+				avgRating = Double.valueOf(totalRate / totalReviews);
+				avgRating = Double.valueOf(Math.round(avgRating.doubleValue() * 10D) / 10D);
+			}
+			servicesWorkerVO.setAvgRating(avgRating);
+			//servicesWorkerVO.setTotalRating(totalRating);
+			servicesWorkerVO.setTotalRating(totalReviews);
+			servicesWorkerVOList.add(servicesWorkerVO);
+		}
+		PaginationData paginaionData=createPaginaionData(page,size);
+    	calculatePaginaionData(paginaionData,size, servicesWorkerVOList.size());
+    	paginatedResponse.setPaginationData(paginaionData);
+		if(servicesWorkerVOList == null || servicesWorkerVOList.isEmpty() || servicesWorkerVOList.size() < paginaionData.getCountByPage()){
+			paginatedResponse.setResponseData(servicesWorkerVOList);
+			return paginatedResponse;
+		}
+    	List<ServicesWorkerVO> paginatedResponses = servicesWorkerVOList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+    	paginatedResponse.setResponseData(paginatedResponses);
+		return paginatedResponse;
 		
 	}
 }
