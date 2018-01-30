@@ -133,7 +133,9 @@ public class ShoppingCartFacadeImpl
         	//get duplicate item from the cart
         	Set<com.salesmanager.core.model.shoppingcart.ShoppingCartItem> cartModelItems = cartModel.getLineItems();
         	for(com.salesmanager.core.model.shoppingcart.ShoppingCartItem cartItem : cartModelItems) {
-        		if(shoppingCartItem.getProduct() != null && cartItem.getProduct().getId().longValue()==shoppingCartItem.getProduct().getId().longValue()) {
+        		if(shoppingCartItem.getProduct() != null 
+        				&& cartItem.getProduct() != null 
+        				&& cartItem.getProduct().getId().longValue()==shoppingCartItem.getProduct().getId().longValue()) {
         			if(CollectionUtils.isEmpty(cartItem.getAttributes())) {
         				if(!duplicateFound) {
         					if(!shoppingCartItem.isProductVirtual()) {
