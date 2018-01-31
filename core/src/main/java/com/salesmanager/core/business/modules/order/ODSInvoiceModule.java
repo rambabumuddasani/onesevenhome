@@ -106,9 +106,9 @@ public class ODSInvoiceModule implements InvoiceModule {
 				LOGGER.warn("Cannot open template " + template);
 				throw new Exception("Cannot open " + new StringBuilder().append(INVOICE_TEMPLATE).append(INVOICE_TEMPLATE_EXTENSION).toString());
 			}	
-		    String tempDir = System.getProperty("java.io.tmpdir");
+		    String tempDir = System.getProperty("java.io.tmpdir")+java.io.File.separator;
 		    System.out.println("temp directory "+tempDir);
-			File file = new File(tempDir+java.io.File.separator+order.getId() + "_working");
+			File file = new File(tempDir+order.getId() + "_working");
 			OutputStream os = new FileOutputStream(file);
 			IOUtils.copy(is, os);
 			os.close();
@@ -340,7 +340,9 @@ public class ODSInvoiceModule implements InvoiceModule {
 			//generate invoice file
 			StringBuilder tempInvoiceName = new StringBuilder();
 			tempInvoiceName.append(order.getId()).append(TEMP_INVOICE_SUFFIX_NAME);
-			File outputFile = new File(tempInvoiceName.toString());
+		    System.out.println("temp directory "+tempDir);
+
+			File outputFile = new File(tempDir+tempInvoiceName.toString());
 			OOUtils.open(sheet.getSpreadSheet().saveAs(outputFile));
 			
 			
