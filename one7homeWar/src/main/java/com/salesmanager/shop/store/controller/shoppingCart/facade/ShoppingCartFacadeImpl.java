@@ -183,7 +183,8 @@ public class ShoppingCartFacadeImpl
         throws Exception
     {
         com.salesmanager.core.model.shoppingcart.ShoppingCartItem item = null;
-    	if(org.springframework.util.StringUtils.isEmpty(shoppingCartItem.getCategory())){
+
+        if(org.springframework.util.StringUtils.isEmpty(shoppingCartItem.getCategory())){
 	        Product product = productService.getById( shoppingCartItem.getProductId() );	
 	        if ( product == null ) {
 	            throw new Exception( "Item with id " + shoppingCartItem.getProductId() + " does not exist" );

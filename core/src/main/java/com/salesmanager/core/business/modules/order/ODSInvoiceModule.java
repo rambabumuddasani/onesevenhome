@@ -105,9 +105,10 @@ public class ODSInvoiceModule implements InvoiceModule {
 			if(is==null) {
 				LOGGER.warn("Cannot open template " + template);
 				throw new Exception("Cannot open " + new StringBuilder().append(INVOICE_TEMPLATE).append(INVOICE_TEMPLATE_EXTENSION).toString());
-			}
-			
-			File file = new File(order.getId() + "_working");
+			}	
+		    String tempDir = System.getProperty("java.io.tmpdir");
+		    System.out.println("temp directory "+tempDir);
+			File file = new File(tempDir+java.io.File.separator+order.getId() + "_working");
 			OutputStream os = new FileOutputStream(file);
 			IOUtils.copy(is, os);
 			os.close();

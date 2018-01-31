@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,6 +53,9 @@ import com.salesmanager.shop.store.controller.customer.VendorResponse;
 import com.salesmanager.shop.store.model.paging.PaginationData;
 import com.salesmanager.shop.utils.EmailUtils;
 import com.salesmanager.shop.utils.LabelUtils;
+
+import freemarker.template.utility.StringUtil;
+
 import com.salesmanager.shop.fileupload.services.StorageService;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
@@ -427,7 +431,7 @@ public class WallPaperController extends AbstractController {
 		
 		List<WallPaperPortfolioVO> wallPaperPortfolioList = new ArrayList<WallPaperPortfolioVO>();
 		try {
-		if(wallPaperRequest.getStatus().equals("ALL")) {
+		if(!StringUtils.isEmpty(wallPaperRequest.getStatus()) && wallPaperRequest.getStatus().equals("ALL")) {
 			
 			wallPaperPortfolios = wallPaperPortfolioService.findByVendorId(wallPaperRequest.getVendorId());
 			

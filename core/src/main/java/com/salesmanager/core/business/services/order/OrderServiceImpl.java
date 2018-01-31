@@ -469,6 +469,7 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
             ByteArrayOutputStream stream = invoiceModule.createInvoice(store, order, language);
             return stream;
         } catch(Exception e) {
+        	e.printStackTrace();
             throw new ServiceException(e);
         }
     }
