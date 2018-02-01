@@ -41,7 +41,7 @@ public interface VendorProductRepository extends JpaRepository<VendorProduct, Lo
 			+ " where vp.adminActivated = TRUE and pd.id=?1 and customer.billing.postalCode = ?2")
 	public List<VendorProduct> findProductVendorsByProductIdAndCustomerPinCode(Long productId,String postalCode);
 
-	@Query("select distinct vp.customer from VendorProduct vp")
+	@Query("select distinct vp.customer from VendorProduct vp where vp.customer.customerType != '0'")
 	public List<Customer> getRequestedVendors();
 
 	/*@Query("select distinct vp from VendorProduct vp left join fetch vp.product pd "

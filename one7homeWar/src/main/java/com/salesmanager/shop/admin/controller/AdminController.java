@@ -2093,12 +2093,13 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    		
 	    		AdminVendorDetailsVO adminvendorDetailsVO = new AdminVendorDetailsVO();
 	    		adminvendorDetailsVO.setVendorId(vendorProduct.getId());
-	    		
+	    		LOGGER.debug("vendor id :: "+vendorProduct.getId());
 	    		int totalCount = getVendorAddedProductsCount(vendorProduct.getId());
 	    		int approvedCount = getVendorAprovedProductsCount(vendorProduct.getId());
 	    		adminvendorDetailsVO.setCount("Total:"+totalCount+"  "+"Approved:"+approvedCount);
-	    		
+	    		if(!vendorProduct.getCustomerType().equals("0"))
 				adminvendorDetailsVO.setVendorName(vendorProduct.getVendorAttrs().getVendorName());
+				if(vendorProduct.getUserProfile()!=null)
 				adminvendorDetailsVO.setVendorUserProfile(vendorProduct.getUserProfile());
 				adminVendorDetailsVOList.add(adminvendorDetailsVO);
 	    		
