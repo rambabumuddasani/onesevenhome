@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.salesmanager.core.model.catalog.category.Category;
 
@@ -73,6 +74,9 @@ public interface CategoryRepository extends JpaRepository<Category, Long>, Categ
 
 	@Query("select c from Category c left join fetch c.descriptions cd where c.id=?1")
 	public Category findOneByCatId(Long categoryId);
+
+	@Query("select distinct c from Category c left join fetch c.descriptions cd where cd.name like %?1% order by c.lineage, c.sortOrder asc")
+	List<Category> findCategoryList(String searchString);
 
 	
 }

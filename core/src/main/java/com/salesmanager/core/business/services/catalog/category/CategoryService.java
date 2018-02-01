@@ -6,6 +6,7 @@ import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.services.common.generic.SalesManagerEntityService;
 import com.salesmanager.core.model.catalog.category.Category;
 import com.salesmanager.core.model.catalog.category.CategoryDescription;
+import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
 
@@ -101,6 +102,8 @@ public interface CategoryService extends SalesManagerEntityService<Long, Categor
 	 */
 	List<Category> listByIds(MerchantStore store, List<Long> ids,
 			Language language);
+
+	List<Category> getCategoryList(String searchString);
 
 
 	

@@ -441,4 +441,9 @@ public class CategoryServiceImpl extends SalesManagerEntityServiceImpl<Long, Cat
 		}
 	}
 
+	@Override
+	public List<Category> getCategoryList(String searchString) {
+		return categoryRepository.findCategoryList(searchString);
+	}
+
 }

@@ -47,7 +47,7 @@ public class Category extends SalesManagerEntity<Long, Category> implements Audi
 	private AuditSection auditSection = new AuditSection();
 
 	@Valid
-	@OneToMany(mappedBy="category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy="category", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private List<CategoryDescription> descriptions = new ArrayList<CategoryDescription>();
 	
 	@ManyToOne(fetch = FetchType.LAZY)
