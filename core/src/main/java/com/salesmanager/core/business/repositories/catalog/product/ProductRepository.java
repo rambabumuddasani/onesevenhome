@@ -26,4 +26,27 @@ public interface ProductRepository extends JpaRepository<Product, Long>, Product
     		+ "WHERE PRICE.PRODUCT_AVAIL_ID = AVAIL.PRODUCT_AVAIL_ID AND  PRODUCT_ID IN (SELECT PRODUCT_ID FROM PRODUCT_CATEGORY "
     		+ "WHERE CATEGORY_ID = (SELECT CATEGORY_ID FROM CATEGORY WHERE CODE = ?1)))",nativeQuery=true)
     Long getMaxProductPrice(String categoryCode);
+    
+
+    @Query("select distinct p from Product as p join fetch p.availabilities pa " 
+    		+ "join fetch p.merchantStore merch join fetch p.descriptions pd left join fetch p.categories categs "
+    		+ "left join fetch pa.prices pap left join fetch pap.descriptions papd left join fetch categs.descriptions categsd "
+    		+ "left join fetch p.images images left join fetch p.attributes pattr left join fetch pattr.productOption po "
+    		+ "left join fetch po.descriptions pod left join fetch pattr.productOptionValue pov left join fetch pov.descriptions povd "
+    		+ "left join fetch p.relationships pr left join fetch p.manufacturer manuf left join fetch manuf.descriptions manufd "
+    		+ "left join fetch p.type type left join fetch p.taxClass tx "
+    		+ "where (pap.productPriceSpecialStartDate > curdate() or pap.productPriceSpecialStartDate is null) and (pap.productPriceSpecialEndDate > curdate() or pap.productPriceSpecialEndDate is null) order by p.id asc")
+	List<Product> findUpcomingDeals();
+
+    @Query("select distinct p from Product as p join fetch p.availabilities pa " 
+    		+ "join fetch p.merchantStore merch join fetch p.descriptions pd left join fetch p.categories categs "
+    		+ "left join fetch pa.prices pap left join fetch pap.descriptions papd left join fetch categs.descriptions categsd "
+    		+ "left join fetch p.images images left join fetch p.attributes pattr left join fetch pattr.productOption po "
+    		+ "left join fetch po.descriptions pod left join fetch pattr.productOptionValue pov left join fetch pov.descriptions povd "
+    		+ "left join fetch p.relationships pr left join fetch p.manufacturer manuf left join fetch manuf.descriptions manufd "
+    		+ "left join fetch p.type type left join fetch p.taxClass tx "
+    		+ "where pap.productPriceSpecialStartDate <= curdate() and pap.productPriceSpecialEndDate < curdate() order by p.id asc")
+	List<Product> findExpiredDeals();
+
+  
 }

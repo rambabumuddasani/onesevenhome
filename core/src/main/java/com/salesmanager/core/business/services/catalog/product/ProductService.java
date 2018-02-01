@@ -1,6 +1,7 @@
 package com.salesmanager.core.business.services.catalog.product;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -75,6 +76,10 @@ public interface ProductService extends SalesManagerEntityService<Long, Product>
 	List<Product> getVendorNotAssociatedProductsListByCategory(String categoryCode, List<Long> productIds) throws ServiceException;
 
 	Long getMaxProductPrice(String categoryCode);
+
+	List<Product> getUpcomingDeals();
+
+	List<Product> getExpiredDeals();
 
 }
 	

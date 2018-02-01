@@ -241,7 +241,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 			qs.append("left join fetch p.type type ");
 			qs.append("left join fetch p.taxClass tx ");
 			
-			qs.append("where pap.productPriceSpecialStartDate <= sysdate() and pap.productPriceSpecialEndDate >= sysdate() order by p.id asc");
+			qs.append("where pap.productPriceSpecialStartDate <= curdate() and pap.productPriceSpecialEndDate >= curdate() order by p.id asc");
 	
 	
 	    	String hql = qs.toString();

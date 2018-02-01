@@ -35,7 +35,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.salesmanager.core.business.modules.services.WorkerServiceResponse;
 import com.salesmanager.core.business.services.catalog.category.CategoryService;
 import com.salesmanager.core.business.services.catalog.product.ProductService;
 import com.salesmanager.core.business.services.catalog.product.image.ProductImageService;
@@ -617,6 +616,7 @@ public class ProductController extends AbstractController {
 				productResponse.setVendorLocation(description.getTitle());
 			}
 		}catch(Exception e){
+			e.printStackTrace();
 			LOGGER.error("Error while getting product details::"+e.getMessage());
 		}
 		LOGGER.debug("Ended getProductDetails");
@@ -659,17 +659,31 @@ public class ProductController extends AbstractController {
 		return todaysDeals;
 	}*/
 	
-	@RequestMapping(value="/getTodaysDeals", method = RequestMethod.GET, 
+	@RequestMapping(value="/getTodaysDeals", method = RequestMethod.POST, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public TodaysDeals getTodaysDeals(@RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+	public TodaysDeals getTodaysDeals(@RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size,
+			@RequestBody TodaysDealRequest todaysDealRequest) throws Exception {
 		
 		LOGGER.debug("Entered getTodaysDeals");
 		
 		TodaysDeals todaysDeals = new TodaysDeals();
 		ProductResponse productResponse = new ProductResponse();
 
-		List<Product> dbProducts = productService.getTodaysDeals();
+		//List<Product> dbProducts = productService.getTodaysDeals();
+		List<Product> dbProducts = null;
+		
+		if(todaysDealRequest.getStatus().equals("0")) {
+			dbProducts = productService.getExpiredDeals();
+			}
+		
+		if(todaysDealRequest.getStatus().equals("1")) {
+			dbProducts = productService.getTodaysDeals();
+			}
+
+		if(todaysDealRequest.getStatus().equals("2")) {
+		     dbProducts = productService.getUpcomingDeals();
+		}
 		
 		List<ProductResponse> responses = new ArrayList<ProductResponse>();
 		for(Product product:dbProducts) {
@@ -1695,6 +1709,206 @@ public CreateProductResponse updateProductDiscount(@RequestBody ProductDiscountR
 		return productService.getMaxProductPrice(categoryCode);
 	}
 
+
+	@RequestMapping(value="/getTodaysDealsForCat", method = RequestMethod.POST)
+	@ResponseBody
+	public TodaysDeals getTodaysDealsForCat(@RequestParam(value="pageNumber", defaultValue = "1") int page , 
+			@RequestParam(value="pageSize", defaultValue="15") int size,
+			@RequestBody TodaysDealRequest todaysDealRequest) throws Exception {
 		
+		LOGGER.debug("Entered getUpcomingsDeals");
+		
+
+		TodaysDeals todaysDeals = new TodaysDeals();
+		ProductResponse productResponse = new ProductResponse();
+		
+		String catCode = todaysDealRequest.getCategoryCode();
+		
+		List<Product> dbProducts = null;
+		
+		if(todaysDealRequest.getStatus().equals("0")) {
+			dbProducts = productService.getExpiredDeals();
+			}
+		
+		if(todaysDealRequest.getStatus().equals("1")) {
+			dbProducts = productService.getTodaysDeals();
+			}
+
+		if(todaysDealRequest.getStatus().equals("2")) {
+		     dbProducts = productService.getUpcomingDeals();
+		}
+		
+		List<ProductResponse> responses = new ArrayList<ProductResponse>();
+		
+		for(Product product:dbProducts) {
+			
+			List<com.salesmanager.shop.admin.controller.products.Category> categoriesList = new ArrayList<com.salesmanager.shop.admin.controller.products.Category>();
+			Set<Category> productCategories = product.getCategories();
+			
+			for(Category productCategory : productCategories) {
+				
+			Category searchCategory = categoryService.getByCategoryCode(catCode); 
+			List<Category> searchCategories = searchCategory.getCategories();
+			
+			for(Category searchCat : searchCategories) {
+				
+				if(searchCat.getCode().equals(productCategory.getCode())) {
+					
+					productResponse=getProductDetails(product,true);
+					
+					com.salesmanager.shop.admin.controller.products.Category cat = new com.salesmanager.shop.admin.controller.products.Category();
+					
+					if(productCategory.getParent() == null)
+						cat.setName(productCategory.getCode());
+					else {
+						System.out.println("parent cat code =="+productCategory.getParent().getCode());
+						cat.setName(productCategory.getParent().getCode());	
+					}
+					
+					categoriesList.add(cat);
+					productResponse.setCategories(categoriesList);
+					responses.add(productResponse);
+				}
+			}
+			}
+		}
+		
+		if(responses == null || responses.isEmpty() || responses.size() < page){
+			todaysDeals.setTodaysDealsData(responses);
+			return todaysDeals;
+		}
+		
+	    PaginationData paginaionData=createPaginaionData(page,size);
+    	calculatePaginaionData(paginaionData,size, responses.size());
+    	todaysDeals.setPaginationData(paginaionData);
+		List<ProductResponse> paginatedProdResponses = responses.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+		todaysDeals.setTodaysDealsData(paginatedProdResponses);
+		
+		LOGGER.debug("Ended getTodaysDeals");
+		return todaysDeals;
+		
+	}
+		
+	/*public ProductResponse getTodaysProductDetails(Product dbProduct,boolean isSpecial) throws Exception {
+		LOGGER.debug("Entered getProductDetails ");
+		System.out.println("merchantStoreService =="+merchantStoreService);
+		
+		ProductResponse productResponse = new ProductResponse();
+		
+		try {
+			
+		productResponse.setProductId(dbProduct.getId());
+		MerchantStore store=merchantStoreService.getMerchantStore(MerchantStore.DEFAULT_STORE);
 	
+		com.salesmanager.shop.admin.model.catalog.Product product = new com.salesmanager.shop.admin.model.catalog.Product();
+		List<ProductDescription> descriptions = new ArrayList<ProductDescription>();
+
+
+			//Product dbProduct = productService.getById(productId);
+			
+			product.setProduct(dbProduct);
+			
+			for(ProductImage image : dbProduct.getImages()) {
+				if(image.isDefaultImage()) {
+					product.setProductImage(image);
+					break;
+				}
+			}
+			
+					ProductAvailability productAvailability = null;
+					ProductPrice productPrice = null;
+					
+					Set<ProductAvailability> availabilities = dbProduct.getAvailabilities();
+					if(availabilities!=null && availabilities.size()>0) {
+						
+						for(ProductAvailability availability : availabilities) {
+							if(availability.getRegion().equals(com.salesmanager.core.business.constants.Constants.ALL_REGIONS)) {
+								productAvailability = availability;
+								Set<ProductPrice> prices = availability.getPrices();
+								for(ProductPrice price : prices) {
+									if(price.isDefaultPrice()) {
+										productPrice = price;
+										product.setProductPrice(priceUtil.getAdminFormatedAmount(store, productPrice.getProductPriceAmount()));
+									}
+									if(price.getDealOfDay().equals("Y")) {
+										productResponse.setDealOfDay(true);
+									}
+									else if(price.getDealOfDay().equals("N") || price.getDealOfDay().equals(null)){
+										productResponse.setDealOfDay(false);
+									}
+								}
+							}
+						}
+					}
+					
+					if(productAvailability==null) {
+						productAvailability = new ProductAvailability();
+					}
+					
+					if(productPrice==null) {
+						productPrice = new ProductPrice();
+					}
+					
+					product.setAvailability(productAvailability);
+					product.setPrice(productPrice);
+					product.setDescriptions(descriptions);
+					
+					
+					product.setDateAvailable(DateUtil.formatDate(dbProduct.getDateAvailable()));
+					
+					System.out.println("product id =="+product);
+					System.out.println("product id =="+product.getProduct().getId());
+					
+					System.out.println("product id =="+dbProduct.getProductDescription().getName());
+					System.out.println("product id =="+product.getProduct().getProductDescription());
+					System.out.println("product id =="+product.getProduct().getProductDescription().getName());
+					
+					if(product.getProductImage() != null)
+						productResponse.setImageURL(product.getProductImage().getProductImageUrl());
+					
+					if(productPrice.getProductPriceAmount() != null)
+						productResponse.setProductPrice(productPrice.getProductPriceAmount());
+					if(productPrice.getProductPriceSpecialAmount() != null) {
+						if(productPrice.getProductPriceSpecialStartDate() != null && productPrice.getProductPriceSpecialEndDate() != null) {
+							if(productPrice.getProductPriceSpecialEndDate().compareTo(productPrice.getProductPriceSpecialStartDate()) > 0){
+								productResponse.setProductPrice(productPrice.getProductPriceAmount());
+								productResponse.setProductDiscountPrice(productPrice.getProductPriceSpecialAmount());
+								productResponse.setDiscountPercentage(getDiscountPercentage(productPrice));
+								productResponse.setProductPriceSpecialEndDate(productPrice.getProductPriceSpecialEndDate());
+								productResponse.setProductPriceSpecialStartDate(productPrice.getProductPriceSpecialStartDate());
+							}
+						}
+					}
+				
+					if(isSpecial) {
+						productResponse.setProductPrice(productPrice.getProductPriceAmount());
+						productResponse.setProductDiscountPrice(productPrice.getProductPriceSpecialAmount());
+						productResponse.setDiscountPercentage(getDiscountPercentage(productPrice));
+						productResponse.setProductPriceSpecialEndDate(productPrice.getProductPriceSpecialEndDate());
+						productResponse.setProductPriceSpecialStartDate(productPrice.getProductPriceSpecialStartDate());
+						//productResponse.setProductPriceSpecialEndTime(productPrice.getProductPriceSpecialEndDateTime());
+					}
+					else
+						productResponse.setProductPrice(productPrice.getProductPriceAmount());
+						
+					productResponse.setProductDescription(dbProduct.getProductDescription().getDescription());	
+					productResponse.setProductName(dbProduct.getProductDescription().getName());
+					//productResponse.setVendorName(dbProduct.getManufacturer().getCode());
+					
+					Set<ManufacturerDescription> manufacturerDescription =  dbProduct.getManufacturer().getDescriptions();
+					for(ManufacturerDescription description:manufacturerDescription){
+						productResponse.setVendorName(description.getName());
+						productResponse.setVendorLocation(description.getTitle());
+					}
+					
+		}catch(Exception e){
+			e.printStackTrace();
+			LOGGER.error("Error while getting product details::"+e.getMessage());
+		}
+		
+			LOGGER.debug("Ended getProductDetails");
+			return productResponse;
+	}*/
+				
+			
 }

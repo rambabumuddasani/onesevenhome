@@ -2,6 +2,7 @@ package com.salesmanager.core.business.services.catalog.product;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -408,5 +409,15 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 	@Override
 	public Long getMaxProductPrice(String categoryCode)  {
 		return productRepository.getMaxProductPrice(categoryCode);
+	}
+
+	@Override
+	public List<Product> getUpcomingDeals() {
+		return productRepository.findUpcomingDeals();
+	}
+
+	@Override
+	public List<Product> getExpiredDeals() {
+		return productRepository.findExpiredDeals();
 	}
 }
