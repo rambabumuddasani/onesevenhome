@@ -228,9 +228,25 @@ public class CategoryController {
 							subcategoryjson.setType("sub_category");
 							subCatTitle = subcategory.getCode();
 							subcategoryjson.setTitle((subcategory.getDescriptions().get(0)).getName());
+
+							String architectType = null;
+					    	for(String arcType:Constants.architectTypes.keySet()){
+					    		if(Constants.architectTypes.get(arcType).equals(subCatTitle.toUpperCase())){
+					    			architectType = arcType;
+					    			break;
+					    		}
+					    	}
+					    	
+					    	if(architectType != null){
+					    		subCatTitle = "/vendortypes/"+customerType+"/"+architectType; 
+					    	} else {
+					    		subCatTitle = "/categories/"+subCatTitle.replaceAll(" ", "_");
+					    	}
+					    	
 							subcategoryjson.setImageURL((subcategory.getDescriptions().get(0)).getSeUrl());
-							subCatTitle = subCatTitle.replaceAll(" ", "_");
-							subcategoryjson.setUrl("/categories/"+subCatTitle);
+							//subCatTitle = subCatTitle.replaceAll(" ", "_");
+							//subcategoryjson.setUrl("/categories/"+subCatTitle);
+							subcategoryjson.setUrl(subCatTitle);
 							j++;
 							subcategoryjsonList.add(subcategoryjson);
 						}
@@ -911,7 +927,7 @@ public class CategoryController {
 		return categoryImageResponse;	
 	}
 	
-	/* Method to search products based on category name */
+	/* Method to search products based on category name 
 	@RequestMapping(value="/getProductsByCategory", method = RequestMethod.POST, 
 			consumes = MediaType.APPLICATION_JSON_VALUE,
 			produces = MediaType.APPLICATION_JSON_VALUE)
@@ -963,7 +979,7 @@ public class CategoryController {
 			}
 				
 			
-			/*for(Entry<String, List<Category>> map : parentMap.entrySet()) {
+			for(Entry<String, List<Category>> map : parentMap.entrySet()) {
 				LOGGER.debug("key::"+map.getKey());
 				
 				Iterator <Category> iterator = map.getValue().iterator();
@@ -972,7 +988,7 @@ public class CategoryController {
 					Category  c = iterator.next();
 					LOGGER.debug("iterator.next() "+c.getDescription().getName());
 				}
-			}*/
+			}
 			
 			LOGGER.debug("Parent Map ::: " + parentMap.size());
 			LOGGER.debug("Parent Key Set ::: " + parentMap.keySet().size());
@@ -1050,7 +1066,7 @@ public class CategoryController {
 		LOGGER.debug("Ended getProductsByCategory");
 		return categoryResponse;
 
-	}
+	}*/
 	
 	// Category search
 	@RequestMapping(value="/getProductByCategory", method = RequestMethod.POST, 

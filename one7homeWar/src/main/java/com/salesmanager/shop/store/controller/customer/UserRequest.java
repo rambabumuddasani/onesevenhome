@@ -35,6 +35,7 @@ public class UserRequest implements Serializable {
 	List<Integer> serviceIds;
 	private String userType;
 	private String gst;
+	List<Long> architectIds;
 	
 	public String getEmail() {
 		return email;
@@ -203,6 +204,12 @@ public class UserRequest implements Serializable {
 	}
 	public void setGst(String gst) {
 		this.gst = gst;
+	}
+	public List<Long> getArchitectIds() {
+		return architectIds;
+	}
+	public void setArchitectIds(List<Long> architectIds) {
+		this.architectIds = architectIds;
 	}
 	
 }

@@ -1062,6 +1062,13 @@ public class CustomerRegistrationController extends AbstractController {
 			vendorDetails.setVendorTIN(customer.getVendorAttrs().getVendorTinNumber());
 			vendorDetails.setUserProfile(customer.getUserProfile());
 			vendorDetails.setGst(customer.getGst());
+			List<Category> categories = customer.getCategories();
+			List<Long> categoryIds = new ArrayList<Long>();
+			for(Category category : categories){
+				Long categoryId = category.getId();
+				categoryIds.add(categoryId);
+			}
+			vendorDetails.setCategoryIds(categoryIds);
 			customerDetailsResponse.setVendorDetails(vendorDetails);
 			LOGGER.debug("Retrieved vendor details");
 			
@@ -1560,7 +1567,19 @@ public class CustomerRegistrationController extends AbstractController {
                 if(servicesList.size() > 0)
                 	customer.setServices(servicesList);
         	}
-    		
+    		if(userRequest.getArchitectIds() != null) {
+                List<Long> architectsIds = userRequest.getArchitectIds();
+                List<Category> architectsSubList = new ArrayList<Category>();
+                for(Long architectId : architectsIds){
+                	Category categories = categoryService.getById(architectId);
+                	if(categories != null){
+                		
+                		architectsSubList.add(categories);
+                	}
+                }
+                if(architectsSubList.size() > 0)
+                	customer.setCategories(architectsSubList);
+        	}
             customerData = customerFacade.registerCustomer( customer, merchantStore, language );
             
         } catch ( Exception e )
@@ -1686,7 +1705,19 @@ public class CustomerRegistrationController extends AbstractController {
                 if(servicesList.size() > 0)
                 	customer.setServices(servicesList);
         	}
-    		
+    		if(userRequest.getArchitectIds() != null) {
+                List<Long> architectsIds = userRequest.getArchitectIds();
+                List<Category> architectsSubList = new ArrayList<Category>();
+                for(Long architectId : architectsIds){
+                	Category categories = categoryService.getById(architectId);
+                	if(categories != null){
+                		
+                		architectsSubList.add(categories);
+                	}
+                }
+                if(architectsSubList.size() > 0)
+                	customer.setCategories(architectsSubList);
+        	}
        	
 	        customerFacade.updateCustomer(customer);
 	        LOGGER.debug("User Updated");

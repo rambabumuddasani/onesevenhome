@@ -250,6 +250,9 @@ public class CustomerPopulator extends
 			if(source.getServices() != null){
 				target.setServices(source.getServices());
 			}
+			if(source.getCategories() != null){
+				target.setCategories(source.getCategories());
+			}
 		
 		} catch (Exception e) {
 			throw new ConversionException(e);

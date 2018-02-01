@@ -34,6 +34,7 @@ import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.salesmanager.core.constants.SchemaConstant;
+import com.salesmanager.core.model.catalog.category.Category;
 import com.salesmanager.core.model.catalog.product.review.ProductReview;
 import com.salesmanager.core.model.common.Billing;
 import com.salesmanager.core.model.common.Delivery;
@@ -162,6 +163,22 @@ public class Customer extends SalesManagerEntity<Long, Customer> {
 		
 	})
 	private List<Services> services = new ArrayList<Services>();
+	
+	@ManyToMany(fetch=FetchType.EAGER, cascade = {CascadeType.REFRESH})
+	@JoinTable(name = "CUSTOMER_ARCHITECTS", schema=SchemaConstant.SALESMANAGER_SCHEMA, joinColumns = { 
+			@JoinColumn(name = "CUSTOMER_ID", nullable = false, updatable = false) }
+			, 
+			inverseJoinColumns = { @JoinColumn(name = "CATEGORY_ID", 
+					nullable = false, updatable = false) }
+	)
+	@Cascade({
+		org.hibernate.annotations.CascadeType.DETACH,
+		org.hibernate.annotations.CascadeType.LOCK,
+		org.hibernate.annotations.CascadeType.REFRESH,
+		org.hibernate.annotations.CascadeType.REPLICATE
+		
+	})
+	private List<Category> categories = new ArrayList<Category>();
 
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "customer")
 	private Set<VendorProduct> vendorProduct = new HashSet<VendorProduct>();
@@ -457,6 +474,14 @@ public class Customer extends SalesManagerEntity<Long, Customer> {
 
 	public void setAvgReview(BigDecimal avgReview) {
 		this.avgReview = avgReview;
+	}
+
+	public List<Category> getCategories() {
+		return categories;
+	}
+
+	public void setCategories(List<Category> categories) {
+		this.categories = categories;
 	}
 	
 }

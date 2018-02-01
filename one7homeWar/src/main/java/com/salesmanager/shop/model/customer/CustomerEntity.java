@@ -9,6 +9,7 @@ import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.salesmanager.core.model.catalog.category.Category;
 import com.salesmanager.core.model.services.Services;
 
 
@@ -48,6 +49,7 @@ public class CustomerEntity extends Customer implements Serializable {
 	@JsonIgnore
 	private List<Services> services;
 	private String gst;
+	private List<Category> categories;
 	
 	@NotEmpty(message="{NotEmpty.customer.userName}")
 	private String userName;
@@ -198,6 +200,14 @@ public class CustomerEntity extends Customer implements Serializable {
 
 	public void setGst(String gst) {
 		this.gst = gst;
+	}
+
+	public List<Category> getCategories() {
+		return categories;
+	}
+
+	public void setCategories(List<Category> categories) {
+		this.categories = categories;
 	}
 
 }

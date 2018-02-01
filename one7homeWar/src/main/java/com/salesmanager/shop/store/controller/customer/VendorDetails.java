@@ -1,5 +1,7 @@
 package com.salesmanager.shop.store.controller.customer;
 
+import java.util.List;
+
 import com.salesmanager.core.model.reference.country.Country;
 
 public class VendorDetails {
@@ -32,6 +34,7 @@ public class VendorDetails {
 	private String vendorTIN;
 	private String userProfile;
 	private String gst;
+	private List<Long> categoryIds;
 	
 	public String getEmail() {
 		return email;
@@ -200,6 +203,12 @@ public class VendorDetails {
 	}
 	public void setGst(String gst) {
 		this.gst = gst;
+	}
+	public List<Long> getCategoryIds() {
+		return categoryIds;
+	}
+	public void setCategoryIds(List<Long> categoryIds) {
+		this.categoryIds = categoryIds;
 	}
 	
 	

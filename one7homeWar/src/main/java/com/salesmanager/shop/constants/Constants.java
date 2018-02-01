@@ -142,6 +142,15 @@ public class Constants {
 		customerTypes.put("4", "WALL PAPER");
 		customerTypes.put("5", "MACHINERY & EQUIPMENT");
 	}
+	
+    public static Map<String,String> architectTypes = new HashMap<String,String>();
+	
+	static {
+		architectTypes.put("1", "INTERIOR");
+		architectTypes.put("2", "LANDSCAPE");
+		architectTypes.put("3", "CIVIL");
+		
+	}
 	private static final String DEFAULT = "DEFAULT";
 
 	private static final String WALLPAPER_CAT = "Wallpaper";
