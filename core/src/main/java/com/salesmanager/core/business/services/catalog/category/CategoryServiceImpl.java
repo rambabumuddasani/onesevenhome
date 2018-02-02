@@ -446,4 +446,10 @@ public class CategoryServiceImpl extends SalesManagerEntityServiceImpl<Long, Cat
 		return categoryRepository.findCategoryList(searchString);
 	}
 
+	@Override
+	public Category getCategoriesForcat(String searchString) {
+		// TODO Auto-generated method stub
+		return categoryRepository.getCategoriesForcat(searchString);
+	}
+
 }

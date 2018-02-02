@@ -238,7 +238,7 @@ public class CategoryController {
 					    	}
 					    	
 					    	if(architectType != null){
-					    		subCatTitle = "/vendortypes/"+customerType+"/"+architectType; 
+					    		subCatTitle = "/vendortypes/"+customerType+"/"+subCatTitle; 
 					    	} else {
 					    		subCatTitle = "/categories/"+subCatTitle.replaceAll(" ", "_");
 					    	}
@@ -1206,6 +1206,103 @@ public class CategoryController {
 	
 		LOGGER.debug("Ended getProductByCategory");
 		return categoryResponse;
+
+	}
+	
+	// method to retrieve subcategory for a parent category
+	@RequestMapping(value="/getCategoriesForCat", method = RequestMethod.POST, 
+			consumes = MediaType.APPLICATION_JSON_VALUE,
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public ParentSubCategories getCategoriesForCat(@RequestParam(value="pageNumber", defaultValue = "1") int page,
+			@RequestParam(value="pageSize", defaultValue="15") int size,
+			@RequestBody SearchRequest searchRequest) throws Exception {
+		
+		LOGGER.debug("Entered getProductByCategory");
+		
+		ParentSubCategories parentSubCategories = new ParentSubCategories();
+		
+		Category searchCategory = null;
+		try {
+			
+			if(searchRequest.getSearchString() != null) {
+				
+				searchCategory = categoryService.getCategoriesForcat(searchRequest.getSearchString());
+			}	
+		
+			List<ParentCatJson> categoryJsonList = new ArrayList<ParentCatJson>();
+			
+			String catTitle = null;
+			String subCatTitle = null;
+			
+					ParentCatJson parentCatJson = new ParentCatJson();
+					parentCatJson.setId(searchCategory.getId());
+					parentCatJson.setType("category");
+					catTitle = searchCategory.getCode();
+					parentCatJson.setTitle((searchCategory.getDescription().getName()));
+					String customerType = null;
+			    	for(String custType:Constants.customerTypes.keySet()){
+			    		if(Constants.customerTypes.get(custType).equals(catTitle.toUpperCase())){
+			    			customerType = custType;
+			    			break;
+			    		}
+			    	}
+					
+			    	if(customerType != null){
+			    		catTitle = "/vendortypes/"+customerType; 
+			    	} else {
+			    		catTitle = "/categories/"+catTitle.replaceAll(" ", "_");
+			    	}
+			    	
+			    	//parentCatJson.setImageURL((searchCategory.getDescription().getSeUrl()));
+			    	//parentCatJson.setUrl(catTitle);
+				
+					List<Category> subList = searchCategory.getCategories();
+						
+						List<SubCategory> subcategoryList = new ArrayList<SubCategory>();
+					
+						for(Category subcategory:subList) {
+							
+							SubCategory subCategory = new SubCategory();
+							subCategory.setId(subcategory.getId());
+							subCategory.setType("sub_category");
+							subCatTitle = subcategory.getCode();
+							subCategory.setTitle((subcategory.getDescription().getName()));
+
+							String architectType = null;
+					    	for(String arcType:Constants.architectTypes.keySet()){
+					    		if(Constants.architectTypes.get(arcType).equals(subCatTitle.toUpperCase())){
+					    			architectType = arcType;
+					    			break;
+					    		}
+					    	}
+					    	
+					    	if(architectType != null){
+					    		subCatTitle = "/vendortypes/"+customerType+"/"+architectType; 
+					    	} else {
+					    		subCatTitle = "/categories/"+subCatTitle.replaceAll(" ", "_");
+					    	}
+					    	
+					    	//subCategory.setImageURL((subcategory.getDescription().getSeUrl()));
+							//subCatTitle = subCatTitle.replaceAll(" ", "_");
+							//subcategoryjson.setUrl("/categories/"+subCatTitle);
+					    	//subCategory.setUrl(subCatTitle);
+							
+					    	subcategoryList.add(subCategory);
+						}
+						parentCatJson.setSubCategory(subcategoryList);
+					
+					categoryJsonList.add(parentCatJson);
+					parentSubCategories.setCategoryData(categoryJsonList);
+					
+		}catch(Exception e){
+			e.printStackTrace();
+		    LOGGER.error("Error while getting all categories"+e.getMessage());
+				
+			}
+	
+		LOGGER.debug("Ended getProductByCategory");
+		return parentSubCategories;
 
 	}
 }
