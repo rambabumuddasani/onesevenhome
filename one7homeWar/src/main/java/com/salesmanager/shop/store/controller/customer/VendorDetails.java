@@ -34,7 +34,7 @@ public class VendorDetails {
 	private String vendorTIN;
 	private String userProfile;
 	private String gst;
-	private List<Long> categoryIds;
+	private List<Long> architectIds;
 	
 	public String getEmail() {
 		return email;
@@ -204,11 +204,11 @@ public class VendorDetails {
 	public void setGst(String gst) {
 		this.gst = gst;
 	}
-	public List<Long> getCategoryIds() {
-		return categoryIds;
+	public List<Long> getArchitectIds() {
+		return architectIds;
 	}
-	public void setCategoryIds(List<Long> categoryIds) {
-		this.categoryIds = categoryIds;
+	public void setArchitectIds(List<Long> architectIds) {
+		this.architectIds = architectIds;
 	}
 	
 	

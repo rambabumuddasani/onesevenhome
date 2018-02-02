@@ -1068,7 +1068,7 @@ public class CustomerRegistrationController extends AbstractController {
 				Long categoryId = category.getId();
 				categoryIds.add(categoryId);
 			}
-			vendorDetails.setCategoryIds(categoryIds);
+			vendorDetails.setArchitectIds(categoryIds);
 			customerDetailsResponse.setVendorDetails(vendorDetails);
 			LOGGER.debug("Retrieved vendor details");
 			
