@@ -627,4 +627,41 @@ public class ServicesController extends AbstractController{
 		return paginatedResponse;
 		
 	}
+	
+	// Vendors listing(Architects)
+	@RequestMapping(value="/getVendorsList", method = RequestMethod.POST, 
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public PaginatedResponse getVendorsList(@RequestBody VendorDetailsRequest vendorDetailsRequest, @RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) {
+		
+		LOGGER.debug("Entered getVendorsList");
+		
+		PaginatedResponse paginatedResponse = new PaginatedResponse();
+		
+		PaginationData paginaionData=createPaginaionData(page,size);
+		
+		try {
+			List<ServicesWorkerVO> paginatedResponses = customerService.getVendorsByCode(vendorDetailsRequest.getCode());
+	    	calculatePaginaionData(paginaionData,size, paginatedResponses.size());
+	    	paginatedResponse.setPaginationData(paginaionData);
+	    	
+			if(paginatedResponses == null || paginatedResponses.isEmpty() || paginatedResponses.size() < paginaionData.getCountByPage()){
+				paginatedResponse.setResponseData(paginatedResponses);
+				return paginatedResponse;
+			}
+			
+	    	paginatedResponses = paginatedResponses.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+	    	paginatedResponse.setResponseData(paginatedResponses);
+	    	
+		} catch(Exception e) {
+			e.printStackTrace();
+			paginatedResponse.setErrorMsg("Error while retrieving getWorkerByService"+e.getMessage());
+			LOGGER.error("Error while retrieving getWorkerByService");
+			return paginatedResponse;
+		}
+		
+		LOGGER.debug("Ended getVendorsList");
+    	return paginatedResponse;
+    	
+	}
 }

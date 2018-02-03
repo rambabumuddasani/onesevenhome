@@ -260,5 +260,48 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 		return customerRepository.findServiceProvidersByLocation(customerType,searchString);
 	}
 
+	@Override
+	public List<ServicesWorkerVO> getVendorsByCode(String code) {
+		LOGGER.debug("Entered findByServiceType");
+		WorkerServiceResponse response = new WorkerServiceResponse();
+		List<Customer> customer = customerRepository.findVendorsByType(code);
+		List<ServicesWorkerVO> servicesWorkerVOSet= new ArrayList<ServicesWorkerVO>();
+		for(Customer eachWorker : customer){
+			Double avgRating = new Double(0);
+			int totalRating= 0;
+			int totalReviews = 0;
+			double totalRate = 0;
+			ServicesWorkerVO servicesWorkerVO = new ServicesWorkerVO();
+			servicesWorkerVO.setId(new Integer(String.valueOf((eachWorker.getId()))));
+			servicesWorkerVO.setCompanyName(eachWorker.getVendorAttrs().getVendorName());
+			/*servicesWorkerVO.setHouseNumber(eachWorker.getVendorAttrs().getVendorOfficeAddress());
+			servicesWorkerVO.setStreet(eachWorker.getBilling().getAddress());
+			servicesWorkerVO.setArea(eachWorker.getArea());
+			servicesWorkerVO.setCity(eachWorker.getBilling().getCity());
+			servicesWorkerVO.setState(eachWorker.getBilling().getState());
+			servicesWorkerVO.setPinCode(eachWorker.getBilling().getPostalCode());
+			servicesWorkerVO.setContactNumber(eachWorker.getBilling().getTelephone());
+			servicesWorkerVO.setImageUrl(eachWorker.getVendorAttrs().getVendorAuthCert());
+			servicesWorkerVO.setCountry(eachWorker.getBilling().getCountry().getName());*/
+			//fetching ratings from services rating
+			List<ServicesRating> servicesRatingList = servicesRatingService.getServicesReviews(eachWorker.getId());
+			if(servicesRatingList != null) {
+				totalReviews = servicesRatingList.size();
+				for(ServicesRating servicesRating:servicesRatingList){
+					totalRating= totalRating + servicesRating.getRating();
+				}
+				totalRate = totalRating;
+				avgRating = Double.valueOf(totalRate / totalReviews);
+				avgRating = Double.valueOf(Math.round(avgRating.doubleValue() * 10D) / 10D);
+			}
+			servicesWorkerVO.setAvgRating(avgRating);
+			//servicesWorkerVO.setTotalRating(totalRating);
+			servicesWorkerVO.setTotalRating(totalReviews);
+			servicesWorkerVOSet.add(servicesWorkerVO);
+		}
+		LOGGER.debug("Ended findByVendorType");
+		return servicesWorkerVOSet;
+	}
+
 
 }
