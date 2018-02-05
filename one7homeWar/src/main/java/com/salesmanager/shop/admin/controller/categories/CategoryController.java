@@ -1101,8 +1101,14 @@ public class CategoryController {
 					
 					//category parent is  null i.e. it is a  parent
 					
-					if(!parentChildCatMap.containsKey(category.getCode())) { 
+					if(!parentChildCatMap.containsKey(category.getCode()) && categories.size()==1) { 
 					
+						ParentChildCategory parentChildCatObj = new ParentChildCategory();
+						parentChildCatObj.setParentCategory(category);
+						//parentChildCatObj.setChilCategory(new HashSet<Category>());
+						parentChildCatObj.setChilCategory(new HashSet<Category>(category.getCategories()));
+						parentChildCatMap.put(category.getCode(), parentChildCatObj);
+					}else {
 						ParentChildCategory parentChildCatObj = new ParentChildCategory();
 						parentChildCatObj.setParentCategory(category);
 						parentChildCatObj.setChilCategory(new HashSet<Category>());
@@ -1111,10 +1117,11 @@ public class CategoryController {
 				
 			   }else {
 				    // it means it is a child
-					// it is sure that this is child of some categoroy, but we don't know whose parent it is ?
-					String parentCat = category.getParent().getCode();//commented today
+					// it is sure that this is child of some category, but we don't know whose parent it is ?
+					String parentCat = category.getParent().getCode();
 				  
 					if(!parentChildCatMap.containsKey(parentCat)){
+						
 						ParentChildCategory parentChildCatObj = new ParentChildCategory();
 						
 						parentChildCatObj.setParentCategory(category.getParent());
