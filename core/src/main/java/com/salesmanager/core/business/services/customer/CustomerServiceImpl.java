@@ -32,6 +32,7 @@ import com.salesmanager.core.modules.utils.GeoLocation;
 
 
 
+
 @Service("customerService")
 public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Customer> implements CustomerService {
 
@@ -284,7 +285,7 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 			servicesWorkerVO.setImageUrl(eachWorker.getVendorAttrs().getVendorAuthCert());
 			servicesWorkerVO.setCountry(eachWorker.getBilling().getCountry().getName());*/
 			//fetching ratings from services rating
-			List<ServicesRating> servicesRatingList = servicesRatingService.getServicesReviews(eachWorker.getId());
+			/*List<ServicesRating> servicesRatingList = servicesRatingService.getServicesReviews(eachWorker.getId());
 			if(servicesRatingList != null) {
 				totalReviews = servicesRatingList.size();
 				for(ServicesRating servicesRating:servicesRatingList){
@@ -293,7 +294,25 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 				totalRate = totalRating;
 				avgRating = Double.valueOf(totalRate / totalReviews);
 				avgRating = Double.valueOf(Math.round(avgRating.doubleValue() * 10D) / 10D);
-			}
+			}*/
+			List<VendorRating> vendorRatingList = vendorRatingService.getVendorReviews(eachWorker.getId());
+			totalReviews = vendorRatingList.size();
+		  	for(VendorRating vendorRating:vendorRatingList) {
+	    		
+	    		totalRating = totalRating + vendorRating.getRating();
+	    	}
+	    	
+			totalRate = totalRating;
+			avgRating = Double.valueOf(totalRate / totalReviews);
+			avgRating = Double.valueOf(Math.round(avgRating.doubleValue() * 10D) / 10D);
+			
+			/*eachWorker.setAvgReview(new BigDecimal(avgRating));
+			try {
+				this.saveOrUpdate(eachWorker);
+			} catch (ServiceException e) {
+				e.printStackTrace();
+				LOGGER.error("Error in upadating vendor average rating "+e.getMessage());
+			}*/
 			servicesWorkerVO.setAvgRating(avgRating);
 			//servicesWorkerVO.setTotalRating(totalRating);
 			servicesWorkerVO.setTotalRating(totalReviews);
