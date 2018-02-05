@@ -165,7 +165,7 @@ public class Customer extends SalesManagerEntity<Long, Customer> {
 	private List<Services> services = new ArrayList<Services>();
 	
 	@ManyToMany(fetch=FetchType.EAGER, cascade = {CascadeType.REFRESH})
-	@JoinTable(name = "CUSTOMER_ARCHITECTS", schema=SchemaConstant.SALESMANAGER_SCHEMA, joinColumns = { 
+	@JoinTable(name = "VENDOR_PROF_SERVICES", schema=SchemaConstant.SALESMANAGER_SCHEMA, joinColumns = { 
 			@JoinColumn(name = "CUSTOMER_ID", nullable = false, updatable = false) }
 			, 
 			inverseJoinColumns = { @JoinColumn(name = "CATEGORY_ID", 
