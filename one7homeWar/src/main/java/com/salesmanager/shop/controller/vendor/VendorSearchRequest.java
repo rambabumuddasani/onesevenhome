@@ -10,6 +10,7 @@ public class VendorSearchRequest implements Serializable {
 	private static final long serialVersionUID = 4356429645325028718L;
 	private String searchString;
 	private String customerType;
+	private String searchSubCategory;
 	public String getSearchString() {
 		return searchString;
 	}
@@ -21,5 +22,11 @@ public class VendorSearchRequest implements Serializable {
 	}
 	public void setCustomerType(String customerType) {
 		this.customerType = customerType;
+	}
+	public String getSearchSubCategory() {
+		return searchSubCategory;
+	}
+	public void setSearchSubCategory(String searchSubCategory) {
+		this.searchSubCategory = searchSubCategory;
 	}
 }

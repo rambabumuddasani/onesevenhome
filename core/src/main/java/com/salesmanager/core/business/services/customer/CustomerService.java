@@ -63,4 +63,10 @@ public interface CustomerService  extends SalesManagerEntityService<Long, Custom
 	
 	public List<ServicesWorkerVO> getVendorsByCode(String code);
 
+	public List<Customer> getVendorsByLocationAndSubCategory(String customerType, String searchString,
+			String searchSubCategory);
+
+	public List<Customer> getVendorsBasedOnSubCategoryByRating(BigDecimal rating, String vendorType,
+			String searchSubCategory);
+
 }

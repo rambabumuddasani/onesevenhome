@@ -397,9 +397,11 @@ public class VendorController extends AbstractController {
 		try {
 			
 		if(vendorSearchRequest.getSearchString() != null) {
-			
-			List<Customer> vendors = customerService.getVendorsByLocation(vendorSearchRequest.getCustomerType(),vendorSearchRequest.getSearchString());
-			
+			List<Customer> vendors = null;
+			if(vendorSearchRequest.getSearchSubCategory().equals(null))
+			vendors = customerService.getVendorsByLocation(vendorSearchRequest.getCustomerType(),vendorSearchRequest.getSearchString());
+			else
+				vendors = customerService.getVendorsByLocationAndSubCategory(vendorSearchRequest.getCustomerType(),vendorSearchRequest.getSearchString(),vendorSearchRequest.getSearchSubCategory());
 			for(Customer vendor : vendors) {
 
 				VendorSearchDetails vendorSearchDetails = new VendorSearchDetails();
@@ -461,9 +463,14 @@ public class VendorController extends AbstractController {
 		
 		try {
 			
+			List<Customer> vendors =null;
+			
 		if(vendorFilterRequest.getRating() != null && (vendorFilterRequest.getRating().doubleValue() >=1 && vendorFilterRequest.getRating().doubleValue() <= 5)){
 			
-		List<Customer> vendors = customerService.getWallPaperVendorsByRating(vendorFilterRequest.getRating(),vendorFilterRequest.getVendorType());
+		if(vendorFilterRequest.getSearchSubCategory()==null)	
+		   vendors = customerService.getWallPaperVendorsByRating(vendorFilterRequest.getRating(),vendorFilterRequest.getVendorType());
+		else
+			vendors = customerService.getVendorsBasedOnSubCategoryByRating(vendorFilterRequest.getRating(),vendorFilterRequest.getVendorType(),vendorFilterRequest.getSearchSubCategory());
 		
 		for(Customer vendor : vendors) {
 			

@@ -12,6 +12,7 @@ public class VendorFilterRequest implements Serializable {
 
 	private BigDecimal rating;
 	private String vendorType;
+	private String searchSubCategory;
 	public BigDecimal getRating() {
 		return rating;
 	}
@@ -23,6 +24,12 @@ public class VendorFilterRequest implements Serializable {
 	}
 	public void setVendorType(String vendorType) {
 		this.vendorType = vendorType;
+	}
+	public String getSearchSubCategory() {
+		return searchSubCategory;
+	}
+	public void setSearchSubCategory(String searchSubCategory) {
+		this.searchSubCategory = searchSubCategory;
 	}
 	
 }

@@ -63,4 +63,12 @@ public interface CustomerRepository extends JpaRepository<Customer, Long>, Custo
 
 	@Query("select c from Customer c join fetch c.merchantStore cm left join fetch c.defaultLanguage cl left join fetch c.attributes ca left join fetch ca.customerOption cao left join fetch ca.customerOptionValue cav left join fetch cao.descriptions caod left join fetch cav.descriptions left join fetch c.categories cc  where cc.code = ?1")
 	List<Customer> findVendorsByType(String code);
+
+	@Query("select c from Customer c join fetch c.merchantStore cm left join fetch c.defaultLanguage cl left join fetch c.attributes ca left join fetch ca.customerOption cao left join fetch ca.customerOptionValue cav left join fetch cao.descriptions caod left join fetch cav.descriptions left join fetch c.categories cc  where c.customerType = ?1 and (c.area like %?2% or c.billing.address like %?2% or c.billing.city like %?2% or c.billing.state like %?2% or c.billing.company like %?2%) and cc.code = ?3")
+	List<Customer> findVendorsByLocationAndSubCategory(String customerType, String searchString,
+			String searchSubCategory);
+
+	@Query("select c from Customer c join fetch c.merchantStore cm left join fetch c.defaultLanguage cl left join fetch c.attributes ca left join fetch ca.customerOption cao left join fetch ca.customerOptionValue cav left join fetch cao.descriptions caod left join fetch cav.descriptions left join fetch c.categories cc where c.avgReview <= ?1 and c.customerType = ?2 and cc.code = ?3")
+	List<Customer> findVendorsBasedOnSubCategoryByRating(BigDecimal rating, String vendorType,
+			String searchSubCategory);
 }

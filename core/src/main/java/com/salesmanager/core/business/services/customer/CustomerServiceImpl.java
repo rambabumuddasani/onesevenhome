@@ -322,5 +322,18 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 		return servicesWorkerVOSet;
 	}
 
+	@Override
+	public List<Customer> getVendorsByLocationAndSubCategory(String customerType, String searchString,
+			String searchSubCategory) {
+		return customerRepository.findVendorsByLocationAndSubCategory(customerType,searchString,searchSubCategory);
+	}
+
+	@Override
+	public List<Customer> getVendorsBasedOnSubCategoryByRating(BigDecimal rating, String vendorType,
+			String searchSubCategory) {
+		// TODO Auto-generated method stub
+		return customerRepository.findVendorsBasedOnSubCategoryByRating(rating,vendorType,searchSubCategory);
+	}
+
 
 }
