@@ -639,9 +639,10 @@ public class ServicesController extends AbstractController{
 		PaginatedResponse paginatedResponse = new PaginatedResponse();
 		
 		PaginationData paginaionData=createPaginaionData(page,size);
-		
+		String subCategoryCode = vendorDetailsRequest.getCode().replaceAll("_", " ");
 		try {
-			List<ServicesWorkerVO> paginatedResponses = customerService.getVendorsByCode(vendorDetailsRequest.getCode());
+			//List<ServicesWorkerVO> paginatedResponses = customerService.getVendorsByCode(vendorDetailsRequest.getCode());
+			List<ServicesWorkerVO> paginatedResponses = customerService.getVendorsByCode(subCategoryCode);
 	    	calculatePaginaionData(paginaionData,size, paginatedResponses.size());
 	    	paginatedResponse.setPaginationData(paginaionData);
 	    	
