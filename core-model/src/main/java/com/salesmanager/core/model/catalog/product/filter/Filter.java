@@ -44,10 +44,10 @@ public class Filter extends SalesManagerEntity<Long, Filter> {
 	private Long id;
 	
 	@Valid
-	@OneToMany(mappedBy="filter", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy="filter", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private List<FilterType> filterTypes = new ArrayList<FilterType>();
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name="CATEGORY_ID", nullable=false)
 	private Category category;
 	

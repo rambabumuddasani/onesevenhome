@@ -1,55 +1,33 @@
 package com.salesmanager.shop.admin.controller.categories;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import com.salesmanager.core.business.services.catalog.category.CategoryService;
 import com.salesmanager.core.business.services.catalog.product.ProductService;
 import com.salesmanager.core.business.services.catalog.product.filter.FilterService;
 import com.salesmanager.core.business.services.catalog.product.filter.FilterTypeService;
-import com.salesmanager.core.business.services.reference.country.CountryService;
-import com.salesmanager.core.business.services.reference.language.LanguageService;
-import com.salesmanager.core.business.utils.ajax.AjaxResponse;
 import com.salesmanager.core.model.catalog.category.Category;
-import com.salesmanager.core.model.catalog.category.CategoryDescription;
 import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.catalog.product.filter.Filter;
 import com.salesmanager.core.model.catalog.product.filter.FilterType;
-import com.salesmanager.core.model.merchant.MerchantStore;
-import com.salesmanager.core.model.reference.language.Language;
-import com.salesmanager.shop.admin.model.web.Menu;
-import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.utils.LabelUtils;
 //import com.sun.prism.Image;
 
@@ -232,5 +210,49 @@ public class FilterController {
 		
 		return filter;
 	}
-   	
+	
+	// Retrieval of filters by search 
+	@RequestMapping(value="/getFiltersBySearch", method = RequestMethod.POST)
+	@ResponseBody
+	public SearchFilterResponse getFiltersBySearch(@RequestBody SearchFilterRequest searchFilterRequest) throws Exception {
+		
+		LOGGER.debug("Entered getFiltersBySearch");
+		
+		SearchFilterResponse searchFilterResponse = new SearchFilterResponse();
+		
+		List<FilterType> searchFiterTypes = filterService.getFilterTypeNamesBySearch(searchFilterRequest.getSearchFilterString());
+		
+		Map<FilterNames,FilterNames> filterNamesList = new HashMap<FilterNames,FilterNames>();
+		LOGGER.debug("size::"+searchFiterTypes.size());
+		
+		for(FilterType searchFiterType : searchFiterTypes) {
+			
+			LOGGER.debug("searchFiterType.getFilter().getFilterName() :::"+searchFiterType.getFilter().getFilterName() );
+			FilterNames filterNames = new FilterNames();
+			filterNames.setCategoryCode(searchFiterType.getFilter().getCategory().getCode());
+			filterNames.setFilterName(searchFiterType.getFilter().getFilterName());
+			
+			if(filterNamesList.containsKey(filterNames)){
+				FilterNames existingFilternames = filterNamesList.get(filterNames);
+				FilterTypes filterTypes = new FilterTypes();
+				filterTypes.setFilterTypeName(searchFiterType.getFilterTypeName());
+				filterTypes.setFilterTypeId(searchFiterType.getId());
+				existingFilternames.addFilterTypes(filterTypes);
+			}else{
+				List<FilterTypes> filterTypeList = new ArrayList<FilterTypes>();
+				FilterTypes filterTypes = new FilterTypes();
+				filterTypes.setFilterTypeName(searchFiterType.getFilterTypeName());
+				filterTypes.setFilterTypeId(searchFiterType.getId());
+				filterTypeList.add(filterTypes);
+				filterNames.setFilterTypes(filterTypeList);
+				filterNamesList.put(filterNames, filterNames);
+			}
+		}
+		
+		searchFilterResponse.setFilteredData(new HashSet<FilterNames>(filterNamesList.values()));
+		LOGGER.debug("Ended getFiltersBySearch"); 
+		return searchFilterResponse;
+		
+	}
+
 }

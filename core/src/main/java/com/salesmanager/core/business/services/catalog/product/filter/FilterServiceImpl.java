@@ -1,22 +1,16 @@
 package com.salesmanager.core.business.services.catalog.product.filter;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
-import com.salesmanager.core.business.constants.Constants;
 import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.repositories.catalog.product.filter.FilterRepository;
 import com.salesmanager.core.business.services.common.generic.SalesManagerEntityServiceImpl;
 import com.salesmanager.core.model.catalog.product.filter.Filter;
+import com.salesmanager.core.model.catalog.product.filter.FilterType;
 
 @Service("filterService")
 public class FilterServiceImpl extends SalesManagerEntityServiceImpl<Long, Filter> implements FilterService {
@@ -39,6 +33,12 @@ public class FilterServiceImpl extends SalesManagerEntityServiceImpl<Long, Filte
 			throw new ServiceException(e);
 		}
 		
+	}
+
+
+	@Override
+	public List<FilterType> getFilterTypeNamesBySearch(String searchFilterString) throws ServiceException {
+		return filterRepository.findFilterTypeNamesBySearch(searchFilterString);
 	}
 
 }
