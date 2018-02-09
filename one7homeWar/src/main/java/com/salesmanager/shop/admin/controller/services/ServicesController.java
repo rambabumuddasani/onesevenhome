@@ -242,6 +242,9 @@ public class ServicesController extends AbstractController{
     	servicesBooking.setServiceType(services);
     	servicesBooking.setBookingDate(new Date());
     	servicesBooking.setStatus("N");
+    	servicesBooking.setContactInfo(servicesBookingRequest.getContactInfo());
+    	servicesBooking.setAppointmentDate(servicesBookingRequest.getAppointmentDate());
+    	servicesBooking.setQuery(servicesBookingRequest.getQuery());
     	
     	servicesBookingService.save(servicesBooking);
     	servicesRatingResponse.setSuccessMessage("Service booking accepted.");

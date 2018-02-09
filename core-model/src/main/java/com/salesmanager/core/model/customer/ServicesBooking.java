@@ -9,7 +9,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
@@ -55,6 +54,16 @@ public class ServicesBooking extends SalesManagerEntity<Long, ServicesBooking> {
 	
 	@Column(name="STATUS")
 	private String status;
+	
+	@Column(name="CONTACT_INFO",length=150)
+	private String contactInfo;
+	
+	@Temporal(TemporalType.DATE)
+	@Column(name="APPOINTMENT_DATE")
+	private Date appointmentDate;
+	
+	@Column(name="QUERY",length=200)
+	private String query;
 
 	public Long getId() {
 		return id;
@@ -110,6 +119,30 @@ public class ServicesBooking extends SalesManagerEntity<Long, ServicesBooking> {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public String getContactInfo() {
+		return contactInfo;
+	}
+
+	public void setContactInfo(String contactInfo) {
+		this.contactInfo = contactInfo;
+	}
+
+	public Date getAppointmentDate() {
+		return appointmentDate;
+	}
+
+	public void setAppointmentDate(Date appointmentDate) {
+		this.appointmentDate = appointmentDate;
+	}
+
+	public String getQuery() {
+		return query;
+	}
+
+	public void setQuery(String query) {
+		this.query = query;
 	}
 	
 }
