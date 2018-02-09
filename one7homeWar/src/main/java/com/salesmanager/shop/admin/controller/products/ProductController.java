@@ -464,9 +464,10 @@ public class ProductController extends AbstractController {
 			
 			//adding filters
 			Set<FilterType> filters = dbProduct.getFilters();
-			ProductFilterType productFilterType = new ProductFilterType();
+			//ProductFilterType productFilterType = new ProductFilterType();
 			List<ProductFilterType> productFilterTypeList = new ArrayList<ProductFilterType>();
 			for(FilterType filter:filters) {
+				ProductFilterType productFilterType = new ProductFilterType();
 				productFilterType.setFilterId(filter.getId());
 				productFilterType.setFilterTypeName(filter.getFilterTypeName());
 				productFilterTypeList.add(productFilterType);
