@@ -133,6 +133,8 @@ public class Constants {
 	public final static String MACHINERY_EQUIPMENT = "Machinery & Equipment";
 	public final static String CUSTOMERS = "Customer";
 	
+	public final static String WALLPAPER_PORTFOLIO = "Wallpaper";
+	
     public static Map<String,String> customerTypes = new HashMap<String,String>();
 	
 	static {
@@ -153,6 +155,6 @@ public class Constants {
 	}
 	private static final String DEFAULT = "DEFAULT";
 
-	private static final String WALLPAPER_CAT = "Wallpaper";
+	//private static final String WALLPAPER_CAT = "Wallpaper";
 
 }

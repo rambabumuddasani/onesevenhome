@@ -58,7 +58,7 @@ public class ShoppingCartFacadeImpl
 {
 
     
-    private static final Logger LOGGER = LoggerFactory.getLogger(ShoppingCartFacadeImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ShoppingCartFacadeImpl.class);
 
     @Inject
     private ShoppingCartService shoppingCartService;
@@ -465,22 +465,25 @@ public class ShoppingCartFacadeImpl
     		ShoppingCart cartModel = null;
     		Set<com.salesmanager.core.model.shoppingcart.ShoppingCartItem> cartItems = new HashSet<com.salesmanager.core.model.shoppingcart.ShoppingCartItem>();
     		for(ShoppingCartItem item : shoppingCartItems) {
-    			
     			if(item.getQuantity()<1) {
     				throw new CartModificationException( "Quantity must not be less than one" );
     			}
-    			
     			if(cartModel==null) {
     				cartModel = getCartModel( item.getCode(), store );
     			}
-    			
                 com.salesmanager.core.model.shoppingcart.ShoppingCartItem entryToUpdate =
                         getEntryToUpdate( item.getId(), cartModel );
 
                 if ( entryToUpdate == null ) {
                         throw new CartModificationException( "Unknown entry number." );
                 }
-
+                
+    			if(Constants.WALLPAPER_PORTFOLIO.equals(item.getCategory())){
+                    LOGGER.info( "Updating wallpaper cart entry quantity to" + item.getQuantity() );
+                    entryToUpdate.setQuantity( (int) item.getQuantity() );
+                    cartItems.add(entryToUpdate);
+    				continue; 
+    			}
                 entryToUpdate.getProduct();
 
                 LOGGER.info( "Updating cart entry quantity to" + item.getQuantity() );
@@ -504,7 +507,6 @@ public class ShoppingCartFacadeImpl
             shoppingCartDataPopulator.setimageUtils(imageUtils);
             shoppingCartDataPopulator.setCustomerService(customerService);
             return shoppingCartDataPopulator.populate( cartModel, store, language );
-
         }
 
 

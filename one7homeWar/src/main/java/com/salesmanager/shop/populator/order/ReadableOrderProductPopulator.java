@@ -23,6 +23,7 @@ import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.order.orderproduct.OrderProduct;
 import com.salesmanager.core.model.order.orderproduct.OrderProductAttribute;
 import com.salesmanager.core.model.reference.language.Language;
+import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.model.catalog.product.ReadableProduct;
 import com.salesmanager.shop.model.order.ReadableOrderProduct;
 import com.salesmanager.shop.model.order.ReadableOrderProductAttribute;
@@ -100,7 +101,7 @@ public class ReadableOrderProductPopulator extends
 			throw new ConversionException("Cannot format price",e);
 		}
 		
-    	if("Wallpaper".equals(source.getProductCategory())){
+    	if(Constants.WALLPAPER_PORTFOLIO.equals(source.getProductCategory())){
     		ReadableProduct productProxy = new ReadableProduct();
 			target.setProduct(productProxy);
 			String wallpaperPortfolio = source.getSku();

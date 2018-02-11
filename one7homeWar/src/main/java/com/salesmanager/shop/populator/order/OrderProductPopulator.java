@@ -1,5 +1,12 @@
 package com.salesmanager.shop.populator.order;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.Validate;
+
 import com.salesmanager.core.business.exception.ConversionException;
 import com.salesmanager.core.business.services.catalog.product.ProductService;
 import com.salesmanager.core.business.services.catalog.product.attribute.ProductAttributeService;
@@ -22,15 +29,7 @@ import com.salesmanager.core.model.reference.language.Language;
 import com.salesmanager.core.model.shoppingcart.ShoppingCartAttributeItem;
 import com.salesmanager.core.model.shoppingcart.ShoppingCartItem;
 import com.salesmanager.shop.constants.ApplicationConstants;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang.Validate;
-
-import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
+import com.salesmanager.shop.constants.Constants;
 
 public class OrderProductPopulator extends
 		AbstractDataPopulator<ShoppingCartItem, OrderProduct> {
@@ -79,7 +78,7 @@ public class OrderProductPopulator extends
 		Validate.notNull(digitalProductService,"digitalProductService must be set");
 		Validate.notNull(productAttributeService,"productAttributeService must be set");
 
-    	if("Wallpaper".equals(source.getProductCategory())){
+    	if(Constants.WALLPAPER_PORTFOLIO.equals(source.getProductCategory())){
 			WallPaperPortfolio wallPaperPortfolio = source.getWallPaperPortfolio();
 			if (wallPaperPortfolio == null) {
 					throw new ConversionException("Cannot get product with id (WallPaperPortfolioID) " + source.getProductId());
@@ -91,7 +90,7 @@ public class OrderProductPopulator extends
 			target.setProductQuantity(source.getQuantity());
 			target.setSku(wallPaperPortfolio.getId().toString());
 			target.setVendorId(source.getVendorId());
-			target.setProductCategory("Wallpaper");
+			target.setProductCategory(Constants.WALLPAPER_PORTFOLIO);
 			FinalPrice price = priceUtil.getWallpaperPortfolioPrice(wallPaperPortfolio);
 
 			if(price==null) {

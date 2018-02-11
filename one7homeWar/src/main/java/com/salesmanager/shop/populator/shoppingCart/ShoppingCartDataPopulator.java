@@ -28,6 +28,7 @@ import com.salesmanager.core.model.order.OrderSummary;
 import com.salesmanager.core.model.order.OrderTotalSummary;
 import com.salesmanager.core.model.reference.language.Language;
 import com.salesmanager.core.model.shoppingcart.ShoppingCart;
+import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.model.order.OrderTotal;
 import com.salesmanager.shop.model.shoppingcart.ShoppingCartAttribute;
 import com.salesmanager.shop.model.shoppingcart.ShoppingCartData;
@@ -93,7 +94,7 @@ public class ShoppingCartDataPopulator extends AbstractDataPopulator<ShoppingCar
                     }
                     if(StringUtils.isEmpty(item.getProductCategory()) || "DEFAULT".equals(item.getProductCategory()) ){
     					cartQuantity = productTypeCartItem(store, cartQuantity, item, shoppingCartItem);                    	
-                    }else if("Wallpaper".equals(item.getProductCategory())){
+                    }else if(Constants.WALLPAPER_PORTFOLIO.equals(item.getProductCategory())){
                     	cartQuantity = wallpaperTypeCartItem(store, cartQuantity, item, shoppingCartItem);
                     }
                     shoppingCartItemsList.add(shoppingCartItem);

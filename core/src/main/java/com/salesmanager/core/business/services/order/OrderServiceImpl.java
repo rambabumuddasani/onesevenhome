@@ -196,7 +196,7 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
         
         for(ShoppingCartItem item : summary.getProducts()) {
         	BigDecimal st = null;
-        	if("Wallpaper".equals(item.getProductCategory())){
+        	if(Constants.WALLPAPER_PORTFOLIO.equals(item.getProductCategory())){
     			Long wallpaperPortfolio = item.getProductId();
     			WallPaperPortfolio wallPaperPortfolio = wallPaperPortfolioService.getById(wallpaperPortfolio);
 

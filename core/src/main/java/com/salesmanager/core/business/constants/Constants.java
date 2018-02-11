@@ -34,5 +34,6 @@ public class Constants {
 	
 	public final static Locale DEFAULT_LOCALE = new Locale("en", "IN");
 	public final static Currency DEFAULT_CURRENCY = Currency.getInstance(new Locale("en", "IN"));
+	public final static String WALLPAPER_PORTFOLIO = "Wallpaper";
 
 }
