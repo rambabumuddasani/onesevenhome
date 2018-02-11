@@ -60,6 +60,10 @@ public class OrderProduct extends SalesManagerEntity<Long, OrderProduct> {
 	@Column(name="VENDOR_ID", nullable=false)
 	private Long vendorId;
 	
+	
+	@Column(name="PRODUCT_CATEGORY", length=100)
+	private String productCategory; // added specific to products like Wallpapers 
+
 	public Long getVendorId() {
 		return vendorId;
 	}
@@ -148,4 +152,13 @@ public class OrderProduct extends SalesManagerEntity<Long, OrderProduct> {
 		return oneTimeCharge;
 	}
 	
+	
+	public String getProductCategory() {
+		return productCategory;
+	}
+
+	public void setProductCategory(String productCategory) {
+		this.productCategory = productCategory;
+	}
+
 }

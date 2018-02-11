@@ -93,7 +93,7 @@ public class ProductPriceUtils {
 		Integer iSize = Integer.parseInt(size);
 		Integer qty = wallPaperPortfolio.getQuantity();
 		
-		BigDecimal fPrice = new BigDecimal(iSize).multiply(new BigDecimal(qty)).multiply(price); // qty * price * per square feet
+		BigDecimal fPrice = new  BigDecimal(qty).multiply(price); // qty * price * per square feet
 		finalPrice.setFinalPrice(fPrice);
 		finalPrice.setOriginalPrice(fPrice);
 		finalPrice.setDefaultPrice(true);

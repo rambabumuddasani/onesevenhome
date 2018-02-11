@@ -37,8 +37,10 @@ import com.salesmanager.core.business.services.order.OrderService;
 import com.salesmanager.core.business.services.reference.country.CountryService;
 import com.salesmanager.core.business.services.reference.language.LanguageService;
 import com.salesmanager.core.business.services.reference.zone.ZoneService;
+import com.salesmanager.core.business.services.services.WallPaperPortfolioService;
 import com.salesmanager.core.business.services.shipping.ShippingService;
 import com.salesmanager.core.business.services.shoppingcart.ShoppingCartService;
+import com.salesmanager.core.business.utils.ProductPriceUtils;
 import com.salesmanager.core.model.common.Billing;
 import com.salesmanager.core.model.common.Delivery;
 import com.salesmanager.core.model.common.SecondaryDelivery;
@@ -125,6 +127,12 @@ public class OrderFacadeImpl implements OrderFacade {
 	@Inject
 	@Qualifier("img")
 	private ImageFilePath imageUtils;
+
+/*	@Inject
+	private WallPaperPortfolioService wallPaperPortfolioService;
+*/
+	@Inject
+	private ProductPriceUtils priceUtil;
 
 	@Override
 	public ShopOrder initializeOrder(MerchantStore store, Customer customer,
@@ -268,7 +276,7 @@ public class OrderFacadeImpl implements OrderFacade {
 			orderProductPopulator.setDigitalProductService(digitalProductService);
 			orderProductPopulator.setProductAttributeService(productAttributeService);
 			orderProductPopulator.setProductService(productService);
-			
+			orderProductPopulator.setPriceUtil(priceUtil);
 			for(ShoppingCartItem item : shoppingCartItems) {
 				OrderProduct orderProduct = new OrderProduct();
 				orderProduct = orderProductPopulator.populate(item, orderProduct , store, language);

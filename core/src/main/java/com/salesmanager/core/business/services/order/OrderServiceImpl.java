@@ -30,10 +30,13 @@ import com.salesmanager.core.business.services.customer.CustomerService;
 import com.salesmanager.core.business.services.order.ordertotal.OrderTotalService;
 import com.salesmanager.core.business.services.payments.PaymentService;
 import com.salesmanager.core.business.services.payments.TransactionService;
+import com.salesmanager.core.business.services.services.WallPaperPortfolioService;
 import com.salesmanager.core.business.services.shipping.ShippingService;
 import com.salesmanager.core.business.services.tax.TaxService;
+import com.salesmanager.core.business.utils.ProductPriceUtils;
 import com.salesmanager.core.model.catalog.product.price.FinalPrice;
 import com.salesmanager.core.model.customer.Customer;
+import com.salesmanager.core.model.customer.WallPaperPortfolio;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.order.Order;
 import com.salesmanager.core.model.order.OrderCriteria;
@@ -49,7 +52,6 @@ import com.salesmanager.core.model.order.orderstatus.OrderStatus;
 import com.salesmanager.core.model.order.orderstatus.OrderStatusHistory;
 import com.salesmanager.core.model.payments.Transaction;
 import com.salesmanager.core.model.reference.language.Language;
-import com.salesmanager.core.model.shipping.ShippingConfiguration;
 import com.salesmanager.core.model.shoppingcart.ShoppingCart;
 import com.salesmanager.core.model.shoppingcart.ShoppingCartItem;
 
@@ -84,6 +86,12 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
 
     private final OrderRepository orderRepository;
 
+	@Inject
+	WallPaperPortfolioService wallPaperPortfolioService;
+
+	@Inject
+	private ProductPriceUtils priceUtil;
+    
     @Inject
     public OrderServiceImpl(OrderRepository orderRepository) {
         super(orderRepository);
@@ -185,52 +193,72 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
         BigDecimal totDiscount = new BigDecimal(0);
         BigDecimal subTotal = new BigDecimal(0);
         subTotal.setScale(2, RoundingMode.HALF_UP);
+        
         for(ShoppingCartItem item : summary.getProducts()) {
+        	BigDecimal st = null;
+        	if("Wallpaper".equals(item.getProductCategory())){
+    			Long wallpaperPortfolio = item.getProductId();
+    			WallPaperPortfolio wallPaperPortfolio = wallPaperPortfolioService.getById(wallpaperPortfolio);
 
-            BigDecimal st = item.getItemPrice().multiply(new BigDecimal(item.getQuantity()));
-            item.setSubTotal(st);
-            subTotal = subTotal.add(st);
-            //Other prices
-            FinalPrice finalPrice = item.getFinalPrice();
-            if(finalPrice!=null) {
-            	if(finalPrice.isDiscounted()) {
-            		totDiscount = totDiscount.add(finalPrice.getDiscountedPrice());
-            	}
-                List<FinalPrice> otherPrices = finalPrice.getAdditionalPrices();
-                if(otherPrices!=null) {
-                    for(FinalPrice price : otherPrices) {
-                        if(!price.isDefaultPrice()) {
-                            OrderTotal itemSubTotal = otherPricesTotals.get(price.getProductPrice().getCode());
+    			if (wallPaperPortfolio == null) {
+    				item.setObsolete(true);
+    				break;
+    			}
+    			item.setWallPaperPortfolio(wallPaperPortfolio);
+    			wallPaperPortfolio.setQuantity(item.getQuantity());
+    			// set item price
+    			FinalPrice price = priceUtil.getWallpaperPortfolioPrice(wallPaperPortfolio);
+    			st = price.getFinalPrice();
+                item.setSubTotal(st);
+                subTotal = subTotal.add(st);
+    			//item.setItemPrice(price.getFinalPrice());
+    			//item.setFinalPrice(price);
+    			//st = item.getItemPrice().multiply(new BigDecimal(item.getQuantity().intValue()));
+        	}else{
+                st = item.getItemPrice().multiply(new BigDecimal(item.getQuantity()));
+                item.setSubTotal(st);
+                subTotal = subTotal.add(st);
+                //Other prices
+                FinalPrice finalPrice = item.getFinalPrice();
+                if(finalPrice!=null) {
+                	if(finalPrice.isDiscounted()) {
+                		totDiscount = totDiscount.add(finalPrice.getDiscountedPrice());
+                	}
+                    List<FinalPrice> otherPrices = finalPrice.getAdditionalPrices();
+                    if(otherPrices!=null) {
+                        for(FinalPrice price : otherPrices) {
+                            if(!price.isDefaultPrice()) {
+                                OrderTotal itemSubTotal = otherPricesTotals.get(price.getProductPrice().getCode());
 
-                            if(itemSubTotal==null) {
-                                itemSubTotal = new OrderTotal();
-                                itemSubTotal.setModule(Constants.OT_ITEM_PRICE_MODULE_CODE);
-                                //itemSubTotal.setText(Constants.OT_ITEM_PRICE_MODULE_CODE);
-                                itemSubTotal.setTitle(Constants.OT_ITEM_PRICE_MODULE_CODE);
-                                itemSubTotal.setOrderTotalCode(price.getProductPrice().getCode());
-                                itemSubTotal.setOrderTotalType(OrderTotalType.PRODUCT);
-                                itemSubTotal.setSortOrder(0);
-                                otherPricesTotals.put(price.getProductPrice().getCode(), itemSubTotal);
-                            }
+                                if(itemSubTotal==null) {
+                                    itemSubTotal = new OrderTotal();
+                                    itemSubTotal.setModule(Constants.OT_ITEM_PRICE_MODULE_CODE);
+                                    //itemSubTotal.setText(Constants.OT_ITEM_PRICE_MODULE_CODE);
+                                    itemSubTotal.setTitle(Constants.OT_ITEM_PRICE_MODULE_CODE);
+                                    itemSubTotal.setOrderTotalCode(price.getProductPrice().getCode());
+                                    itemSubTotal.setOrderTotalType(OrderTotalType.PRODUCT);
+                                    itemSubTotal.setSortOrder(0);
+                                    otherPricesTotals.put(price.getProductPrice().getCode(), itemSubTotal);
+                                }
 
-                            BigDecimal orderTotalValue = itemSubTotal.getValue();
-                            if(orderTotalValue==null) {
-                                orderTotalValue = new BigDecimal(0);
-                                orderTotalValue.setScale(2, RoundingMode.HALF_UP);
-                            }
+                                BigDecimal orderTotalValue = itemSubTotal.getValue();
+                                if(orderTotalValue==null) {
+                                    orderTotalValue = new BigDecimal(0);
+                                    orderTotalValue.setScale(2, RoundingMode.HALF_UP);
+                                }
 
-                            orderTotalValue = orderTotalValue.add(price.getFinalPrice());
-                            itemSubTotal.setValue(orderTotalValue);
-                            if(price.getProductPrice().getProductPriceType().name().equals(OrderValueType.ONE_TIME)) {
-                                subTotal = subTotal.add(price.getFinalPrice());
+                                orderTotalValue = orderTotalValue.add(price.getFinalPrice());
+                                itemSubTotal.setValue(orderTotalValue);
+                                if(price.getProductPrice().getProductPriceType().name().equals(OrderValueType.ONE_TIME)) {
+                                    subTotal = subTotal.add(price.getFinalPrice());
+                                }
                             }
                         }
                     }
                 }
             }
-
-        }
-        
+        	}
+          
         //only in order page, otherwise invokes too many processing
 /*        if(OrderSummaryType.ORDERTOTAL.name().equals(summary.getOrderSummaryType().name())) {
 

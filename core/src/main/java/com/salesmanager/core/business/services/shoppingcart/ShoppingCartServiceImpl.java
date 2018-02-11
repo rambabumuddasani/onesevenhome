@@ -401,9 +401,8 @@ public class ShoppingCartServiceImpl extends SalesManagerEntityServiceImpl<Long,
 			FinalPrice price = priceUtil.getWallpaperPortfolioPrice(wallPaperPortfolio);
 			item.setItemPrice(price.getFinalPrice());
 			item.setFinalPrice(price);
-
-			BigDecimal subTotal = item.getItemPrice().multiply(new BigDecimal(item.getQuantity().intValue()));
-			item.setSubTotal(subTotal);
+			//BigDecimal subTotal = item.getItemPrice().multiply(new BigDecimal(item.getQuantity().intValue()));
+			item.setSubTotal(price.getFinalPrice());
 		}
 	}
 

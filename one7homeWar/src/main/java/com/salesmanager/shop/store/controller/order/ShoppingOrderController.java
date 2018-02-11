@@ -473,7 +473,7 @@ public class ShoppingOrderController extends AbstractController {
 			MerchantStore store = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
 			Language language = (Language)request.getAttribute("LANGUAGE");
 			
-			PersistableCustomer customer = order.getCustomer();
+			//PersistableCustomer customer = order.getCustomer();
 			
 /*	        if(order.isShipToBillingAdress()) {
 	        	customer.setDelivery(customer.getBilling());

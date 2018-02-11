@@ -4,12 +4,15 @@ import com.salesmanager.core.business.exception.ConversionException;
 import com.salesmanager.core.business.services.catalog.product.ProductService;
 import com.salesmanager.core.business.services.catalog.product.attribute.ProductAttributeService;
 import com.salesmanager.core.business.services.catalog.product.file.DigitalProductService;
+import com.salesmanager.core.business.services.services.WallPaperPortfolioService;
 import com.salesmanager.core.business.utils.AbstractDataPopulator;
+import com.salesmanager.core.business.utils.ProductPriceUtils;
 import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.catalog.product.attribute.ProductAttribute;
 import com.salesmanager.core.model.catalog.product.file.DigitalProduct;
 import com.salesmanager.core.model.catalog.product.price.FinalPrice;
 import com.salesmanager.core.model.catalog.product.price.ProductPrice;
+import com.salesmanager.core.model.customer.WallPaperPortfolio;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.order.orderproduct.OrderProduct;
 import com.salesmanager.core.model.order.orderproduct.OrderProductAttribute;
@@ -22,9 +25,12 @@ import com.salesmanager.shop.constants.ApplicationConstants;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.Validate;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import javax.inject.Inject;
 
 public class OrderProductPopulator extends
 		AbstractDataPopulator<ShoppingCartItem, OrderProduct> {
@@ -32,7 +38,17 @@ public class OrderProductPopulator extends
 	private ProductService productService;
 	private DigitalProductService digitalProductService;
 	private ProductAttributeService productAttributeService;
+	WallPaperPortfolioService wallPaperPortfolioService;
+	private ProductPriceUtils priceUtil;
+    
+	
+	public ProductPriceUtils getPriceUtil() {
+		return priceUtil;
+	}
 
+	public void setPriceUtil(ProductPriceUtils priceUtil) {
+		this.priceUtil = priceUtil;
+	}
 
 	public ProductAttributeService getProductAttributeService() {
 		return productAttributeService;
@@ -63,7 +79,32 @@ public class OrderProductPopulator extends
 		Validate.notNull(digitalProductService,"digitalProductService must be set");
 		Validate.notNull(productAttributeService,"productAttributeService must be set");
 
-		
+    	if("Wallpaper".equals(source.getProductCategory())){
+			WallPaperPortfolio wallPaperPortfolio = source.getWallPaperPortfolio();
+			if (wallPaperPortfolio == null) {
+					throw new ConversionException("Cannot get product with id (WallPaperPortfolioID) " + source.getProductId());
+			}
+			source.setWallPaperPortfolio(wallPaperPortfolio);
+			wallPaperPortfolio.setQuantity(source.getQuantity());
+			target.setOneTimeCharge(wallPaperPortfolio.getPrice());	
+			target.setProductName(wallPaperPortfolio.getBrand()); // set brand name for both productName 
+			target.setProductQuantity(source.getQuantity());
+			target.setSku(wallPaperPortfolio.getId().toString());
+			target.setVendorId(source.getVendorId());
+			target.setProductCategory("Wallpaper");
+			FinalPrice price = priceUtil.getWallpaperPortfolioPrice(wallPaperPortfolio);
+
+			if(price==null) {
+				throw new ConversionException("Object final price not populated in shoppingCartItem (source)");
+			}
+
+/*			target.setOneTimeCharge(source.getItemPrice());	
+			target.setProductName(source.getProduct().getDescriptions().iterator().next().getName());
+			target.setProductQuantity(source.getQuantity());
+			target.setSku(source.getProduct().getSku());
+			target.setVendorId(source.getVendorId());
+*/
+    	} else {
 		try {
 			Product modelProduct = productService.getById(source.getProductId());
 			if(modelProduct==null) {
@@ -94,6 +135,7 @@ public class OrderProductPopulator extends
 			if(finalPrice==null) {
 				throw new ConversionException("Object final price not populated in shoppingCartItem (source)");
 			}
+			
 			//Default price
 			OrderProductPrice orderProductPrice = orderProductPrice(finalPrice);
 			orderProductPrice.setOrderProduct(target);
@@ -147,7 +189,7 @@ public class OrderProductPopulator extends
 			throw new ConversionException(e);
 		}
 		
-		
+    	}
 		return target;
 	}
 

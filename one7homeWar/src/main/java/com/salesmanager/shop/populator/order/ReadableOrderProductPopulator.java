@@ -13,10 +13,12 @@ import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.services.catalog.product.PricingService;
 import com.salesmanager.core.business.services.catalog.product.ProductService;
 import com.salesmanager.core.business.services.customer.CustomerService;
+import com.salesmanager.core.business.services.services.WallPaperPortfolioService;
 import com.salesmanager.core.business.utils.AbstractDataPopulator;
 import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.catalog.product.image.ProductImage;
 import com.salesmanager.core.model.customer.Customer;
+import com.salesmanager.core.model.customer.WallPaperPortfolio;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.order.orderproduct.OrderProduct;
 import com.salesmanager.core.model.order.orderproduct.OrderProductAttribute;
@@ -35,6 +37,15 @@ public class ReadableOrderProductPopulator extends
 	private PricingService pricingService;
 	private ImageFilePath imageUtils;
 	private CustomerService customerService;
+	private WallPaperPortfolioService wallPaperPortfolioService;
+
+	public WallPaperPortfolioService getWallPaperPortfolioService() {
+		return wallPaperPortfolioService;
+	}
+
+	public void setWallPaperPortfolioService(WallPaperPortfolioService wallPaperPortfolioService) {
+		this.wallPaperPortfolioService = wallPaperPortfolioService;
+	}
 
 	public CustomerService getCustomerService() {
 		return customerService;
@@ -62,6 +73,7 @@ public class ReadableOrderProductPopulator extends
 		Validate.notNull(imageUtils,"Requires imageUtils");
 		target.setId(source.getId());
 		target.setOrderedQuantity(source.getProductQuantity());
+		target.setProductCategory(source.getProductCategory());
 		try {
 			target.setPrice(pricingService.getDisplayAmount(source.getOneTimeCharge(), store));
 		} catch(Exception e) {
@@ -78,6 +90,7 @@ public class ReadableOrderProductPopulator extends
 		}
 		//subtotal = price * quantity
 		BigDecimal subTotal = source.getOneTimeCharge();
+		
 		subTotal = subTotal.multiply(new BigDecimal(source.getProductQuantity()));
 		
 		try {
@@ -87,6 +100,17 @@ public class ReadableOrderProductPopulator extends
 			throw new ConversionException("Cannot format price",e);
 		}
 		
+    	if("Wallpaper".equals(source.getProductCategory())){
+    		ReadableProduct productProxy = new ReadableProduct();
+			target.setProduct(productProxy);
+			String wallpaperPortfolio = source.getSku();
+			if(!StringUtils.isBlank(wallpaperPortfolio)) {
+				Long wallpaperPortfolioId = Long.getLong(wallpaperPortfolio);
+    			WallPaperPortfolio wallPaperPortfolio = wallPaperPortfolioService.getById(wallpaperPortfolioId);
+    			target.setImage(wallPaperPortfolio.getImageURL());
+			}
+    		return target;
+    	}
 		if(source.getOrderAttributes()!=null) {
 			List<ReadableOrderProductAttribute> attributes = new ArrayList<ReadableOrderProductAttribute>();
 			for(OrderProductAttribute attr : source.getOrderAttributes()) {

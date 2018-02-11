@@ -30,7 +30,7 @@ public class ShoppingCartItemPopulator extends
 		Validate.notNull(productService, "Requires to set productService");
 		Validate.notNull(productAttributeService, "Requires to set productAttributeService");
 		Validate.notNull(shoppingCartService, "Requires to set shoppingCartService");
-		
+    	
 		Product product = productService.getById(source.getProduct().getId());
 		if(source.getAttributes()!=null) {
 

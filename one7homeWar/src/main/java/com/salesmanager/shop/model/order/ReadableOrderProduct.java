@@ -16,6 +16,7 @@ public class ReadableOrderProduct extends OrderProductEntity implements
 	private String productName;
 	private String price;
 	private String subTotal;
+	private String productCategory;
 	private VendorResponse vendorDetails;
 	
 	@JsonIgnore
@@ -64,6 +65,12 @@ public class ReadableOrderProduct extends OrderProductEntity implements
 	}
 	public void setVendorDetails(VendorResponse vendorDetails) {
 		this.vendorDetails = vendorDetails;
+	}
+	public String getProductCategory() {
+		return productCategory;
+	}
+	public void setProductCategory(String productCategory) {
+		this.productCategory = productCategory;
 	}
 
 
