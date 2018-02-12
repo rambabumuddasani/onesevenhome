@@ -128,9 +128,9 @@ public class OrderFacadeImpl implements OrderFacade {
 	@Qualifier("img")
 	private ImageFilePath imageUtils;
 
-/*	@Inject
+	@Inject
 	private WallPaperPortfolioService wallPaperPortfolioService;
-*/
+
 	@Inject
 	private ProductPriceUtils priceUtil;
 
@@ -949,6 +949,7 @@ public class OrderFacadeImpl implements OrderFacade {
 			orderProductPopulator.setPricingService(pricingService);
 			orderProductPopulator.setimageUtils(imageUtils);
 			orderProductPopulator.setCustomerService(customerService);
+			orderProductPopulator.setWallPaperPortfolioService(wallPaperPortfolioService);
 
 			ReadableOrderProduct orderProduct = new ReadableOrderProduct();
 			orderProductPopulator.populate(p, orderProduct, store, language);
