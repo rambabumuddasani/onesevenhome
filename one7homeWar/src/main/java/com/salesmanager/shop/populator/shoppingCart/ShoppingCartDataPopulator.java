@@ -96,6 +96,7 @@ public class ShoppingCartDataPopulator extends AbstractDataPopulator<ShoppingCar
     					cartQuantity = productTypeCartItem(store, cartQuantity, item, shoppingCartItem);                    	
                     }else if(Constants.WALLPAPER_PORTFOLIO.equals(item.getProductCategory())){
                     	cartQuantity = wallpaperTypeCartItem(store, cartQuantity, item, shoppingCartItem);
+                       	shoppingCartItem.setCategory(Constants.WALLPAPER_PORTFOLIO);
                     }
                     shoppingCartItemsList.add(shoppingCartItem);
                 }
