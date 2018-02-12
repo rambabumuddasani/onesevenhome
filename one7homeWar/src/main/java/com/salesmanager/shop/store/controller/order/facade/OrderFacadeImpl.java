@@ -818,7 +818,8 @@ public class OrderFacadeImpl implements OrderFacade {
             orderProductPopulator.setProductService(productService);
             orderProductPopulator.setPricingService(pricingService);
             orderProductPopulator.setimageUtils(imageUtils);
-			orderProductPopulator.setCustomerService(customerService);
+	    orderProductPopulator.setCustomerService(customerService);
+	    orderProductPopulator.setWallPaperPortfolioService(wallPaperPortfolioService);
 
             ReadableOrderProduct orderProduct = new ReadableOrderProduct();
             orderProductPopulator.populate(p, orderProduct, store, language);
@@ -906,6 +907,7 @@ public class OrderFacadeImpl implements OrderFacade {
 			orderProductPopulator.setPricingService(pricingService);
 			orderProductPopulator.setimageUtils(imageUtils);
 			orderProductPopulator.setCustomerService(customerService);
+			orderProductPopulator.setWallPaperPortfolioService(wallPaperPortfolioService);
 			ReadableOrderProduct orderProduct = new ReadableOrderProduct();
 			orderProductPopulator.populate(p, orderProduct, store, language);
 			orderProducts.add(orderProduct);
