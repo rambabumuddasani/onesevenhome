@@ -106,7 +106,8 @@ public class ReadableOrderProductPopulator extends
 			target.setProduct(productProxy);
 			String wallpaperPortfolio = source.getSku();
 			if(!StringUtils.isBlank(wallpaperPortfolio)) {
-				Long wallpaperPortfolioId = Long.getLong(wallpaperPortfolio);
+			Long wallpaperPortfolioId = Long.valueOf(wallpaperPortfolio);
+ 			System.out.println(getClass().getName()+" wallpaperPortfolio long type"+wallpaperPortfolio);
     			WallPaperPortfolio wallPaperPortfolio = wallPaperPortfolioService.getById(wallpaperPortfolioId);
     			target.setImage(wallPaperPortfolio.getImageURL());
 			}
