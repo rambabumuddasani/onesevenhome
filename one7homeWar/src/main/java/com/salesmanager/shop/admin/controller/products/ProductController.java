@@ -5,6 +5,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -675,7 +676,10 @@ public class ProductController extends AbstractController {
 		List<Product> dbProducts = null;
 		
 		if(todaysDealRequest.getStatus().equals("0")) {
-			dbProducts = productService.getExpiredDeals();
+			final Calendar cal = Calendar.getInstance();
+		    cal.add(Calendar.DATE, -1);
+		    Date yesterDayDate = cal.getTime();
+			dbProducts = productService.getExpiredDeals(yesterDayDate);
 			}
 		
 		if(todaysDealRequest.getStatus().equals("1")) {
@@ -1728,7 +1732,10 @@ public CreateProductResponse updateProductDiscount(@RequestBody ProductDiscountR
 		List<Product> dbProducts = null;
 		
 		if(todaysDealRequest.getStatus().equals("0")) {
-			dbProducts = productService.getExpiredDeals();
+			final Calendar cal = Calendar.getInstance();
+		    cal.add(Calendar.DATE, -1);
+		    Date yesterDayDate = cal.getTime();
+			dbProducts = productService.getExpiredDeals(yesterDayDate);
 			}
 		
 		if(todaysDealRequest.getStatus().equals("1")) {

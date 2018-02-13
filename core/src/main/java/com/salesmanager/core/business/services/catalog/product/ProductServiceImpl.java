@@ -417,7 +417,12 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 	}
 
 	@Override
-	public List<Product> getExpiredDeals() {
-		return productRepository.findExpiredDeals();
+	public List<Product> getExpiredDeals(Date yesterDayDate) {
+		return productRepository.findExpiredDeals(yesterDayDate);
+	}
+
+	@Override
+	public List<Product> modifyDealOfDay(Date startDate, Date endDate, String status) {
+		return productRepository.modifyDealOfDay(startDate,endDate,status);
 	}
 }

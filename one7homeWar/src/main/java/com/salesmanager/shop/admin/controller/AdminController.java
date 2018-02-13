@@ -2425,6 +2425,132 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 			}
 	         return df.format(discount);
 		}
+	    @RequestMapping(value="/admin/modifydealOfDay", method=RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
+				produces = MediaType.APPLICATION_JSON_VALUE)
+		@ResponseBody
+		public AdminDealOfDayResponse adminModifyDealOfDay(@RequestBody AdminDealOfDayRequest adminDealOfDayReq) throws Exception {
+	    	LOGGER.debug("Entered adminDealOfDay");
+	    	AdminDealOfDayResponse adminDealOfDayResponse = new AdminDealOfDayResponse();
+	    
+	    	Long productId = adminDealOfDayReq.getProductId();
+	    	Date startDate = adminDealOfDayReq.getProductPriceSpecialStartDate();
+	    	Date endDate = adminDealOfDayReq.getProductPriceSpecialEndDate();
+	    
+	    	Product dbProduct = productService.getByProductId(productId);
+	    	
+	    	if(dbProduct==null) {
+	    		LOGGER.debug("Deal Of Day product is not found");
+	    		adminDealOfDayResponse.setErrorMesg("Deal Of Day product is not found");
+	    		adminDealOfDayResponse.setStatus("false");
+	    		return adminDealOfDayResponse;
+		    }
+	    	
+	    	MerchantStore store=merchantStoreService.getMerchantStore(MerchantStore.DEFAULT_STORE);
+		    
+	    	com.salesmanager.shop.admin.model.catalog.Product product = new com.salesmanager.shop.admin.model.catalog.Product();
+	    	
+	     	product.setProduct(dbProduct);
+	    	
+		    ProductAvailability productAvailability = null;
+			ProductPrice pPrice = null;
+		    Set<ProductAvailability> availabilities = dbProduct.getAvailabilities();
+		    
+		    if(availabilities!=null && availabilities.size()>0)
+		    {
+				
+				for(ProductAvailability availability : availabilities)
+				{
+					if(availability.getRegion().equals(com.salesmanager.core.business.constants.Constants.ALL_REGIONS))
+					 {
+						productAvailability = availability;
+						
+						Set<ProductPrice> prices = availability.getPrices();
+						for(ProductPrice price : prices)
+						{
+							if(price.isDefaultPrice()) {
+								pPrice = price;
+								product.setProductPrice(priceUtil.getAdminFormatedAmount(store, pPrice.getProductPriceAmount()));
+							}
+							
+								if(adminDealOfDayReq.getStatus().equals("Y")) {
+									//Checking DealOfDay product which is available in the given date  
+									List<Product> dodProducts = productService.modifyDealOfDay(startDate,endDate,adminDealOfDayReq.getStatus());
+								if(dodProducts!=null) {
+									for(Product dodProduct : dodProducts){	
+										ProductPrice dodproductPrice = getProductPrice(dodProduct);
+										dodproductPrice.setDealOfDay("N");
+										productPrice.saveOrUpdate(dodproductPrice);
+										
+									}
+								}
+										price.setDealOfDay("Y");
+										price.setProductPriceSpecialStartDate(adminDealOfDayReq.getProductPriceSpecialStartDate());
+										price.setProductPriceSpecialEndDate(adminDealOfDayReq.getProductPriceSpecialEndDate());
+										productPrice.saveOrUpdate(price);
+										adminDealOfDayResponse.setSuccessMsg("Deal Of Day is set successfully");
+										adminDealOfDayResponse.setStatus("true");
+									}
+									else {
+								    // if no product is available in the specified date, then update the product in dealofday 
+									price.setDealOfDay("Y");
+									price.setProductPriceSpecialStartDate(adminDealOfDayReq.getProductPriceSpecialStartDate());
+									price.setProductPriceSpecialEndDate(adminDealOfDayReq.getProductPriceSpecialEndDate());
+									productPrice.saveOrUpdate(price);
+									adminDealOfDayResponse.setSuccessMsg("Deal Of Day is set successfully");
+									adminDealOfDayResponse.setStatus("true");
+									try {
+									HistoryManagement historyManagement = new HistoryManagement();
+									historyManagement.setProductId(dbProduct.getId());
+									historyManagement.setProductName(dbProduct.getProductDescription().getName());
+									historyManagement.setProductPrice(price.getProductPriceAmount());
+									historyManagement.setProductDiscountPrice(price.getProductPriceSpecialAmount());
+									historyManagement.setProductPriceStartDate(price.getProductPriceSpecialStartDate());
+									historyManagement.setProductPriceEndDate(price.getProductPriceSpecialEndDate());
+									historyManagement.setEnableFor("DOD");
+									historyManagementService.save(historyManagement);
+									}catch(Exception e) {
+										LOGGER.error("Error in history management "+e.getMessage());
+									}
+									}
+								}
+								if(adminDealOfDayReq.getStatus().equals("N")) {
+									pPrice.setDealOfDay("N");
+									productPrice.saveOrUpdate(pPrice);
+									adminDealOfDayResponse.setSuccessMsg("Product is disabled from Deal Of Day");
+									adminDealOfDayResponse.setStatus("true");
+								}		
+					}
+				}
+			}
+				
+	     
+		    LOGGER.debug("Ended adminDealOfDay");
+			return adminDealOfDayResponse;
+	  }
+	    public ProductPrice getProductPrice(Product dodProduct) {
+	    	
+	    	ProductAvailability productAvailability = null;
+			ProductPrice productPrice = null;
+			
+			Set<ProductAvailability> availabilities = dodProduct.getAvailabilities();
+			if(availabilities!=null && availabilities.size()>0) {
+				
+				for(ProductAvailability availability : availabilities) {
+					if(availability.getRegion().equals(com.salesmanager.core.business.constants.Constants.ALL_REGIONS)) {
+						productAvailability = availability;
+						Set<ProductPrice> prices = availability.getPrices();
+						for(ProductPrice price : prices) {
+							if(price.isDefaultPrice()) {
+								productPrice = price;
+							}
+						}
+					}
+				}
+			}
+	    	
+			return productPrice;
+	    	
+	    }
 }
     
  

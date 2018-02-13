@@ -79,7 +79,9 @@ public interface ProductService extends SalesManagerEntityService<Long, Product>
 
 	List<Product> getUpcomingDeals();
 
-	List<Product> getExpiredDeals();
+	List<Product> getExpiredDeals(Date yesterDayDate);
+
+	List<Product> modifyDealOfDay(Date startDate, Date endDate, String status);
 
 }
 	
