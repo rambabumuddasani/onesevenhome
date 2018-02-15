@@ -275,6 +275,7 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 			ServicesWorkerVO servicesWorkerVO = new ServicesWorkerVO();
 			servicesWorkerVO.setId(new Integer(String.valueOf((eachWorker.getId()))));
 			servicesWorkerVO.setCompanyName(eachWorker.getVendorAttrs().getVendorName());
+			servicesWorkerVO.setImageUrl(eachWorker.getVendorAttrs().getVendorAuthCert());
 			/*servicesWorkerVO.setHouseNumber(eachWorker.getVendorAttrs().getVendorOfficeAddress());
 			servicesWorkerVO.setStreet(eachWorker.getBilling().getAddress());
 			servicesWorkerVO.setArea(eachWorker.getArea());
