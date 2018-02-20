@@ -35,7 +35,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, Product
     		+ "left join fetch po.descriptions pod left join fetch pattr.productOptionValue pov left join fetch pov.descriptions povd "
     		+ "left join fetch p.relationships pr left join fetch p.manufacturer manuf left join fetch manuf.descriptions manufd "
     		+ "left join fetch p.type type left join fetch p.taxClass tx "
-    		+ "where (pap.productPriceSpecialStartDate > curdate() or pap.productPriceSpecialStartDate is null) and (pap.productPriceSpecialEndDate > curdate() or pap.productPriceSpecialEndDate is null) order by p.id asc")
+    		+ "where pap.productPriceSpecialStartDate > curdate() order by p.id asc")
 	List<Product> findUpcomingDeals();
 
     @Query("select distinct p from Product as p join fetch p.availabilities pa " 
