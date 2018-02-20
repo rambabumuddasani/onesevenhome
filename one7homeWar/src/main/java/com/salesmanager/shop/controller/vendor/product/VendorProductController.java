@@ -39,6 +39,7 @@ import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.constants.EmailConstants;
 import com.salesmanager.shop.populator.order.VendorPopulator;
 import com.salesmanager.shop.store.controller.AbstractController;
+import com.salesmanager.shop.store.controller.customer.CustomerResponse;
 import com.salesmanager.shop.store.controller.customer.VendorResponse;
 import com.salesmanager.shop.store.model.paging.PaginationData;
 import com.salesmanager.shop.utils.EmailUtils;
@@ -331,7 +332,7 @@ public class VendorProductController extends AbstractController {
 		try {
 			List<VendorProduct> dbVendorProductList = vendorProductService.findProductVendorsByProductIdAndCustomerPinCode(productId, billingPostalCode);
 			if(dbVendorProductList == null || dbVendorProductList.isEmpty()){
-				vendorsList.setStatus("Couldn't locate this product in your pincode, Sorry!");
+				vendorsList.setStatus("Couldn't locate vendor(s) under this pincode");
 				return vendorsList;
 			}
 			LOGGER.debug("dbVendorProductList size=="+dbVendorProductList.size());
@@ -451,5 +452,113 @@ public class VendorProductController extends AbstractController {
 */
 		LOGGER.debug("Ended addWishListProductsToProductList");
 		return vendorProductResponse;
+	}
+	// Delete wishlisted products for both customer and vendor
+	@RequestMapping(value="/deleteWishListProducts", method = RequestMethod.POST) 
+	@ResponseBody
+	public DeleteProductResponse deleteWishListProducts(@RequestBody VendorProductRequest vendorProductRequest ) throws Exception {
+		
+		LOGGER.debug("Entered deleteWishListProducts");
+		
+		DeleteProductResponse deleteProductResponse = new DeleteProductResponse(); 
+		
+		String vendorId = vendorProductRequest.getVendorId();
+		
+		try {
+			
+		Long longVendorId = new Long(vendorProductRequest.getVendorId());
+
+		List<String> productIds = vendorProductRequest.getProductId();
+
+		List<VendorProduct> vpList = new ArrayList<VendorProduct>();
+		List<ProductsInfo> vList = new ArrayList<ProductsInfo>();
+
+		for(String productId : productIds){
+			
+			Long longProductId = new Long(productId);
+			
+			List<VendorProduct> vendorProducts = vendorProductService.getByProductIdAndVendorId(longProductId,longVendorId);
+			
+			for(VendorProduct vendorProduct : vendorProducts){
+
+			ProductsInfo productsInfo = new ProductsInfo();
+			
+			vendorProductService.delete(vendorProduct);
+			
+			productsInfo.setProductId(vendorProduct.getId());
+			productsInfo.setProductName(vendorProduct.getProduct().getProductDescription().getName());
+			vpList.add(vendorProduct);
+			vList.add(productsInfo);
+			}
+		}
+		
+		LOGGER.debug("vpList:"+vpList.size());
+		LOGGER.debug("Deleted wishlisted products");
+		deleteProductResponse.setVenderId(vendorId);
+		deleteProductResponse.setVendorProducts(vList);
+		deleteProductResponse.setSuccessMessage("Successfully deleted product(s) from wishlist");
+		deleteProductResponse.setStatus("true");
+		}catch(Exception e) {
+			LOGGER.error("Error while deleting product(s) from wishlist "+e.getMessage());
+			deleteProductResponse.setErrorMessage("Error while deleting product(s) from wishlist");
+			deleteProductResponse.setStatus("false");
+		}
+		
+		LOGGER.debug("Ended deleteWishListProducts");
+		return deleteProductResponse;
+	}
+	// Method to delete products from product list
+	@RequestMapping(value="/deleteProductsFromProductList", method = RequestMethod.POST) 
+	@ResponseBody
+	public DeleteProductResponse deleteProductsFromProductList(@RequestBody VendorProductRequest vendorProductRequest ) throws Exception {
+		
+		LOGGER.debug("Entered deleteProductsFromProductList");
+	
+		DeleteProductResponse deleteProductResponse = new DeleteProductResponse();
+		
+		String vendorId = vendorProductRequest.getVendorId();
+		
+		try {
+			
+		Long longVendorId = new Long(vendorProductRequest.getVendorId());
+
+		List<String> productIds = vendorProductRequest.getProductId();
+
+		List<VendorProduct> vpList = new ArrayList<VendorProduct>();
+		List<ProductsInfo> vList = new ArrayList<ProductsInfo>();
+
+		for(String productId : productIds){
+			
+			Long longProductId = new Long(productId);
+			
+			List<VendorProduct> vendorProducts = vendorProductService.getVendoProductsProductIdAndVendorId(longProductId,longVendorId);
+			
+			for(VendorProduct vendorProduct : vendorProducts){
+
+			ProductsInfo productsInfo = new ProductsInfo();
+			
+			vendorProductService.delete(vendorProduct);
+			
+			productsInfo.setProductId(vendorProduct.getId());
+			productsInfo.setProductName(vendorProduct.getProduct().getProductDescription().getName());
+			vpList.add(vendorProduct);
+			vList.add(productsInfo);
+			}
+		}
+		LOGGER.debug("vpList:"+vpList.size());
+		LOGGER.debug("Deleted products");
+		
+		deleteProductResponse.setVenderId(vendorId);
+		deleteProductResponse.setVendorProducts(vList);
+		deleteProductResponse.setSuccessMessage("Successfully deleted product(s) from ProductList");
+		deleteProductResponse.setStatus("true");
+		}catch(Exception e) {
+			LOGGER.error("Error while deleting products from ProductList "+e.getMessage());
+			deleteProductResponse.setErrorMessage("Error while deleting products from ProductList");
+			deleteProductResponse.setStatus("false");
+		}
+		
+		LOGGER.debug("Ended deleteProductsFromProductList");
+		return deleteProductResponse;
 	}
 }

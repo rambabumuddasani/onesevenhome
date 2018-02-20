@@ -20,4 +20,6 @@ public interface VendorProductService extends SalesManagerEntityService<Long, Ve
 	List<Customer> getRequestedVendors();
 	List<VendorProduct> getVendorAddedProductsByVendorId(Long vendorId);
 	List<VendorProduct> getVendorApprovedProductsByVendorId(Long vendorId);
+	List<VendorProduct> getByProductIdAndVendorId(Long productId,Long vendorId);
+	List<VendorProduct> getVendoProductsProductIdAndVendorId(Long longProductId, Long longVendorId);
 }
