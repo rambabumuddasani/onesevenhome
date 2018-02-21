@@ -612,11 +612,15 @@ public class ProductController extends AbstractController {
 			productResponse.setProductName(dbProduct.getProductDescription().getName());
 			//productResponse.setVendorName(dbProduct.getManufacturer().getCode());
 			
-			Set<ManufacturerDescription> manufacturerDescription =  dbProduct.getManufacturer().getDescriptions();
+			/* Surender - 20 Feb 2018
+			 * Commenting following code(617-621) as it is not needed as part of
+			 * response and will be considered  if needed 
+			 */
+			/*Set<ManufacturerDescription> manufacturerDescription =  dbProduct.getManufacturer().getDescriptions();
 			for(ManufacturerDescription description:manufacturerDescription){
 				productResponse.setVendorName(description.getName());
 				productResponse.setVendorLocation(description.getTitle());
-			}
+			}*/
 		}catch(Exception e){
 			e.printStackTrace();
 			LOGGER.error("Error while getting product details::"+e.getMessage());
