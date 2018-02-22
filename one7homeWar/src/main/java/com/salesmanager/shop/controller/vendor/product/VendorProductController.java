@@ -83,13 +83,15 @@ public class VendorProductController extends AbstractController {
 	public VendorProductResponse addVendorProducts(@RequestBody VendorProductRequest vendorProductRequest ) throws Exception {
 
 		LOGGER.debug("Entered addVendorProducts:");
+		
+		VendorProductResponse vendorProductResponse = new VendorProductResponse(); 
+		
+		try {
 		String vendorId = vendorProductRequest.getVendorId();
-		System.out.println(vendorId);
+		
 		Customer customer = customerService.getById(Long.parseLong(vendorId));
 
 		List<String> productIds = vendorProductRequest.getProductId();
-
-		VendorProductResponse vendorProductResponse = new VendorProductResponse(); 
 
 		List<VendorProduct> vpList = new ArrayList<VendorProduct>();
 		List<ProductsInfo> vList = new ArrayList<ProductsInfo>();
@@ -112,6 +114,8 @@ public class VendorProductController extends AbstractController {
 		LOGGER.debug("Added products");
 		vendorProductResponse.setVenderId(vendorId);
 		vendorProductResponse.setVendorProducts(vList);
+		vendorProductResponse.setSuccessMessage("Successfully added products to ProductList");
+		vendorProductResponse.setStatus("true");
 
 		//sending email
 		MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");  
@@ -135,6 +139,12 @@ public class VendorProductController extends AbstractController {
 
 		emailService.sendHtmlEmail(merchantStore, email);
 
+		}catch(Exception e){
+			e.printStackTrace();
+			LOGGER.error("Error while adding product(s) to Product List "+e.getMessage());
+			vendorProductResponse.setErrorMessage("Error while adding product(s) to Product List");
+			vendorProductResponse.setStatus("false");
+		}
 		LOGGER.debug("Ended addVendorProducts");
 		return vendorProductResponse;
 	}
@@ -144,13 +154,14 @@ public class VendorProductController extends AbstractController {
 	public VendorProductResponse addVendorWishListProducts(@RequestBody VendorProductRequest vendorProductRequest ) throws Exception {
 
 		LOGGER.debug("Entered addVendorWishListProducts:");
+		VendorProductResponse vendorProductResponse = new VendorProductResponse();
+		
+		try {
 		String vendorId = vendorProductRequest.getVendorId();
-		System.out.println(vendorId);
+		
 		Customer customer = customerService.getById(Long.parseLong(vendorId));
 
-		List<String> productIds = vendorProductRequest.getProductId();
-
-		VendorProductResponse vendorProductResponse = new VendorProductResponse(); 
+		List<String> productIds = vendorProductRequest.getProductId(); 
 
 		List<VendorProduct> vpList = new ArrayList<VendorProduct>();
 		List<ProductsInfo> vList = new ArrayList<ProductsInfo>();
@@ -174,6 +185,8 @@ public class VendorProductController extends AbstractController {
 		LOGGER.debug("Products added to wishList");
 		vendorProductResponse.setVenderId(vendorId);
 		vendorProductResponse.setVendorProducts(vList);
+		vendorProductResponse.setSuccessMessage("Successfully added product(s) to WishList");
+		vendorProductResponse.setStatus("true");
 
 		/* Commenting code to send email which is not required for adding products into wish list*/
 		
@@ -197,6 +210,12 @@ public class VendorProductController extends AbstractController {
 		email.setTemplateTokens(templateTokens);
 		emailService.sendHtmlEmail(merchantStore, email); */
 
+		}catch(Exception e) {
+			e.printStackTrace();
+			LOGGER.error("Error while adding product(s) to WishList "+e.getMessage());
+			vendorProductResponse.setErrorMessage("Error while adding product(s) to WishLis");
+			vendorProductResponse.setStatus("false");
+		}
 		LOGGER.debug("Ended addVendorWishListProducts:");
 		return vendorProductResponse;
 	}
@@ -496,11 +515,11 @@ public class VendorProductController extends AbstractController {
 		LOGGER.debug("Deleted wishlisted products");
 		deleteProductResponse.setVenderId(vendorId);
 		deleteProductResponse.setVendorProducts(vList);
-		deleteProductResponse.setSuccessMessage("Successfully deleted product(s) from wishlist");
+		deleteProductResponse.setSuccessMessage("Successfully deleted product(s) from Wishlist");
 		deleteProductResponse.setStatus("true");
 		}catch(Exception e) {
-			LOGGER.error("Error while deleting product(s) from wishlist "+e.getMessage());
-			deleteProductResponse.setErrorMessage("Error while deleting product(s) from wishlist");
+			LOGGER.error("Error while deleting product(s) from Wishlist "+e.getMessage());
+			deleteProductResponse.setErrorMessage("Error while deleting product(s) from Wishlist");
 			deleteProductResponse.setStatus("false");
 		}
 		
