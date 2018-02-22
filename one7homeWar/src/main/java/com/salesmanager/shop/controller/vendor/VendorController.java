@@ -408,14 +408,17 @@ public class VendorController extends AbstractController {
 				
 				vendorSearchDetails.setId(vendor.getId().intValue());
 				vendorSearchDetails.setCompanyName(vendor.getVendorAttrs().getVendorName());
-				vendorSearchDetails.setHouseNumber(vendor.getVendorAttrs().getVendorOfficeAddress());
+				/*
+				 * commenting following code as it is not needed as a part of response
+				 */
+				/*vendorSearchDetails.setHouseNumber(vendor.getVendorAttrs().getVendorOfficeAddress());
 				vendorSearchDetails.setStreet(vendor.getBilling().getAddress());
 				vendorSearchDetails.setArea(vendor.getArea());
 				vendorSearchDetails.setCity(vendor.getBilling().getCity());
 				vendorSearchDetails.setState(vendor.getBilling().getState());
 				vendorSearchDetails.setPinCode(vendor.getBilling().getPostalCode());
 				vendorSearchDetails.setContactNumber(vendor.getBilling().getTelephone());
-				vendorSearchDetails.setCountry(vendor.getBilling().getCountry().getName());
+				vendorSearchDetails.setCountry(vendor.getBilling().getCountry().getName());*/
 				vendorSearchDetails.setImageUrl(vendor.getUserProfile());
 				vendorSearchDetails.setAvgRating(vendor.getAvgReview());
 				
@@ -478,14 +481,17 @@ public class VendorController extends AbstractController {
 			
 			filteredVendors.setId(vendor.getId());
 			filteredVendors.setCompanyName(vendor.getVendorAttrs().getVendorName());
-			filteredVendors.setHouseNumber(vendor.getVendorAttrs().getVendorOfficeAddress());
+			/*
+			 * commenting following code as it is not needed as a part of response
+			 */
+			/*filteredVendors.setHouseNumber(vendor.getVendorAttrs().getVendorOfficeAddress());
 			filteredVendors.setStreet(vendor.getBilling().getAddress());
 			filteredVendors.setArea(vendor.getArea());
 			filteredVendors.setCity(vendor.getBilling().getCity());
 			filteredVendors.setState(vendor.getBilling().getState());
 			filteredVendors.setPinCode(vendor.getBilling().getPostalCode());
 			filteredVendors.setCountry(vendor.getBilling().getCountry().getName());
-			filteredVendors.setContactNumber(vendor.getBilling().getTelephone());
+			filteredVendors.setContactNumber(vendor.getBilling().getTelephone());*/
 			filteredVendors.setImageUrl(vendor.getUserProfile());
 			filteredVendors.setAvgRating(vendor.getAvgReview());
 			
