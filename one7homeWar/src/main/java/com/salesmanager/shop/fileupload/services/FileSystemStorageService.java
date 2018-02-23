@@ -74,6 +74,34 @@ public class FileSystemStorageService implements StorageService {
             throw new StorageException("Failed to store file " + file.getOriginalFilename(), e);
         }
     }
+    @Override
+	public String customFileStore(MultipartFile file, String dirPath) {
+		
+		StringBuilder filePath = new StringBuilder();
+		
+		String fileName = file.getOriginalFilename();
+		fileName = fileName.substring(fileName.indexOf("@") + 1);
+		
+		filePath.append(rootLocation + java.io.File.separator + dirPath);
+		System.out.println("filePath" + filePath);
+		
+		try {
+			if (file.isEmpty()) {
+				LOGGER.debug("Failed to store empty file " + fileName);
+				throw new StorageException("Failed to store empty file " + fileName);
+			}
+			
+			createDirectoryIfNotExist(filePath);
+			filePath.append(java.io.File.separator).append(getUniqFileName(fileName));
+			Files.copy(file.getInputStream(), this.rootLocation.resolve(filePath.toString()));
+			System.out.println("filePath.toString()" + filePath.toString());
+			return filePath.toString();
+			
+		} catch (IOException e) {
+			LOGGER.error("Failed to store file " + fileName);
+			throw new StorageException("Failed to store file " + fileName, e);
+		}
+	}
 
 	private void createDirectoryIfNotExist(StringBuilder filePath) {
 		File dir = new File(filePath.toString());

@@ -156,5 +156,14 @@ public class Constants {
 	private static final String DEFAULT = "DEFAULT";
 
 	//private static final String WALLPAPER_CAT = "Wallpaper";
+	
+	// Defining constants for handling multipart files
+	public final static String USER_PROFILE = "USER_PROFILE";
+	public final static String CERTIFICATE = "CERTIFICATE";
+	public final static String FILE_1 = "FILE_1";
+	public final static String FILE_2 = "FILE_2";
+	public final static String FILE_3 = "FILE_3";
+	
+	
 
 }

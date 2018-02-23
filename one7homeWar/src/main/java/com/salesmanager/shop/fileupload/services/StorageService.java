@@ -24,4 +24,6 @@ public interface StorageService {
 	    void deleteAll();
 	    
 	    void deleteFile(String fileName);
+
+		String customFileStore(MultipartFile file, String dirPath);
 }

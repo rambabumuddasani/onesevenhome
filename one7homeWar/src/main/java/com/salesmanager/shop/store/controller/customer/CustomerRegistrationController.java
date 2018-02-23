@@ -1,6 +1,9 @@
 package com.salesmanager.shop.store.controller.customer;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -1317,6 +1320,28 @@ public class CustomerRegistrationController extends AbstractController {
 		return filePath;
 	}
 	
+	
+	private String storeMultipartfile(MultipartFile file, String tempPath) {
+		
+		String filePath = ""; 
+		
+		if (!file.isEmpty()) {
+			
+			String fileName = file.getOriginalFilename();
+			fileName = fileName.substring(fileName.indexOf("@")+1);
+			LOGGER.debug("fileName "+fileName);
+			
+			try {	
+				filePath = storageService.customFileStore(file,tempPath);
+			}catch(StorageException se){
+				LOGGER.error("StoreException occured"+se);
+				throw se;
+			}
+		}
+		return filePath;
+	}
+	
+	
 	@RequestMapping(value="/services/register", method = RequestMethod.POST)
 	@ResponseBody
     //public CustomerResponse registerServices(@RequestBody ServicesRequest servicesRequest) throws Exception {
@@ -1510,16 +1535,16 @@ public class CustomerRegistrationController extends AbstractController {
         MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");  //i will come back here
     	final Locale locale  = new Locale("en");
     	
-        if ( StringUtils.isNotBlank( customer.getUserName() ) ) {
-            if ( customerFacade.checkIfUserExists( customer.getUserName(), merchantStore ) ) {
+        if ( StringUtils.isNotBlank( userRequest.getEmail() ) ) {
+            if ( customerFacade.checkIfUserExists( userRequest.getEmail(), merchantStore ) ) {
                 LOGGER.debug( "Customer with username {} already exists for this store ", customer.getUserName() );
             	customerResponse.setErrorMessage(messages.getMessage("registration.username.already.exists", locale));
             	return customerResponse;
             }
         }
         
-        if ( StringUtils.isNotBlank( customer.getPassword() ) &&  StringUtils.isNotBlank( customer.getCheckPassword() )) {
-            if (! customer.getPassword().equals(customer.getCheckPassword()) ) {
+        if ( StringUtils.isNotBlank( userRequest.getPassword() ) &&  StringUtils.isNotBlank( userRequest.getConfirmPassword() )) {
+            if (! userRequest.getPassword().equals(userRequest.getConfirmPassword()) ) {
             	customerResponse.setErrorMessage(messages.getMessage("message.password.checkpassword.identical", locale));
             	return customerResponse;
             }
@@ -1655,9 +1680,13 @@ public class CustomerRegistrationController extends AbstractController {
             	return customerResponse;
             }
             	
-        }	
+        }
+        
 		String userProfile = "";
 		String certFileName = "";
+		String file1 = "";
+		String file2 = "";
+		String file3 = "";
 
         VendorAttributes vendorAttrs = customer.getVendorAttrs();
         Billing billing = customer.getBilling();
@@ -1667,27 +1696,112 @@ public class CustomerRegistrationController extends AbstractController {
          * 2nd object always represent vendor certificate.
          * 
          */
-        MultipartFile 	profilePicFile = uploadedFiles[0];
-        MultipartFile 	vendorCertificateFile = uploadedFiles[1];
-		String tempVendorProfilePicPath = new StringBuilder("vendor").append(File.separator).append("profiles").toString(); // give file directory path
-		String tempVendorCertificatePath = new StringBuilder("vendor").append(File.separator).append("certificates").toString(); // give file directory path
-
+        int uploadedFilesLength = uploadedFiles.length;
+        LOGGER.debug("uploadedFilesLength "+uploadedFilesLength);
+        
+        MultipartFile 	profilePicFile			= null;
+        MultipartFile 	vendorCertificateFile	= null;
+        MultipartFile 	uploadfile1				= null;
+        MultipartFile 	uploadfile2				= null;
+        MultipartFile 	uploadfile3				= null;
+        
+        // Iterate through the multipart file list
+        for (int uploadLength = 0; uploadLength <uploadedFilesLength; uploadLength++) {
+        	
+        	String uploadFileName = (String) uploadedFiles[uploadLength].getOriginalFilename();
+        	LOGGER.debug("File Name " + uploadedFiles[uploadLength] + " : " + uploadFileName);
+        	
+        	if (uploadFileName.startsWith(Constants.USER_PROFILE)) profilePicFile  = uploadedFiles[uploadLength];
+        	if (uploadFileName.startsWith(Constants.CERTIFICATE)) vendorCertificateFile  = uploadedFiles[uploadLength];
+        	if (uploadFileName.startsWith(Constants.FILE_1)) uploadfile1  = uploadedFiles[uploadLength];
+        	if (uploadFileName.startsWith(Constants.FILE_2)) uploadfile2  = uploadedFiles[uploadLength];
+        	if (uploadFileName.startsWith(Constants.FILE_3)) uploadfile3  = uploadedFiles[uploadLength];
+        	
+        }
+        
+        String tempVendorProfilePicPath = null;
+        String tempVendorCertificatePath = null;
+        String tempvendorFile1Path = null;
+        String tempvendorFile2Path = null;
+        String tempvendorFile3Path = null;
+        
 		if(userRequest.getUserType().equals("SERVICE")){
 			tempVendorProfilePicPath = new StringBuilder("service").append(File.separator).append("profiles").toString(); // give file directory path
 			tempVendorCertificatePath = new StringBuilder("service").append(File.separator).append("certificates").toString(); // give file directory path
+			tempvendorFile1Path = new StringBuilder("service").append(File.separator).append("supporting_artifacts").toString();
+			tempvendorFile2Path = new StringBuilder("service").append(File.separator).append("supporting_artifacts").toString();
+			tempvendorFile3Path = new StringBuilder("service").append(File.separator).append("supporting_artifacts").toString();
 		}
-		userProfile = storeFile(profilePicFile, tempVendorProfilePicPath);
-        if(!StringUtils.isEmpty(userProfile)){
-        	customer.setUserProfile(userProfile);
-        }
+		else{
+			tempVendorProfilePicPath = new StringBuilder("vendor").append(File.separator).append("profiles").toString(); // give file directory path
+			tempVendorCertificatePath = new StringBuilder("vendor").append(File.separator).append("certificates").toString(); // give file directory path
+			tempvendorFile1Path = new StringBuilder("vendor").append(File.separator).append("supporting_artifacts").toString();
+			tempvendorFile2Path = new StringBuilder("vendor").append(File.separator).append("supporting_artifacts").toString();
+			tempvendorFile3Path = new StringBuilder("vendor").append(File.separator).append("supporting_artifacts").toString();
+			
+		}
+		
+		if (profilePicFile != null) {
+			
+			LOGGER.debug("Inside Profile File : " + profilePicFile.getOriginalFilename());
+		
+			userProfile = storeMultipartfile(profilePicFile, tempVendorProfilePicPath);
+			
+			if(!StringUtils.isEmpty(userProfile)){
+				customer.setUserProfile(userProfile);
+			}
+			
+		}
         
-    	certFileName = storeFile(vendorCertificateFile, tempVendorCertificatePath);
-        if(!StringUtils.isEmpty(certFileName)){
-      		vendorAttrs.setVendorAuthCert(certFileName);
-        }
+    	if (vendorCertificateFile != null) {
+    		
+    		LOGGER.debug("Inside Certificate File :" + vendorCertificateFile.getOriginalFilename());
+		
+    		certFileName = storeMultipartfile(vendorCertificateFile, tempVendorCertificatePath);
         
+    		if(!StringUtils.isEmpty(certFileName)){
+    			vendorAttrs.setVendorAuthCert(certFileName);
+    		}
         
-        try {
+    	}
+    	
+    	if (uploadfile1 != null) {
+    		
+    		LOGGER.debug("Inside File 1 : " + uploadfile1.getOriginalFilename());
+    	
+    		file1 = storeMultipartfile(uploadfile1, tempvendorFile1Path);
+        
+    		if(!StringUtils.isEmpty(file1)){
+    			customer.setFile1(file1);
+    		}
+        
+    	}
+    	
+    	if (uploadfile2 != null) {
+    	
+    		LOGGER.debug("Inside File 2 : " + uploadfile2.getOriginalFilename());
+    		
+    		file2 = storeMultipartfile(uploadfile2, tempvendorFile2Path);
+        
+    		if(!StringUtils.isEmpty(file2)){
+    			customer.setFile2(file2);
+    		}
+        
+    	}
+    	
+    	if (uploadfile3 != null) {
+        
+    		LOGGER.debug("Inside File 3 : " + uploadfile3.getOriginalFilename());
+    		
+    		file3 = storeMultipartfile(uploadfile3, tempvendorFile3Path);
+        
+    		if(!StringUtils.isEmpty(file3)){
+    			customer.setFile3(file3);
+    		}
+    		
+    	}
+
+    	try {
         	customer = setCustomerAttributes(customer, userRequest, billing);
         	vendorAttrs = setUpdateVendorAttributes(userRequest, vendorAttrs);
     		customer.setVendorAttrs(vendorAttrs);
