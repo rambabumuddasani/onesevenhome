@@ -486,6 +486,7 @@ public class ProductController extends AbstractController {
 		ProductResponse productResponse = new ProductResponse();
 		try {
 		productResponse.setProductId(dbProduct.getId());
+		productResponse.setSku(dbProduct.getSku());
 		MerchantStore store=merchantStoreService.getMerchantStore(MerchantStore.DEFAULT_STORE);
 		//List<ProductType> productTypes = productTypeService.list();
 		
