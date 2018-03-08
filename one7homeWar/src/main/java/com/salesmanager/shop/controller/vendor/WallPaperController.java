@@ -419,13 +419,13 @@ public class WallPaperController extends AbstractController {
 	}
 	@RequestMapping(value="/getUserWallPaperPortfolio", method=RequestMethod.POST)
   	@ResponseBody
-  	public PaginatedResponse getUserWallPaperPortfolio(@RequestBody WallPaperRequest wallPaperRequest,
+  	public ArchitectPaginatedResponse getUserWallPaperPortfolio(@RequestBody WallPaperRequest wallPaperRequest,
   			 @RequestParam(value="pageNumber", defaultValue = "1") int page , 
  			 @RequestParam(value="pageSize", defaultValue="15") int size) {
 			
 		LOGGER.debug("Entered getUserWallPaperPortfolio");
 		
-		PaginatedResponse paginatedResponse = new PaginatedResponse();
+		ArchitectPaginatedResponse paginatedResponse = new ArchitectPaginatedResponse();
 		
         List<WallPaperPortfolio> wallPaperPortfolios = null;
 		
@@ -449,10 +449,10 @@ public class WallPaperController extends AbstractController {
 				wallPaperPortfolioVO.setImageURL(wallPaperPortfolio.getImageURL());
 				
 				wallPaperPortfolioVO.setVendorId(wallPaperPortfolio.getCustomer().getId());
-				wallPaperPortfolioVO.setVendorName(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorName());
-				wallPaperPortfolioVO.setVendorImageURL(wallPaperPortfolio.getCustomer().getUserProfile());
-				wallPaperPortfolioVO.setVendorDescription(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorDescription());
-				wallPaperPortfolioVO.setVendorShortDescription(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorShortDescription());
+				paginatedResponse.setVendorName(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorName());
+				paginatedResponse.setVendorImageURL(wallPaperPortfolio.getCustomer().getUserProfile());
+				paginatedResponse.setVendorDescription(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorDescription());
+				paginatedResponse.setVendorShortDescription(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorShortDescription());
 				
 				wallPaperPortfolioList.add(wallPaperPortfolioVO);
 				
@@ -475,10 +475,10 @@ public class WallPaperController extends AbstractController {
 					wallPaperPortfolioVO.setImageURL(wallPaperPortfolio.getImageURL());
 					
 					wallPaperPortfolioVO.setVendorId(wallPaperPortfolio.getCustomer().getId());
-					wallPaperPortfolioVO.setVendorName(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorName());
-					wallPaperPortfolioVO.setVendorImageURL(wallPaperPortfolio.getCustomer().getUserProfile());
-					wallPaperPortfolioVO.setVendorDescription(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorDescription());
-					wallPaperPortfolioVO.setVendorShortDescription(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorShortDescription());
+					paginatedResponse.setVendorName(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorName());
+					paginatedResponse.setVendorImageURL(wallPaperPortfolio.getCustomer().getUserProfile());
+					paginatedResponse.setVendorDescription(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorDescription());
+					paginatedResponse.setVendorShortDescription(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorShortDescription());
 					
 					wallPaperPortfolioList.add(wallPaperPortfolioVO);
 						
