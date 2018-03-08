@@ -414,9 +414,9 @@ public class ArchitectsController extends AbstractController {
 	    }
 	    @RequestMapping(value="/getUserArchitectsPortfolio", method=RequestMethod.POST)
 	  	@ResponseBody
-	  	public PaginatedResponse getUserArchitectsPortfolio(@RequestBody UserArchitectsRequest userArchitectsRequest, @RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+	  	public ArchitectPaginatedResponse getUserArchitectsPortfolio(@RequestBody UserArchitectsRequest userArchitectsRequest, @RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
 	    	LOGGER.debug("Entered getAdminArchitectsPortfolio");
-	    	PaginatedResponse paginatedResponse = new PaginatedResponse();
+	    	ArchitectPaginatedResponse architectPaginatedResponse = new ArchitectPaginatedResponse();
 			List<ArchitectsPortfolioVO> architectsPortfolioList = new ArrayList<ArchitectsPortfolioVO>();
 			List<ArchitectsPortfolio> architectsPortfolios = null;
 			
@@ -439,10 +439,10 @@ public class ArchitectsController extends AbstractController {
 	    			}
 					//architectsPortfolioVO.setImageURL(architectsPortfolio.getImageURL());
 					architectsPortfolioVO.setPortfolioName(architectsPortfolio.getPortfolioName());
-					architectsPortfolioVO.setVendorName(architectsPortfolio.getCustomer().getVendorAttrs().getVendorName());
-					architectsPortfolioVO.setVendorDescription(architectsPortfolio.getCustomer().getVendorAttrs().getVendorDescription());
-					architectsPortfolioVO.setVendorShortDescription(architectsPortfolio.getCustomer().getVendorAttrs().getVendorShortDescription());
-					architectsPortfolioVO.setVendorImageURL(architectsPortfolio.getCustomer().getUserProfile());
+					architectPaginatedResponse.setVendorName(architectsPortfolio.getCustomer().getVendorAttrs().getVendorName());
+					architectPaginatedResponse.setVendorDescription(architectsPortfolio.getCustomer().getVendorAttrs().getVendorDescription());
+					architectPaginatedResponse.setVendorShortDescription(architectsPortfolio.getCustomer().getVendorAttrs().getVendorShortDescription());
+					architectPaginatedResponse.setVendorImageURL(architectsPortfolio.getCustomer().getUserProfile());
 					architectsPortfolioVO.setStatus(architectsPortfolio.getStatus());
 					architectsPortfolioList.add(architectsPortfolioVO);
 					
@@ -465,10 +465,10 @@ public class ArchitectsController extends AbstractController {
 	    			}
 					//architectsPortfolioVO.setImageURL(architectsPortfolio.getImageURL());
 					architectsPortfolioVO.setPortfolioName(architectsPortfolio.getPortfolioName());
-					architectsPortfolioVO.setVendorName(architectsPortfolio.getCustomer().getVendorAttrs().getVendorName());
-					architectsPortfolioVO.setVendorDescription(architectsPortfolio.getCustomer().getVendorAttrs().getVendorDescription());
-					architectsPortfolioVO.setVendorShortDescription(architectsPortfolio.getCustomer().getVendorAttrs().getVendorShortDescription());
-					architectsPortfolioVO.setVendorImageURL(architectsPortfolio.getCustomer().getVendorAttrs().getVendorAuthCert());
+					architectPaginatedResponse.setVendorName(architectsPortfolio.getCustomer().getVendorAttrs().getVendorName());
+					architectPaginatedResponse.setVendorDescription(architectsPortfolio.getCustomer().getVendorAttrs().getVendorDescription());
+					architectPaginatedResponse.setVendorShortDescription(architectsPortfolio.getCustomer().getVendorAttrs().getVendorShortDescription());
+					architectPaginatedResponse.setVendorImageURL(architectsPortfolio.getCustomer().getVendorAttrs().getVendorAuthCert());
 					architectsPortfolioVO.setStatus(architectsPortfolio.getStatus());
 					architectsPortfolioList.add(architectsPortfolioVO);
 					
@@ -478,17 +478,17 @@ public class ArchitectsController extends AbstractController {
 			
 			PaginationData paginaionData=createPaginaionData(page,size);
 	    	calculatePaginaionData(paginaionData,size, architectsPortfolioList.size());
-	    	paginatedResponse.setPaginationData(paginaionData);
+	    	architectPaginatedResponse.setPaginationData(paginaionData);
 	    	
 			if(architectsPortfolioList == null || architectsPortfolioList.isEmpty() || architectsPortfolioList.size() < paginaionData.getCountByPage()){
-				paginatedResponse.setResponseData(architectsPortfolioList);
+				architectPaginatedResponse.setResponseData(architectsPortfolioList);
 				LOGGER.debug("Ended getAdminArchitectsPortfolio");
-				return paginatedResponse;
+				return architectPaginatedResponse;
 			}
 			
 	    	List<ArchitectsPortfolioVO> paginatedResponses = architectsPortfolioList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
-	    	paginatedResponse.setResponseData(paginatedResponses);
+	    	architectPaginatedResponse.setResponseData(paginatedResponses);
 			
-			return paginatedResponse;
+			return architectPaginatedResponse;
 	    }
 }

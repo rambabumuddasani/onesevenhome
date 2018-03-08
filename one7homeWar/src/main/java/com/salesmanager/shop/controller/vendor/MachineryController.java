@@ -391,12 +391,12 @@ public class MachineryController extends AbstractController {
 	// Machinery portfolios Retrieval vendorwise and status 
 	@RequestMapping(value="/getUserMachineryPortfolio", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
   	@ResponseBody
-  	public PaginatedResponse getUserMachineryPortfolio(@RequestBody MachineryRequest machineryRequest,
+  	public ArchitectPaginatedResponse getUserMachineryPortfolio(@RequestBody MachineryRequest machineryRequest,
   			@RequestParam(value="pageNumber", defaultValue = "1") int page , 
  			@RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
 		
 		LOGGER.debug("Entered getUserMachineryPortfolio");
-		PaginatedResponse paginatedResponse = new PaginatedResponse();
+		ArchitectPaginatedResponse paginatedResponse = new ArchitectPaginatedResponse();
 	
 		List<MachineryPortfolioVO> machineryPortfolioList = new ArrayList<MachineryPortfolioVO>();
 		List<MachineryPortfolio> portfolioList = null;
@@ -416,10 +416,10 @@ public class MachineryController extends AbstractController {
 				machineryPortfolioVO.setEquipmentName(machineryPortfolio.getEquipmentName());
 				machineryPortfolioVO.setEquipmentPrice(machineryPortfolio.getEquipmentPrice());
 				machineryPortfolioVO.setHiringType(machineryPortfolio.getHiringType());
-				machineryPortfolioVO.setVendorName(machineryPortfolio.getCustomer().getVendorAttrs().getVendorName());
-				machineryPortfolioVO.setVendorImageURL(machineryPortfolio.getCustomer().getUserProfile());
-				machineryPortfolioVO.setVendorDescription(machineryPortfolio.getCustomer().getVendorAttrs().getVendorDescription());
-				machineryPortfolioVO.setVendorShortDescription(machineryPortfolio.getCustomer().getVendorAttrs().getVendorShortDescription());
+				paginatedResponse.setVendorName(machineryPortfolio.getCustomer().getVendorAttrs().getVendorName());
+				paginatedResponse.setVendorImageURL(machineryPortfolio.getCustomer().getUserProfile());
+				paginatedResponse.setVendorDescription(machineryPortfolio.getCustomer().getVendorAttrs().getVendorDescription());
+				paginatedResponse.setVendorShortDescription(machineryPortfolio.getCustomer().getVendorAttrs().getVendorShortDescription());
 				machineryPortfolioList.add(machineryPortfolioVO);
 	    	}
 			} else {
@@ -435,10 +435,10 @@ public class MachineryController extends AbstractController {
 					machineryPortfolioVO.setEquipmentName(machineryPortfolio.getEquipmentName());
 					machineryPortfolioVO.setEquipmentPrice(machineryPortfolio.getEquipmentPrice());
 					machineryPortfolioVO.setHiringType(machineryPortfolio.getHiringType());
-					machineryPortfolioVO.setVendorName(machineryPortfolio.getCustomer().getVendorAttrs().getVendorName());
-					machineryPortfolioVO.setVendorImageURL(machineryPortfolio.getCustomer().getUserProfile());
-					machineryPortfolioVO.setVendorDescription(machineryPortfolio.getCustomer().getVendorAttrs().getVendorDescription());
-					machineryPortfolioVO.setVendorShortDescription(machineryPortfolio.getCustomer().getVendorAttrs().getVendorShortDescription());
+					paginatedResponse.setVendorName(machineryPortfolio.getCustomer().getVendorAttrs().getVendorName());
+					paginatedResponse.setVendorImageURL(machineryPortfolio.getCustomer().getUserProfile());
+					paginatedResponse.setVendorDescription(machineryPortfolio.getCustomer().getVendorAttrs().getVendorDescription());
+					paginatedResponse.setVendorShortDescription(machineryPortfolio.getCustomer().getVendorAttrs().getVendorShortDescription());
 					machineryPortfolioList.add(machineryPortfolioVO);
 		    	}
 	    	}
