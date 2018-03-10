@@ -1,5 +1,6 @@
 package com.salesmanager.core.business.repositories.order;
 
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
@@ -10,6 +11,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.salesmanager.core.model.order.Order;
+import com.salesmanager.core.model.order.OrderTotal;
+import com.salesmanager.core.model.order.orderproduct.OrderProduct;
 
 public interface OrderRepository extends JpaRepository<Order, Long>, OrderRepositoryCustom {
 
@@ -59,5 +62,27 @@ https://stackoverflow.com/questions/21549480/spring-data-fetch-join-with-paging-
     @Query(value = "select distinct o from Order o join fetch o.orderProducts op join fetch o.orderTotal ot left join fetch o.orderHistory oh left join fetch op.downloads opd left join fetch op.orderAttributes opa left join fetch op.prices opp where o.datePurchased BETWEEN ?1 AND ?2",
  	       countQuery = "select count(distinct o) from Order o  where o.datePurchased BETWEEN ?1 AND ?2")
     Page<Order> findByDatePurchasedBetween(@Param("startDate") Date startDate,@Param("endDate")Date endDate,Pageable pageable);
+
+    
+    @Query("select distinct o from Order o join fetch o.orderProducts op where o.datePurchased BETWEEN ?1 AND ?2 and op.vendorId=?3 and o.status='COMPLETED'")     
+	List<Order> findOrdersByVendor(Date startDate, Date endDate, Long value);
+
+    @Query("select o from Order o join fetch o.orderProducts op where o.datePurchased BETWEEN ?1 AND ?2 and op.sku=?3 and o.status='COMPLETED'")
+	List<Order> findOrdersByProduct(Date startDate, Date endDate, String value);
+
+    @Query(value="SELECT DISTINCT VENDOR_ID FROM ORDER_PRODUCT as p inner join ORDERS as o " 
+    		+" where o.DATE_PURCHASED BETWEEN ?1 AND ?2 and o.ORDER_ID=p.ORDER_ID",nativeQuery=true)
+	List<BigInteger> findVendorIds(Date startDate, Date endDate);
+
+    @Query(value="SELECT DISTINCT PRODUCT_SKU FROM ORDER_PRODUCT as p INNER JOIN ORDERS as o " 
+    		+" WHERE o.DATE_PURCHASED BETWEEN ?1 AND ?2 and o.ORDER_ID=p.ORDER_ID AND p.PRODUCT_CATEGORY IS NULL",nativeQuery=true)
+	List<String> findProductSkus(Date startDate, Date endDate);
+
+    @Query("select distinct op from OrderProduct op where op.vendorId=?1")
+	List<OrderProduct> findOrderProductByVendorIdAndSku(Long vendorId, String productSku);
+
+    @Query(value = "SELECT distinct(op.VENDOR_ID) FROM ORDER_PRODUCT as op inner join ORDERS as o "
+    		+" on o.ORDER_ID=op.ORDER_ID where o.DATE_PURCHASED between ?1 and ?2 ", nativeQuery=true)
+	List<BigInteger> findRevenueVendors(Date startDate, Date endDate);
 
 }

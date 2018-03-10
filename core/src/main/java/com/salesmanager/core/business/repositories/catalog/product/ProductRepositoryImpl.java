@@ -476,7 +476,8 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 			qs.append("left join fetch p.taxClass tx ");
 			
 			qs.append("where p.sku=:code ");
-			qs.append("and pd.language.id=:lang and papd.language.id=:lang");
+			qs.append("and pd.language.id=:lang ");
+			//qs.append("and papd.language.id=:lang");
 			//this cannot be done on child elements from left join
 			//qs.append("and pod.languageId=:lang and povd.languageId=:lang");
 

@@ -1,6 +1,7 @@
 package com.salesmanager.shop.admin.controller;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -10,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -46,6 +48,7 @@ import com.salesmanager.core.business.services.customer.testmonial.review.Custom
 import com.salesmanager.core.business.services.historymanage.HistoryManagementService;
 import com.salesmanager.core.business.services.image.brand.BrandImageService;
 import com.salesmanager.core.business.services.merchant.MerchantStoreService;
+import com.salesmanager.core.business.services.order.OrderService;
 import com.salesmanager.core.business.services.postrequirement.PostRequirementService;
 import com.salesmanager.core.business.services.reference.country.CountryService;
 import com.salesmanager.core.business.services.reference.language.LanguageService;
@@ -70,6 +73,9 @@ import com.salesmanager.core.model.customer.VendorBooking;
 import com.salesmanager.core.model.history.HistoryManagement;
 import com.salesmanager.core.model.image.brand.BrandImage;
 import com.salesmanager.core.model.merchant.MerchantStore;
+import com.salesmanager.core.model.order.Order;
+import com.salesmanager.core.model.order.OrderTotal;
+import com.salesmanager.core.model.order.orderproduct.OrderProduct;
 import com.salesmanager.core.model.postrequirement.PostRequirement;
 import com.salesmanager.core.model.product.vendor.VendorProduct;
 import com.salesmanager.core.model.reference.country.Country;
@@ -169,6 +175,9 @@ public class AdminController extends AbstractController {
 	
 	@Inject
 	MachineryPortfolioService machineryPortfolioService;
+	
+	@Inject
+	private OrderService orderService;
 	
     // Admin update store address
 	@RequestMapping(value="/admin/updatestore", method = RequestMethod.POST, 
@@ -2425,7 +2434,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 			}
 	         return df.format(discount);
 		}
-	    @RequestMapping(value="/admin/modifydealOfDay", method=RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
+	    @RequestMapping(value="/admin/modifyDealOfDay", method=RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
 				produces = MediaType.APPLICATION_JSON_VALUE)
 		@ResponseBody
 		public AdminDealOfDayResponse adminModifyDealOfDay(@RequestBody AdminDealOfDayRequest adminDealOfDayReq) throws Exception {
@@ -2475,13 +2484,46 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 								if(adminDealOfDayReq.getStatus().equals("Y")) {
 									//Checking DealOfDay product which is available in the given date  
 									List<Product> dodProducts = productService.modifyDealOfDay(startDate,endDate,adminDealOfDayReq.getStatus());
-								if(dodProducts!=null) {
-									for(Product dodProduct : dodProducts){	
+								if(dodProducts!=null && !dodProducts.isEmpty()) {
+									for(Product dodProduct : dodProducts){
+										/*if(dodProduct.getId()==adminDealOfDayReq.getProductId()) {
+											ProductPrice existingDodProductPrice = getProductPrice(dodProduct);
+											existingDodProductPrice.setProductPriceSpecialStartDate(adminDealOfDayReq.getProductPriceSpecialStartDate());
+											existingDodProductPrice.setProductPriceSpecialEndDate(adminDealOfDayReq.getProductPriceSpecialEndDate());
+											existingDodProductPrice.setDealOfDay("Y");
+											productPrice.saveOrUpdate(existingDodProductPrice);
+											//break;
+										}
 										ProductPrice dodproductPrice = getProductPrice(dodProduct);
 										dodproductPrice.setDealOfDay("N");
-										productPrice.saveOrUpdate(dodproductPrice);
-										
+										productPrice.saveOrUpdate(dodproductPrice);*/
+									/*	if(!(dodProduct.getId()==adminDealOfDayReq.getProductId())) {
+											ProductPrice dodproductPrice = getProductPrice(dodProduct);
+											dodproductPrice.setDealOfDay("N");
+											productPrice.saveOrUpdate(dodproductPrice);
+											
+										}*//*else {
+										ProductPrice existingDodProductPrice = getProductPrice(dodProduct);
+										existingDodProductPrice.setProductPriceSpecialStartDate(adminDealOfDayReq.getProductPriceSpecialStartDate());
+										existingDodProductPrice.setProductPriceSpecialEndDate(adminDealOfDayReq.getProductPriceSpecialEndDate());
+										existingDodProductPrice.setDealOfDay("Y");
+										productPrice.saveOrUpdate(existingDodProductPrice);
+										//break;
+										}*/
+										if(dodProduct.getId()==adminDealOfDayReq.getProductId()) {
+											ProductPrice dodproductPrice = getProductPrice(dodProduct);
+											dodproductPrice.setDealOfDay("Y");
+											dodproductPrice.setProductPriceSpecialStartDate(startDate);
+											dodproductPrice.setProductPriceSpecialEndDate(endDate);
+											productPrice.saveOrUpdate(dodproductPrice);
+											
+										}else{
+											ProductPrice dodproductPrice = getProductPrice(dodProduct);
+											dodproductPrice.setProductPriceSpecialStartDate(endDate);
+											productPrice.saveOrUpdate(dodproductPrice);
+										}
 									}
+									
 								}
 										price.setDealOfDay("Y");
 										price.setProductPriceSpecialStartDate(adminDealOfDayReq.getProductPriceSpecialStartDate());
@@ -2489,6 +2531,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 										productPrice.saveOrUpdate(price);
 										adminDealOfDayResponse.setSuccessMsg("Deal Of Day is set successfully");
 										adminDealOfDayResponse.setStatus("true");
+								
 									}
 									else {
 								    // if no product is available in the specified date, then update the product in dealofday 
@@ -2551,6 +2594,399 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 			return productPrice;
 	    	
 	    }
+	    
+	    @RequestMapping(value="/getVendorRevenues", method=RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
+				produces = MediaType.APPLICATION_JSON_VALUE)
+		@ResponseBody
+		public PaginatedRevenueResponse getVendorRevenues(@RequestBody VendorRevenueRequest vendorRevenueRequest,
+				@RequestParam(value="pageNumber", defaultValue = "1") int page ,
+                @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+			
+	    	LOGGER.debug("Entered getVendorRevenues");
+	    	
+	    	PaginatedRevenueResponse paginatedRevenueResponse = new PaginatedRevenueResponse();
+	    	
+	    	List<VendorRevenueVO> vendorRevenueList = new ArrayList<VendorRevenueVO>();
+	    	List<BigInteger> vendorIds = null;
+	    	
+	    	try {
+	    	Date startDate = vendorRevenueRequest.getStartDate();
+	    	Date endDate = vendorRevenueRequest.getEndDate();
+	    	
+	    	if(vendorRevenueRequest.getVendorIds().isEmpty()) 
+	    		vendorIds = orderService.findVendorIds(startDate,endDate);
+	    	else	
+	    		vendorIds = vendorRevenueRequest.getVendorIds();
+	    	
+	    	int vendorsTotalRevenue = 0;
+	    	for(BigInteger vendorId : vendorIds){
+	    		
+	    		VendorRevenueVO vendorRevenueVO = new VendorRevenueVO();	
+	    		LOGGER.debug("Vendor Id: "+vendorId);
+	    		vendorRevenueVO.setVendorId(vendorId.longValue());
+	    		
+	    		Customer vendor = customerService.getById(vendorId.longValue());
+	    		
+	    		if(vendor==null) {
+	    			paginatedRevenueResponse.setErrorMsg("Vendor with vendor Id : "+vendorId+" does not exist");
+	    			paginatedRevenueResponse.setStatus("false");
+	    			return paginatedRevenueResponse;
+	    		}
+	    		
+	    	vendorRevenueVO.setVendorName(vendor.getVendorAttrs().getVendorName());
+	    		
+	    	List<Order> vendorAssociatedOrders =  orderService.findOrdersByVendor(startDate,endDate,vendorId.longValue());
+	    	
+	    	int total = 0;
+	    	for(Order order : vendorAssociatedOrders) {
+	    		
+	    		Set<OrderProduct> orderProducts = order.getOrderProducts();
+	    		
+	    		for(OrderProduct orderProduct : orderProducts){
+	    		  
+	    			 BigDecimal  productTotal = orderProduct.getOneTimeCharge().multiply(new BigDecimal(orderProduct.getProductQuantity()));
+	    			 total = total+productTotal.intValue();
+	    	
+	    		}
+	    	}
+	    	
+	    	vendorsTotalRevenue = vendorsTotalRevenue+total;
+	    	vendorRevenueVO.setTotalRevenue(total);
+	    	vendorRevenueList.add(vendorRevenueVO);
+	    }
+	    
+	    	PaginationData paginaionData=createPaginaionData(page,size);
+        	calculatePaginaionData(paginaionData,size, vendorRevenueList.size());
+        	paginatedRevenueResponse.setPaginationData(paginaionData);
+    		if(vendorRevenueList == null || vendorRevenueList.isEmpty() || vendorRevenueList.size() < paginaionData.getCountByPage()){
+    			paginatedRevenueResponse.setVendorRevenues(vendorRevenueList);
+    			return paginatedRevenueResponse;
+    		}
+    		
+        	List<VendorRevenueVO> paginatedResponses = vendorRevenueList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+        	paginatedRevenueResponse.setVendorRevenues(paginatedResponses);
+        	paginatedRevenueResponse.setTotal(vendorsTotalRevenue);
+	    	}catch(Exception e) {
+	    		e.printStackTrace();
+	    		LOGGER.error("Error while retrieving vendor revenues "+e.getMessage());
+	    		paginatedRevenueResponse.setErrorMsg("Error while retrieving vendor revenues");
+	    		paginatedRevenueResponse.setStatus("false");
+	    		return paginatedRevenueResponse;
+	    	}
+	    	LOGGER.debug("Ended getVendorRevenues");
+	    	return paginatedRevenueResponse;
+	 }
+	    
+	    @RequestMapping(value="/getProductRevenues", method=RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
+				produces = MediaType.APPLICATION_JSON_VALUE)
+		@ResponseBody
+		public PaginatedRevenueResponse getProductRevenues(@RequestBody VendorRevenueRequest vendorRevenueRequest,
+				@RequestParam(value="pageNumber", defaultValue = "1") int page ,
+                @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+			
+	    	LOGGER.debug("Entered getProductRevenues");
+	    	
+	    	PaginatedRevenueResponse paginatedRevenueResponse = new PaginatedRevenueResponse();
+	    	
+	    	List<ProductRevenueVO> productRevenueList = new ArrayList<ProductRevenueVO>();
+	    	
+	    	List<String> productSkus = null;
+	    	
+	    	try {
+	    	Date startDate = vendorRevenueRequest.getStartDate();
+	    	Date endDate = vendorRevenueRequest.getEndDate();
+	    	
+	    	if(vendorRevenueRequest.getProductSkus().isEmpty())
+	    	   productSkus = orderService.findProductSkus(startDate,endDate);
+	    	else
+	    	   productSkus= vendorRevenueRequest.getProductSkus();
+	    	
+	    	int productsTotalRevenue = 0;
+	    	for(String productSku : productSkus){
+	    		
+	    		ProductRevenueVO productRevenueVO = new ProductRevenueVO();	
+	    		LOGGER.debug("Product Sku "+productSku);
+	    		productRevenueVO.setProductId(productSku);
+	    		
+	    		Language language = languageService.getById(1);
+	    		
+	    		Product product = productService.getByCode(productSku,language);
+	    		
+	    		if(product==null) {
+	    			LOGGER.debug("Product with product sku : "+productSku+" does not exist");
+	    			paginatedRevenueResponse.setErrorMsg("Product with product sku : "+productSku+" does not exist");
+	    			paginatedRevenueResponse.setStatus("false");
+	    			return paginatedRevenueResponse;
+	    		}
+	    		
+	    		LOGGER.debug("Product Name "+product.getProductDescription().getName());
+	    		
+	    		productRevenueVO.setProductName(product.getProductDescription().getName());
+	    		
+	    	List<Order> vendorAssociatedOrders =  orderService.findOrdersByProduct(startDate,endDate,productSku);
+	    	
+	    	int total = 0;
+	    	for(Order order : vendorAssociatedOrders) {
+	    		
+	    		Set<OrderProduct> orderProducts = order.getOrderProducts();
+	    		
+	    		for(OrderProduct orderProduct : orderProducts){
+	    		 
+	    			 BigDecimal  productTotal = orderProduct.getOneTimeCharge().multiply(new BigDecimal(orderProduct.getProductQuantity()));
+	    			 total = total+productTotal.intValue();
+	    
+	    		}
+	    	}
+	    	productsTotalRevenue = productsTotalRevenue+total;
+	    	productRevenueVO.setTotalRevenue(total);
+	    	productRevenueList.add(productRevenueVO);
+	    }
+	    	
+	    	PaginationData paginaionData=createPaginaionData(page,size);
+        	calculatePaginaionData(paginaionData,size, productRevenueList.size());
+        	paginatedRevenueResponse.setPaginationData(paginaionData);
+    		if(productRevenueList == null || productRevenueList.isEmpty() || productRevenueList.size() < paginaionData.getCountByPage()){
+    			paginatedRevenueResponse.setProductRevenues(productRevenueList);
+    			return paginatedRevenueResponse;
+    		}
+    		
+        	List<ProductRevenueVO> paginatedResponses = productRevenueList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+        	paginatedRevenueResponse.setProductRevenues(paginatedResponses);
+        	paginatedRevenueResponse.setTotal(productsTotalRevenue);
+	    	}catch(Exception e) {
+	    		e.printStackTrace();
+	    		LOGGER.error("Error while retrieving product revenues "+e.getMessage());
+	    		paginatedRevenueResponse.setErrorMsg("Error while retrieving product revenues");
+	    		paginatedRevenueResponse.setStatus("false");
+	    		return paginatedRevenueResponse;
+	    	}
+	    	
+	    	LOGGER.debug("Ended getProductRevenues");
+	    	return paginatedRevenueResponse;
+	 }
+	    
+	    @RequestMapping(value="/getProductRevenuesByVendor", method=RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
+				produces = MediaType.APPLICATION_JSON_VALUE)
+		@ResponseBody
+		public PaginatedRevenueResponse getVendorProductRevenues(@RequestBody VendorProductRevenueRequest vendorProductRevenueRequest,
+				@RequestParam(value="pageNumber", defaultValue = "1") int page ,
+                @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+					
+            LOGGER.debug("Entered getProductRevenuesByVendor");
+	    	
+	    	PaginatedRevenueResponse paginatedRevenueResponse = new PaginatedRevenueResponse();
+	    	
+	    	List<VendorProductRevenueVO> vendorProductRevenueList = new ArrayList<VendorProductRevenueVO>();
+	    	List<VendorProducts> vendorProductList = new ArrayList<VendorProducts>();
+	    	
+	    	try {
+	    		
+	    	Date startDate = vendorProductRevenueRequest.getStartDate();
+	    	Date endDate   = vendorProductRevenueRequest.getEndDate();
+	
+	    	VendorProductRevenueVO vendorProductRevenueVO = new VendorProductRevenueVO();
+	    	
+	    	LOGGER.debug("Vendor Id: "+vendorProductRevenueRequest.getVendorId());
+	    		
+	    	vendorProductRevenueVO.setVendorId(vendorProductRevenueRequest.getVendorId());
+	    		
+	    	Customer vendor = customerService.getById(vendorProductRevenueRequest.getVendorId());
+	    			
+	    	vendorProductRevenueVO.setVendorName(vendor.getVendorAttrs().getVendorName());
+	    		
+	    	List<Order> vendorAssociatedOrders =  orderService.findOrdersByVendor(startDate,endDate,vendorProductRevenueRequest.getVendorId());
+	    	
+	    	int total = 0;
+	    	for(Order order : vendorAssociatedOrders) {
+	    		
+	    		Set<OrderProduct> orderProducts = order.getOrderProducts();
+	    		
+	    		int  productRevenueTotal = 0;
+	    		
+	    		for(OrderProduct orderProduct : orderProducts){
+	    		  
+	    			   VendorProducts vendorProducts = new VendorProducts();
+	    			   
+	    			   BigDecimal  productRevenue =  orderProduct.getOneTimeCharge().multiply(new BigDecimal(orderProduct.getProductQuantity()));
+	    			   productRevenueTotal = productRevenueTotal+productRevenue.intValue();
+	    			   
+	    			   Language language = languageService.getById(1);
+	   	    		
+	   	    		   Product product = productService.getByCode(orderProduct.getSku(),language);
+	   	    		   vendorProducts.setProductId(product.getId());
+	   	    		   
+	    			   vendorProducts.setProductRevenue(productRevenueTotal);
+	    			   vendorProducts.setProductName(orderProduct.getProductName());
+	    			   vendorProducts.setOrderId(orderProduct.getOrder().getId());
+	    			   vendorProducts.setPurchasedDate(orderProduct.getOrder().getDatePurchased());
+	    			   vendorProducts.setProductquantity(orderProduct.getProductQuantity());
+	    			   vendorProducts.setProductPrice(orderProduct.getOneTimeCharge());
+	    			   
+	    			   vendorProductList.add(vendorProducts);
+	    			   vendorProductRevenueVO.setVendorProducts(vendorProductList);
+	    			 
+	    			   total = total+productRevenueTotal;
+	    			   vendorProductRevenueVO.setTotalRevenue(total);    	
+	    		}
+	    	}
+	    	
+	    	vendorProductRevenueVO.setVendorProducts(vendorProductList);
+	    	vendorProductRevenueList.add(vendorProductRevenueVO);
+	    	
+	    	LOGGER.debug("VendorProductRevenue list size :"+vendorProductRevenueList.size());
+	    	
+	    	PaginationData paginaionData=createPaginaionData(page,size);
+        	calculatePaginaionData(paginaionData,size, vendorProductRevenueList.size());
+        	paginatedRevenueResponse.setPaginationData(paginaionData);
+    		if(vendorProductRevenueList == null || vendorProductRevenueList.isEmpty() || vendorProductRevenueList.size() < paginaionData.getCountByPage()){
+    			paginatedRevenueResponse.setVendorProductRevenueData(vendorProductRevenueList);
+    			return paginatedRevenueResponse;
+    		}
+        	List<VendorProductRevenueVO> paginatedResponses = vendorProductRevenueList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+        	paginatedRevenueResponse.setVendorProductRevenueData(paginatedResponses);
+	    	}catch(Exception ex) {
+	    		LOGGER.error("Error while retrieving vendor product revenues "+ex.getMessage());
+	    		paginatedRevenueResponse.setErrorMsg("Error while vendor product revenues");
+	    		paginatedRevenueResponse.setStatus("false");
+	    		return paginatedRevenueResponse;
+	    	}
+	    	
+	    	LOGGER.debug("Ended getProductRevenuesByVendor");
+	    	return paginatedRevenueResponse;
+	   
+	    	
+	    }
+	    
+	    @RequestMapping(value="/getRevenueVendors", method=RequestMethod.POST)
+		@ResponseBody
+		public List<Long> getRevenueVendors(@RequestBody VendorProductRevenueRequest vendorProductRevenueRequest) throws Exception {
+					
+	    	LOGGER.debug("Entered getRevenueVendors");
+	    	
+	    	Date startDate = vendorProductRevenueRequest.getStartDate();
+	    	Date endDate   = vendorProductRevenueRequest.getEndDate();
+	    	
+	    	List<BigInteger> revenueVendorIds = orderService.findRevenueVendors(startDate,endDate);
+	    	
+	    	LOGGER.debug("RevenueVendorIds size "+revenueVendorIds.size());
+	    	
+	    	List<Long> revVendorIds = new ArrayList<Long>();
+	    	for(BigInteger revenueVendor : revenueVendorIds) {
+	    		
+	    		revVendorIds.add(revenueVendor.longValue());
+	    	}
+	    	
+	    	LOGGER.debug("Entered getRevenueVendors");
+	    	return revVendorIds;
+	    	
+	    }
+	    
+	    @RequestMapping(value="/getProductVendors", method=RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
+				produces = MediaType.APPLICATION_JSON_VALUE)
+		@ResponseBody
+		public PaginatedRevenueResponse getProductVendors(@RequestBody VendorProductRevenueRequest vendorProductRevenueRequest,
+				@RequestParam(value="pageNumber", defaultValue = "1") int page ,
+                @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+			
+	    	LOGGER.debug("Entered getProductVendors");		
+	    	
+	    	PaginatedRevenueResponse paginatedRevenueResponse = new PaginatedRevenueResponse(); 
+	    	
+	    	try {
+	    	Date startDate = vendorProductRevenueRequest.getStartDate();
+	    	Date endDate   = vendorProductRevenueRequest.getEndDate();
+	    	
+	    	
+	    	List<ProductVendorRevenueVO> productVendorRevenueVOList  = new ArrayList<ProductVendorRevenueVO>();
+	    	List<ProductVendors> productVendorsList = new ArrayList<ProductVendors>();
+	    	
+	    	ProductVendorRevenueVO productVendorRevenueVO = new ProductVendorRevenueVO();
+	    	
+	    	productVendorRevenueVO.setProductSku(vendorProductRevenueRequest.getProductSku());
+	    	
+	    	Language language = languageService.getById(1);
+    		
+    		Product product = productService.getByCode(vendorProductRevenueRequest.getProductSku(),language);
+	    	
+    		productVendorRevenueVO.setProductName(product.getProductDescription().getName());
+	    	
+	    	LOGGER.debug("Product Sku: "+vendorProductRevenueRequest.getProductSku());
+	    	
+	    	List<Order> vendorAssociatedOrders =  orderService.findOrdersByProduct(startDate,endDate,vendorProductRevenueRequest.getProductSku());
+	    	
+	    	int total = 0;
+	    	for(Order order : vendorAssociatedOrders) {
+	    		
+	    		Set<OrderProduct> orderProducts = order.getOrderProducts();
+	    		
+	    		for(OrderProduct orderProduct : orderProducts){
+	    		 
+	    			 ProductVendors  productVendors = new ProductVendors();
+	    			 BigDecimal  productTotal = orderProduct.getOneTimeCharge().multiply(new BigDecimal(orderProduct.getProductQuantity()));
+	    			 total = total+productTotal.intValue();
+	    			 
+	    			 Customer vendor = customerService.getById(orderProduct.getVendorId()); 
+	    			 
+	    			 productVendors.setVendorId(vendor.getId());
+	    			 productVendors.setVendorName(vendor.getVendorAttrs().getVendorName());
+	    			 productVendors.setOrderId(orderProduct.getOrder().getId());
+	    			 
+	    			 productVendorsList.add(productVendors);
+	    			 productVendorRevenueVO.setProductVendors(productVendorsList);
+	    			 productVendorRevenueVO.setTotalRevenue(total);
+	    
+	    		}
+	    	}
+	    	
+	    	productVendorRevenueVOList.add(productVendorRevenueVO);
+	    	
+	    	LOGGER.debug("ProductVendorRevenueVOList size "+productVendorRevenueVOList.size());
+	    	
+	    	PaginationData paginaionData=createPaginaionData(page,size);
+        	calculatePaginaionData(paginaionData,size, productVendorRevenueVOList.size());
+        	paginatedRevenueResponse.setPaginationData(paginaionData);
+    		if(productVendorRevenueVOList == null || productVendorRevenueVOList.isEmpty() || productVendorRevenueVOList.size() < paginaionData.getCountByPage()){
+    			paginatedRevenueResponse.setProductVendorRevenueData(productVendorRevenueVOList);
+    			return paginatedRevenueResponse;
+    		}
+        	List<ProductVendorRevenueVO> paginatedResponses = productVendorRevenueVOList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+        	paginatedRevenueResponse.setProductVendorRevenueData(paginatedResponses);
+	    	}catch(Exception e) {
+	    		e.printStackTrace();
+	    		LOGGER.error("Error while retrieving product vendors "+e.getMessage());
+	    		paginatedRevenueResponse.setErrorMsg("Error while retrieving product vendors");
+	    		paginatedRevenueResponse.setStatus("false");
+	    		return paginatedRevenueResponse;
+	    		
+	    	}
+	    	return paginatedRevenueResponse;
+	    	
+	    }
+	    
+	    @RequestMapping(value="/getOrderProducts", method=RequestMethod.POST)
+		@ResponseBody
+		public List<Long> getOrderProducts(@RequestBody VendorProductRevenueRequest vendorProductRevenueRequest) throws Exception {
+			
+	    	LOGGER.debug("Entered getOrderProducts");
+	    	
+	    	Date startDate = vendorProductRevenueRequest.getStartDate();
+	    	Date endDate   = vendorProductRevenueRequest.getEndDate();
+	    	
+	    	List<Long> productIdsList = new ArrayList<Long>();
+	    	
+	    	List<String> productSkus = orderService.findProductSkus(startDate, endDate);
+	    	for(String productSku : productSkus) {
+	    		Language language = languageService.getById(1);
+	    		
+	    		Product product = productService.getByCode(productSku,language);
+	    		Long vendorId = product.getId();
+	    		productIdsList.add(vendorId);
+	    		
+	    	}
+	    	return productIdsList;
+	    	
+	    }
+	
 }
     
  

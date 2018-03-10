@@ -2,6 +2,7 @@ package com.salesmanager.core.business.services.order;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Date;
@@ -569,6 +570,36 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
 	@Override
 	public Page<Order> findByDatePurchasedBetween( Date startDate,Date endDate,Pageable pageable) {
 		return orderRepository.findByDatePurchasedBetween(startDate,endDate,pageable);	
+	}
+
+	@Override
+	public List<Order> findOrdersByVendor(Date startDate, Date endDate, Long vendorId) {
+		return orderRepository.findOrdersByVendor(startDate,endDate,vendorId);
+	}
+
+	@Override
+	public List<Order> findOrdersByProduct(Date startDate, Date endDate, String value) {
+		return orderRepository.findOrdersByProduct(startDate,endDate,value);
+	}
+
+	@Override
+	public List<BigInteger> findVendorIds(Date startDate, Date endDate) {
+		return orderRepository.findVendorIds(startDate,endDate);
+	}
+
+	@Override
+	public List<String> findProductSkus(Date startDate, Date endDate) {
+		return orderRepository.findProductSkus(startDate,endDate);
+	}
+
+	@Override
+	public List<OrderProduct> findOrderProductByVendorIdAndSku(Long vendorId, String productSku) {
+		return orderRepository.findOrderProductByVendorIdAndSku(vendorId,productSku);
+	}
+
+	@Override
+	public List<BigInteger> findRevenueVendors(Date startDate, Date endDate) {
+		return orderRepository.findRevenueVendors(startDate,endDate);
 	}
 
 }

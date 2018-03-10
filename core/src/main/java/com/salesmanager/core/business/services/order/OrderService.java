@@ -1,6 +1,7 @@
 package com.salesmanager.core.business.services.order;
 
 import java.io.ByteArrayOutputStream;
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
@@ -15,7 +16,9 @@ import com.salesmanager.core.model.order.Order;
 import com.salesmanager.core.model.order.OrderCriteria;
 import com.salesmanager.core.model.order.OrderList;
 import com.salesmanager.core.model.order.OrderSummary;
+import com.salesmanager.core.model.order.OrderTotal;
 import com.salesmanager.core.model.order.OrderTotalSummary;
+import com.salesmanager.core.model.order.orderproduct.OrderProduct;
 import com.salesmanager.core.model.order.orderstatus.OrderStatusHistory;
 import com.salesmanager.core.model.payments.Payment;
 import com.salesmanager.core.model.payments.Transaction;
@@ -123,4 +126,16 @@ public interface OrderService extends SalesManagerEntityService<Long, Order> {
 	Page<Order> findByDatePurchasedBetween(Date startDate, Date endDate, Pageable pageable);
 
 	Page<Order> findVendorPaginatedOrders(Long id, Pageable pageable);
+
+	List<Order> findOrdersByVendor(Date startDate, Date endDate, Long value);
+
+	List<Order> findOrdersByProduct(Date startDate, Date endDate, String value);
+
+	List<BigInteger> findVendorIds(Date startDate, Date endDate);
+
+	List<String> findProductSkus(Date startDate, Date endDate);
+
+	List<OrderProduct> findOrderProductByVendorIdAndSku(Long vendorId, String productSku);
+
+	List<BigInteger> findRevenueVendors(Date startDate, Date endDate);
 }
