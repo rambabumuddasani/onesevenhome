@@ -86,6 +86,9 @@ public class Category extends SalesManagerEntity<Long, Category> implements Audi
 	@NotEmpty
 	@Column(name="CODE", length=100, nullable=false)
 	private String code;
+	
+	@Column(name = "CATEGORY_PREF_ORDER")
+	private Integer preferenceOrder;
 
 	public String getCode() {
 		return code;
@@ -220,5 +223,13 @@ public class Category extends SalesManagerEntity<Long, Category> implements Audi
 
 	public void setCategoryImage1(String categoryImage1) {
 		this.categoryImage1 = categoryImage1;
+	}
+
+	public Integer getPreferenceOrder() {
+		return preferenceOrder;
+	}
+
+	public void setPreferenceOrder(Integer preferenceOrder) {
+		this.preferenceOrder = preferenceOrder;
 	}
 }
