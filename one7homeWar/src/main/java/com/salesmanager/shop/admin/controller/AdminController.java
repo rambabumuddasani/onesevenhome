@@ -6,6 +6,7 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -2653,6 +2654,12 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    	vendorsTotalRevenue = vendorsTotalRevenue+total;
 	    	vendorRevenueVO.setTotalRevenue(total);
 	    	vendorRevenueList.add(vendorRevenueVO);
+	    	
+	    	/*if(vendorRevenueRequest.getSortBy().equals("ASC"))
+	    	Collections.sort(vendorRevenueList, new TotalRevenueComparator());
+	    	
+	    	if(vendorRevenueRequest.getSortBy().equals("DESC"))
+	    	Collections.sort(vendorRevenueList, Collections.reverseOrder(new TotalRevenueDescComparator()));*/
 	    }
 	    
 	    	PaginationData paginaionData=createPaginaionData(page,size);
@@ -2856,7 +2863,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	   
 	    	
 	    }
-	    
+	    // retrieval of vendor Ids for vendor revenues
 	    @RequestMapping(value="/getRevenueVendors", method=RequestMethod.POST)
 		@ResponseBody
 		public List<Long> getRevenueVendors(@RequestBody VendorProductRevenueRequest vendorProductRevenueRequest) throws Exception {
@@ -2962,29 +2969,207 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    	return paginatedRevenueResponse;
 	    	
 	    }
-	    
-	    @RequestMapping(value="/getOrderProducts", method=RequestMethod.POST)
+	    // retrieval of product ids for product revenues
+	    @RequestMapping(value="/getRevenueProducts", method=RequestMethod.POST)
 		@ResponseBody
-		public List<Long> getOrderProducts(@RequestBody VendorProductRevenueRequest vendorProductRevenueRequest) throws Exception {
+		public List<String> getRevenueProducts(@RequestBody VendorProductRevenueRequest vendorProductRevenueRequest) throws Exception {
 			
 	    	LOGGER.debug("Entered getOrderProducts");
 	    	
 	    	Date startDate = vendorProductRevenueRequest.getStartDate();
 	    	Date endDate   = vendorProductRevenueRequest.getEndDate();
 	    	
-	    	List<Long> productIdsList = new ArrayList<Long>();
+	    	//List<Long> productIdsList = new ArrayList<Long>();
 	    	
 	    	List<String> productSkus = orderService.findProductSkus(startDate, endDate);
-	    	for(String productSku : productSkus) {
+	    	/*for(String productSku : productSkus) {
 	    		Language language = languageService.getById(1);
 	    		
 	    		Product product = productService.getByCode(productSku,language);
-	    		Long vendorId = product.getId();
-	    		productIdsList.add(vendorId);
+	    		Long productId = product.getId();
+	    		productIdsList.add(productId);
 	    		
-	    	}
-	    	return productIdsList;
+	    	}*/
+	    	//return productIdsList;
+	    	return productSkus;
 	    	
+	    }
+	    
+	    // Activating vendor means that the vendors  are listing for a products
+	    // relating to the vendor
+	    @RequestMapping(value="/activateVendor", method=RequestMethod.POST)
+		@ResponseBody
+		public ActivateVendorResponse activateVendor(@RequestBody ActivateVendorRequest activateVendorRequest) throws Exception {
+			
+	    	LOGGER.debug("Entered activateVendor");
+	    	
+	    	ActivateVendorResponse activateVendorResponse = new ActivateVendorResponse();
+	    	
+	    	Long vendorId = activateVendorRequest.getVendorId();
+	    	
+	    	try {
+	    		
+	    	Customer vendor = customerService.getById(vendorId);
+	    	
+	    	vendor.setActivated("1");
+	    	vendor.setIsVendorActivated("Y");
+	    	
+	    	customerService.saveOrUpdate(vendor);
+	    	
+	    	LOGGER.debug("Vendor Activated");
+	    	
+	    	activateVendorResponse.setSuccessMessage("Vendor approved successfully");
+	    	activateVendorResponse.setStatus(TRUE);
+	    	
+	    	}catch(Exception e) {
+	    		LOGGER.debug("Error while activating vendor "+e.getMessage());
+	    		activateVendorResponse.setErrorMessage("Error while activating vendor");
+	    		activateVendorResponse.setStatus(FALSE);
+	    		return activateVendorResponse;
+	    	}
+	    	
+	    	return activateVendorResponse;
+	    	
+	    }
+	
+	    // In-activating vendor means that the vendors are not listing for a products
+	    // relating to the vendor
+	    @RequestMapping(value="/inActivateVendor", method=RequestMethod.POST)
+		@ResponseBody
+		public ActivateVendorResponse inActivateVendor(@RequestBody ActivateVendorRequest activateVendorRequest) throws Exception {
+			
+	    	LOGGER.debug("Entered activateVendor");
+	    	
+	    	ActivateVendorResponse activateVendorResponse = new ActivateVendorResponse();
+	    	
+	    	Long vendorId = activateVendorRequest.getVendorId();
+	    	
+	    	try {
+	    		
+	    	Customer vendor = customerService.getById(vendorId);
+	    	
+	    	vendor.setActivated("1");
+	    	vendor.setIsVendorActivated("N");
+	    	
+	    	customerService.saveOrUpdate(vendor);
+	    	
+	    	LOGGER.debug("Vendor Activated");
+	    	
+	    	activateVendorResponse.setSuccessMessage("Vendor inactivated successfully");
+	    	activateVendorResponse.setStatus(TRUE);
+	    	
+	    	}catch(Exception e) {
+	    		LOGGER.debug("Error while deactivating vendor "+e.getMessage());
+	    		activateVendorResponse.setErrorMessage("Error while inactivating vendor");
+	    		activateVendorResponse.setStatus(FALSE);
+	    		return activateVendorResponse;
+	    	}
+	    	
+	    	return activateVendorResponse;
+	    	
+	    }
+	    
+	    // Retrieval of paid and unpaid vendors based on status and customer type
+	    // here status may be N/Y/ALL and customer type may be 1/2/3/4/5/ALL
+	    @RequestMapping(value="/getPaidOrUnpaidVendors", method = RequestMethod.POST)
+		@ResponseBody
+		public PaginatedResponse getPaidOrUnpaidVendors(@RequestParam(value="pageNumber", defaultValue = "1") int page ,
+				                  @RequestParam(value="pageSize", defaultValue="15") int size,
+				                  @RequestBody AdminApprovedVendorsRequest adminApprovedVendorsRequest) throws Exception{
+									
+	    	LOGGER.debug("Entered getPaidOrUnpaidVendors");
+	    	
+            PaginatedResponse paginatedResponse = new PaginatedResponse();
+			
+			List<VendorDetailsVO> vendorDetailsVOList = new ArrayList<VendorDetailsVO>();
+			
+			List<Customer> vendorsList = null;
+			
+			try {
+				
+			if(adminApprovedVendorsRequest.getStatus().equals("ALL")) {
+				
+				if(adminApprovedVendorsRequest.getCustomerType().equals("ALL")){
+				vendorsList = customerService.getAllPaidOrUnPaidVendors();
+				}
+				else {
+					vendorsList = customerService.getPaidOrUnPaidtVendorsByCustomerType(adminApprovedVendorsRequest.getCustomerType());
+				}
+				
+				for(Customer vendor : vendorsList) {
+					
+					VendorDetailsVO vendorDetailsVO = new VendorDetailsVO();
+					vendorDetailsVO.setVendorId(vendor.getId());
+					
+					vendorDetailsVO.setVendorName(vendor.getVendorAttrs().getVendorName());
+					vendorDetailsVO.setStatus(vendor.getIsVendorActivated());
+					
+					vendorDetailsVO.setVendorUserProfile(vendor.getUserProfile());
+					
+					if(vendor.getCustomerType().equals("1"))
+						vendorDetailsVO.setVendorType(Constants.PRODUCT_VENDORS);
+					if(vendor.getCustomerType().equals("2")) 
+						vendorDetailsVO.setVendorType(Constants.SERVICE_PROVIDER);
+					if(vendor.getCustomerType().equals("3")) 
+						vendorDetailsVO.setVendorType(Constants.ARCHITECTS);
+					if(vendor.getCustomerType().equals("4")) 
+						vendorDetailsVO.setVendorType(Constants.WALLPAPER);
+					if(vendor.getCustomerType().equals("5"))
+					    vendorDetailsVO.setVendorType(Constants.MACHINERY_EQUIPMENT);
+					
+					vendorDetailsVOList.add(vendorDetailsVO);
+				}
+			} else {
+				
+				if(adminApprovedVendorsRequest.getCustomerType().equals("ALL")) {
+				vendorsList = customerService.getPaidOrUnPaidVendorsBasedOnStatus(adminApprovedVendorsRequest.getStatus());
+				}
+				else{
+					vendorsList = customerService.getPaidOrUnPaidVendorsBasedOnStatusAndCustomerType(adminApprovedVendorsRequest.getStatus(),adminApprovedVendorsRequest.getCustomerType());
+				}
+				
+				for(Customer vendor : vendorsList) {
+					
+					VendorDetailsVO vendorDetailsVO = new VendorDetailsVO();
+					vendorDetailsVO.setVendorId(vendor.getId());
+					
+					vendorDetailsVO.setVendorName(vendor.getVendorAttrs().getVendorName());
+					vendorDetailsVO.setStatus(vendor.getIsVendorActivated());
+					
+					vendorDetailsVO.setVendorUserProfile(vendor.getUserProfile());
+					
+					if(vendor.getCustomerType().equals("1"))
+						vendorDetailsVO.setVendorType(Constants.PRODUCT_VENDORS);
+					if(vendor.getCustomerType().equals("2")) 
+						vendorDetailsVO.setVendorType(Constants.SERVICE_PROVIDER);
+					if(vendor.getCustomerType().equals("3")) 
+						vendorDetailsVO.setVendorType(Constants.ARCHITECTS);
+					if(vendor.getCustomerType().equals("4")) 
+						vendorDetailsVO.setVendorType(Constants.WALLPAPER);
+					if(vendor.getCustomerType().equals("5"))
+					    vendorDetailsVO.setVendorType(Constants.MACHINERY_EQUIPMENT);
+					
+					vendorDetailsVOList.add(vendorDetailsVO);
+			   }
+			}
+				PaginationData paginaionData=createPaginaionData(page,size);
+	        	calculatePaginaionData(paginaionData,size, vendorDetailsVOList.size());
+	        	paginatedResponse.setPaginationData(paginaionData);
+	    		if(vendorDetailsVOList == null || vendorDetailsVOList.isEmpty() || vendorDetailsVOList.size() < paginaionData.getCountByPage()){
+	    			paginatedResponse.setResponseData(vendorDetailsVOList);
+	    			return paginatedResponse;
+	    		}
+	        	List<VendorDetailsVO> paginatedResponses = vendorDetailsVOList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+	        	paginatedResponse.setResponseData(paginatedResponses);
+			}catch(Exception e) {
+				e.printStackTrace();
+				LOGGER.error("error while retrieving paid or unpaid vendors"+e.getMessage());
+				paginatedResponse.setErrorMsg("error while retrieving paid or unpaid vendors");
+			}
+			
+			LOGGER.debug("Ended getPaidOrUnpaidVendors");
+			return paginatedResponse;
+	
 	    }
 	
 }

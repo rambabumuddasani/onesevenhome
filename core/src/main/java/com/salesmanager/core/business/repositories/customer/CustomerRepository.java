@@ -71,4 +71,16 @@ public interface CustomerRepository extends JpaRepository<Customer, Long>, Custo
 	@Query("select c from Customer c join fetch c.merchantStore cm left join fetch c.defaultLanguage cl left join fetch c.attributes ca left join fetch ca.customerOption cao left join fetch ca.customerOptionValue cav left join fetch cao.descriptions caod left join fetch cav.descriptions left join fetch c.categories cc where c.avgReview <= ?1 and c.customerType = ?2 and cc.code = ?3")
 	List<Customer> findVendorsBasedOnSubCategoryByRating(BigDecimal rating, String vendorType,
 			String searchSubCategory);
+
+	@Query("select c from Customer c join fetch c.merchantStore cm left join fetch c.defaultLanguage cl left join fetch c.attributes ca left join fetch ca.customerOption cao left join fetch ca.customerOptionValue cav left join fetch cao.descriptions caod left join fetch cav.descriptions where c.customerType != '0' and c.isVendorActivated=?2 and c.activated='1'")
+	List<Customer> findPaidOrUnPaidVendorsBasedOnStatus(String status);
+
+	@Query("select c from Customer c join fetch c.merchantStore cm left join fetch c.defaultLanguage cl left join fetch c.attributes ca left join fetch ca.customerOption cao left join fetch ca.customerOptionValue cav left join fetch cao.descriptions caod left join fetch cav.descriptions where c.isVendorActivated = ?1 and c.customerType = ?2 and c.activated='1'")
+	List<Customer> getPaidOrUnPaidVendorsBasedOnStatusAndCustomerType(String status, String customerType);
+
+	@Query("select c from Customer c join fetch c.merchantStore cm left join fetch c.defaultLanguage cl left join fetch c.attributes ca left join fetch ca.customerOption cao left join fetch ca.customerOptionValue cav left join fetch cao.descriptions caod left join fetch cav.descriptions where c.customerType = ?1 and c.activated='1'")
+	List<Customer> gePaidOrUnPaidtVendorsByCustomerType(String customerType);
+
+	@Query("select c from Customer c join fetch c.merchantStore cm left join fetch c.defaultLanguage cl left join fetch c.attributes ca left join fetch ca.customerOption cao left join fetch ca.customerOptionValue cav left join fetch cao.descriptions caod left join fetch cav.descriptions where c.customerType !='0' and c.activated='1'")
+	List<Customer> getAllPaidOrUnPaidVendors();
 }

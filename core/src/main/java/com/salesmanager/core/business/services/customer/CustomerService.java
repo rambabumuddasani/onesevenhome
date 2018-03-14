@@ -69,4 +69,12 @@ public interface CustomerService  extends SalesManagerEntityService<Long, Custom
 	public List<Customer> getVendorsBasedOnSubCategoryByRating(BigDecimal rating, String vendorType,
 			String searchSubCategory);
 
+	public List<Customer> getPaidOrUnPaidVendorsBasedOnStatus(String status);
+
+	public List<Customer> getPaidOrUnPaidVendorsBasedOnStatusAndCustomerType(String status, String customerType);
+
+	public List<Customer> getPaidOrUnPaidtVendorsByCustomerType(String customerType);
+
+	public List<Customer> getAllPaidOrUnPaidVendors();
+
 }

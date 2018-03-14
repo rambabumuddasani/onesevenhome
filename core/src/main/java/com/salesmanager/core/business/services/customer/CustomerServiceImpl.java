@@ -334,8 +334,27 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 	@Override
 	public List<Customer> getVendorsBasedOnSubCategoryByRating(BigDecimal rating, String vendorType,
 			String searchSubCategory) {
-		// TODO Auto-generated method stub
 		return customerRepository.findVendorsBasedOnSubCategoryByRating(rating,vendorType,searchSubCategory);
+	}
+
+	@Override
+	public List<Customer> getPaidOrUnPaidVendorsBasedOnStatus(String status) {
+		return customerRepository.findPaidOrUnPaidVendorsBasedOnStatus(status);
+	}
+
+	@Override
+	public List<Customer> getPaidOrUnPaidVendorsBasedOnStatusAndCustomerType(String status, String customerType) {
+		return customerRepository.getPaidOrUnPaidVendorsBasedOnStatusAndCustomerType(status,customerType);
+	}
+
+	@Override
+	public List<Customer> getPaidOrUnPaidtVendorsByCustomerType(String customerType) {
+		return customerRepository.gePaidOrUnPaidtVendorsByCustomerType(customerType);
+	}
+
+	@Override
+	public List<Customer> getAllPaidOrUnPaidVendors() {
+		return customerRepository.getAllPaidOrUnPaidVendors();
 	}
 
 
