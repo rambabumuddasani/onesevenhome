@@ -47,6 +47,7 @@ import com.salesmanager.core.business.services.catalog.product.type.ProductTypeS
 import com.salesmanager.core.business.services.customer.CustomerService;
 import com.salesmanager.core.business.services.customer.testmonial.review.CustomerTestmonialService;
 import com.salesmanager.core.business.services.historymanage.HistoryManagementService;
+import com.salesmanager.core.business.services.homepage.offers.HomePageOffersService;
 import com.salesmanager.core.business.services.image.brand.BrandImageService;
 import com.salesmanager.core.business.services.merchant.MerchantStoreService;
 import com.salesmanager.core.business.services.order.OrderService;
@@ -72,6 +73,7 @@ import com.salesmanager.core.model.customer.CustomerTestimonial;
 import com.salesmanager.core.model.customer.MachineryPortfolio;
 import com.salesmanager.core.model.customer.VendorBooking;
 import com.salesmanager.core.model.history.HistoryManagement;
+import com.salesmanager.core.model.homepage.offers.HomePageOffers;
 import com.salesmanager.core.model.image.brand.BrandImage;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.order.Order;
@@ -179,6 +181,9 @@ public class AdminController extends AbstractController {
 	
 	@Inject
 	private OrderService orderService;
+	
+	@Inject
+	private HomePageOffersService homePageOffersService;
 	
     // Admin update store address
 	@RequestMapping(value="/admin/updatestore", method = RequestMethod.POST, 
@@ -2655,11 +2660,11 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    	vendorRevenueVO.setTotalRevenue(total);
 	    	vendorRevenueList.add(vendorRevenueVO);
 	    	
-	    	/*if(vendorRevenueRequest.getSortBy().equals("ASC"))
+	    	if(vendorRevenueRequest.getSortBy().equals("ASC"))
 	    	Collections.sort(vendorRevenueList, new TotalRevenueComparator());
 	    	
 	    	if(vendorRevenueRequest.getSortBy().equals("DESC"))
-	    	Collections.sort(vendorRevenueList, Collections.reverseOrder(new TotalRevenueDescComparator()));*/
+	    	Collections.sort(vendorRevenueList, Collections.reverseOrder(new TotalRevenueDescComparator()));
 	    }
 	    
 	    	PaginationData paginaionData=createPaginaionData(page,size);
@@ -3171,7 +3176,171 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 			return paginatedResponse;
 	
 	    }
+	    // Home page offers
+	    @RequestMapping(value="/homePageOffers", method = RequestMethod.POST)
+		@ResponseBody
+		public HomePageOffersResponse homePageOffers(@RequestPart("homePageOffersRequest") String homePageOffersRequestStr,
+				@RequestPart("file") MultipartFile catImage) throws Exception {
+	    	
+	    	LOGGER.debug("Entered uploadOrUpdateSubCatImage ");
+	    	
+	    	HomePageOffersRequest homePageOffersRequest = new ObjectMapper().readValue(homePageOffersRequestStr, HomePageOffersRequest.class);
+	    	HomePageOffersResponse homePageOffersResponse = new HomePageOffersResponse();
+	    	
+	    	
+	    	String fileName = "";
+	    	
+	    	try { 
+	    		
+	    		List<HomePageOffers> dbHomePageOffers = homePageOffersService.getAllHomePageOffers();
+	    		
+	    		for(HomePageOffers homePageOffer : dbHomePageOffers) {
+	    			
+	    			if(homePageOffer.getSectionName().equals(homePageOffersRequest.getSectionName())) {
+	    				
+	    				// Storing image
+	    		    	if(catImage.getSize() != 0) {
+	    		    		try{
+	    		    			LOGGER.debug("Storing category image");
+	    		    			fileName = storageService.store(catImage,"homecatimg");
+	    		    			System.out.println("fileName "+fileName);
+	    		    		}catch(StorageException se){
+	    		    			LOGGER.error("StoreException occured"+se.getMessage());
+	    		    			homePageOffersResponse.setErrorMessage("Failed while storing image");
+	    		    			homePageOffersResponse.setStatus(FALSE);
+	    		    			return homePageOffersResponse;
+	    		    		}
+	    		    	}
+	    				homePageOffer.setCategoryImageURL(fileName);
+	    	    		
+	    	    		if(!homePageOffersRequest.getCategoryName().equals(null))
+	    	    			homePageOffer.setCategoryName(homePageOffersRequest.getCategoryName());
+	    	    		
+	    	    		if(!homePageOffersRequest.getSubCategoryName().equals(null))
+	    	    			homePageOffer.setSubCategoryName(homePageOffersRequest.getSubCategoryName());
+	    	    		
+	    	    		homePageOffer.setDescription(homePageOffersRequest.getDescription());
+	    	    		homePageOffer.setDiscount(homePageOffersRequest.getDiscount());
+	    	    		homePageOffer.setCategoryTitle(homePageOffersRequest.getCategoryTitle());
+	    	    		homePageOffer.setSectionName(homePageOffersRequest.getSectionName());
+	    	    		
+	    	    		homePageOffersService.update(homePageOffer);
+	    	    		
+	    	    		LOGGER.debug("Image uploaded");
+	    				homePageOffersResponse.setCategoryName(homePageOffersRequest.getCategoryName());
+	    				homePageOffersResponse.setCategoryImageURL(fileName);
+	    				homePageOffersResponse.setSuccessMessage("Category Image updated successfully");
+	    				homePageOffersResponse.setStatus(TRUE);
+	    				
+	    				return homePageOffersResponse;
+	    				
+	    			}
+	    		
+	    	}	
+	    		// Storing image
+		    	if(catImage.getSize() != 0) {
+		    		try{
+		    			LOGGER.debug("Storing category image");
+		    			fileName = storageService.store(catImage,"homecatimg");
+		    			System.out.println("fileName "+fileName);
+		    		}catch(StorageException se){
+		    			LOGGER.error("StoreException occured"+se.getMessage());
+		    			homePageOffersResponse.setErrorMessage("Failed while storing image");
+		    			homePageOffersResponse.setStatus(FALSE);
+		    			return homePageOffersResponse;
+		    		}
+		    	}
+		          HomePageOffers homePageOffers = new HomePageOffers();
+		
+		          homePageOffers.setCategoryImageURL(fileName);
+		
+		         if(!homePageOffersRequest.getCategoryName().equals(null))
+		            homePageOffers.setCategoryName(homePageOffersRequest.getCategoryName());
+		
+		         if(!homePageOffersRequest.getSubCategoryName().equals(null))
+		            homePageOffers.setSubCategoryName(homePageOffersRequest.getSubCategoryName());
+		
+		            homePageOffers.setDescription(homePageOffersRequest.getDescription());
+		            homePageOffers.setDiscount(homePageOffersRequest.getDiscount());
+		            homePageOffers.setCategoryTitle(homePageOffersRequest.getCategoryTitle());
+		            homePageOffers.setSectionName(homePageOffersRequest.getSectionName());
+		
 	
+		            homePageOffersService.save(homePageOffers);
+		            LOGGER.debug("Image uploaded");
+		            homePageOffersResponse.setCategoryName(homePageOffersRequest.getCategoryName());
+		            homePageOffersResponse.setCategoryImageURL(fileName);
+		            homePageOffersResponse.setSuccessMessage("Category Image uploaded successfully");
+		            homePageOffersResponse.setStatus(TRUE);
+    		}
+		    catch(Exception e){ 
+			LOGGER.error("Error while storing category image");
+			if(StringUtils.isEmpty(fileName)){
+				storageService.deleteFile(fileName); // delete image
+			}
+			homePageOffersResponse.setStatus(FALSE);
+			homePageOffersResponse.setErrorMessage("Error while storing category image");
+		    }
+			return homePageOffersResponse;
+	    }
+	    
+	    @RequestMapping(value="/getHomePageOffers", method = RequestMethod.GET)
+		@ResponseBody
+		public PaginatedResponse getHomePageOffers(@RequestParam(value="pageNumber", defaultValue = "1") int page ,
+				                  @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception{
+									
+	    	LOGGER.debug("Entered getHomePageOffers");
+	    	
+	    	PaginatedResponse paginatedResponse = new PaginatedResponse();
+	    	
+	    	try{
+	    		
+	    	List<HomePageOffers> homePageOffers = homePageOffersService.getAllHomePageOffers();
+	    	
+	    	List<HomePageOffersVO> homePageOffersList = new ArrayList<HomePageOffersVO>();
+	    	
+	    	for(HomePageOffers homePageOffer : homePageOffers ) {
+	    		
+	    		HomePageOffersVO homePageOffersVO = new HomePageOffersVO();
+	    		
+	    		homePageOffersVO.setId(homePageOffer.getId());
+	    		
+	    		if(!homePageOffer.getCategoryName().equals(null))
+	    		homePageOffersVO.setCategoryName(homePageOffer.getCategoryName());
+	    		
+	    		if(!homePageOffer.getSubCategoryName().equals(null))
+	    		homePageOffersVO.setSubCategoryName(homePageOffer.getSubCategoryName());
+	    		
+	    		homePageOffersVO.setDiscount(homePageOffer.getDiscount());
+	    		homePageOffersVO.setDescription(homePageOffer.getDescription());
+	    		homePageOffersVO.setSectionName(homePageOffer.getSectionName());
+	    		homePageOffersVO.setCategoryImageURL(homePageOffer.getCategoryImageURL());
+	    		homePageOffersVO.setCategoryTitle(homePageOffer.getCategoryTitle());
+	    		
+	    		homePageOffersList.add(homePageOffersVO);
+	    	}
+	    	
+	    	PaginationData paginaionData=createPaginaionData(page,size);
+        	calculatePaginaionData(paginaionData,size, homePageOffersList.size());
+        	paginatedResponse.setPaginationData(paginaionData);
+    		if(homePageOffersList == null || homePageOffersList.isEmpty() || homePageOffersList.size() < paginaionData.getCountByPage()){
+    			paginatedResponse.setResponseData(homePageOffersList);
+    			return paginatedResponse;
+    		}
+        	List<HomePageOffersVO> paginatedResponses = homePageOffersList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+        	paginatedResponse.setResponseData(paginatedResponses);
+	    	}catch(Exception e) {
+	    		e.printStackTrace();
+	    		LOGGER.debug("Error while retrieving home page offers "+e.getMessage());
+	    		paginatedResponse.setErrorMsg("Error while retrieving home page offers");
+	    		return paginatedResponse;
+	    	}
+	    	
+	    	LOGGER.debug("Ended getHomePageOffers");
+	    	return paginatedResponse;
+	    	
+	    	
+	    }
 }
     
  

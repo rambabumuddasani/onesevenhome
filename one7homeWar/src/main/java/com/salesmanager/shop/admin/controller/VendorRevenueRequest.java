@@ -21,7 +21,6 @@ public class VendorRevenueRequest implements Serializable{
 	private List<BigInteger> vendorIds;
 	private List<String> productSkus;
 	private String status;
-	@JsonIgnore
 	private String sortBy;
 	public Date getStartDate() {
 		return startDate;
