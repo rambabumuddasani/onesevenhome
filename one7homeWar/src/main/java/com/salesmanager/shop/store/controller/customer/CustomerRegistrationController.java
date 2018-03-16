@@ -1027,6 +1027,9 @@ public class CustomerRegistrationController extends AbstractController {
 			serviceDetails.setVendorTIN(customer.getVendorAttrs().getVendorTinNumber());
 			serviceDetails.setUserProfile(customer.getUserProfile());
 			serviceDetails.setGst(customer.getGst());
+			serviceDetails.setFile1(customer.getFile1());
+			serviceDetails.setFile2(customer.getFile2());
+			serviceDetails.setFile3(customer.getFile3());
 			List<Services> services = customer.getServices();
 			List<Integer> serviceIds = new ArrayList<Integer>();
 			for(Services service : services){
@@ -1065,6 +1068,9 @@ public class CustomerRegistrationController extends AbstractController {
 			vendorDetails.setVendorTIN(customer.getVendorAttrs().getVendorTinNumber());
 			vendorDetails.setUserProfile(customer.getUserProfile());
 			vendorDetails.setGst(customer.getGst());
+			vendorDetails.setFile1(customer.getFile1());
+			vendorDetails.setFile2(customer.getFile2());
+			vendorDetails.setFile3(customer.getFile3());
 			List<Category> categories = customer.getCategories();
 			List<Long> categoryIds = new ArrayList<Long>();
 			for(Category category : categories){
