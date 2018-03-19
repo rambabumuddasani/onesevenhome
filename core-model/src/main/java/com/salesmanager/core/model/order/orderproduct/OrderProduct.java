@@ -63,6 +63,9 @@ public class OrderProduct extends SalesManagerEntity<Long, OrderProduct> {
 	
 	@Column(name="PRODUCT_CATEGORY", length=100)
 	private String productCategory; // added specific to products like Wallpapers 
+	
+	@Column(name="PRODUCT_ID")
+	private Long productId;
 
 	public Long getVendorId() {
 		return vendorId;
@@ -160,5 +163,14 @@ public class OrderProduct extends SalesManagerEntity<Long, OrderProduct> {
 	public void setProductCategory(String productCategory) {
 		this.productCategory = productCategory;
 	}
+
+	public Long getProductId() {
+		return productId;
+	}
+
+	public void setProductId(Long productId) {
+		this.productId = productId;
+	}
+
 
 }
