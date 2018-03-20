@@ -1068,12 +1068,12 @@ public class CategoryController {
 
 	}*/
 	
-	// Category search
-	@RequestMapping(value="/getProductByCategory", method = RequestMethod.POST, 
+	// Product search by Category selection
+	@RequestMapping(value="/getProductByCategorySelection", method = RequestMethod.POST, 
 			consumes = MediaType.APPLICATION_JSON_VALUE,
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public CategoryResponse getProductByCategory(@RequestParam(value="pageNumber", defaultValue = "1") int page,
+	public CategoryResponse getProductByCategorySelection(@RequestParam(value="pageNumber", defaultValue = "1") int page,
 			@RequestParam(value="pageSize", defaultValue="15") int size,
 			@RequestBody SearchRequest searchRequest) throws Exception {
 		
@@ -1086,7 +1086,7 @@ public class CategoryController {
 			
 			if(searchRequest.getSearchString() != null) {
 				
-			     categories = categoryService.getCategoryList(searchRequest.getSearchString());
+			     categories = categoryService.getCategoryListBySelection(searchRequest.getSearchString());
 			}	
 			
 			LOGGER.debug("Categories :: " + categories.size());
@@ -1312,4 +1312,151 @@ public class CategoryController {
 		return parentSubCategories;
 
 	}
+	@RequestMapping(value="/getProductByCategory", method = RequestMethod.POST, 
+			consumes = MediaType.APPLICATION_JSON_VALUE,
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public CategoryResponse getProductByCategory(@RequestParam(value="pageNumber", defaultValue = "1") int page,
+			@RequestParam(value="pageSize", defaultValue="15") int size,
+			@RequestBody SearchRequest searchRequest) throws Exception {
+		
+		LOGGER.debug("Entered getProductByCategory");
+		
+		CategoryResponse categoryResponse = new CategoryResponse();
+	
+		List<Category> categories = null;
+		try {
+			
+			if(searchRequest.getSearchString() != null) {
+				
+			     categories = categoryService.getCategoryList(searchRequest.getSearchString());
+			}	
+			
+			LOGGER.debug("Categories :: " + categories.size());
+			Map<String,ParentChildCategory> parentChildCatMap = new HashMap<String, ParentChildCategory>();
+		
+			
+			for(Category category:categories) {			
+				
+				LOGGER.debug("Category :: " + category.getDescription().getName());	
+				
+				if(category.getParent() == null) {
+					
+					//category parent is  null i.e. it is a  parent
+					
+					if(!parentChildCatMap.containsKey(category.getCode()) && categories.size()==1) { 
+					
+						ParentChildCategory parentChildCatObj = new ParentChildCategory();
+						parentChildCatObj.setParentCategory(category);
+						//parentChildCatObj.setChilCategory(new HashSet<Category>());
+						parentChildCatObj.setChilCategory(new HashSet<Category>(category.getCategories()));
+						parentChildCatMap.put(category.getCode(), parentChildCatObj);
+					}else {
+						ParentChildCategory parentChildCatObj = new ParentChildCategory();
+						parentChildCatObj.setParentCategory(category);
+						parentChildCatObj.setChilCategory(new HashSet<Category>());
+						parentChildCatMap.put(category.getCode(), parentChildCatObj);
+					}
+				
+			   }else {
+				    // it means it is a child
+					// it is sure that this is child of some category, but we don't know whose parent it is ?
+					String parentCat = category.getParent().getCode();
+				  
+					if(!parentChildCatMap.containsKey(parentCat)){
+						
+						ParentChildCategory parentChildCatObj = new ParentChildCategory();
+						
+						parentChildCatObj.setParentCategory(category.getParent());
+						parentChildCatObj.setChilCategory(new HashSet<Category>());
+						parentChildCatObj.getChilCategory().add(category);
+						parentChildCatMap.put(parentChildCatObj.getParentCategory().getCode(),parentChildCatObj);			
+					}else{
+						ParentChildCategory parentChildCategory = parentChildCatMap.get(parentCat);
+						parentChildCategory.getChilCategory().add(category);
+					}
+			   }
+				
+			}
+			/*for(Entry<String, List<Category>> map : parentMap.entrySet()) {
+				LOGGER.debug("key::"+map.getKey());
+				
+				Iterator <Category> iterator = map.getValue().iterator();
+				
+				while (iterator.hasNext()) {
+					Category  c = iterator.next();
+					LOGGER.debug("iterator.next() "+c.getDescription().getName());
+				}
+			}*/
+			
+			LOGGER.debug("Parent Map ::: " + parentChildCatMap.size());
+			LOGGER.debug("Parent Key Set ::: " + parentChildCatMap.keySet().size());
+			
+			Collection<ParentChildCategory> parentChildCatSet =  parentChildCatMap.values();
+			
+			List<CategoryJson> categoryJsonList = new ArrayList<CategoryJson>();
+			
+			String catTitle = null;
+			String subCatTitle = null;
+			
+			for(ParentChildCategory parentChildCat : parentChildCatSet){
+				
+				Category parentCat = parentChildCat.getParentCategory();
+					
+				CategoryJson catJson = new CategoryJson();
+				catTitle = parentCat.getCode();
+				catJson.setTitle(parentCat.getDescription().getName());
+				String customerType = null;
+		    	for(String custType:Constants.customerTypes.keySet()){
+		    		if(Constants.customerTypes.get(custType).equals(catTitle.toUpperCase())){
+		    			customerType = custType;
+		    			break;
+		    		}
+		    	}
+				
+		    	if(customerType != null){
+		    		catTitle = "/vendortypes/"+customerType; 
+		    	} else {
+		    		catTitle = "/categories/"+catTitle.replaceAll(" ", "_");
+		    	}
+				catJson.setImageURL(parentCat.getDescription().getSeUrl());
+				catJson.setType("category");
+				
+				//catTitle = "/categories/"+catTitle.replaceAll(" ", "_");
+				catJson.setUrl(catTitle);
+				
+				List<SubCategoryJson> subcategoryjsonList = new ArrayList<SubCategoryJson>();
+				
+				for(Category childCat : parentChildCat.getChilCategory()){
+					
+					SubCategoryJson subcategoryjson = new SubCategoryJson();
+					subCatTitle = childCat.getCode();
+					subcategoryjson.setTitle(childCat.getDescription().getName());
+					subcategoryjson.setImageURL(childCat.getDescription().getSeUrl());
+					subcategoryjson.setType("subcategory");
+					
+					subCatTitle = subCatTitle.replaceAll(" ", "_");
+					subcategoryjson.setUrl("/categories/"+subCatTitle);
+					
+					subcategoryjsonList.add(subcategoryjson);
+				}
+				
+				catJson.setSubCategory(subcategoryjsonList);
+				categoryJsonList.add(catJson);
+			
+			categoryResponse.setCategoryData(categoryJsonList);
+			
+			}
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		    LOGGER.error("Error while getting all categories"+e.getMessage());
+				
+			}
+	
+		LOGGER.debug("Ended getProductByCategory");
+		return categoryResponse;
+
+	}
+	
 }

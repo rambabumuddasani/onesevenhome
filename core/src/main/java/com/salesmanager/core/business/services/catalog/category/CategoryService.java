@@ -107,6 +107,8 @@ public interface CategoryService extends SalesManagerEntityService<Long, Categor
 
 	Category getCategoriesForcat(String searchString);
 
+	List<Category> getCategoryListBySelection(String searchString);
+
 
 	
 	

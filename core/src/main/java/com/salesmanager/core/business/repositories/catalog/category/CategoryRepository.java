@@ -81,5 +81,8 @@ public interface CategoryRepository extends JpaRepository<Category, Long>, Categ
 	@Query("select distinct c from Category c left join fetch c.descriptions cd where cd.name = ?1 order by c.lineage, c.sortOrder asc")
 	Category getCategoriesForcat(String searchString);
 
+	@Query("select distinct c from Category c left join fetch c.descriptions cd where cd.name like ?1 order by c.lineage, c.sortOrder asc")
+	List<Category> getCategoryListBySelection(String searchString);
+
 	
 }
