@@ -153,6 +153,7 @@ public class VendorController extends AbstractController {
         templateTokens.put(EmailConstants.EMAIL_SERVICE_TYPE, Constants.customerTypes.get(vendor.getCustomerType()));
         templateTokens.put(EmailConstants.EMAIL_VENDOR_NAME, vendorBooking.getVendor().getVendorAttrs().getVendorName());
         templateTokens.put(EmailConstants.EMAIL_VENDOR_IMAGE, vendorBooking.getVendor().getVendorAttrs().getVendorAuthCert());
+        templateTokens.put(EmailConstants.EMAIL_URL_LINK, messages.getMessage("email.url.link",locale));
 		
         Email email = new Email();
 		email.setFrom(merchantStore.getStorename());
@@ -318,6 +319,7 @@ public class VendorController extends AbstractController {
 	    templateTokens.put(EmailConstants.EMAIL_VENDOR_NAME, vendorBooking.getVendor().getVendorAttrs().getVendorName());
 	    templateTokens.put(EmailConstants.EMAIL_VENDOR_IMAGE, vendorBooking.getVendor().getVendorAttrs().getVendorAuthCert());
 	    templateTokens.put(EmailConstants.ADMIN_VENDOR_BOOKING_COMMENT, vendorBooking.getComment());
+	    templateTokens.put(EmailConstants.EMAIL_URL_LINK, messages.getMessage("email.url.link",locale));
 		
 	    Email email = new Email();
 		email.setFrom(merchantStore.getStorename());
@@ -366,6 +368,7 @@ public class VendorController extends AbstractController {
         templateTokens.put(EmailConstants.EMAIL_VENDOR_NAME, vendorBooking.getVendor().getVendorAttrs().getVendorName());
         templateTokens.put(EmailConstants.EMAIL_VENDOR_IMAGE, vendorBooking.getVendor().getVendorAttrs().getVendorAuthCert());
         templateTokens.put(EmailConstants.ADMIN_VENDOR_BOOKING_COMMENT, vendorBooking.getComment());
+        templateTokens.put(EmailConstants.EMAIL_URL_LINK, messages.getMessage("email.url.link",locale));
 		
         Email email = new Email();
 		email.setFrom(merchantStore.getStorename());

@@ -25,15 +25,15 @@
 								<td style="color:#333333; padding:16px 45px 0px; fomnt-family:Arial,sans-serif;" align="left">
 									<p style="margin:0px 0 10px;font-size:12px;font-weight:normal;line-height:20px;">Dear <b>${EMAIL_USER_FIRSTNAME}</b>,</p>
 									<!-- <p style="color:333;font-size:12px;line-height:15px;margin:0">Greetings from www.onesevenhome.com</p> -->
-									<p style="color:333;font-size:12px;line-height:15px;margin:0">The customer ${EMAIL_USER_FIRSTNAME} has requested for the service</p> 
-									
-									
+									<p style="color:333;font-size:12px;line-height:15px;margin:0">One Seven Home customer ${EMAIL_USER_FIRSTNAME} has requested for following service:</p>
+									<br/><p style="color:333;font-size:12px;line-height:15px;margin:0"><b><li>{EMAIL_SERVICE_TYPE}</li></b></p>
+
 								</td>
 							</tr>
-							
+
 					    </tbody>
 				    </table>
-				    
+
 	<table width="700" border="0" align="center" cellpadding="0" cellspacing="0"  >
       <tbody>
         <tr style="  ">
@@ -44,10 +44,10 @@
           <td align="center" valign="top" bgcolor="#000000"><div class="social-links"><a href="#" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a> <a href="#" target="_blank"><i class="fa fa-instagram" aria-hidden="true"></i></a> <a href="#" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a> </div>
               <table height="41" cellspacing="10" cellpadding="0" border="0">
                 <tbody>
-                  <tr>
-                    <td><a href="#" style="text-decoration:none" target="_blank" data-saferedirecturl="https://www.google.com/url?hl=en&amp;q=http://msupply.us12.list-manage.com/track/click?u%3D3b0e84c9f9c844a0179cc0a62%26id%3D0e4084eda1%26e%3D7fffac015d&amp;source=gmail&amp;ust=1503850177213000&amp;usg=AFQjCNH0fqt0m2NRfxbfx1uOHBo3FOwXOA"><img src="fb.jpg" alt="facebook"   width="25" height="25" border="0" class="CToWUd"> </a></td>
-                    <td><a href="#" style="text-decoration:none" target="_blank" data-saferedirecturl="https://www.google.com/url?hl=en&amp;q=http://msupply.us12.list-manage2.com/track/click?u%3D3b0e84c9f9c844a0179cc0a62%26id%3D608ffe4f16%26e%3D7fffac015d&amp;source=gmail&amp;ust=1503850177213000&amp;usg=AFQjCNG0KsPn79g4bg7BHeulsxVozr7lFw"><img src="ins.jpg" alt="twitter"   width="25" height="25" border="0" class="CToWUd"> </a></td>
-                    <td><a href="#" style="text-decoration:none" target="_blank" data-saferedirecturl="https://www.google.com/url?hl=en&amp;q=http://msupply.us12.list-manage.com/track/click?u%3D3b0e84c9f9c844a0179cc0a62%26id%3D00b1169cbc%26e%3D7fffac015d&amp;source=gmail&amp;ust=1503850177213000&amp;usg=AFQjCNG-RTPRz4mCGueFekEPr_QrGD4KMw"><img src="tw.jpg" alt="googleplus"  width="25" height="25" border="0" class="CToWUd"> </a></td>
+                 <tr>
+                    <td><a href="#" style="text-decoration:none" target="_blank" data-saferedirecturl="https://www.google.com/url?hl=en&amp;q=http://msupply.us12.list-manage.com/track/click?u%3D3b0e84c9f9c844a0179cc0a62%26id%3D0e4084eda1%26e%3D7fffac015d&amp;source=gmail&amp;ust=1503850177213000&amp;usg=AFQjCNH0fqt0m2NRfxbfx1uOHBo3FOwXOA"><img src="${EMAIL_URL_LINK}fb.jpg" alt="facebook"   width="25" height="25" border="0" class="CToWUd"> </a></td>
+                    <td><a href="#" style="text-decoration:none" target="_blank" data-saferedirecturl="https://www.google.com/url?hl=en&amp;q=http://msupply.us12.list-manage2.com/track/click?u%3D3b0e84c9f9c844a0179cc0a62%26id%3D608ffe4f16%26e%3D7fffac015d&amp;source=gmail&amp;ust=1503850177213000&amp;usg=AFQjCNG0KsPn79g4bg7BHeulsxVozr7lFw"><img src="${EMAIL_URL_LINK}ins.jpg" alt="twitter"   width="25" height="25" border="0" class="CToWUd"> </a></td>
+                    <td><a href="#" style="text-decoration:none" target="_blank" data-saferedirecturl="https://www.google.com/url?hl=en&amp;q=http://msupply.us12.list-manage.com/track/click?u%3D3b0e84c9f9c844a0179cc0a62%26id%3D00b1169cbc%26e%3D7fffac015d&amp;source=gmail&amp;ust=1503850177213000&amp;usg=AFQjCNG-RTPRz4mCGueFekEPr_QrGD4KMw"><img src="${EMAIL_URL_LINK}tw.jpg" alt="googleplus"  width="25" height="25" border="0" class="CToWUd"> </a></td>
                   </tr>
                 </tbody>
             </table></td>

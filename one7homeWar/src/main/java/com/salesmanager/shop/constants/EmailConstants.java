@@ -102,4 +102,8 @@ public class EmailConstants {
 	public static final String EMAIL_VENDOR_NAME = "EMAIL_VENDOR_NAME";
 	public static final String EMAIL_VENDOR_IMAGE = "EMAIL_VENDOR_IMAGE";
 	public static final String ADMIN_VENDOR_BOOKING_COMMENT = "ADMIN_VENDOR_BOOKING_COMMENT";
+	public static final String EMAIL_STATUS = "EMAIL_STATUS";
+	public static final String EMAIL_VENDOR_ADDED_PRODUCTS = "EMAIL_VENDOR_ADDED_PRODUCTS";
+	public static final String EMAIL_VENDOR_PRODUCTS = "EMAIL_VENDOR_PRODUCTS";
+	public static final String EMAIL_URL_LINK = "EMAIL_URL_LINK";
 }

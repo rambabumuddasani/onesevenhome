@@ -91,6 +91,7 @@ public class ServicesController extends AbstractController{
 	private final static String SERVICE_BOOKING_TMPL = "email_template_service_booking.ftl";
 	//private final static String ADMIN_SERVICE_BOOKING_TMPL = "email_template_admin_service_booking.ftl";
 	private final static String SERVICEPROVIDER_SERVICE_BOOKING_TMPL = "email_template_serviceprovider_service_booking.ftl";
+	private final static String SERVICE_BOOKING_CLOSE_TMPL = "email_template_service_booking_close.ftl";
 
 	@RequestMapping(value="/services", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
@@ -266,7 +267,8 @@ public class ServicesController extends AbstractController{
         //ServicesBooking serviceBooking = servicesBookingService.getById(servicesBooking.getId());
         templateTokens.put(EmailConstants.EMAIL_SERVICE_TYPE, services.getServiceType());
         templateTokens.put(EmailConstants.EMAIL_SERVICEPROVIDER_NAME, service.getVendorAttrs().getVendorName());
-        templateTokens.put(EmailConstants.EMAIL_SERVICEPRIVIDER_IMAGE,service.getVendorAttrs().getVendorAuthCert());
+        templateTokens.put(EmailConstants.EMAIL_SERVICEPRIVIDER_IMAGE,service.getUserProfile());
+        templateTokens.put(EmailConstants.EMAIL_URL_LINK, messages.getMessage("email.url.link",locale));
 		
         Email email = new Email();
 		email.setFrom(merchantStore.getStorename());
@@ -330,6 +332,7 @@ public class ServicesController extends AbstractController{
         templateTokens.put(EmailConstants.EMAIL_SERVICEPROVIDER_NAME, service.getVendorAttrs().getVendorName());
         templateTokens.put(EmailConstants.EMAIL_SERVICEPRIVIDER_IMAGE,service.getVendorAttrs().getVendorAuthCert());
         templateTokens.put(EmailConstants.EMAIL_SERVICE_TYPE, services.getServiceType());
+        templateTokens.put(EmailConstants.EMAIL_URL_LINK, messages.getMessage("email.url.link",locale));
         
 		Email email = new Email();
 		email.setFrom(merchantStore.getStorename());
@@ -534,6 +537,42 @@ public class ServicesController extends AbstractController{
 				servicesBookingStatusResponse.setErrormessage("Services Booking is already in open state");
 				
 			}
+			MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");
+	    	final Locale locale  = new Locale("en");
+	    	
+	        Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
+	        if(servicesBooking.getCustomer().getCustomerType().equals("0")) {
+	        templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, servicesBooking.getCustomer().getBilling().getFirstName());
+	        templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, servicesBooking.getCustomer().getBilling().getLastName());
+	        } else {
+	        	templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, servicesBooking.getCustomer().getVendorAttrs().getVendorName());
+	        	templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, "");
+	        }
+	        templateTokens.put(EmailConstants.EMAIL_USER_NAME, servicesBooking.getCustomer().getEmailAddress());
+	        //ServicesBooking serviceBooking = servicesBookingService.getById(servicesBooking.getId());
+	        Services services = servicesService.getById(servicesBooking.getServiceType().getId());
+	        templateTokens.put(EmailConstants.EMAIL_SERVICE_TYPE, services.getServiceType());
+	        templateTokens.put(EmailConstants.EMAIL_URL_LINK, messages.getMessage("email.url.link",locale));
+	        String status = null;
+	        if(servicesBookingStatusRequest.getStatus().equals("Y"))
+	        	status = "Closed";
+	        else 
+	        	status = "Opened";
+	        templateTokens.put(EmailConstants.EMAIL_STATUS,status);
+	       /* templateTokens.put(EmailConstants.EMAIL_SERVICEPROVIDER_NAME, service.getVendorAttrs().getVendorName());
+	        templateTokens.put(EmailConstants.EMAIL_SERVICEPRIVIDER_IMAGE,service.getUserProfile());*/
+			
+	        Email email = new Email();
+			email.setFrom(merchantStore.getStorename());
+			email.setFromEmail(merchantStore.getStoreEmailAddress());
+			email.setSubject(messages.getMessage("email.customer.service.booking.status",locale));
+			email.setTo(servicesBooking.getCustomer().getEmailAddress());
+			//email.setTo("surendervarmac@gmail.com");
+			email.setTemplateName(SERVICE_BOOKING_CLOSE_TMPL);
+			email.setTemplateTokens(templateTokens);
+
+			emailService.sendHtmlEmail(merchantStore, email);
+			LOGGER.debug("Email sent to customer");
 		}catch(Exception e) {
 			LOGGER.error("Error occured while closing services booking"+e.getMessage());
 			servicesBookingStatusResponse.setErrormessage("Error occured while closing services booking");

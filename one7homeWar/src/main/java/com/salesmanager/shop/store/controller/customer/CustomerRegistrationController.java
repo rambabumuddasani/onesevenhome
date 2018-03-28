@@ -850,11 +850,21 @@ public class CustomerRegistrationController extends AbstractController {
         //sending email
         String[] forgotPwdURLArg = {forgotPwdURL};
         Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
+        if(customer.getCustomerType().equals("0")) {
+            templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, customer.getBilling().getFirstName());
+            templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, customer.getBilling().getLastName());
+            } else {
+            	templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, customer.getVendorAttrs().getVendorName());
+            	templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, "");
+            }
+            templateTokens.put(EmailConstants.EMAIL_USER_NAME, customer.getEmailAddress());
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_USERNAME_LABEL, messages.getMessage("label.generic.username",locale));
-		templateTokens.put(EmailConstants.EMAIL_PASSWORD_LINK, messages.getMessage("email.user.text.forgotpwd.link",forgotPwdURLArg,locale));
+		//templateTokens.put(EmailConstants.EMAIL_PASSWORD_LINK, messages.getMessage("email.user.text.forgotpwd.link",forgotPwdURLArg,locale));
+		templateTokens.put(EmailConstants.EMAIL_PASSWORD_LINK, forgotPwdURL);
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_PASSWORD_LABEL, messages.getMessage("label.generic.password",locale));
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
+		templateTokens.put(EmailConstants.EMAIL_URL_LINK, messages.getMessage("email.url.link",locale));
 
 		
 		Email email = new Email();
@@ -918,11 +928,20 @@ public class CustomerRegistrationController extends AbstractController {
         
         //sending email
         Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
+        if(customer.getCustomerType().equals("0")) {
+            templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, customer.getBilling().getFirstName());
+            templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, customer.getBilling().getLastName());
+            } else {
+            	templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, customer.getVendorAttrs().getVendorName());
+            	templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, "");
+            }
+        templateTokens.put(EmailConstants.EMAIL_USER_NAME, customer.getEmailAddress());
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_USERNAME_LABEL, messages.getMessage("label.generic.username",locale));
 		templateTokens.put(EmailConstants.EMAIL_RESET_PASSWORD_TXT, messages.getMessage("email.user.resetpassword.text",locale));
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_PASSWORD_LABEL, messages.getMessage("label.generic.password",locale));
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
+		templateTokens.put(EmailConstants.EMAIL_URL_LINK, messages.getMessage("email.url.link",locale));
 
 		
 		Email email = new Email();
@@ -1200,6 +1219,7 @@ public class CustomerRegistrationController extends AbstractController {
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_PASSWORD_LABEL, messages.getMessage("label.generic.password",locale));
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
+		templateTokens.put(EmailConstants.EMAIL_URL_LINK, messages.getMessage("email.url.link",locale));
 
 		
 		Email email = new Email();
@@ -1639,6 +1659,7 @@ public class CustomerRegistrationController extends AbstractController {
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_PASSWORD_LABEL, messages.getMessage("label.generic.password",locale));
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
+		templateTokens.put(EmailConstants.EMAIL_URL_LINK, messages.getMessage("email.url.link",locale));
 
 		
 		Email email = new Email();

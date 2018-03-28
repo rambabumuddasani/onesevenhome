@@ -1,10 +1,13 @@
 package com.salesmanager.shop.controller.vendor.product;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -29,7 +32,9 @@ import com.salesmanager.core.business.services.merchant.MerchantStoreService;
 import com.salesmanager.core.business.services.system.EmailService;
 import com.salesmanager.core.business.vendor.product.services.VendorProductService;
 import com.salesmanager.core.model.catalog.product.Product;
+import com.salesmanager.core.model.catalog.product.availability.ProductAvailability;
 import com.salesmanager.core.model.catalog.product.image.ProductImage;
+import com.salesmanager.core.model.catalog.product.price.ProductPrice;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.product.vendor.VendorProduct;
@@ -96,6 +101,10 @@ public class VendorProductController extends AbstractController {
 		List<VendorProduct> vpList = new ArrayList<VendorProduct>();
 		List<ProductsInfo> vList = new ArrayList<ProductsInfo>();
 
+		StringBuilder sb = new StringBuilder();
+		String startLI = "<li>";
+		String endLI = "</li>";
+		List<Long> productInfoList = new ArrayList<Long>();
 		for(String productId : productIds){
 			Product dbProduct = productService.getById(Long.parseLong(productId));
 			VendorProduct vendorProduct = new VendorProduct();
@@ -106,8 +115,43 @@ public class VendorProductController extends AbstractController {
 			vendorProduct.setVendorWishListed(Boolean.FALSE);
 			productsInfo.setProductId(dbProduct.getId());
 			productsInfo.setProductName(dbProduct.getProductDescription().getName());
+			//<li>{EMAIL_VENDOR_ADDED_PRODUCTS}</li>
+			sb.append(startLI).append(dbProduct.getProductDescription().getName()).append(endLI);
+			productInfoList.add(dbProduct.getId());
 			vpList.add(vendorProduct);
 			vList.add(productsInfo);
+		}
+		String url ="http://rainiersoft.com/clients/onesevenhome/";
+		String productName = "";
+		String productDescription = "";
+		BigDecimal productPrice = null;
+		String productImage = "";
+		Iterator it = productInfoList.iterator();
+		while(it.hasNext()) {
+			Long pId = (Long)it.next();
+			Product product = productService.getById(pId);
+			productName = product.getProductDescription().getName();
+			productDescription = product.getProductDescription().getDescription();
+			productImage = url.concat(product.getProductImage().getProductImageUrl());
+			ProductAvailability productAvailability = null;
+			ProductPrice pPrice = null;
+			Set<ProductAvailability> availabilities = product.getAvailabilities();
+			if(availabilities!=null && availabilities.size()>0) {
+				
+				for(ProductAvailability availability : availabilities) {
+					if(availability.getRegion().equals(com.salesmanager.core.business.constants.Constants.ALL_REGIONS)) {
+						productAvailability = availability;
+						Set<ProductPrice> prices = availability.getPrices();
+						for(ProductPrice price : prices) {
+							if(price.isDefaultPrice()) {
+								pPrice = price;
+							}
+						}
+					}
+				}
+			}
+			productPrice = pPrice.getProductPriceAmount();
+			break;
 		}
 		LOGGER.debug("vpList:"+vpList.size());
 		vendorProductService.save(vpList);
@@ -120,20 +164,27 @@ public class VendorProductController extends AbstractController {
 		//sending email
 		MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");  
 		final Locale locale  = new Locale("en");
-		String[] vendorName = {customer.getVendorAttrs().getVendorName()};
+		//String[] vendorName = {customer.getVendorAttrs().getVendorName()};
+		String vendorName = customer.getVendorAttrs().getVendorName();
 		Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
+		templateTokens.put(EmailConstants.EMAIL_VENDOR_NAME,vendorName);
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_USERNAME_LABEL, messages.getMessage("label.generic.username",locale));
-		templateTokens.put(EmailConstants.EMAIL_VENDOR_ADD_PRODUCTS_TXT, messages.getMessage("email.vendor.addproducts.text",vendorName,locale));
+		//templateTokens.put(EmailConstants.EMAIL_VENDOR_ADD_PRODUCTS_TXT, messages.getMessage("email.vendor.addproducts.text",vendorName,locale));
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_PASSWORD_LABEL, messages.getMessage("label.generic.password",locale));
 		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
-		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
+		templateTokens.put(EmailConstants.EMAIL_VENDOR_ADDED_PRODUCTS,sb.toString());
+		templateTokens.put(EmailConstants.EMAIL_PRODUCT_NAME,productName);
+		templateTokens.put(EmailConstants.EMAIL_PRODUCT_DESCRIPTION,productDescription);
+		templateTokens.put(EmailConstants.EMAIL_PRODUCT_IMAGE_URL,productImage);
+		templateTokens.put(EmailConstants.EMAIL_PRODUCT_PRICE,productPrice.toString());
+		templateTokens.put(EmailConstants.EMAIL_URL_LINK, messages.getMessage("email.url.link",locale));
 
 
 		Email email = new Email();
 		email.setFrom(merchantStore.getStorename());
 		email.setFromEmail(merchantStore.getStoreEmailAddress());
 		email.setSubject(messages.getMessage("email.vendor.addproducts.text.subject",locale));
-		email.setTo(merchantStore.getStoreEmailAddress());
+		email.setTo(customer.getEmailAddress());
 		email.setTemplateName(VENDOR_ADD_PRODUCTS_TPL);
 		email.setTemplateTokens(templateTokens);
 

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -47,6 +48,7 @@ import com.salesmanager.core.business.services.catalog.product.type.ProductTypeS
 import com.salesmanager.core.business.services.customer.CustomerService;
 import com.salesmanager.core.business.services.customer.testmonial.review.CustomerTestmonialService;
 import com.salesmanager.core.business.services.historymanage.HistoryManagementService;
+import com.salesmanager.core.business.services.homepage.customization.headers.CustomizationService;
 import com.salesmanager.core.business.services.homepage.offers.HomePageOffersService;
 import com.salesmanager.core.business.services.image.brand.BrandImageService;
 import com.salesmanager.core.business.services.merchant.MerchantStoreService;
@@ -73,6 +75,7 @@ import com.salesmanager.core.model.customer.CustomerTestimonial;
 import com.salesmanager.core.model.customer.MachineryPortfolio;
 import com.salesmanager.core.model.customer.VendorBooking;
 import com.salesmanager.core.model.history.HistoryManagement;
+import com.salesmanager.core.model.homepage.customization.headers.Customizations;
 import com.salesmanager.core.model.homepage.offers.HomePageOffers;
 import com.salesmanager.core.model.image.brand.BrandImage;
 import com.salesmanager.core.model.merchant.MerchantStore;
@@ -106,6 +109,7 @@ public class AdminController extends AbstractController {
 	private static final String ADIMIN_APPROVE_PRODUCT_TMPL = "email_template_vendor_approve_products.ftl";
 	private static final String ADIMIN_ADD_PRODUCT_TMPL = "email_template_admin_vendor_postrequirement.ftl";
 	private static final String VENDOR_REGISTRATION_ADMIN_APPROVE_TMPL = "email_template_vendor_registration_admin_approve.ftl";
+	private static final String ADMIN_APPROVE_VENDOR_ADD_PRODUCTS_TPL = "email_template_vendor_approve_products.ftl";
 	@Inject
 	private MerchantStoreService merchantStoreService;
 	
@@ -184,6 +188,9 @@ public class AdminController extends AbstractController {
 	
 	@Inject
 	private HomePageOffersService homePageOffersService;
+	
+	@Inject
+	private CustomizationService customizationService;
 	
     // Admin update store address
 	@RequestMapping(value="/admin/updatestore", method = RequestMethod.POST, 
@@ -868,6 +875,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
 		templateTokens.put(EmailConstants.EMAIL_PRODUCT_IMAGE_URL, imageURL);
 		templateTokens.put(EmailConstants.EMAIL_PRODUCT_PRICE, productPrice.getProductPriceAmount().toString());
 		templateTokens.put(EmailConstants.EMAIL_PRODUCT_DESCRIPTION, vendorProduct.getProduct().getProductDescription().getDescription());
+		templateTokens.put(EmailConstants.EMAIL_URL_LINK, messages.getMessage("email.url.link",locale));
 		
 		
 		Email email = new Email();
@@ -1684,6 +1692,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	}
 		templateTokens.put(EmailConstants.EMAIL_PRODUCT_LABEL, messages.getMessage("email.vendor.add.request.product", locale));
 		templateTokens.put(EmailConstants.EMAIL_CATEGORY, category.getDescription().getName());
+		templateTokens.put(EmailConstants.EMAIL_URL_LINK, messages.getMessage("email.url.link",locale));
 		
 		Email email = new Email();
 		email.setFrom(merchantStore.getStorename());
@@ -1723,6 +1732,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     		
 		templateTokens.put(EmailConstants.EMAIL_PRODUCT_LABEL, messages.getMessage("email.vendor.add.request.product", locale));
 		templateTokens.put(EmailConstants.EMAIL_CATEGORY, category.getDescription().getName());
+		templateTokens.put(EmailConstants.EMAIL_URL_LINK, messages.getMessage("email.url.link",locale));
 		
 		Email email = new Email();
 		email.setFrom(merchantStore.getStorename());
@@ -1801,6 +1811,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		templateTokens.put(EmailConstants.EMAIL_PRODUCT_LABEL, messages.getMessage("email.vendor.add.request.product", locale));
 		templateTokens.put(EmailConstants.EMAIL_CATEGORY, category.getDescription().getName());
 		templateTokens.put(EmailConstants.EMAIL_AMIN_RESPONSE_MESSAGE, postRequirement.getResponseMessage());
+		templateTokens.put(EmailConstants.EMAIL_URL_LINK, messages.getMessage("email.url.link",locale));
 		
 		Email email = new Email();
 		email.setFrom(merchantStore.getStorename());
@@ -1938,13 +1949,18 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 			LOGGER.debug("Entered adminApproveProductsByVendor");
 			
 			ActivateProductResponse activateProductResponse = new ActivateProductResponse();
-			
+			String productStatus = "";
+			String startLI = "<li>";
+			String endLI = "</li>";
+			StringBuilder sb = new StringBuilder();
+			String vendorName = "";
+			Customer vendor = null;
 			try {
-				
+			List<Long> productInfoList = new ArrayList<Long>();	
 			List<Long> vendorProductIds = approveVendorProductRequest.getVendorProductIds();
 			
 			//List<VendorProduct> vendorProductsList = vendorProductService.findProductsByVendor(approveVendorProductRequest.getVendorId());
-			
+			Map<String,String> vendorProductStatus = new HashMap<String,String>();
 			for(Long vendorProductId : vendorProductIds) {
 				 VendorProduct vendorProduct = vendorProductService.getVendorProductById(vendorProductId);
 			    	if(vendorProduct==null) {
@@ -1952,13 +1968,62 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 			    		activateProductResponse.setStatus(FALSE);
 			    		return activateProductResponse;
 			    	}
+			    	Long productId = vendorProduct.getProduct().getId();
+			    	productInfoList.add(productId);
+			    	vendorName = vendorProduct.getCustomer().getVendorAttrs().getVendorName();
+			    	vendor = customerService.getById(vendorProduct.getCustomer().getId());
+			    	String productName = vendorProduct.getProduct().getProductDescription().getName();
+			    	if(approveVendorProductRequest.isStatus()==true)
+			    	    productStatus = "Approved";
+			    	else 
+			    		productStatus = "Declined";
+			    	vendorProductStatus.put(productName,productStatus);
 			    	// Approving and updating vendor product
 			    	vendorProduct.setAdminActivatedDate(new Date());
 			    	vendorProduct.setAdminActivated(approveVendorProductRequest.isStatus());
 			    	vendorProductService.update(vendorProduct);
 	
 			}
-			
+			Set<Entry<String,String>> vendorProductSet = vendorProductStatus.entrySet();
+			for (Entry<String, String> entry : vendorProductSet) 
+	        {
+	            String pName = entry.getKey();
+	            String pStatus = entry.getValue();
+	            sb.append(startLI).append(pName).append("  ").append(pStatus).append(endLI);
+	            
+	        }
+			String url ="http://rainiersoft.com/clients/onesevenhome/";
+			String productName = "";
+			String productDescription = "";
+			BigDecimal productPrice = null;
+			String productImage = "";
+			Iterator it = productInfoList.iterator();
+			while(it.hasNext()) {
+				Long pId = (Long)it.next();
+				Product product = productService.getById(pId);
+				productName = product.getProductDescription().getName();
+				productDescription = product.getProductDescription().getDescription();
+				productImage = url.concat(product.getProductImage().getProductImageUrl());
+				ProductAvailability productAvailability = null;
+				ProductPrice pPrice = null;
+				Set<ProductAvailability> availabilities = product.getAvailabilities();
+				if(availabilities!=null && availabilities.size()>0) {
+					
+					for(ProductAvailability availability : availabilities) {
+						if(availability.getRegion().equals(com.salesmanager.core.business.constants.Constants.ALL_REGIONS)) {
+							productAvailability = availability;
+							Set<ProductPrice> prices = availability.getPrices();
+							for(ProductPrice price : prices) {
+								if(price.isDefaultPrice()) {
+									pPrice = price;
+								}
+							}
+						}
+					}
+				}
+				productPrice = pPrice.getProductPriceAmount();
+				break;
+			}
 			if(approveVendorProductRequest.isStatus()==true) {
 	    		activateProductResponse.setSuccessMsg("Product(s) Approved");
 	    		activateProductResponse.setStatus(TRUE);
@@ -1966,6 +2031,29 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    		activateProductResponse.setSuccessMsg("Product(s) Declined");
 	    		activateProductResponse.setStatus(TRUE);
 	    	}
+			MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");  
+			final Locale locale  = new Locale("en");
+			
+			Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
+			templateTokens.put(EmailConstants.EMAIL_VENDOR_NAME,vendorName);
+			templateTokens.put(EmailConstants.EMAIL_VENDOR_PRODUCTS,sb.toString());
+			templateTokens.put(EmailConstants.EMAIL_PRODUCT_NAME,productName);
+			templateTokens.put(EmailConstants.EMAIL_PRODUCT_DESCRIPTION,productDescription);
+			templateTokens.put(EmailConstants.EMAIL_PRODUCT_IMAGE_URL,productImage);
+			templateTokens.put(EmailConstants.EMAIL_PRODUCT_PRICE,productPrice.toString());
+			templateTokens.put(EmailConstants.EMAIL_URL_LINK, messages.getMessage("email.url.link",locale));
+
+
+
+			Email email = new Email();
+			email.setFrom(merchantStore.getStorename());
+			email.setFromEmail(merchantStore.getStoreEmailAddress());
+			email.setSubject(messages.getMessage("email.vendor.addproducts.text.subject",locale));
+			email.setTo(vendor.getEmailAddress());
+			email.setTemplateName(ADMIN_APPROVE_VENDOR_ADD_PRODUCTS_TPL);
+			email.setTemplateTokens(templateTokens);
+
+			emailService.sendHtmlEmail(merchantStore, email);
 		
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -3339,6 +3427,52 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    	LOGGER.debug("Ended getHomePageOffers");
 	    	return paginatedResponse;
 	    	
+	    	
+	    }
+	    // Customization headers
+	    @RequestMapping(value="/getCustomizations", method = RequestMethod.POST)
+		@ResponseBody
+		public CustomizationHeaderResponse getCustomizations(@RequestBody CustomizationHeaderRequest customizationHeaderRequest) throws Exception{
+			
+	    	LOGGER.debug("Entered getCustomizations");
+	    	
+	    	CustomizationHeaderResponse customizationHeaderResponse = new CustomizationHeaderResponse();
+	    	
+	    	String customizationId = customizationHeaderRequest.getCustomizationId();
+	    	
+	    	LOGGER.debug("CustomizationId : "+customizationId);
+	    	
+	    	try {
+	    		
+	    	Customizations cusomizations = customizationService.getByCustomizationId(customizationId);
+	    	
+	    	if(cusomizations==null){
+	    		customizationHeaderResponse.setErrorMessage("Customizatiom header does not exist for the customization id "+customizationId);
+	    		customizationHeaderResponse.setStatus(FALSE);
+	    		return customizationHeaderResponse;
+	    	}
+	    	
+	    	CustomizationVO customizationVO = new CustomizationVO();
+	    	
+	    	customizationVO.setCustomizationId(cusomizations.getCustomizationId());
+	    	customizationVO.setHeader(cusomizations.getHeader());
+	    	customizationVO.setSubHeader(cusomizations.getSubHeader());
+	    	
+	    	customizationHeaderResponse.setCustomizations(customizationVO);
+	    	
+	    	customizationHeaderResponse.setSuccessMessage("Customization header retrieved sucessfully");
+	    	customizationHeaderResponse.setStatus(TRUE);
+	    	
+	    	}catch(Exception e) {
+	    		
+	    		LOGGER.debug("Error while retrieving customization header");
+	    		customizationHeaderResponse.setErrorMessage("Error  while retrieving customization header "+e.getMessage());
+	    		customizationHeaderResponse.setStatus(FALSE);
+	    		return customizationHeaderResponse;
+	    	}
+	    	
+	    	LOGGER.debug("Ended getCustomizations");
+	    	return customizationHeaderResponse;
 	    	
 	    }
 }

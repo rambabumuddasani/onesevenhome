@@ -24,78 +24,20 @@
 							<tr>
 								<td style="color:#333333; padding:16px 45px 0px; fomnt-family:Arial,sans-serif;" align="left">
 									<p style="margin:0px 0 10px;font-size:12px;font-weight:normal;line-height:20px;">Dear <b>${EMAIL_USER_FIRSTNAME}  ${EMAIL_USER_LASTNAME}</b>,</p>
-									<!--<p style="color:333;font-size:12px;line-height:15px;margin:0">Greetings from www.onesevenhome.com</p>-->
-									<p style="color:333;font-size:12px;line-height:15px;margin:10px 0 10px 0;">Thank you for chosing ${EMAIL_SERVICE_TYPE} offered by www.onesevenhome.com. We hope you are happy with our services.</p>
-									<p style="color:333;font-size:12px;line-height:15px;margin:10px 0 10px 0;">Our comments: <b>${ADMIN_VENDOR_BOOKING_COMMENT}</b></p>
+									<p style="color:333;font-size:12px;line-height:15px;margin:0">Greetings from www.onesevenhome.com</p>
+									<p style="color:333;font-size:12px;line-height:15px;margin:10px 0 10px 0;">Thank you for showing your interest on services offered by One Seven Home</p>
+									<p style="color:333;font-size:12px;line-height:15px;margin:10px 0 10px 0;">Your request for <b>${EMAIL_SERVICE_TYPE}</b> has been ${EMAIL_STATUS}</p>
 								</td>
 							</tr>
 					    </tbody>
 				    </table>
-				    <!--<table width="700" cellspacing="0" cellpadding="0" border="0" align="left" style="background:#fff;border-top:3px solid #eaeced;border-bottom:3px solid #eaeced;clear:both">
-					    <tbody>
-							<tr>
-								<td align="center" style="color:#333333">
-									<p style="margin:45px 0;font-size:22px;font-weight:bold;line-height:20px">${EMAIL_VENDOR_NAME} </p>
-								</td>
-							</tr>
-					    </tbody>
-				    </table> -->
-					 <!-- <table width="700" cellspacing="0" cellpadding="0" border="0" align="left" style="background:#ededed;border-top:3px solid #eaeced;border-bottom:3px solid #eaeced;clear:both">
-					    <tbody>
-							<tr>
-								<td class="m_-6508970810580465838m_9166124052267274536m_6698583959415294282section-padding" style="padding:0 36px 36px">
-									<table width="100%" cellspacing="0" cellpadding="0" border="0">
-										<tbody>
-											<tr align="left">
-												<td width="100%" align="left">
-												    <table align="left" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:700px">
-                                                        <tbody><tr>
-															<td width="100%" align="left" valign="top" class="m_-6508970810580465838m_9166124052267274536m_6698583959415294282padding">
-															    <table cellpadding="0" cellspacing="0" border="0" width="100%">
-																	<tbody><tr>
-																		<td align="middle" valign="top">
-																		    <a href="#" target="_blank" data-saferedirecturl="#">
-																			   <img src="${EMAIL_VENDOR_IMAGE}" width="300" height="250" border="0" class="CToWUd">																			</a>																		</td>
-																	</tr>
-																	<tr>
-																		<td width="299" align="middle">
-																		  <table bgcolor="#fff" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:299px;padding:20px 13px 16px 13px;border-bottom:4px solid #85a7a9">
-																				<tbody><tr>
-																					<td align="left" style="color:#333;font-size:16px;font-weight:bold;padding-bottom:13px">
-																						<span>Rating: Specify Ratings</span>
-																					</td>
-																				</tr>
-																		  </tbody></table>
-																		</td>
-																	</tr>
-																</tbody></table>
-															</td>
-													    </tr>
-													</tbody></table>
-												</td>
-											</tr>
-										</tbody>
-									</table>
-								</td>
-							</tr>
-
-					    </tbody>
-					</table>
-				</td>
-			</tr>
-
-			<tr>
-			  <td>&nbsp;</td>
-			</tr>
-		</tbody>
-  </table> -->
 	<table width="700" border="0" align="center" cellpadding="0" cellspacing="0"  >
       <tbody>
         <tr style="  ">
           <td style="color:#000000; background:#fff; padding:20px;"><p style="margin-top:0;font-size:14px;font-weight:normal;line-height:20px;margin-bottom:10px; font-family:Arial, Helvetica, sans-serif; "><b>About OneSevenHome</b></p>
               <p style="font-size:11px;font-family:Arial,sans-serif;line-height:15px;margin-bottom:10px">OneSevenHome is India's largest B2B marketplace for all kind of materials such as Bricks, Cement, Sand, Wood, Sanitary, Interiors etc. OneSevenHome provides a unique platform for connecting Vendors with Builders and Contractors.</p></td>
         </tr>
-      <tr>
+         <tr>
           <td align="center" valign="top" bgcolor="#000000"><div class="social-links"><a href="#" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a> <a href="#" target="_blank"><i class="fa fa-instagram" aria-hidden="true"></i></a> <a href="#" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a> </div>
               <table height="41" cellspacing="10" cellpadding="0" border="0">
                 <tbody>
