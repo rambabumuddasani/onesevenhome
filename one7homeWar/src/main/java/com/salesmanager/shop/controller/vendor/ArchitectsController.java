@@ -425,7 +425,15 @@ public class ArchitectsController extends AbstractController {
 			if(userArchitectsRequest.getStatus().equals("ALL")) {
 				
 				architectsPortfolios = architectsPortfolioService.getPortFoliosByVendorId(userArchitectsRequest.getVendorId());
-				
+				if(architectsPortfolios.isEmpty()){
+					Customer vendor = customerService.getById(userArchitectsRequest.getVendorId());
+					
+					architectPaginatedResponse.setVendorName(vendor.getVendorAttrs().getVendorName());
+					architectPaginatedResponse.setVendorDescription(vendor.getVendorAttrs().getVendorDescription());
+					architectPaginatedResponse.setVendorShortDescription(vendor.getVendorAttrs().getVendorShortDescription());
+					architectPaginatedResponse.setVendorImageURL(vendor.getUserProfile());
+					return architectPaginatedResponse;
+				}
 				for(ArchitectsPortfolio architectsPortfolio : architectsPortfolios) {
 				
 					ArchitectsPortfolioVO architectsPortfolioVO = new ArchitectsPortfolioVO();
@@ -451,7 +459,15 @@ public class ArchitectsController extends AbstractController {
 			} else {
 				
 				architectsPortfolios = architectsPortfolioService.getPortfoliosBasedOnStatusAndVendorId(userArchitectsRequest.getStatus(),userArchitectsRequest.getVendorId());
-				
+				if(architectsPortfolios.isEmpty()){
+					Customer vendor = customerService.getById(userArchitectsRequest.getVendorId());
+					
+					architectPaginatedResponse.setVendorName(vendor.getVendorAttrs().getVendorName());
+					architectPaginatedResponse.setVendorDescription(vendor.getVendorAttrs().getVendorDescription());
+					architectPaginatedResponse.setVendorShortDescription(vendor.getVendorAttrs().getVendorShortDescription());
+					architectPaginatedResponse.setVendorImageURL(vendor.getUserProfile());
+					return architectPaginatedResponse;
+				}
 				for(ArchitectsPortfolio architectsPortfolio : architectsPortfolios) {
 				
 					ArchitectsPortfolioVO architectsPortfolioVO = new ArchitectsPortfolioVO();
@@ -468,7 +484,7 @@ public class ArchitectsController extends AbstractController {
 					architectPaginatedResponse.setVendorName(architectsPortfolio.getCustomer().getVendorAttrs().getVendorName());
 					architectPaginatedResponse.setVendorDescription(architectsPortfolio.getCustomer().getVendorAttrs().getVendorDescription());
 					architectPaginatedResponse.setVendorShortDescription(architectsPortfolio.getCustomer().getVendorAttrs().getVendorShortDescription());
-					architectPaginatedResponse.setVendorImageURL(architectsPortfolio.getCustomer().getVendorAttrs().getVendorAuthCert());
+					architectPaginatedResponse.setVendorImageURL(architectsPortfolio.getCustomer().getUserProfile());
 					architectsPortfolioVO.setStatus(architectsPortfolio.getStatus());
 					architectsPortfolioList.add(architectsPortfolioVO);
 					
