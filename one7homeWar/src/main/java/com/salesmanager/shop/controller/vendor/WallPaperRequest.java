@@ -1,9 +1,14 @@
 package com.salesmanager.shop.controller.vendor;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
-public class WallPaperRequest {
+public class WallPaperRequest implements Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1194851172261569559L;
 	private String portfolioName;
 	private Long vendorId;
 	private Long portfolioId;
@@ -12,6 +17,7 @@ public class WallPaperRequest {
 	private String thickness;
 	private String brand;
 	private String status; 
+	private BigDecimal serviceCharges;
 	
 	public String getPortfolioName() {
 		return portfolioName;
@@ -75,6 +81,14 @@ public class WallPaperRequest {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public BigDecimal getServiceCharges() {
+		return serviceCharges;
+	}
+
+	public void setServiceCharges(BigDecimal serviceCharges) {
+		this.serviceCharges = serviceCharges;
 	}
 	
 }

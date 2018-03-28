@@ -11,6 +11,7 @@ public class WallPaperPortfolioVO {
 	private String size;
 	private String thickness;
 	private String brand;
+	private BigDecimal serviceCharges;
 	private String vendorName;
 	private String vendorImageURL;
 	private String vendorDescription;
@@ -94,5 +95,11 @@ public class WallPaperPortfolioVO {
 	}
 	public void setImageURL(String imageURL) {
 		this.imageURL = imageURL;
+	}
+	public BigDecimal getServiceCharges() {
+		return serviceCharges;
+	}
+	public void setServiceCharges(BigDecimal serviceCharges) {
+		this.serviceCharges = serviceCharges;
 	}
 }

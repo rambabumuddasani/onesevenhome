@@ -13,6 +13,7 @@ public class WallPaperDetails {
 	private String thickness;
 	private String brand;
 	private String status;
+	private BigDecimal serviceCharges;
 	public Long getPortfolioId() {
 		return portfolioId;
 	}
@@ -66,5 +67,11 @@ public class WallPaperDetails {
 	}
 	public void setStatus(String status) {
 		this.status = status;
+	}
+	public BigDecimal getServiceCharges() {
+		return serviceCharges;
+	}
+	public void setServiceCharges(BigDecimal serviceCharges) {
+		this.serviceCharges = serviceCharges;
 	}
 }

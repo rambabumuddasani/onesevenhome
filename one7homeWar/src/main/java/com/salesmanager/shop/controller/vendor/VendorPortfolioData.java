@@ -16,6 +16,7 @@ public class VendorPortfolioData {
 	private String equipmentName;
 	private BigDecimal equipmentPrice;
 	private String hiringType;
+	private BigDecimal serviceCharges;
 	
 	public Long getPortfolioId() {
 		return portfolioId;
@@ -111,6 +112,14 @@ public class VendorPortfolioData {
 
 	public void setHiringType(String hiringType) {
 		this.hiringType = hiringType;
+	}
+
+	public BigDecimal getServiceCharges() {
+		return serviceCharges;
+	}
+
+	public void setServiceCharges(BigDecimal serviceCharges) {
+		this.serviceCharges = serviceCharges;
 	}
 	
 }

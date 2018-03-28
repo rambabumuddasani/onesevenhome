@@ -120,6 +120,7 @@ public class WallPaperController extends AbstractController {
 	    		wallPaperPortfolio.setPrice(wallPaperRequest.getPrice());
 	    		wallPaperPortfolio.setSize(wallPaperRequest.getSize());
 	    		wallPaperPortfolio.setThickness(wallPaperRequest.getThickness());
+	    		wallPaperPortfolio.setServiceCharges(wallPaperRequest.getServiceCharges());
 	    		wallPaperPortfolioService.save(wallPaperPortfolio);
 	    		
 	    		wallPaperResponse.setStatus(true);
@@ -156,6 +157,7 @@ public class WallPaperController extends AbstractController {
 	    		vendorPortfolioData.setPrice(portfolio.getPrice());
 	    		vendorPortfolioData.setSize(portfolio.getSize());
 	    		vendorPortfolioData.setThickness(portfolio.getThickness());
+	    		vendorPortfolioData.setServiceCharges(portfolio.getServiceCharges());
 	    		vendorPortfolioList.add(vendorPortfolioData);
 	    	}
 	    	wallPaperResponse.setStatus(true);
@@ -240,6 +242,7 @@ public class WallPaperController extends AbstractController {
 	    		wallPaperPortfolio.setSize(wallPaperRequest.getSize());
 	    		wallPaperPortfolio.setThickness(wallPaperRequest.getThickness());
 	    		wallPaperPortfolio.setPortfolioName(wallPaperRequest.getPortfolioName());
+	    		wallPaperPortfolio.setServiceCharges(wallPaperRequest.getServiceCharges());
 	    		wallPaperPortfolioService.update(wallPaperPortfolio);
 	    		
 	    		wallPaperResponse.setStatus(true);
@@ -297,6 +300,7 @@ public class WallPaperController extends AbstractController {
 				wallPaperPortfolioVO.setPrice(wallPaperPortfolio.getPrice());
 				wallPaperPortfolioVO.setStatus(wallPaperPortfolio.getStatus());
 				wallPaperPortfolioVO.setImageURL(wallPaperPortfolio.getImageURL());
+				wallPaperPortfolioVO.setServiceCharges(wallPaperPortfolio.getServiceCharges());
 				
 				wallPaperPortfolioVO.setVendorId(wallPaperPortfolio.getCustomer().getId());
 				wallPaperPortfolioVO.setVendorName(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorName());
@@ -323,6 +327,7 @@ public class WallPaperController extends AbstractController {
 					wallPaperPortfolioVO.setPrice(wallPaperPortfolio.getPrice());
 					wallPaperPortfolioVO.setStatus(wallPaperPortfolio.getStatus());
 					wallPaperPortfolioVO.setImageURL(wallPaperPortfolio.getImageURL());
+					wallPaperPortfolioVO.setServiceCharges(wallPaperPortfolio.getServiceCharges());
 					
 					wallPaperPortfolioVO.setVendorId(wallPaperPortfolio.getCustomer().getId());
 					wallPaperPortfolioVO.setVendorName(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorName());
@@ -447,6 +452,7 @@ public class WallPaperController extends AbstractController {
 				wallPaperPortfolioVO.setPrice(wallPaperPortfolio.getPrice());
 				wallPaperPortfolioVO.setStatus(wallPaperPortfolio.getStatus());
 				wallPaperPortfolioVO.setImageURL(wallPaperPortfolio.getImageURL());
+				wallPaperPortfolioVO.setServiceCharges(wallPaperPortfolio.getServiceCharges());
 				
 				wallPaperPortfolioVO.setVendorId(wallPaperPortfolio.getCustomer().getId());
 				paginatedResponse.setVendorName(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorName());
@@ -473,6 +479,7 @@ public class WallPaperController extends AbstractController {
 					wallPaperPortfolioVO.setPrice(wallPaperPortfolio.getPrice());
 					wallPaperPortfolioVO.setStatus(wallPaperPortfolio.getStatus());
 					wallPaperPortfolioVO.setImageURL(wallPaperPortfolio.getImageURL());
+					wallPaperPortfolioVO.setServiceCharges(wallPaperPortfolio.getServiceCharges());
 					
 					wallPaperPortfolioVO.setVendorId(wallPaperPortfolio.getCustomer().getId());
 					paginatedResponse.setVendorName(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorName());
@@ -532,6 +539,7 @@ public class WallPaperController extends AbstractController {
 		wallPaperDetails.setThickness(wallPaperPortfolio.getThickness());
 		wallPaperDetails.setPrice(wallPaperPortfolio.getPrice());
 		wallPaperDetails.setStatus(wallPaperPortfolio.getStatus());
+		wallPaperDetails.setServiceCharges(wallPaperPortfolio.getServiceCharges());
 		wallPaperDetails.setVendorId(wallPaperPortfolio.getCustomer().getId());
 		
 		wallPaperDetailsResponse.setWallPaperDetails(wallPaperDetails);

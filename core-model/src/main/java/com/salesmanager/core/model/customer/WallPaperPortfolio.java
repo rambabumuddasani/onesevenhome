@@ -65,6 +65,9 @@ public class WallPaperPortfolio extends SalesManagerEntity<Long, WallPaperPortfo
 	
 	@Column (name ="ADMIN_APPROVE_STATUS", length=5)
 	private String status = "N";
+	
+	@Column (name ="SERVICE_CHARGES")
+	private BigDecimal serviceCharges;
 
 	@Transient
 	private Integer quantity = new Integer(0);
@@ -155,6 +158,14 @@ public class WallPaperPortfolio extends SalesManagerEntity<Long, WallPaperPortfo
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public BigDecimal getServiceCharges() {
+		return serviceCharges;
+	}
+
+	public void setServiceCharges(BigDecimal serviceCharges) {
+		this.serviceCharges = serviceCharges;
 	}
 
 	
