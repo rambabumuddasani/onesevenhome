@@ -267,7 +267,10 @@ public class ServicesController extends AbstractController{
         //ServicesBooking serviceBooking = servicesBookingService.getById(servicesBooking.getId());
         templateTokens.put(EmailConstants.EMAIL_SERVICE_TYPE, services.getServiceType());
         templateTokens.put(EmailConstants.EMAIL_SERVICEPROVIDER_NAME, service.getVendorAttrs().getVendorName());
-        templateTokens.put(EmailConstants.EMAIL_SERVICEPRIVIDER_IMAGE,service.getUserProfile());
+        if(service.getUserProfile()!=null)
+            templateTokens.put(EmailConstants.EMAIL_SERVICEPRIVIDER_IMAGE,service.getUserProfile());
+        else 
+        	templateTokens.put(EmailConstants.EMAIL_SERVICEPRIVIDER_IMAGE,"");	
         templateTokens.put(EmailConstants.EMAIL_URL_LINK, messages.getMessage("email.url.link",locale));
 		
         Email email = new Email();

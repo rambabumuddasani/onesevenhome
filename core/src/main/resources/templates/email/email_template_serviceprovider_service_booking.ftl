@@ -26,7 +26,7 @@
 									<p style="margin:0px 0 10px;font-size:12px;font-weight:normal;line-height:20px;">Dear <b>${EMAIL_USER_FIRSTNAME}</b>,</p>
 									<!-- <p style="color:333;font-size:12px;line-height:15px;margin:0">Greetings from www.onesevenhome.com</p> -->
 									<p style="color:333;font-size:12px;line-height:15px;margin:0">One Seven Home customer ${EMAIL_USER_FIRSTNAME} has requested for following service:</p>
-									<br/><p style="color:333;font-size:12px;line-height:15px;margin:0"><b><li>{EMAIL_SERVICE_TYPE}</li></b></p>
+									<br/><p style="color:333;font-size:12px;line-height:15px;margin:0"><b><li>${EMAIL_SERVICE_TYPE}</li></b></p>
 
 								</td>
 							</tr>
