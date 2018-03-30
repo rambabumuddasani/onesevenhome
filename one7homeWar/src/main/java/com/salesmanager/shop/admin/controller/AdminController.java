@@ -2748,12 +2748,12 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    	vendorRevenueVO.setTotalRevenue(total);
 	    	vendorRevenueList.add(vendorRevenueVO);
 	    	
-	    	if(vendorRevenueRequest.getSortBy().equals("ASC"))
-	    	Collections.sort(vendorRevenueList, new TotalRevenueComparator());
-	    	
-	    	if(vendorRevenueRequest.getSortBy().equals("DESC"))
-	    	Collections.sort(vendorRevenueList, Collections.reverseOrder(new TotalRevenueDescComparator()));
 	    }
+	    	if(vendorRevenueRequest.getSortBy().equals("ASC"))
+		    	Collections.sort(vendorRevenueList, new TotalRevenueComparator());
+		    	
+		    if(vendorRevenueRequest.getSortBy().equals("DESC"))
+		    	Collections.sort(vendorRevenueList, Collections.reverseOrder(new TotalRevenueDescComparator()));
 	    
 	    	PaginationData paginaionData=createPaginaionData(page,size);
         	calculatePaginaionData(paginaionData,size, vendorRevenueList.size());
@@ -2806,7 +2806,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    		
 	    		ProductRevenueVO productRevenueVO = new ProductRevenueVO();	
 	    		LOGGER.debug("Product Sku "+productSku);
-	    		productRevenueVO.setProductId(productSku);
+	    		productRevenueVO.setProductSku(productSku);
 	    		
 	    		Language language = languageService.getById(1);
 	    		
@@ -2818,7 +2818,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    			paginatedRevenueResponse.setStatus("false");
 	    			return paginatedRevenueResponse;
 	    		}
-	    		
+	    		productRevenueVO.setProductId(product.getId());
 	    		LOGGER.debug("Product Name "+product.getProductDescription().getName());
 	    		
 	    		productRevenueVO.setProductName(product.getProductDescription().getName());
@@ -2826,6 +2826,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    	List<Order> vendorAssociatedOrders =  orderService.findOrdersByProduct(startDate,endDate,productSku);
 	    	
 	    	int total = 0;
+	    	int productQuantity =0;
 	    	for(Order order : vendorAssociatedOrders) {
 	    		
 	    		Set<OrderProduct> orderProducts = order.getOrderProducts();
@@ -2834,14 +2835,20 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    		 
 	    			 BigDecimal  productTotal = orderProduct.getOneTimeCharge().multiply(new BigDecimal(orderProduct.getProductQuantity()));
 	    			 total = total+productTotal.intValue();
+	    			 productQuantity = productQuantity+orderProduct.getProductQuantity(); 
 	    
 	    		}
 	    	}
 	    	productsTotalRevenue = productsTotalRevenue+total;
 	    	productRevenueVO.setTotalRevenue(total);
+	    	productRevenueVO.setProductQuantity(productQuantity);
 	    	productRevenueList.add(productRevenueVO);
 	    }
-	    	
+	    	if(vendorRevenueRequest.getSortBy().equals("ASC"))
+		    	Collections.sort(productRevenueList, new TotalProductRevenueAscComparator());
+		    	
+		    if(vendorRevenueRequest.getSortBy().equals("DESC"))
+		    	Collections.sort(productRevenueList, Collections.reverseOrder(new TotalProductRevenueDescComparator()));
 	    	PaginationData paginaionData=createPaginaionData(page,size);
         	calculatePaginaionData(paginaionData,size, productRevenueList.size());
         	paginatedRevenueResponse.setPaginationData(paginaionData);
@@ -2959,9 +2966,11 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    // retrieval of vendor Ids for vendor revenues
 	    @RequestMapping(value="/getRevenueVendors", method=RequestMethod.POST)
 		@ResponseBody
-		public List<Long> getRevenueVendors(@RequestBody VendorProductRevenueRequest vendorProductRevenueRequest) throws Exception {
+		public VendorProductRevenueResponse getRevenueVendors(@RequestBody VendorProductRevenueRequest vendorProductRevenueRequest) throws Exception {
 					
 	    	LOGGER.debug("Entered getRevenueVendors");
+	    	
+	    	VendorProductRevenueResponse vendorProductRevenueResponse = new VendorProductRevenueResponse();
 	    	
 	    	Date startDate = vendorProductRevenueRequest.getStartDate();
 	    	Date endDate   = vendorProductRevenueRequest.getEndDate();
@@ -2970,14 +2979,24 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    	
 	    	LOGGER.debug("RevenueVendorIds size "+revenueVendorIds.size());
 	    	
-	    	List<Long> revVendorIds = new ArrayList<Long>();
-	    	for(BigInteger revenueVendor : revenueVendorIds) {
+	    	List<RevenueVendors> revVendorsList = new ArrayList<RevenueVendors>();
+	    	for(BigInteger revenueVendorId : revenueVendorIds) {
 	    		
-	    		revVendorIds.add(revenueVendor.longValue());
+	    		//revVendorIds.add(revenueVendor.longValue());
+	    		Customer vendor = customerService.getById(revenueVendorId.longValue());
+	    		
+	    		RevenueVendors revenueVendors = new RevenueVendors();
+	    		
+	    		revenueVendors.setVendorId(vendor.getId());
+	    		revenueVendors.setVendorName(vendor.getVendorAttrs().getVendorName());
+	    		
+	    		revVendorsList.add(revenueVendors);
+	    		
+	    		
 	    	}
-	    	
+	    	vendorProductRevenueResponse.setRevenueVendors(revVendorsList);
 	    	LOGGER.debug("Entered getRevenueVendors");
-	    	return revVendorIds;
+	    	return vendorProductRevenueResponse;
 	    	
 	    }
 	    
@@ -3065,26 +3084,35 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    // retrieval of product ids for product revenues
 	    @RequestMapping(value="/getRevenueProducts", method=RequestMethod.POST)
 		@ResponseBody
-		public List<String> getRevenueProducts(@RequestBody VendorProductRevenueRequest vendorProductRevenueRequest) throws Exception {
+		public VendorProductRevenueResponse getRevenueProducts(@RequestBody VendorProductRevenueRequest vendorProductRevenueRequest) throws Exception {
 			
 	    	LOGGER.debug("Entered getOrderProducts");
+	    	
+	    	VendorProductRevenueResponse vendorProductRevenueResponse= new VendorProductRevenueResponse();
 	    	
 	    	Date startDate = vendorProductRevenueRequest.getStartDate();
 	    	Date endDate   = vendorProductRevenueRequest.getEndDate();
 	    	
-	    	//List<Long> productIdsList = new ArrayList<Long>();
+	    	List<RevenueProducts> revenueProductsList = new ArrayList<RevenueProducts>();
 	    	
 	    	List<String> productSkus = orderService.findProductSkus(startDate, endDate);
-	    	/*for(String productSku : productSkus) {
+	    	for(String productSku : productSkus) {
 	    		Language language = languageService.getById(1);
 	    		
 	    		Product product = productService.getByCode(productSku,language);
 	    		Long productId = product.getId();
-	    		productIdsList.add(productId);
+	    		String productName = product.getProductDescription().getName();
 	    		
-	    	}*/
-	    	//return productIdsList;
-	    	return productSkus;
+	    		RevenueProducts revenueProducts = new RevenueProducts();
+	    		revenueProducts.setProductId(productId);
+	    		revenueProducts.setProductName(productName);
+	    		revenueProducts.setProductSku(productSku);
+	    		
+	    		revenueProductsList.add(revenueProducts);
+	    		
+	    	}
+	    	vendorProductRevenueResponse.setRevenueProducts(revenueProductsList);
+	    	return vendorProductRevenueResponse;
 	    	
 	    }
 	    

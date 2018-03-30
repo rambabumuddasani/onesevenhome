@@ -1,11 +1,9 @@
 package com.salesmanager.shop.admin.controller;
 
-public class ProductRevenueVO {
+public class RevenueProducts {
 
 	private Long productId;
 	private String productName;
-	private Integer totalRevenue;
-	private Integer productQuantity;
 	private String productSku;
 	public Long getProductId() {
 		return productId;
@@ -18,18 +16,6 @@ public class ProductRevenueVO {
 	}
 	public void setProductName(String productName) {
 		this.productName = productName;
-	}
-	public Integer getTotalRevenue() {
-		return totalRevenue;
-	}
-	public void setTotalRevenue(Integer totalRevenue) {
-		this.totalRevenue = totalRevenue;
-	}
-	public Integer getProductQuantity() {
-		return productQuantity;
-	}
-	public void setProductQuantity(Integer productQuantity) {
-		this.productQuantity = productQuantity;
 	}
 	public String getProductSku() {
 		return productSku;
