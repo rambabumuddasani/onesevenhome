@@ -216,7 +216,7 @@ public class WallPaperController extends AbstractController {
 	@ResponseBody
 	public WallPaperResponse updateWallPaperPortfolio(@RequestPart("wallPaperRequest") String wallPaperRequestStr,
 			@RequestPart("file") MultipartFile uploadedImage) throws Exception {
-		LOGGER.debug("Entered addWallPaperPortfolio");
+		LOGGER.debug("Entered updateWallPaperPortfolio");
 		WallPaperRequest wallPaperRequest = new ObjectMapper().readValue(wallPaperRequestStr, WallPaperRequest.class);
 		WallPaperResponse wallPaperResponse = new WallPaperResponse();
 		
@@ -234,7 +234,7 @@ public class WallPaperController extends AbstractController {
 	    			wallPaperResponse.setStatus(false);
 	    			return wallPaperResponse;
 	    		}
-	    		if(fileName != null) {
+	    		if(fileName != null && !fileName.isEmpty()) {
 	    			wallPaperPortfolio.setImageURL(fileName);
 	    		}
 	    		wallPaperPortfolio.setBrand(wallPaperRequest.getBrand());
@@ -243,6 +243,7 @@ public class WallPaperController extends AbstractController {
 	    		wallPaperPortfolio.setThickness(wallPaperRequest.getThickness());
 	    		wallPaperPortfolio.setPortfolioName(wallPaperRequest.getPortfolioName());
 	    		wallPaperPortfolio.setServiceCharges(wallPaperRequest.getServiceCharges());
+	    		wallPaperPortfolio.setStatus("N");
 	    		wallPaperPortfolioService.update(wallPaperPortfolio);
 	    		
 	    		wallPaperResponse.setStatus(true);
@@ -266,7 +267,9 @@ public class WallPaperController extends AbstractController {
     			wallPaperResponse.setStatus(false);
     			return wallPaperResponse;
     		}
-    	return wallPaperResponse;
+    		
+    		LOGGER.debug("Entered updateWallPaperPortfolio");
+    	    return wallPaperResponse;
 	}
 	@RequestMapping(value="/admin/getAdminWallPaperPortfolio", method=RequestMethod.POST)
   	@ResponseBody
