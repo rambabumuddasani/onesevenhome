@@ -1,5 +1,6 @@
 package com.salesmanager.core.business.services.postrequirement;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -35,5 +36,15 @@ public class PostRequirementServiceImpl extends SalesManagerEntityServiceImpl<Lo
 	@Override
 	public List<PostRequirement> getPostRequirementsByCustomerId(Long customerId) {
 		return postRequirementRepository.findPostRequirementsByCustomerId(customerId);
+	}
+
+	@Override
+	public List<PostRequirement> getAllPostRequirements(Date startDate, Date endDate) {
+		return postRequirementRepository.getAllPostRequirements(startDate, endDate);
+	}
+
+	@Override
+	public List<PostRequirement> getPostRequirementsBasedOnStatusAndDate(String status, Date startDate, Date endDate) {
+		return postRequirementRepository.getPostRequirementsBasedOnStatusAndDate(status, startDate, endDate);
 	}
 }

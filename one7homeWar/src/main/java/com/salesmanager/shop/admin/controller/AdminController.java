@@ -1677,6 +1677,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     	postRequirement.setQuery(postRequirementRequest.getQuery());
     	postRequirement.setCategoryId(category.getId());
     	postRequirement.setPostedDate(new Date());
+    	postRequirement.setState("N");
     	postRequirementService.save(postRequirement);
     	LOGGER.debug("Query saved");
     	final Locale locale  = new Locale("en");
@@ -1769,7 +1770,12 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     			}else {
     				postRequirementVO.setCustomerName(customer.getVendorAttrs().getVendorName());
     			}
+    			if(!postRequirement.getState().equals(null) && postRequirement.getState().equals("Y"))
+    				postRequirementVO.setStatus(Constants.ADMIN_POSTREQUIREMENT_RESPONDED);
+    			if(!postRequirement.getState().equals(null) && postRequirement.getState().equals("N"))
+    				postRequirementVO.setStatus(Constants.ADMIN_POSTREQUIREMENT_PENDING);
     			postRequirementVOList.add(postRequirementVO);
+    			
     		}
     		PaginationData paginaionData=createPaginaionData(page,size);
         	calculatePaginaionData(paginaionData,size, postRequirementVOList.size());
@@ -1799,6 +1805,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		try {
 		PostRequirement postRequirement = postRequirementService.getById(requirementRequest.getPostRequirementId());
 		postRequirement.setResponseMessage(requirementRequest.getResponseMessage());
+		postRequirement.setState("Y");
 		postRequirementService.save(postRequirement);
 		
 		final Locale locale  = new Locale("en");
@@ -2081,10 +2088,16 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 			if(adminApprovedVendorsRequest.getStatus().equals("ALL")) {
 				
 				if(adminApprovedVendorsRequest.getCustomerType().equals("ALL")){
-				vendorsList = customerService.getAllVendors();
+					if(adminApprovedVendorsRequest.getSearchString().isEmpty())
+				         vendorsList = customerService.getAllVendors();
+					else
+					     vendorsList = customerService.getVendorsSearchByName(adminApprovedVendorsRequest.getSearchString());
 				}
 				else {
-					vendorsList = customerService.getVendorsByCustomerType(adminApprovedVendorsRequest.getCustomerType());
+					if(adminApprovedVendorsRequest.getSearchString().isEmpty())
+					    vendorsList = customerService.getVendorsByCustomerType(adminApprovedVendorsRequest.getCustomerType());
+					else
+						vendorsList = customerService.getVendorsByCustomerType(adminApprovedVendorsRequest.getCustomerType(), adminApprovedVendorsRequest.getSearchString());
 				}
 				
 				for(Customer vendor : vendorsList) {
@@ -2121,10 +2134,17 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 			} else {
 				
 				if(adminApprovedVendorsRequest.getCustomerType().equals("ALL")) {
-				vendorsList = customerService.getVendorsBasedOnStatus(adminApprovedVendorsRequest.getStatus());
+					if(adminApprovedVendorsRequest.getSearchString().isEmpty())
+				        vendorsList = customerService.getVendorsBasedOnStatus(adminApprovedVendorsRequest.getStatus());
+					else
+						vendorsList = customerService.getVendorsBasedOnStatus(adminApprovedVendorsRequest.getStatus(), adminApprovedVendorsRequest.getSearchString());
 				}
 				else{
-					vendorsList = customerService.getVendorsBasedOnStatusAndCustomerType(adminApprovedVendorsRequest.getStatus(),adminApprovedVendorsRequest.getCustomerType());
+					if(adminApprovedVendorsRequest.getSearchString().isEmpty())
+					    vendorsList = customerService.getVendorsBasedOnStatusAndCustomerType(adminApprovedVendorsRequest.getStatus(),adminApprovedVendorsRequest.getCustomerType());
+					else
+						vendorsList = customerService.getVendorsBasedOnStatusAndCustomerType(adminApprovedVendorsRequest.getStatus(),adminApprovedVendorsRequest.getCustomerType(),
+								                                                             adminApprovedVendorsRequest.getSearchString());
 				}
 				
 				for(Customer vendor : vendorsList) {
@@ -2465,7 +2485,143 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    	LOGGER.debug("Ended getVendorBookingsForAdmin");
 	    	return paginatedResponse;
 	    }
-	    
+	    //03/04/2018
+	    @RequestMapping(value="/getVendorBookingsForAdminByDate", method = RequestMethod.POST)
+		@ResponseBody
+		public PaginatedResponse getVendorBookingsForAdminByDate(@RequestBody AdminVendorBokingRequest adminVendorBokingRequest, 
+				                  @RequestParam(value="pageNumber", defaultValue = "1") int page ,
+				                  @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception{
+			
+	    	LOGGER.debug("Entered getVendorBookingsForAdmin");
+	    	
+	    	PaginatedResponse paginatedResponse = new PaginatedResponse();
+	    	
+	    	Date startDate = adminVendorBokingRequest.getStartDate();
+	    	Date endDate = adminVendorBokingRequest.getEndDate();
+	    	
+	    	List<VendorBooking> vendorBookingList = null;
+	    	
+	    	List<VendorBookingVO> vendorBookingVOList = new ArrayList<VendorBookingVO>();
+	    	
+	    	try {
+	    	
+	    	if(adminVendorBokingRequest.getStatus().equals("ALL")) { 
+	    		
+	    	
+	    	vendorBookingList = vendorBookingService.getVendorBookingsByVendorType(adminVendorBokingRequest.getVendorType(), startDate, endDate );
+	    		
+	    	for(VendorBooking vendorBooking : vendorBookingList) {
+	    		
+	    		    VendorBookingVO vendorBookingVO = new VendorBookingVO();
+	    			
+	    			vendorBookingVO.setId(vendorBooking.getId());
+	    			vendorBookingVO.setCustomerName(vendorBooking.getCustomer().getBilling().getFirstName().concat(" ").concat(vendorBooking.getCustomer().getBilling().getLastName()));
+	    			vendorBookingVO.setVendorName(vendorBooking.getVendor().getVendorAttrs().getVendorName());
+	    			vendorBookingVO.setVendorId(vendorBooking.getVendor().getId());
+	    			vendorBookingVO.setBookingDate(vendorBooking.getBookingDate());
+	    			vendorBookingVO.setAppointmentDate(vendorBooking.getAppointmentDate());
+	    			vendorBookingVO.setClosingDate(vendorBooking.getClosingDate());
+	    			vendorBookingVO.setAddress(vendorBooking.getAddress());
+	    			vendorBookingVO.setDescription(vendorBooking.getDescription());
+	    			vendorBookingVO.setComment(vendorBooking.getComment());
+	    			vendorBookingVO.setStatus(vendorBooking.getStatus());
+	    			vendorBookingVO.setCustomerEmailId(vendorBooking.getCustomer().getEmailAddress());
+	    			vendorBookingVO.setCustomerMobileNumber(vendorBooking.getCustomer().getBilling().getTelephone());
+	    			vendorBookingVO.setVendorEmailId(vendorBooking.getVendor().getEmailAddress());
+	    			vendorBookingVO.setVendorMobileNumber(vendorBooking.getVendor().getVendorAttrs().getVendorMobile());
+	    			
+	    			if(vendorBooking.getVendor().getCustomerType().equals("5") && vendorBooking.getPortfolioId() != null) {
+	    			MachineryPortfolio  machineryPortfoilio = machineryPortfolioService.getById(vendorBooking.getPortfolioId());
+	    			vendorBookingVO.setEquipmentName(machineryPortfoilio.getEquipmentName());
+	    			vendorBookingVO.setEquipmentPrice(machineryPortfoilio.getEquipmentPrice());
+	    			vendorBookingVO.setHiringtype(machineryPortfoilio.getHiringType());
+	    			vendorBookingVO.setImageURL(machineryPortfoilio.getImageURL());
+	    			vendorBookingVO.setPortfolioName(machineryPortfoilio.getPortfolioName());
+	    			vendorBookingVO.setMachineryPortfolioId(machineryPortfoilio.getId());
+	    			}
+	    			
+	    			if(vendorBooking.getVendor().getCustomerType().equals("1"))
+	    			vendorBookingVO.setBookingType(Constants.PRODUCT_VENDORS);
+	    			if(vendorBooking.getVendor().getCustomerType().equals("2"))
+	    				vendorBookingVO.setBookingType(Constants.SERVICE_PROVIDER);
+	    			if(vendorBooking.getVendor().getCustomerType().equals("3"))
+	    				vendorBookingVO.setBookingType(Constants.ARCHITECTS);
+	    			if(vendorBooking.getVendor().getCustomerType().equals("4"))
+	    				vendorBookingVO.setBookingType(Constants.WALLPAPER);
+	    			if(vendorBooking.getVendor().getCustomerType().equals("5")) 
+	    				vendorBookingVO.setBookingType(Constants.MACHINERY_EQUIPMENT);
+	    		
+	    			vendorBookingVOList.add(vendorBookingVO);
+	    			
+	    	 } 
+	    	
+	    	} else {
+	    				vendorBookingList = vendorBookingService.getVendorBookingBasedOnStatus(adminVendorBokingRequest.getStatus(),adminVendorBokingRequest.getVendorType());
+	    				
+	    				for(VendorBooking vendorBooking : vendorBookingList) {
+	    					
+	    				VendorBookingVO vendorBookingVO = new VendorBookingVO();
+	    				
+	    				vendorBookingVO.setId(vendorBooking.getId());
+		    			vendorBookingVO.setCustomerName(vendorBooking.getCustomer().getBilling().getFirstName().concat(" ").concat(vendorBooking.getCustomer().getBilling().getLastName()));
+		    			vendorBookingVO.setVendorName(vendorBooking.getVendor().getVendorAttrs().getVendorName());
+		    			vendorBookingVO.setVendorId(vendorBooking.getVendor().getId());
+		    			vendorBookingVO.setBookingDate(vendorBooking.getBookingDate());
+		    			vendorBookingVO.setAppointmentDate(vendorBooking.getAppointmentDate());
+		    			vendorBookingVO.setClosingDate(vendorBooking.getClosingDate());
+		    			vendorBookingVO.setAddress(vendorBooking.getAddress());
+		    			vendorBookingVO.setDescription(vendorBooking.getDescription());
+		    			vendorBookingVO.setComment(vendorBooking.getComment());
+		    			vendorBookingVO.setStatus(vendorBooking.getStatus());
+		    			vendorBookingVO.setCustomerEmailId(vendorBooking.getCustomer().getEmailAddress());
+		    			vendorBookingVO.setCustomerMobileNumber(vendorBooking.getCustomer().getBilling().getTelephone());
+		    			vendorBookingVO.setVendorEmailId(vendorBooking.getVendor().getEmailAddress());
+		    			vendorBookingVO.setVendorMobileNumber(vendorBooking.getVendor().getVendorAttrs().getVendorMobile());
+		    			
+		    			if(vendorBooking.getVendor().getCustomerType().equals("5") && vendorBooking.getPortfolioId() != null) {
+		    			MachineryPortfolio  machineryPortfoilio = machineryPortfolioService.getById(vendorBooking.getPortfolioId());
+		    			vendorBookingVO.setEquipmentName(machineryPortfoilio.getEquipmentName());
+		    			vendorBookingVO.setEquipmentPrice(machineryPortfoilio.getEquipmentPrice());
+		    			vendorBookingVO.setHiringtype(machineryPortfoilio.getHiringType());
+		    			vendorBookingVO.setImageURL(machineryPortfoilio.getImageURL());
+		    			vendorBookingVO.setPortfolioName(machineryPortfoilio.getPortfolioName());
+		    			vendorBookingVO.setMachineryPortfolioId(machineryPortfoilio.getId());
+		    			}
+		    			
+		    			if(vendorBooking.getVendor().getCustomerType().equals("1"))
+			    			vendorBookingVO.setBookingType(Constants.PRODUCT_VENDORS);
+			    		if(vendorBooking.getVendor().getCustomerType().equals("2"))
+			    			vendorBookingVO.setBookingType(Constants.SERVICE_PROVIDER);
+			    		if(vendorBooking.getVendor().getCustomerType().equals("3"))
+			    			vendorBookingVO.setBookingType(Constants.ARCHITECTS);
+			    		if(vendorBooking.getVendor().getCustomerType().equals("4"))
+			    			vendorBookingVO.setBookingType(Constants.WALLPAPER);
+			    		if(vendorBooking.getVendor().getCustomerType().equals("5")) 
+			    			vendorBookingVO.setBookingType(Constants.MACHINERY_EQUIPMENT);;
+		    		
+		    			vendorBookingVOList.add(vendorBookingVO);
+	    			}
+	    	
+	    		}
+	    	
+	    	PaginationData paginaionData=createPaginaionData(page,size);
+        	calculatePaginaionData(paginaionData,size, vendorBookingVOList.size());
+        	paginatedResponse.setPaginationData(paginaionData);
+    		if(vendorBookingVOList == null || vendorBookingVOList.isEmpty() || vendorBookingVOList.size() < paginaionData.getCountByPage()){
+    			paginatedResponse.setResponseData(vendorBookingVOList);
+    			return paginatedResponse;
+    		}
+    		
+        	List<VendorBookingVO> paginatedResponses = vendorBookingVOList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+        	paginatedResponse.setResponseData(paginatedResponses);
+	    	
+	    }catch(Exception e) {
+	    	e.printStackTrace();
+	    	LOGGER.error("Error while retrieving vendor bookings "+e.getMessage());
+	    }
+	    	LOGGER.debug("Ended getVendorBookingsForAdmin");
+	    	return paginatedResponse;
+	    }
 	    // Calculate discount price or discount percentage
 	    @RequestMapping(value="/getDiscountPriceOrPercentage", method = RequestMethod.POST)
 		@ResponseBody
@@ -3501,6 +3657,66 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    	
 	    	LOGGER.debug("Ended getCustomizations");
 	    	return customizationHeaderResponse;
+	    	
+	    }
+	    //02/04/2018
+	    @RequestMapping(value="/getPostRequirementsByDate", method = RequestMethod.POST)
+		@ResponseBody
+		public PaginatedResponse getPostRequirementsByDate(@RequestBody AdminPostRequirementRequest adminPostRequirementRequest,
+				@RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) {
+	    	LOGGER.debug("Entered getPostRequirements");
+	    	PaginatedResponse paginatedResponse = new PaginatedResponse();
+	    	List<PostRequirementVO> postRequirementVOList = new ArrayList<PostRequirementVO>();
+	    	String status = adminPostRequirementRequest.getStatus();
+	    	Date startDate = adminPostRequirementRequest.getStartDate();
+	    	Date endDate = adminPostRequirementRequest.getEndDate();
+	    	
+	    	List<PostRequirement> postRequirements = null;
+	    	
+	    	try {
+	    		if(status.equals("ALL"))
+	    			 postRequirements = postRequirementService.getAllPostRequirements(startDate,endDate);  
+	    		else
+	    			 postRequirements = postRequirementService.getPostRequirementsBasedOnStatusAndDate(status, startDate, endDate);
+	    			
+	    		for(PostRequirement postRequirement: postRequirements) {
+	    			PostRequirementVO postRequirementVO = new PostRequirementVO();
+	    			postRequirementVO.setPostRequirementId(postRequirement.getId());
+	    			postRequirementVO.setQuery(postRequirement.getQuery());
+	    			postRequirementVO.setDateAndTime(postRequirement.getPostedDate());
+	    			Customer customer = customerService.getById(postRequirement.getCustomerId());
+	    			postRequirementVO.setCustomerId(customer.getId());
+	    			Category category = categoryService.getById(postRequirement.getCategoryId());
+	    			postRequirementVO.setCategory(category.getDescription().getName());
+	    			if(customer.getCustomerType().equals("0")) {
+	    				postRequirementVO.setCustomerName(customer.getBilling().getFirstName().concat(" ").concat(customer.getBilling().getLastName()));
+	    			}else {
+	    				postRequirementVO.setCustomerName(customer.getVendorAttrs().getVendorName());
+	    			}
+	    			if(postRequirement.getState().equals("Y"))
+	    				postRequirementVO.setStatus(Constants.ADMIN_POSTREQUIREMENT_RESPONDED);
+	    			if(postRequirement.getState().equals("N"))
+	    				postRequirementVO.setStatus(Constants.ADMIN_POSTREQUIREMENT_PENDING);
+	    			postRequirementVOList.add(postRequirementVO);
+	    			
+	    		}
+	    		PaginationData paginaionData=createPaginaionData(page,size);
+	        	calculatePaginaionData(paginaionData,size, postRequirementVOList.size());
+	        	paginatedResponse.setPaginationData(paginaionData);
+	    		if(postRequirementVOList == null || postRequirementVOList.isEmpty() || postRequirementVOList.size() < paginaionData.getCountByPage()){
+	    			paginatedResponse.setResponseData(postRequirementVOList);
+	    			LOGGER.debug("Ended getProductForCatAndTitle method ");
+	    			return paginatedResponse;
+	    		}
+	        	List<PostRequirementVO> paginatedResponses = postRequirementVOList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+	        	paginatedResponse.setResponseData(paginatedResponses);
+	    		//return paginatedResponse;
+	    	}catch (Exception e) {
+	    		e.printStackTrace();
+	    		LOGGER.error("Error while retrieving queries "+e.getMessage());	
+	    	}
+	    	LOGGER.debug("Ended getPostRequirements");
+			return paginatedResponse;
 	    	
 	    }
 }
