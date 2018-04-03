@@ -1,5 +1,6 @@
 package com.salesmanager.core.business.services.services;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -46,6 +47,24 @@ public class ServicesBookingServiceImpl extends SalesManagerEntityServiceImpl<Lo
 	public List<ServicesBooking> getOpenedServicesBookings() {
 		
 		return servicesBookingRepository.getOpenedServicesBookings();
+	}
+
+
+	@Override
+	public List<ServicesBooking> getAllServicesBookings(Date startDate, Date endDate) {
+		return servicesBookingRepository.getAllServicesBookings(startDate, endDate);
+	}
+
+
+	@Override
+	public List<ServicesBooking> getClosedServicesBookingsByDate(String status, Date startDate, Date endDate) {
+		return servicesBookingRepository.getClosedServicesBookingsByDate(status, startDate, endDate);
+	}
+
+
+	@Override
+	public List<ServicesBooking> getOpenedServicesBookingsByDate(String status, Date startDate, Date endDate) {
+		return servicesBookingRepository.getOpenedServicesBookingsByDate(status, startDate, endDate);
 	}
 
 

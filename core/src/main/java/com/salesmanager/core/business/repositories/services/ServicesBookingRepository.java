@@ -2,6 +2,7 @@ package com.salesmanager.core.business.repositories.services;
 
 import com.salesmanager.core.model.customer.ServicesBooking;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,5 +15,14 @@ public interface ServicesBookingRepository extends JpaRepository<ServicesBooking
 
 	@Query("select sb from ServicesBooking sb where sb.status = 'N'")
 	List<ServicesBooking> getOpenedServicesBookings();
+
+	@Query("select sb from ServicesBooking sb where sb.bookingDate between ?1 and ?2 ")
+	List<ServicesBooking> getAllServicesBookings(Date startDate, Date endDate);
+
+	@Query("select sb from ServicesBooking sb where sb.status = ?1 and sb.bookingDate between ?2 and ?3")
+	List<ServicesBooking> getClosedServicesBookingsByDate(String status, Date startDate, Date endDate);
+
+	@Query("select sb from ServicesBooking sb where sb.status = ?1 and sb.bookingDate between ?2 and ?3")
+	List<ServicesBooking> getOpenedServicesBookingsByDate(String status, Date startDate, Date endDate);
 
 }

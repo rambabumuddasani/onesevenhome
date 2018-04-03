@@ -1,5 +1,6 @@
 package com.salesmanager.core.business.services.services;
 
+import java.util.Date;
 import java.util.List;
 
 import com.salesmanager.core.business.services.common.generic.SalesManagerEntityService;
@@ -12,6 +13,12 @@ public interface ServicesBookingService extends SalesManagerEntityService<Long, 
 	List<ServicesBooking> getClosedServicesBookings();
 
 	List<ServicesBooking> getOpenedServicesBookings();
+
+	List<ServicesBooking> getAllServicesBookings(Date startDate, Date endDate);
+
+	List<ServicesBooking> getClosedServicesBookingsByDate(String status, Date startDate, Date endDate);
+
+	List<ServicesBooking> getOpenedServicesBookingsByDate(String status, Date startDate, Date endDate);
 	
 	
 }
