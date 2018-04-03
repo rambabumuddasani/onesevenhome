@@ -13,6 +13,7 @@ public class PostRequirementVO {
 	//private Date postedDate;
 	private Date dateAndTime;
 	private String state;
+	private String status;
 	private String responseMessage;
 
 	
@@ -75,5 +76,11 @@ public class PostRequirementVO {
 	}
 	public void setResponseMessage(String responseMessage) {
 		this.responseMessage = responseMessage;
+	}
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
 	}
 }
