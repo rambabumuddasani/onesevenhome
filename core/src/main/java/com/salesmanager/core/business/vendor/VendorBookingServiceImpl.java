@@ -1,5 +1,6 @@
 package com.salesmanager.core.business.vendor;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -57,8 +58,13 @@ public class VendorBookingServiceImpl extends SalesManagerEntityServiceImpl<Long
 
 	@Override
 	public List<VendorBooking> getVendorBookingBasedOnStatus(String status,String vendorType) {
-		// TODO Auto-generated method stub
 		return vendorBookingRepository.getVendorBookingBasedOnStatus(status,vendorType);
+	}
+
+
+	@Override
+	public List<VendorBooking> getVendorBookingsByVendorType(String vendorType, Date startDate, Date endDate) {
+		return vendorBookingRepository.getVendorBookingsByVendorType(vendorType, startDate, endDate);
 	}
 
 

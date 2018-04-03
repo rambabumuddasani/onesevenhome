@@ -1,5 +1,6 @@
 package com.salesmanager.core.business.vendor;
 
+import java.util.Date;
 import java.util.List;
 
 import com.salesmanager.core.business.services.common.generic.SalesManagerEntityService;
@@ -16,6 +17,8 @@ public interface VendorBookingService extends SalesManagerEntityService<Long, Ve
 	List<VendorBooking> getVendorBookingsByVendorType(String vendorType);
 
 	List<VendorBooking> getVendorBookingBasedOnStatus(String status,String vendorType);
+
+	List<VendorBooking> getVendorBookingsByVendorType(String vendorType, Date startDate, Date endDate);
 	
 	
 }
