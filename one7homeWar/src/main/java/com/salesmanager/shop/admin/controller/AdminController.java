@@ -56,6 +56,7 @@ import com.salesmanager.core.business.services.order.OrderService;
 import com.salesmanager.core.business.services.postrequirement.PostRequirementService;
 import com.salesmanager.core.business.services.reference.country.CountryService;
 import com.salesmanager.core.business.services.reference.language.LanguageService;
+import com.salesmanager.core.business.services.services.ArchitectsPortfolioService;
 import com.salesmanager.core.business.services.services.MachineryPortfolioService;
 import com.salesmanager.core.business.services.system.EmailService;
 import com.salesmanager.core.business.services.user.UserService;
@@ -70,6 +71,7 @@ import com.salesmanager.core.model.catalog.product.description.ProductDescriptio
 import com.salesmanager.core.model.catalog.product.image.ProductImage;
 import com.salesmanager.core.model.catalog.product.price.ProductPrice;
 import com.salesmanager.core.model.catalog.product.type.ProductType;
+import com.salesmanager.core.model.customer.ArchitectsPortfolio;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.customer.CustomerTestimonial;
 import com.salesmanager.core.model.customer.MachineryPortfolio;
@@ -92,6 +94,9 @@ import com.salesmanager.shop.admin.controller.products.PaginatedResponse;
 import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.constants.EmailConstants;
 import com.salesmanager.shop.controller.AbstractController;
+import com.salesmanager.shop.controller.vendor.AdminArchitectsRequest;
+import com.salesmanager.shop.controller.vendor.ArchitectsPortfolioVO;
+import com.salesmanager.shop.controller.vendor.MachineryPortfolioVO;
 import com.salesmanager.shop.fileupload.services.StorageException;
 import com.salesmanager.shop.fileupload.services.StorageService;
 import com.salesmanager.shop.store.model.paging.PaginationData;
@@ -191,6 +196,9 @@ public class AdminController extends AbstractController {
 	
 	@Inject
 	private CustomizationService customizationService;
+	
+	@Inject
+	ArchitectsPortfolioService architectsPortfolioService;
 	
     // Admin update store address
 	@RequestMapping(value="/admin/updatestore", method = RequestMethod.POST, 
@@ -3865,6 +3873,124 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 				
 			}
 			LOGGER.debug("Ended vendorSearchForAdmin");
+	    	return paginatedResponse;
+	    	
+	    }
+	    //Admin-PortfoliosBySearch(vendor name and vendor id
+	    @RequestMapping(value="/getPortfoliosBySearch", method=RequestMethod.POST)
+	  	@ResponseBody
+	  	public PaginatedResponse getPortfoliosBySearch(@RequestBody SearchPortfolioRequest searchPortfolioRequest, 
+	  			@RequestParam(value="pageNumber", defaultValue = "1") int page , 
+	  			@RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+			
+	    	LOGGER.debug("Entered PortfoliosBySearch");		
+	    	
+	    	PaginatedResponse paginatedResponse = new PaginatedResponse();
+	    	
+	    	String searchFor    = searchPortfolioRequest.getSearchFor();
+			String searchBy     = searchPortfolioRequest.getSearchBy();
+			String searchString = searchPortfolioRequest.getSearchString();
+			
+			List<ArchitectsPortfolioVO> architectsPortfolioList = new ArrayList<ArchitectsPortfolioVO>();
+			List<ArchitectsPortfolio> architectsPortfolios = null;
+			
+			List<MachineryPortfolioVO> machineryPortfolioList = new ArrayList<MachineryPortfolioVO>();
+			List<MachineryPortfolio> machineryPortfolios = null;
+	    	
+	    	if(searchFor.equals(Constants.ARCHITECT_PORTFOLIO)) {
+	    		
+	    		Long userId = null;
+				if(searchBy.equals(Constants.USER_NAME)) {
+					
+					architectsPortfolios = architectsPortfolioService.getArchitectPortfoliosSearchByVendorName(searchString);
+					
+				}else if(searchBy.equals(Constants.USER_ID)) {
+					
+					userId = new Long(searchString);
+					architectsPortfolios = architectsPortfolioService.getArchitectPortfoliosSearchByVendorId(userId);
+				}
+				
+				for(ArchitectsPortfolio architectsPortfolio : architectsPortfolios) {
+					
+					ArchitectsPortfolioVO architectsPortfolioVO = new ArchitectsPortfolioVO();
+					architectsPortfolioVO.setArchitectPortfolioId(architectsPortfolio.getId());
+					architectsPortfolioVO.setCreatedate(architectsPortfolio.getCreateDate());
+					architectsPortfolioVO.setImageURL(architectsPortfolio.getImageURL());
+					architectsPortfolioVO.setPortfolioName(architectsPortfolio.getPortfolioName());
+					architectsPortfolioVO.setVendorName(architectsPortfolio.getCustomer().getVendorAttrs().getVendorName());
+					architectsPortfolioVO.setVendorDescription(architectsPortfolio.getCustomer().getVendorAttrs().getVendorDescription());
+					architectsPortfolioVO.setVendorShortDescription(architectsPortfolio.getCustomer().getVendorAttrs().getVendorShortDescription());
+					architectsPortfolioVO.setVendorImageURL(architectsPortfolio.getCustomer().getUserProfile());
+					architectsPortfolioVO.setStatus(architectsPortfolio.getStatus());
+					architectsPortfolioList.add(architectsPortfolioVO);
+					
+				}
+	    		
+	    	}
+	    	else if(searchFor.equals(Constants.MACHINERY_PORTFOLIO)){
+	    		
+	    		Long userId = null;
+				if(searchBy.equals(Constants.USER_NAME)) {
+					
+					machineryPortfolios = machineryPortfolioService.getMachineryPortfoliosVendorName(searchString);
+					
+				}else if(searchBy.equals(Constants.USER_ID)) {
+					
+					userId = new Long(searchString);
+					machineryPortfolios = machineryPortfolioService.getMachineryPortfoliosVendorId(userId);
+				}
+				
+				for(MachineryPortfolio machineryPortfolio : machineryPortfolios) {
+					
+					MachineryPortfolioVO machineryPortfolioVO = new MachineryPortfolioVO();
+					machineryPortfolioVO.setMachineryPortfolioId(machineryPortfolio.getId());
+					machineryPortfolioVO.setCreatedate(machineryPortfolio.getCreateDate());
+					machineryPortfolioVO.setImageURL(machineryPortfolio.getImageURL());
+					machineryPortfolioVO.setPortfolioName(machineryPortfolio.getPortfolioName());
+					machineryPortfolioVO.setStatus(machineryPortfolio.getStatus());
+					machineryPortfolioVO.setEquipmentName(machineryPortfolio.getEquipmentName());
+					machineryPortfolioVO.setEquipmentPrice(machineryPortfolio.getEquipmentPrice());
+					machineryPortfolioVO.setHiringType(machineryPortfolio.getHiringType());
+					machineryPortfolioVO.setVendorName(machineryPortfolio.getCustomer().getVendorAttrs().getVendorName());
+					machineryPortfolioVO.setVendorImageURL(machineryPortfolio.getCustomer().getUserProfile());
+					machineryPortfolioVO.setVendorDescription(machineryPortfolio.getCustomer().getVendorAttrs().getVendorDescription());
+					machineryPortfolioVO.setVendorShortDescription(machineryPortfolio.getCustomer().getVendorAttrs().getVendorShortDescription());
+					machineryPortfolioList.add(machineryPortfolioVO);
+				}
+	    		
+	    	}
+	    	
+	    	if(searchFor.equals(Constants.ARCHITECT_PORTFOLIO)) {
+	    		
+	    		PaginationData paginaionData=createPaginaionData(page,size);
+		    	calculatePaginaionData(paginaionData,size, architectsPortfolioList.size());
+		    	paginatedResponse.setPaginationData(paginaionData);
+		    	
+				if(architectsPortfolioList == null || architectsPortfolioList.isEmpty() || architectsPortfolioList.size() < paginaionData.getCountByPage()){
+					paginatedResponse.setResponseData(architectsPortfolioList);
+					LOGGER.debug("Ended getAdminArchitectsPortfolio");
+					return paginatedResponse;
+				}
+				
+		    	List<ArchitectsPortfolioVO> paginatedResponses = architectsPortfolioList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+		    	paginatedResponse.setResponseData(paginatedResponses);
+	    		
+	    	}else {
+	    		
+	    		PaginationData paginaionData=createPaginaionData(page,size);
+	        	calculatePaginaionData(paginaionData,size, machineryPortfolioList.size());
+	        	paginatedResponse.setPaginationData(paginaionData);
+	        	
+	    		if(machineryPortfolioList == null || machineryPortfolioList.isEmpty() || machineryPortfolioList.size() < paginaionData.getCountByPage()){
+	    			paginatedResponse.setResponseData(machineryPortfolioList);
+	    		
+	    			return paginatedResponse;
+	    		}
+	    		
+	        	List<MachineryPortfolioVO> paginatedResponses = machineryPortfolioList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+	        	paginatedResponse.setResponseData(paginatedResponses);
+	    		
+	    	}
 	    	return paginatedResponse;
 	    	
 	    }

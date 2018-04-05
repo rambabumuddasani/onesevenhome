@@ -48,7 +48,14 @@ public class ArchitectsPortfolioServiceImpl extends SalesManagerEntityServiceImp
 	}
 	@Override
 	public List<ArchitectsPortfolio> getPortfoliosBasedOnStatusAndVendorId(String status, Long vendorId) {
-		// TODO Auto-generated method stub
 		return architectsPortfolioRepository.findPortfoliosBasedOnStatusAndVendorId(status,vendorId);
+	}
+	@Override
+	public List<ArchitectsPortfolio> getArchitectPortfoliosSearchByVendorName(String searchString) {
+		return architectsPortfolioRepository.getArchitectPortfoliosSearchByVendorName(searchString);
+	}
+	@Override
+	public List<ArchitectsPortfolio> getArchitectPortfoliosSearchByVendorId(Long userId) {
+		return architectsPortfolioRepository.getArchitectPortfoliosSearchByVendorId(userId);
 	}
 }

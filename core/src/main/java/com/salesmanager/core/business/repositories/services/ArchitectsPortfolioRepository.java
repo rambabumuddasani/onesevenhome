@@ -22,4 +22,10 @@ public interface ArchitectsPortfolioRepository extends JpaRepository<ArchitectsP
 	@Query("select pf from ArchitectsPortfolio pf where pf.status = ?1 and pf.customer.id=?2")
 	public List<ArchitectsPortfolio> findPortfoliosBasedOnStatusAndVendorId(String status, Long vendorId);
 
+	@Query("select pf from ArchitectsPortfolio pf where pf.customer.vendorAttrs.vendorName like %?1%")
+	public List<ArchitectsPortfolio> getArchitectPortfoliosSearchByVendorName(String searchString);
+
+	@Query("select pf from ArchitectsPortfolio pf where pf.customer.id = ?1")
+	public List<ArchitectsPortfolio> getArchitectPortfoliosSearchByVendorId(Long userId);
+
 }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.salesmanager.core.business.repositories.services.MachineryPortfolioRepository;
 import com.salesmanager.core.business.services.common.generic.SalesManagerEntityServiceImpl;
+import com.salesmanager.core.model.customer.ArchitectsPortfolio;
 import com.salesmanager.core.model.customer.MachineryPortfolio;
 
 @Service("machineryPortfolioService")
@@ -49,7 +50,16 @@ public class MachineryPortfolioServiceImpl extends SalesManagerEntityServiceImpl
 
 	@Override
 	public MachineryPortfolio getMachineryPortfolio(Long id, Long id2) {
-		// TODO Auto-generated method stub
 		return machineryPortfolioRepository.findgetMachineryPortfolio(id,id2);
+	}
+
+	@Override
+	public List<MachineryPortfolio> getMachineryPortfoliosVendorName(String searchString) {
+		return machineryPortfolioRepository.getMachineryPortfoliosVendorName(searchString);
+	}
+
+	@Override
+	public List<MachineryPortfolio> getMachineryPortfoliosVendorId(Long userId) {
+		return machineryPortfolioRepository.getMachineryPortfoliosVendorId(userId);
 	}
 }
