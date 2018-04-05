@@ -58,6 +58,12 @@ public interface VendorProductRepository extends JpaRepository<VendorProduct, Lo
 
 	@Query("select distinct vp from VendorProduct vp join fetch  vp.customer customer where vp.product.id = ?1 and vp.customer.id=?2 and vp.vendorWishListed = FALSE")
 	public List<VendorProduct> findVendoProductsByProductIdAndVendorId(Long longProductId, Long longVendorId);
+
+	@Query("select distinct vp.customer from VendorProduct vp where vp.customer.customerType != '0' and vp.customer.vendorAttrs.vendorName like %?1%")
+	public List<Customer> searchRequestedVendorsByName(String searchString);
+
+	@Query("select distinct vp.customer from VendorProduct vp where vp.customer.customerType != '0' and vp.customer.id = ?1")
+	public List<Customer> searchRequestedVendorsById(Long vendorId);
 	
 
 	

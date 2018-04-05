@@ -100,4 +100,16 @@ public class VendorProductServiceImpl extends SalesManagerEntityServiceImpl<Long
 		return vendorProductRepository.findVendoProductsByProductIdAndVendorId(longProductId,longVendorId);
 	}
 
+	@Override
+	public List<Customer> searchRequestedVendorsByName(String searchString) {
+		// TODO Auto-generated method stub
+		return vendorProductRepository.searchRequestedVendorsByName(searchString);
+	}
+
+	@Override
+	public List<Customer> searchRequestedVendorsById(Long vendorId) {
+		// TODO Auto-generated method stub
+		return vendorProductRepository.searchRequestedVendorsById(vendorId);
+	}
+
 }

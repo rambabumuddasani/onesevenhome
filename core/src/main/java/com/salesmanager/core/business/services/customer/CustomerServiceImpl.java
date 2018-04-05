@@ -357,5 +357,50 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 		return customerRepository.getAllPaidOrUnPaidVendors();
 	}
 
+	/*@Override
+	public List<Customer> getVendorsSearchByName(String searchString) {
+		return customerRepository.getVendorsSearchByName(searchString);
+	}
+
+	@Override
+	public List<Customer> getVendorsByCustomerType(String customerType, String searchString) {
+		return customerRepository.getVendorsByCustomerType(customerType, searchString);
+	}
+
+	@Override
+	public List<Customer> getVendorsBasedOnStatus(String status, String searchString) {
+		return customerRepository.getVendorsBasedOnStatus(status, searchString);
+	}
+
+	@Override
+	public List<Customer> getVendorsBasedOnStatusAndCustomerType(String status, String customerType,
+			String searchString) {
+		return customerRepository.getVendorsBasedOnStatusAndCustomerType(status,customerType, searchString);
+	}*/
+
+	@Override
+	public List<Customer> getVendorSearchByName(String searchString) {
+		// TODO Auto-generated method stub
+		return customerRepository.getVendorSearchByName(searchString);
+	}
+
+	@Override
+	public List<Customer> getVendorSearchById(Long vendorId) {
+		// TODO Auto-generated method stub
+		return customerRepository.getVendorSearchById(vendorId);
+	}
+
+	@Override
+	public List<Customer> searchPaidOrUnPaidVendorsByName(String searchString) {
+		// TODO Auto-generated method stub
+		return customerRepository.searchPaidOrUnPaidVendorsByName(searchString);
+	}
+
+	@Override
+	public List<Customer> searchPaidOrUnPaidVendorsById(Long vendorId) {
+		// TODO Auto-generated method stub
+		return customerRepository.searchPaidOrUnPaidVendorsById(vendorId);
+	}
+
 
 }

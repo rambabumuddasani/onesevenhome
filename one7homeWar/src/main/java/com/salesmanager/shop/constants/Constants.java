@@ -164,6 +164,13 @@ public class Constants {
 	public final static String FILE_2 = "FILE_2";
 	public final static String FILE_3 = "FILE_3";
 	
+	public final static String ADMIN_POSTREQUIREMENT_RESPONDED = "Responded";
+	public final static String ADMIN_POSTREQUIREMENT_PENDING = "Pending";
 	
+	public final static String VENDOR_NAME = "VENDOR_NAME";
+	public final static String VENDOR_ID = "VENDOR_ID";
+	public final static String REGISTERED_VENDOR = "REGISTERED_VENDOR";
+	public final static String VENDOR_PRODUCTS = "VENDOR_PRODUCTS";
+	public final static String PAYMENT_VENDOR = "PAYMENT_VENDOR";
 
 }
