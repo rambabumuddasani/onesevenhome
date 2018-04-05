@@ -68,4 +68,18 @@ public class ServicesBookingServiceImpl extends SalesManagerEntityServiceImpl<Lo
 	}
 
 
+	@Override
+	public List<ServicesBooking> searchServicesBookingByName(String searchString) {
+		// TODO Auto-generated method stub
+		return servicesBookingRepository.searchServicesBookingByName(searchString);
+	}
+
+
+	@Override
+	public List<ServicesBooking> searchServicesBookingById(Long userId) {
+		// TODO Auto-generated method stub
+		return servicesBookingRepository.searchServicesBookingById(userId);
+	}
+
+
 }

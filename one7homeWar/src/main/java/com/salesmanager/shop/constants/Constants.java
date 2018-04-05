@@ -172,5 +172,12 @@ public class Constants {
 	public final static String REGISTERED_VENDOR = "REGISTERED_VENDOR";
 	public final static String VENDOR_PRODUCTS = "VENDOR_PRODUCTS";
 	public final static String PAYMENT_VENDOR = "PAYMENT_VENDOR";
+	public final static String SERVICES_BOOKING = "SERVICES_BOOKING";
+	public final static String USER_NAME = "USER_NAME";
+	public final static String USER_ID = "USER_ID";
+	public final static String ARCHITECT_PORTFOLIO = "ARCHITECT_PORTFOLIO";
+	public final static String MACHINERY_PORTFOLIO = "MACHINERY_PORTFOLIO";
+	
+	
 
 }

@@ -25,4 +25,11 @@ public interface ServicesBookingRepository extends JpaRepository<ServicesBooking
 	@Query("select sb from ServicesBooking sb where sb.status = ?1 and sb.bookingDate between ?2 and ?3")
 	List<ServicesBooking> getOpenedServicesBookingsByDate(String status, Date startDate, Date endDate);
 
+	@Query("select sb from ServicesBooking sb where sb.customer.billing.firstName like %?1% or sb.customer.billing.lastName like %?1% or "
+			+ " sb.service.vendorAttrs.vendorName like %?1%")  
+	List<ServicesBooking> searchServicesBookingByName(String searchString);
+
+	@Query("select sb from ServicesBooking sb where sb.customer.id = ?1 or sb.service.id = ?1 ")
+	List<ServicesBooking> searchServicesBookingById(Long userId);
+
 }

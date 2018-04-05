@@ -19,6 +19,10 @@ public interface ServicesBookingService extends SalesManagerEntityService<Long, 
 	List<ServicesBooking> getClosedServicesBookingsByDate(String status, Date startDate, Date endDate);
 
 	List<ServicesBooking> getOpenedServicesBookingsByDate(String status, Date startDate, Date endDate);
+
+	List<ServicesBooking> searchServicesBookingByName(String searchString);
+
+	List<ServicesBooking> searchServicesBookingById(Long userId);
 	
 	
 }

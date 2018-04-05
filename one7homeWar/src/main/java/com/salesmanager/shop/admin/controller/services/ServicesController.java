@@ -38,6 +38,7 @@ import com.salesmanager.core.model.customer.ServicesRating;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.services.Services;
 import com.salesmanager.shop.admin.controller.products.PaginatedResponse;
+import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.constants.EmailConstants;
 import com.salesmanager.shop.controller.AbstractController;
 import com.salesmanager.shop.controller.vendor.VendorSearchRequest;
@@ -871,4 +872,93 @@ public class ServicesController extends AbstractController{
     	return paginatedResponse;
     	
     }
+	@RequestMapping(value="/searchServicesBooking", method = RequestMethod.POST)
+	@ResponseBody
+	public PaginatedResponse searchServicesBooking(@RequestBody SearchServicesBookingRequest searchServicesBookingRequest, 
+			@RequestParam(value="pageNumber", defaultValue = "1") int page ,
+			@RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+		
+		LOGGER.debug("Entered searchServicesBooking");
+		
+		PaginatedResponse paginatedResponse = new PaginatedResponse();
+		
+		String searchFor    = searchServicesBookingRequest.getSearchFor();
+		String searchBy     = searchServicesBookingRequest.getSearchBy();
+		String searchString = searchServicesBookingRequest.getSearchString();
+		
+		List<ServicesBooking> servicesBookings = null;
+		CustomerBookingDetails customerBookingDetails = new CustomerBookingDetails();
+		List<ServicesBookingVO> servicesBookingVOList = new ArrayList<ServicesBookingVO>();
+		
+		if(searchFor.equals(Constants.SERVICES_BOOKING)){
+			
+			Long userId = null;
+			if(searchBy.equals(Constants.USER_NAME)) {
+				servicesBookings = servicesBookingService.searchServicesBookingByName(searchString);
+			}
+			else if(searchBy.equals(Constants.USER_ID)) {
+				
+				userId = new Long(searchString);
+				servicesBookings = servicesBookingService.searchServicesBookingById(userId);
+				
+			}
+			
+			for(ServicesBooking servicesBooking : servicesBookings) {
+				ServicesBookingVO servicesBookingVO = new ServicesBookingVO();
+				servicesBookingVO.setBookingDate(servicesBooking.getBookingDate());
+				servicesBookingVO.setServicesBookingId(servicesBooking.getId());
+				servicesBookingVO.setServiceType(servicesBooking.getServiceType().getServiceType());
+				servicesBookingVO.setStatus(servicesBooking.getStatus());
+				if(servicesBooking.getCustomer().getCustomerType().equals("0")){
+				customerBookingDetails.setCustomerName(servicesBooking.getCustomer().getBilling().getFirstName().concat(" ").concat(servicesBooking.getCustomer().getBilling().getLastName()));
+				customerBookingDetails.setContactNumber(servicesBooking.getCustomer().getBilling().getTelephone());
+				customerBookingDetails.setStreet(servicesBooking.getCustomer().getBilling().getAddress());
+				customerBookingDetails.setArea(servicesBooking.getCustomer().getArea());
+				customerBookingDetails.setCity(servicesBooking.getCustomer().getBilling().getState());
+				customerBookingDetails.setState(servicesBooking.getCustomer().getBilling().getState());
+				customerBookingDetails.setPinCode(servicesBooking.getCustomer().getBilling().getPostalCode());
+				customerBookingDetails.setEmailAddress(servicesBooking.getCustomer().getEmailAddress());
+				}
+				else {
+					customerBookingDetails.setCustomerName(servicesBooking.getCustomer().getVendorAttrs().getVendorName());
+					customerBookingDetails.setContactNumber(servicesBooking.getCustomer().getBilling().getTelephone());
+					customerBookingDetails.setStreet(servicesBooking.getCustomer().getVendorAttrs().getVendorOfficeAddress());
+					customerBookingDetails.setArea(servicesBooking.getCustomer().getArea());
+					customerBookingDetails.setCity(servicesBooking.getCustomer().getBilling().getState());
+					customerBookingDetails.setState(servicesBooking.getCustomer().getBilling().getState());
+					customerBookingDetails.setPinCode(servicesBooking.getCustomer().getBilling().getPostalCode());
+					customerBookingDetails.setEmailAddress(servicesBooking.getCustomer().getEmailAddress());
+				}
+				Customer serviceProvider = servicesBooking.getService();
+				Long serviceProviderId = serviceProvider.getId();
+				ServiceProviderDetails serviceProviderDetails = new ServiceProviderDetails();
+				serviceProviderDetails.setServiceProviderId(serviceProviderId);
+				serviceProviderDetails.setArea(serviceProvider.getArea());
+				serviceProviderDetails.setCity(serviceProvider.getBilling().getCity());
+				serviceProviderDetails.setState(serviceProvider.getBilling().getState());
+				serviceProviderDetails.setPinCode(serviceProvider.getBilling().getPostalCode());
+				serviceProviderDetails.setEmailAddress(serviceProvider.getEmailAddress());
+				//serviceProviderDetails.setContactNumber(serviceProvider.getVendorAttrs().getVendorTelephone());
+				//serviceProviderDetails.setCompanyName(serviceProvider.getVendorAttrs().getVendorName());
+				servicesBookingVO.setServiceProviderDetails(serviceProviderDetails);
+				servicesBookingVO.setCustomerBookingdetails(customerBookingDetails);
+				servicesBookingVOList.add(servicesBookingVO);
+			
+		}
+		
+	  }
+		PaginationData paginaionData=createPaginaionData(page,size);
+    	calculatePaginaionData(paginaionData,size, servicesBookingVOList.size());
+    	paginatedResponse.setPaginationData(paginaionData);
+		if(servicesBookingVOList == null || servicesBookingVOList.isEmpty() || servicesBookingVOList.size() < paginaionData.getCountByPage()){
+			paginatedResponse.setResponseData(servicesBookingVOList);
+			LOGGER.debug("Ended getTestimonials");
+			return paginatedResponse;
+		}
+    	List<ServicesBookingVO> paginatedResponses = servicesBookingVOList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+    	paginatedResponse.setResponseData(paginatedResponses);
+    	
+    	LOGGER.debug("Ended searchServicesBooking");
+		return paginatedResponse;
+	}
 }
