@@ -82,7 +82,6 @@ import com.salesmanager.core.model.homepage.offers.HomePageOffers;
 import com.salesmanager.core.model.image.brand.BrandImage;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.order.Order;
-import com.salesmanager.core.model.order.OrderTotal;
 import com.salesmanager.core.model.order.orderproduct.OrderProduct;
 import com.salesmanager.core.model.postrequirement.PostRequirement;
 import com.salesmanager.core.model.product.vendor.VendorProduct;
@@ -94,7 +93,6 @@ import com.salesmanager.shop.admin.controller.products.PaginatedResponse;
 import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.constants.EmailConstants;
 import com.salesmanager.shop.controller.AbstractController;
-import com.salesmanager.shop.controller.vendor.AdminArchitectsRequest;
 import com.salesmanager.shop.controller.vendor.ArchitectsPortfolioVO;
 import com.salesmanager.shop.controller.vendor.MachineryPortfolioVO;
 import com.salesmanager.shop.fileupload.services.StorageException;
@@ -3991,6 +3989,109 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	        	paginatedResponse.setResponseData(paginatedResponses);
 	    		
 	    	}
+	    	return paginatedResponse;
+	    	
+	    }
+	    // Admin-Vendor bookings search by vendor name,customer name and id
+	    @RequestMapping(value="/getVendorBookingsBySearch", method = RequestMethod.POST)
+		@ResponseBody
+		public PaginatedResponse getVendorBookingsBySearch(@RequestBody SearchVendorBokingRequest searchVendorBokingRequest, 
+				                  @RequestParam(value="pageNumber", defaultValue = "1") int page ,
+				                  @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception{
+            
+	    	LOGGER.debug("Entered getVendorBookingsBySearch");
+	    	
+	    	PaginatedResponse paginatedResponse = new PaginatedResponse();
+	    	
+	    	List<VendorBooking> vendorBookingList = null;
+	    	
+	    	List<VendorBookingVO> vendorBookingVOList = new ArrayList<VendorBookingVO>();
+	    	
+	    	//String searchFor    = searchPortfolioRequest.getSearchFor();
+	    	String vendorType   = searchVendorBokingRequest.getVendorType();
+			String searchBy     = searchVendorBokingRequest.getSearchBy();
+			String searchString = searchVendorBokingRequest.getSearchString();
+			
+			//if(vendorType.equals("3")) {
+				
+				Long userId = null;
+				if(searchBy.equals(Constants.USER_NAME)) {
+				
+				vendorBookingList = vendorBookingService.searchVendorBookingsByName(vendorType, searchString);
+				
+				}else if(searchBy.equals(Constants.USER_ID)){
+					
+					userId = new Long(searchString);
+					vendorBookingList = vendorBookingService.searchVendorBookingsById(vendorType, userId);
+					
+				}
+				
+				if(vendorBookingList.isEmpty()) {
+					
+					if(searchBy.equals(Constants.USER_NAME)) 
+					     paginatedResponse.setErrorMsg("No result(s) found for "+searchString);
+					else if(searchBy.equals(Constants.USER_ID))
+						paginatedResponse.setErrorMsg("No result(s) found for "+userId);
+					
+					return paginatedResponse;
+				}
+	    		
+		    	for(VendorBooking vendorBooking : vendorBookingList) {
+		    		
+		    		    VendorBookingVO vendorBookingVO = new VendorBookingVO();
+		    			
+		    			vendorBookingVO.setId(vendorBooking.getId());
+		    			vendorBookingVO.setCustomerName(vendorBooking.getCustomer().getBilling().getFirstName().concat(" ").concat(vendorBooking.getCustomer().getBilling().getLastName()));
+		    			vendorBookingVO.setVendorName(vendorBooking.getVendor().getVendorAttrs().getVendorName());
+		    			vendorBookingVO.setVendorId(vendorBooking.getVendor().getId());
+		    			vendorBookingVO.setBookingDate(vendorBooking.getBookingDate());
+		    			vendorBookingVO.setAppointmentDate(vendorBooking.getAppointmentDate());
+		    			vendorBookingVO.setClosingDate(vendorBooking.getClosingDate());
+		    			vendorBookingVO.setAddress(vendorBooking.getAddress());
+		    			vendorBookingVO.setDescription(vendorBooking.getDescription());
+		    			vendorBookingVO.setComment(vendorBooking.getComment());
+		    			vendorBookingVO.setStatus(vendorBooking.getStatus());
+		    			vendorBookingVO.setCustomerEmailId(vendorBooking.getCustomer().getEmailAddress());
+		    			vendorBookingVO.setCustomerMobileNumber(vendorBooking.getCustomer().getBilling().getTelephone());
+		    			vendorBookingVO.setVendorEmailId(vendorBooking.getVendor().getEmailAddress());
+		    			vendorBookingVO.setVendorMobileNumber(vendorBooking.getVendor().getVendorAttrs().getVendorMobile());
+		    			
+		    			if(vendorBooking.getVendor().getCustomerType().equals("5") && vendorBooking.getPortfolioId() != null) {
+		    			MachineryPortfolio  machineryPortfoilio = machineryPortfolioService.getById(vendorBooking.getPortfolioId());
+		    			vendorBookingVO.setEquipmentName(machineryPortfoilio.getEquipmentName());
+		    			vendorBookingVO.setEquipmentPrice(machineryPortfoilio.getEquipmentPrice());
+		    			vendorBookingVO.setHiringtype(machineryPortfoilio.getHiringType());
+		    			vendorBookingVO.setImageURL(machineryPortfoilio.getImageURL());
+		    			vendorBookingVO.setPortfolioName(machineryPortfoilio.getPortfolioName());
+		    			vendorBookingVO.setMachineryPortfolioId(machineryPortfoilio.getId());
+		    			}
+		    			
+		    			if(vendorBooking.getVendor().getCustomerType().equals("1"))
+		    			vendorBookingVO.setBookingType(Constants.PRODUCT_VENDORS);
+		    			if(vendorBooking.getVendor().getCustomerType().equals("2"))
+		    				vendorBookingVO.setBookingType(Constants.SERVICE_PROVIDER);
+		    			if(vendorBooking.getVendor().getCustomerType().equals("3"))
+		    				vendorBookingVO.setBookingType(Constants.ARCHITECTS);
+		    			if(vendorBooking.getVendor().getCustomerType().equals("4"))
+		    				vendorBookingVO.setBookingType(Constants.WALLPAPER);
+		    			if(vendorBooking.getVendor().getCustomerType().equals("5")) 
+		    				vendorBookingVO.setBookingType(Constants.MACHINERY_EQUIPMENT);
+		    		
+		    			vendorBookingVOList.add(vendorBookingVO);
+		    			
+		    	 } 
+		    	
+		    	PaginationData paginaionData=createPaginaionData(page,size);
+	        	calculatePaginaionData(paginaionData,size, vendorBookingVOList.size());
+	        	paginatedResponse.setPaginationData(paginaionData);
+	    		if(vendorBookingVOList == null || vendorBookingVOList.isEmpty() || vendorBookingVOList.size() < paginaionData.getCountByPage()){
+	    			paginatedResponse.setResponseData(vendorBookingVOList);
+	    			return paginatedResponse;
+	    		}
+	    		
+	        	List<VendorBookingVO> paginatedResponses = vendorBookingVOList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+	        	paginatedResponse.setResponseData(paginatedResponses);
+			
 	    	return paginatedResponse;
 	    	
 	    }

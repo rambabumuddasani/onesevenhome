@@ -19,6 +19,10 @@ public interface VendorBookingService extends SalesManagerEntityService<Long, Ve
 	List<VendorBooking> getVendorBookingBasedOnStatus(String status,String vendorType);
 
 	List<VendorBooking> getVendorBookingsByVendorType(String vendorType, Date startDate, Date endDate);
+
+	List<VendorBooking> searchVendorBookingsByName(String vendorType, String searchString);
+
+	List<VendorBooking> searchVendorBookingsById(String vendorType, Long userId);
 	
 	
 }

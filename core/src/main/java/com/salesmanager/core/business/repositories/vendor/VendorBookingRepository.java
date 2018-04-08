@@ -25,4 +25,10 @@ public interface VendorBookingRepository extends JpaRepository<VendorBooking, Lo
 	@Query("select vb from VendorBooking vb where vb.vendor.customerType = ?1 and vb.bookingDate between ?2 and ?3 order by vb.bookingDate desc")
 	List<VendorBooking> getVendorBookingsByVendorType(String vendorType, Date startDate, Date endDate);
 
+	@Query("select vb from VendorBooking vb where vb.vendor.customerType = ?1 and (vb.vendor.vendorAttrs.vendorName like %?2% or vb.customer.billing.firstName like %?2% or vb.customer.billing.lastName like %?2%) order by vb.bookingDate desc")
+	List<VendorBooking> searchVendorBookingsByName(String vendorType, String searchString);
+
+	@Query("select vb from VendorBooking vb where vb.vendor.customerType = ?1 and (vb.vendor.id = ?2 or vb.customer.id = ?2) order by vb.bookingDate desc")
+	List<VendorBooking> searchVendorBookingsById(String vendorType, Long userId);
+
 }

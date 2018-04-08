@@ -68,4 +68,16 @@ public class VendorBookingServiceImpl extends SalesManagerEntityServiceImpl<Long
 	}
 
 
+	@Override
+	public List<VendorBooking> searchVendorBookingsByName(String vendorType, String searchString) {
+		return vendorBookingRepository.searchVendorBookingsByName(vendorType, searchString);
+	}
+
+
+	@Override
+	public List<VendorBooking> searchVendorBookingsById(String vendorType, Long userId) {
+		return vendorBookingRepository.searchVendorBookingsById(vendorType, userId);
+	}
+
+
 }
