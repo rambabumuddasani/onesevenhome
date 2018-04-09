@@ -177,6 +177,7 @@ public class Constants {
 	public final static String USER_ID = "USER_ID";
 	public final static String ARCHITECT_PORTFOLIO = "ARCHITECT_PORTFOLIO";
 	public final static String MACHINERY_PORTFOLIO = "MACHINERY_PORTFOLIO";
+	public final static String WALLPAPER_PF = "WALLPAPER_PF";
 	
 	
 

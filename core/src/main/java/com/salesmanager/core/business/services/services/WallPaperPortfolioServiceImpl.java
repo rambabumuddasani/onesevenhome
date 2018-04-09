@@ -51,5 +51,17 @@ public class WallPaperPortfolioServiceImpl extends SalesManagerEntityServiceImpl
 		return wallPaperPortfolioRepository.findPortfoliosBasedOnStatusAndVendorId(vendorId, status);
 	}
 
+	@Override
+	public List<WallPaperPortfolio> getWallPaperPortfoliosSearchByVendorName(String searchString) {
+		// TODO Auto-generated method stub
+		return wallPaperPortfolioRepository.findWallPaperPortfoliosByVendorName(searchString);
+	}
+
+	@Override
+	public List<WallPaperPortfolio> getWallPaperPortfoliosSearchByVendorId(Long userId) {
+		// TODO Auto-generated method stub
+		return wallPaperPortfolioRepository.findByVendorId(userId);
+	}
+
 
 }

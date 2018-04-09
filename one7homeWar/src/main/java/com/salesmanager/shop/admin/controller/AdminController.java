@@ -58,6 +58,7 @@ import com.salesmanager.core.business.services.reference.country.CountryService;
 import com.salesmanager.core.business.services.reference.language.LanguageService;
 import com.salesmanager.core.business.services.services.ArchitectsPortfolioService;
 import com.salesmanager.core.business.services.services.MachineryPortfolioService;
+import com.salesmanager.core.business.services.services.WallPaperPortfolioService;
 import com.salesmanager.core.business.services.system.EmailService;
 import com.salesmanager.core.business.services.user.UserService;
 import com.salesmanager.core.business.utils.ProductPriceUtils;
@@ -76,6 +77,7 @@ import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.customer.CustomerTestimonial;
 import com.salesmanager.core.model.customer.MachineryPortfolio;
 import com.salesmanager.core.model.customer.VendorBooking;
+import com.salesmanager.core.model.customer.WallPaperPortfolio;
 import com.salesmanager.core.model.history.HistoryManagement;
 import com.salesmanager.core.model.homepage.customization.headers.Customizations;
 import com.salesmanager.core.model.homepage.offers.HomePageOffers;
@@ -95,6 +97,7 @@ import com.salesmanager.shop.constants.EmailConstants;
 import com.salesmanager.shop.controller.AbstractController;
 import com.salesmanager.shop.controller.vendor.ArchitectsPortfolioVO;
 import com.salesmanager.shop.controller.vendor.MachineryPortfolioVO;
+import com.salesmanager.shop.controller.vendor.WallPaperPortfolioVO;
 import com.salesmanager.shop.fileupload.services.StorageException;
 import com.salesmanager.shop.fileupload.services.StorageService;
 import com.salesmanager.shop.store.model.paging.PaginationData;
@@ -197,6 +200,9 @@ public class AdminController extends AbstractController {
 	
 	@Inject
 	ArchitectsPortfolioService architectsPortfolioService;
+	
+	@Inject
+	WallPaperPortfolioService wallPaperPortfolioService;
 	
     // Admin update store address
 	@RequestMapping(value="/admin/updatestore", method = RequestMethod.POST, 
@@ -3748,6 +3754,16 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 					vendorsList = customerService.getVendorSearchById(vendorId);
 				}
 				
+                 if(vendorsList.isEmpty()) {
+					
+					if(searchType.equals(Constants.VENDOR_NAME)) 
+					     paginatedResponse.setErrorMsg("No result(s) found for "+searchString);
+					else if(searchType.equals(Constants.VENDOR_ID))
+						paginatedResponse.setErrorMsg("No result(s) found for "+vendorId);
+					
+					return paginatedResponse;
+				}
+                 
 				for(Customer vendor : vendorsList) {
 					
 					VendorDetailsVO vendorDetailsVO = new VendorDetailsVO();
@@ -3794,6 +3810,16 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 				    requestedVendorList = vendorProductService.searchRequestedVendorsById(vendorId);
 				}   
 				
+                if(requestedVendorList.isEmpty()) {
+					
+					if(searchType.equals(Constants.VENDOR_NAME)) 
+					     paginatedResponse.setErrorMsg("No result(s) found for "+searchString);
+					else if(searchType.equals(Constants.VENDOR_ID))
+						paginatedResponse.setErrorMsg("No result(s) found for "+vendorId);
+					
+					return paginatedResponse;
+				}
+				
 				    for(Customer vendorProduct:requestedVendorList) {
 			    		
 			    		AdminVendorDetailsVO adminvendorDetailsVO = new AdminVendorDetailsVO();
@@ -3820,7 +3846,17 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 				else {
 					vendorId = new Long(searchString);
 				    vendorsList = customerService.searchPaidOrUnPaidVendorsById(vendorId);
-				}   
+				}  
+				
+				if(vendorsList.isEmpty()) {
+					
+					if(searchType.equals(Constants.VENDOR_NAME)) 
+					     paginatedResponse.setErrorMsg("No result(s) found for "+searchString);
+					else if(searchType.equals(Constants.VENDOR_ID))
+						paginatedResponse.setErrorMsg("No result(s) found for "+vendorId);
+					
+					return paginatedResponse;
+				}
 				
 				    for(Customer vendor : vendorsList) {
 						
@@ -3894,7 +3930,10 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 			
 			List<MachineryPortfolioVO> machineryPortfolioList = new ArrayList<MachineryPortfolioVO>();
 			List<MachineryPortfolio> machineryPortfolios = null;
-	    	
+			
+			List<WallPaperPortfolioVO> wallPaperPortfolioList = new ArrayList<WallPaperPortfolioVO>();
+			List<WallPaperPortfolio> wallPaperPortfolios = null;
+			
 	    	if(searchFor.equals(Constants.ARCHITECT_PORTFOLIO)) {
 	    		
 	    		Long userId = null;
@@ -3906,6 +3945,16 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 					
 					userId = new Long(searchString);
 					architectsPortfolios = architectsPortfolioService.getArchitectPortfoliosSearchByVendorId(userId);
+				}
+				
+                 if(architectsPortfolios.isEmpty()) {
+					
+					if(searchBy.equals(Constants.USER_NAME)) 
+					     paginatedResponse.setErrorMsg("No result(s) found for "+searchString);
+					else if(searchBy.equals(Constants.USER_ID))
+						paginatedResponse.setErrorMsg("No result(s) found for "+userId);
+					
+					return paginatedResponse;
 				}
 				
 				for(ArchitectsPortfolio architectsPortfolio : architectsPortfolios) {
@@ -3938,6 +3987,16 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 					machineryPortfolios = machineryPortfolioService.getMachineryPortfoliosVendorId(userId);
 				}
 				
+                 if(machineryPortfolios.isEmpty()) {
+					
+					if(searchBy.equals(Constants.USER_NAME)) 
+					     paginatedResponse.setErrorMsg("No result(s) found for "+searchString);
+					else if(searchBy.equals(Constants.USER_ID))
+						paginatedResponse.setErrorMsg("No result(s) found for "+userId);
+					
+					return paginatedResponse;
+				}
+				
 				for(MachineryPortfolio machineryPortfolio : machineryPortfolios) {
 					
 					MachineryPortfolioVO machineryPortfolioVO = new MachineryPortfolioVO();
@@ -3958,6 +4017,55 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    		
 	    	}
 	    	
+	    	else if(searchFor.equals(Constants.WALLPAPER_PF)){
+	    		
+	    		Long userId = null;
+				if(searchBy.equals(Constants.USER_NAME)) {
+					
+					wallPaperPortfolios = wallPaperPortfolioService.getWallPaperPortfoliosSearchByVendorName(searchString);
+					
+				}else if(searchBy.equals(Constants.USER_ID)) {
+					
+					userId = new Long(searchString);
+					wallPaperPortfolios = wallPaperPortfolioService.getWallPaperPortfoliosSearchByVendorId(userId);
+				}
+				
+
+                if(wallPaperPortfolios.isEmpty()) {
+					
+					if(searchBy.equals(Constants.USER_NAME)) 
+					     paginatedResponse.setErrorMsg("No result(s) found for "+searchString);
+					else if(searchBy.equals(Constants.USER_ID))
+						paginatedResponse.setErrorMsg("No result(s) found for "+userId);
+					
+					return paginatedResponse;
+				}
+				
+				for(WallPaperPortfolio wallPaperPortfolio : wallPaperPortfolios) {
+					
+					WallPaperPortfolioVO wallPaperPortfolioVO = new WallPaperPortfolioVO();
+					
+					wallPaperPortfolioVO.setPortfolioId(wallPaperPortfolio.getId());
+					wallPaperPortfolioVO.setPortfolioName(wallPaperPortfolio.getPortfolioName());
+					wallPaperPortfolioVO.setBrand(wallPaperPortfolio.getBrand());
+					wallPaperPortfolioVO.setSize(wallPaperPortfolio.getSize());
+					wallPaperPortfolioVO.setThickness(wallPaperPortfolio.getThickness());
+					wallPaperPortfolioVO.setPrice(wallPaperPortfolio.getPrice());
+					wallPaperPortfolioVO.setStatus(wallPaperPortfolio.getStatus());
+					wallPaperPortfolioVO.setImageURL(wallPaperPortfolio.getImageURL());
+					wallPaperPortfolioVO.setServiceCharges(wallPaperPortfolio.getServiceCharges());
+					
+					wallPaperPortfolioVO.setVendorId(wallPaperPortfolio.getCustomer().getId());
+					wallPaperPortfolioVO.setVendorName(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorName());
+					wallPaperPortfolioVO.setVendorImageURL(wallPaperPortfolio.getCustomer().getUserProfile());
+					wallPaperPortfolioVO.setVendorDescription(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorDescription());
+					wallPaperPortfolioVO.setVendorShortDescription(wallPaperPortfolio.getCustomer().getVendorAttrs().getVendorShortDescription());
+					
+					wallPaperPortfolioList.add(wallPaperPortfolioVO);
+					
+				} 
+	    	}
+	    	
 	    	if(searchFor.equals(Constants.ARCHITECT_PORTFOLIO)) {
 	    		
 	    		PaginationData paginaionData=createPaginaionData(page,size);
@@ -3973,7 +4081,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		    	List<ArchitectsPortfolioVO> paginatedResponses = architectsPortfolioList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
 		    	paginatedResponse.setResponseData(paginatedResponses);
 	    		
-	    	}else {
+	    	}else if(searchFor.equals(Constants.MACHINERY_PORTFOLIO)){
 	    		
 	    		PaginationData paginaionData=createPaginaionData(page,size);
 	        	calculatePaginaionData(paginaionData,size, machineryPortfolioList.size());
@@ -3989,6 +4097,23 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	        	paginatedResponse.setResponseData(paginatedResponses);
 	    		
 	    	}
+	    	else if(searchFor.equals(Constants.WALLPAPER_PF)){
+	    		
+	    		PaginationData paginaionData=createPaginaionData(page,size);
+		    	calculatePaginaionData(paginaionData,size, wallPaperPortfolioList.size());
+		    	paginatedResponse.setPaginationData(paginaionData);
+		    	
+				if(wallPaperPortfolioList == null || wallPaperPortfolioList.isEmpty() || wallPaperPortfolioList.size() < paginaionData.getCountByPage()){
+					paginatedResponse.setResponseData(wallPaperPortfolioList);
+				
+					return paginatedResponse;
+				}
+				
+		    	List<WallPaperPortfolioVO> paginatedResponses = wallPaperPortfolioList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+		    	paginatedResponse.setResponseData(paginatedResponses);
+	    	}
+	    	
+	    	LOGGER.debug("Ended PortfoliosBySearch");
 	    	return paginatedResponse;
 	    	
 	    }

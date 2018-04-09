@@ -15,6 +15,10 @@ public interface WallPaperPortfolioService extends SalesManagerEntityService<Lon
 	List<WallPaperPortfolio> getPortfoliosBasedOnStatus(String status);
 
 	List<WallPaperPortfolio> getPortfoliosBasedOnStatusAndVendorId(Long vendorId, String status);
+
+	List<WallPaperPortfolio> getWallPaperPortfoliosSearchByVendorName(String searchString);
+
+	List<WallPaperPortfolio> getWallPaperPortfoliosSearchByVendorId(Long userId);
 	
 	//public FinalPrice calculateProductPrice(WallPaperPortfolio w);
 }

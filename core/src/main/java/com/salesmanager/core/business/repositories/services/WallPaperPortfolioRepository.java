@@ -20,4 +20,7 @@ public interface WallPaperPortfolioRepository extends JpaRepository<WallPaperPor
 	@Query("select pf from WallPaperPortfolio pf where pf.customer.id=?1 and pf.status = ?2")
 	public List<WallPaperPortfolio> findPortfoliosBasedOnStatusAndVendorId(Long vendorId, String status);
 
+	@Query("select pf from WallPaperPortfolio pf where pf.customer.vendorAttrs.vendorName like %?1%")
+	public List<WallPaperPortfolio> findWallPaperPortfoliosByVendorName(String searchString);
+
 }
