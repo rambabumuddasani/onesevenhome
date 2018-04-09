@@ -1799,7 +1799,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     		}
         	List<PostRequirementVO> paginatedResponses = postRequirementVOList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
         	paginatedResponse.setResponseData(paginatedResponses);
-    		return paginatedResponse;
+    		
     	}catch (Exception e) {
     		e.printStackTrace();
     		LOGGER.error("Error while retrieving queries "+e.getMessage());	
@@ -4132,12 +4132,10 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    	
 	    	List<VendorBookingVO> vendorBookingVOList = new ArrayList<VendorBookingVO>();
 	    	
-	    	//String searchFor    = searchPortfolioRequest.getSearchFor();
 	    	String vendorType   = searchVendorBokingRequest.getVendorType();
 			String searchBy     = searchVendorBokingRequest.getSearchBy();
 			String searchString = searchVendorBokingRequest.getSearchString();
-			
-			//if(vendorType.equals("3")) {
+		
 				
 				Long userId = null;
 				if(searchBy.equals(Constants.USER_NAME)) {
@@ -4218,6 +4216,107 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	        	paginatedResponse.setResponseData(paginatedResponses);
 			
 	    	return paginatedResponse;
+	    	
+	    }
+	    // Search post requirements by name(customer or vendor) and id
+	    @RequestMapping(value="/searchPostRequirements", method = RequestMethod.POST)
+		@ResponseBody
+		public PaginatedResponse searchPostRequirements(@RequestParam(value="pageNumber", defaultValue = "1") int page , 
+				@RequestParam(value="pageSize", defaultValue="15") int size,
+				@RequestBody SerchPostRequirementRequest serchPostRequirementRequest) {
+			
+	    	LOGGER.debug("Entered searchPostRequirements");
+	    	
+	    	PaginatedResponse paginatedResponse = new PaginatedResponse();
+	    	
+	    	String searchBy     = serchPostRequirementRequest.getSearchBy();
+	    	String searchString = serchPostRequirementRequest.getSearchString().replaceAll(" " , "");
+	    	
+	    	List<PostRequirementVO> postRequirementVOList = new ArrayList<PostRequirementVO>();
+	    	List<PostRequirement> searchpostRequirements = new ArrayList<PostRequirement>();
+	    	List<PostRequirement> postRequirements = null;
+	    	
+	    	Long userId = null;
+	    	if(searchBy.equals(Constants.USER_NAME)) {
+	    		
+	    		postRequirements    = postRequirementService.getAllPostRequirements();
+	    		for(PostRequirement postRequirement: postRequirements) {
+	    			
+	    			Customer customer  = customerService.getById(postRequirement.getCustomerId());
+	    			
+	    			if(customer.getCustomerType().equals("0")) {
+	    			   String custFirstName = customer.getBilling().getFirstName();
+	    			   String custLastName  = customer.getBilling().getLastName();
+	    			   String custFullName  = custFirstName.concat(custLastName);
+	    			   //String searchText    = searchString.replaceAll(" ", "");
+	    			   //if(customer.getBilling().getFirstName().toLowerCase().contains(searchString.toLowerCase()) || (customer.getBilling().getLastName().toLowerCase().contains(searchString.toLowerCase()))) {
+	    				   if(custFullName.toLowerCase().contains(searchString.toLowerCase())) {
+	    				   searchpostRequirements.add(postRequirement);
+	    			   }
+	    			}else {
+	    				if(!customer.getVendorAttrs().getVendorName().equals(null)) {
+	    					String vendorName = customer.getVendorAttrs().getVendorName().replaceAll(" ", "");
+	    				    //if(customer.getVendorAttrs().getVendorName().toLowerCase().contains(searchString.toLowerCase())) {
+	    					if(vendorName.toLowerCase().contains(searchString.toLowerCase())) {
+	    					      searchpostRequirements.add(postRequirement);
+	    				    }
+	    			   }
+	    			}
+	    		}
+	    	    
+	    		
+	    	} else if(searchBy.equals(Constants.USER_ID)) {
+	    		
+	    		userId = new Long(searchString);
+	    		postRequirements = postRequirementService.getAllPostRequirements();
+	    		
+                for(PostRequirement postRequirement: postRequirements) {
+	    			
+	    			Customer customer  = customerService.getById(postRequirement.getCustomerId());
+	    			
+	    			if(customer.getId()==userId.longValue()) {
+	    				
+	    				searchpostRequirements.add(postRequirement);
+	    			}
+	    		}
+	    	}
+	    	
+	    	for(PostRequirement searchPostRequirement: searchpostRequirements) {
+    			PostRequirementVO postRequirementVO = new PostRequirementVO();
+    			postRequirementVO.setPostRequirementId(searchPostRequirement.getId());
+    			postRequirementVO.setQuery(searchPostRequirement.getQuery());
+    			postRequirementVO.setDateAndTime(searchPostRequirement.getPostedDate());
+    			Customer customer = customerService.getById(searchPostRequirement.getCustomerId());
+    			postRequirementVO.setCustomerId(customer.getId());
+    			Category category = categoryService.getById(searchPostRequirement.getCategoryId());
+    			postRequirementVO.setCategory(category.getDescription().getName());
+    			if(customer.getCustomerType().equals("0")) {
+    				postRequirementVO.setCustomerName(customer.getBilling().getFirstName().concat(" ").concat(customer.getBilling().getLastName()));
+    			}else {
+    				postRequirementVO.setCustomerName(customer.getVendorAttrs().getVendorName());
+    			}
+    			if(!searchPostRequirement.getState().equals(null) && searchPostRequirement.getState().equals("Y"))
+    				postRequirementVO.setStatus(Constants.ADMIN_POSTREQUIREMENT_RESPONDED);
+    			if(!searchPostRequirement.getState().equals(null) && searchPostRequirement.getState().equals("N"))
+    				postRequirementVO.setStatus(Constants.ADMIN_POSTREQUIREMENT_PENDING);
+    			postRequirementVOList.add(postRequirementVO);
+    			
+    		}
+	    	
+    		PaginationData paginaionData=createPaginaionData(page,size);
+        	calculatePaginaionData(paginaionData,size, postRequirementVOList.size());
+        	paginatedResponse.setPaginationData(paginaionData);
+    		if(postRequirementVOList == null || postRequirementVOList.isEmpty() || postRequirementVOList.size() < paginaionData.getCountByPage()){
+    			paginatedResponse.setResponseData(postRequirementVOList);
+    			LOGGER.debug("Ended getProductForCatAndTitle method ");
+    			return paginatedResponse;
+    		}
+        	List<PostRequirementVO> paginatedResponses = postRequirementVOList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+        	paginatedResponse.setResponseData(paginatedResponses);
+        	
+        	LOGGER.debug("Ended searchPostRequirements");
+    		return paginatedResponse;
+	    	
 	    	
 	    }
 }
