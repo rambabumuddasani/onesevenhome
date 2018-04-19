@@ -36,6 +36,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -866,7 +867,64 @@ public class ShoppingOrderController extends AbstractController {
 	}
 
 	
-/*	@RequestMapping(value="/orders", method = RequestMethod.POST)
+// url/allOrderDetails?userId=1
+	@RequestMapping(value="/adminSearchOrders", method = RequestMethod.POST)
+	@ResponseBody
+	public OrderResponse  adminSearchOrders(HttpServletRequest request, Locale locale,
+				@RequestParam(value="page",defaultValue = "0") int page, 
+				@RequestParam(value="size",defaultValue="5")int size,
+				@RequestParam("fromDate") @DateTimeFormat(pattern="yyyy-MM-dd") Date fromDate,
+				@RequestParam("toDate")   @DateTimeFormat(pattern="yyyy-MM-dd") Date toDate,
+				@RequestBody AdminOrderSearchRequest adminOrderSearchRequest
+				) throws Exception {
+		OrderResponse orderResponse = new OrderResponse();
+		MerchantStore store = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
+	    //Customer customer = getSessionAttribute(  Constants.CUSTOMER, request );
+	    //Long customerId = customer.getId();
+		String searchBy     = adminOrderSearchRequest.getSearchBy();
+		String searchString = adminOrderSearchRequest.getSearchstring();
+		
+		Page<Order> pageOrders= null;
+		
+	    if(fromDate == null){
+	    	fromDate = new Date();
+	    }
+	    if(toDate == null){
+	    	LocalDate localDays = LocalDate.now().plusDays(15);
+	    	toDate = Date.from(localDays.atStartOfDay(ZoneId.systemDefault()).toInstant());
+	    }
+	    Pageable pageable = createPageRequest(page,size);
+		Language language = (Language)request.getAttribute("LANGUAGE");
+		
+		Long orderId = null;
+		if(searchBy.equals(Constants.ORDER_ID)) {
+			 orderId = new Long(searchString);
+		     pageOrders = orderService.adminSearchOrdersByDatePurchasedBetween(fromDate, toDate,orderId,pageable);
+		}else if(searchBy.equals(Constants.USER_NAME)) {
+			 pageOrders = orderService.adminSearchOrdersByDatePurchasedBetweenAndName(fromDate, toDate,searchString,pageable);
+		}
+		
+		/*if(searchBy.equals(Constants.USER_NAME))
+		     orders = orderService.searchOrdersByCustomerName(fromDate,toDate,searchString);*/
+		
+		List<ReadableOrder> allOrders = new ArrayList<ReadableOrder>();
+		for(Order o : pageOrders){
+			allOrders.add(orderFacade.getReadableOrderByOrder(o, store, language));
+		}
+		orderResponse.setFirst(pageOrders.isFirst());
+		orderResponse.setLast(pageOrders.isLast());
+		orderResponse.setNumber(pageOrders.getNumber());
+		orderResponse.setNumberOfElements(pageOrders.getNumberOfElements());
+		orderResponse.setOrders(allOrders);
+		orderResponse.setSize(pageOrders.getSize());
+		orderResponse.setTotalPages(pageOrders.getTotalPages());
+		
+		return orderResponse;
+		
+	}
+
+
+	/*	@RequestMapping(value="/orders", method = RequestMethod.POST)
 	@ResponseBody
 	public List<ReadableOrder> getAllPaginatedCustomerOrders(HttpServletRequest request, Locale locale,Pageable pageable) throws Exception {
 	//public List<ReadableOrder> getAllPaginatedCustomerOrders(HttpServletRequest request, Locale locale) throws Exception {

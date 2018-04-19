@@ -138,4 +138,20 @@ public interface OrderService extends SalesManagerEntityService<Long, Order> {
 	List<OrderProduct> findOrderProductByVendorIdAndSku(Long vendorId, String productSku);
 
 	List<BigInteger> findRevenueVendors(Date startDate, Date endDate);
+
+	List<BigInteger> searchRevenueVendors();
+
+	List<Order> findOrdersSearchyVendor(long vendorId);
+
+	List<String> searchRevenueProducts();
+
+	List<Order> findOrdersSearchByProduct(String productSku);
+
+	Page<Order> adminSearchOrdersByDatePurchasedBetween(Date fromDate, Date toDate, Long orderId,
+			Pageable pageable);
+
+	Page<Order> adminSearchOrdersByDatePurchasedBetweenAndName(Date fromDate, Date toDate, String searchString,
+			Pageable pageable);
+
+	List<Order> searchOrdersByCustomerName(Date fromDate, Date toDate, String searchString);
 }

@@ -31,7 +31,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Long>, Custo
 	@Query("select c from Customer c join fetch c.merchantStore cm left join fetch c.defaultLanguage cl left join fetch c.attributes ca left join fetch ca.customerOption cao left join fetch ca.customerOptionValue cav left join fetch cao.descriptions caod left join fetch cav.descriptions left join fetch c.services cs  where cs.id = ?1")
 	List<Customer> findByServiceId(Integer serviceId);
 	
-	@Query("select c from Customer c join fetch c.merchantStore cm left join fetch c.defaultLanguage cl left join fetch c.attributes ca left join fetch ca.customerOption cao left join fetch ca.customerOptionValue cav left join fetch cao.descriptions caod left join fetch cav.descriptions left join fetch c.services cs  where cs.serviceType = ?1")
+	@Query("select c from Customer c join fetch c.merchantStore cm left join fetch c.defaultLanguage cl left join fetch c.attributes ca left join fetch ca.customerOption cao left join fetch ca.customerOptionValue cav left join fetch cao.descriptions caod left join fetch cav.descriptions left join fetch c.services cs  where cs.serviceType = ?1 and c.customerType='2'")
 	List<Customer> findByServiceType(String serviceType);
 	
 	@Query("select c from Customer c join fetch c.merchantStore cm left join fetch c.defaultLanguage cl left join fetch c.attributes ca left join fetch ca.customerOption cao left join fetch ca.customerOptionValue cav left join fetch cao.descriptions caod left join fetch cav.descriptions where c.customerType = ?1")
@@ -58,7 +58,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Long>, Custo
 	@Query("select c from Customer c join fetch c.merchantStore cm left join fetch c.defaultLanguage cl left join fetch c.attributes ca left join fetch ca.customerOption cao left join fetch ca.customerOptionValue cav left join fetch cao.descriptions caod left join fetch cav.descriptions where c.activated = ?1 and c.customerType = ?2")
 	List<Customer> findVendorsBasedOnStatusAndCustomerType(String status, String customerType);
 
-	@Query("select c from Customer c join fetch c.services cs where cs.serviceType = ?1 and (c.area like %?2% or c.billing.address like %?2% or c.billing.city like %?2% or c.billing.state like %?2% or c.billing.company like %?2%)")
+	@Query("select c from Customer c join fetch c.services cs where cs.serviceType = ?1 and c.customerType ='2' and (c.area like %?2% or c.billing.address like %?2% or c.billing.city like %?2% or c.billing.state like %?2% or c.billing.company like %?2%)")
 	List<Customer> findServiceProvidersByLocation(String customerType, String searchString);
 
 	@Query("select c from Customer c join fetch c.merchantStore cm left join fetch c.defaultLanguage cl left join fetch c.attributes ca left join fetch ca.customerOption cao left join fetch ca.customerOptionValue cav left join fetch cao.descriptions caod left join fetch cav.descriptions left join fetch c.categories cc  where cc.code = ?1")
@@ -84,18 +84,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Long>, Custo
 	@Query("select c from Customer c join fetch c.merchantStore cm left join fetch c.defaultLanguage cl left join fetch c.attributes ca left join fetch ca.customerOption cao left join fetch ca.customerOptionValue cav left join fetch cao.descriptions caod left join fetch cav.descriptions where c.customerType !='0' and c.activated='1'")
 	List<Customer> getAllPaidOrUnPaidVendors();
 
-	/*@Query("select c from Customer c join fetch c.merchantStore cm left join fetch c.defaultLanguage cl left join fetch c.attributes ca left join fetch ca.customerOption cao left join fetch ca.customerOptionValue cav left join fetch cao.descriptions caod left join fetch cav.descriptions where c.customerType !='0' and c.vendorAttrs.vendorName like %?1%")
-	List<Customer> getVendorsSearchByName(String searchString);*/
-
-	/*@Query("select c from Customer c join fetch c.merchantStore cm left join fetch c.defaultLanguage cl left join fetch c.attributes ca left join fetch ca.customerOption cao left join fetch ca.customerOptionValue cav left join fetch cao.descriptions caod left join fetch cav.descriptions where c.customerType = ?1 and c.vendorAttrs.vendorName like %?2%")
-	List<Customer> getVendorsByCustomerType(String customerType, String searchString);*/
-
-	/*@Query("select c from Customer c join fetch c.merchantStore cm left join fetch c.defaultLanguage cl left join fetch c.attributes ca left join fetch ca.customerOption cao left join fetch ca.customerOptionValue cav left join fetch cao.descriptions caod left join fetch cav.descriptions where c.customerType != '0' and c.activated = ?1 and c.vendorAttrs.vendorName like %?2%")
-	List<Customer> getVendorsBasedOnStatus(String status, String searchString);*/
-
-	/*@Query("select c from Customer c join fetch c.merchantStore cm left join fetch c.defaultLanguage cl left join fetch c.attributes ca left join fetch ca.customerOption cao left join fetch ca.customerOptionValue cav left join fetch cao.descriptions caod left join fetch cav.descriptions where c.activated = ?1 and c.customerType = ?2 and c.vendorAttrs.vendorName like %?3%")
-	List<Customer> getVendorsBasedOnStatusAndCustomerType(String status, String customerType, String searchString);*/
-
 	@Query("select c from Customer c join fetch c.merchantStore cm left join fetch c.defaultLanguage cl left join fetch c.attributes ca left join fetch ca.customerOption cao left join fetch ca.customerOptionValue cav left join fetch cao.descriptions caod left join fetch cav.descriptions where c.customerType !='0' and c.vendorAttrs.vendorName like %?1%")
 	List<Customer> getVendorSearchByName(String searchString);
 
@@ -107,4 +95,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Long>, Custo
 
 	@Query("select c from Customer c join fetch c.merchantStore cm left join fetch c.defaultLanguage cl left join fetch c.attributes ca left join fetch ca.customerOption cao left join fetch ca.customerOptionValue cav left join fetch cao.descriptions caod left join fetch cav.descriptions where c.customerType !='0' and c.activated='1' and c.id = ?1")
 	List<Customer> searchPaidOrUnPaidVendorsById(Long vendorId);
+
+	@Query("select c from Customer c join fetch c.merchantStore cm left join fetch c.defaultLanguage cl left join fetch c.attributes ca left join fetch ca.customerOption cao left join fetch ca.customerOptionValue cav left join fetch cao.descriptions caod left join fetch cav.descriptions left join fetch c.services cs  where cs.serviceType = ?1")
+	List<Customer> findByServiceTypeAndRated(String serviceType);
 }

@@ -178,7 +178,8 @@ public class Constants {
 	public final static String ARCHITECT_PORTFOLIO = "ARCHITECT_PORTFOLIO";
 	public final static String MACHINERY_PORTFOLIO = "MACHINERY_PORTFOLIO";
 	public final static String WALLPAPER_PF = "WALLPAPER_PF";
-	
+	public final static String PRODUCT_NAME = "PRODUCT_NAME";
+	public final static String PRODUCT_ID = "PRODUCT_ID";
 	
 
 }

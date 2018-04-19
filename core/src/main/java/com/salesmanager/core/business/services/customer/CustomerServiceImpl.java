@@ -2,6 +2,7 @@ package com.salesmanager.core.business.services.customer;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -148,6 +149,7 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 			ServicesWorkerVO servicesWorkerVO = new ServicesWorkerVO();
 			servicesWorkerVO.setId(new Integer(String.valueOf((eachWorker.getId()))));
 			servicesWorkerVO.setCompanyName(eachWorker.getVendorAttrs().getVendorName());
+			servicesWorkerVO.setImageUrl(eachWorker.getUserProfile());
 			/*servicesWorkerVO.setHouseNumber(eachWorker.getVendorAttrs().getVendorOfficeAddress());
 			servicesWorkerVO.setStreet(eachWorker.getBilling().getAddress());
 			servicesWorkerVO.setArea(eachWorker.getArea());
@@ -357,49 +359,72 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 		return customerRepository.getAllPaidOrUnPaidVendors();
 	}
 
-	/*@Override
-	public List<Customer> getVendorsSearchByName(String searchString) {
-		return customerRepository.getVendorsSearchByName(searchString);
-	}
-
-	@Override
-	public List<Customer> getVendorsByCustomerType(String customerType, String searchString) {
-		return customerRepository.getVendorsByCustomerType(customerType, searchString);
-	}
-
-	@Override
-	public List<Customer> getVendorsBasedOnStatus(String status, String searchString) {
-		return customerRepository.getVendorsBasedOnStatus(status, searchString);
-	}
-
-	@Override
-	public List<Customer> getVendorsBasedOnStatusAndCustomerType(String status, String customerType,
-			String searchString) {
-		return customerRepository.getVendorsBasedOnStatusAndCustomerType(status,customerType, searchString);
-	}*/
-
 	@Override
 	public List<Customer> getVendorSearchByName(String searchString) {
-		// TODO Auto-generated method stub
 		return customerRepository.getVendorSearchByName(searchString);
 	}
 
 	@Override
 	public List<Customer> getVendorSearchById(Long vendorId) {
-		// TODO Auto-generated method stub
 		return customerRepository.getVendorSearchById(vendorId);
 	}
 
 	@Override
 	public List<Customer> searchPaidOrUnPaidVendorsByName(String searchString) {
-		// TODO Auto-generated method stub
 		return customerRepository.searchPaidOrUnPaidVendorsByName(searchString);
 	}
 
 	@Override
 	public List<Customer> searchPaidOrUnPaidVendorsById(Long vendorId) {
-		// TODO Auto-generated method stub
 		return customerRepository.searchPaidOrUnPaidVendorsById(vendorId);
+	}
+
+	@Override
+	public List<ServicesWorkerVO> findByServiceTypeAndRated(String serviceType) {
+		LOGGER.debug("Entered findByServiceTypeAndRated");
+		WorkerServiceResponse response = new WorkerServiceResponse();
+		List<Customer> customer = customerRepository.findByServiceTypeAndRated(serviceType);
+		List<ServicesWorkerVO> servicesWorkerVOSet= new ArrayList<ServicesWorkerVO>();
+		List<ServicesWorkerVO> serviceWorkersList = null;
+		for(Customer eachWorker : customer){
+			Double avgRating = new Double(0);
+			int totalRating= 0;
+			int totalReviews = 0;
+			double totalRate = 0;
+			ServicesWorkerVO servicesWorkerVO = new ServicesWorkerVO();
+			servicesWorkerVO.setId(new Integer(String.valueOf((eachWorker.getId()))));
+			servicesWorkerVO.setCompanyName(eachWorker.getVendorAttrs().getVendorName());
+			servicesWorkerVO.setImageUrl(eachWorker.getUserProfile());
+			/*servicesWorkerVO.setHouseNumber(eachWorker.getVendorAttrs().getVendorOfficeAddress());
+			servicesWorkerVO.setStreet(eachWorker.getBilling().getAddress());
+			servicesWorkerVO.setArea(eachWorker.getArea());
+			servicesWorkerVO.setCity(eachWorker.getBilling().getCity());
+			servicesWorkerVO.setState(eachWorker.getBilling().getState());
+			servicesWorkerVO.setPinCode(eachWorker.getBilling().getPostalCode());
+			servicesWorkerVO.setContactNumber(eachWorker.getBilling().getTelephone());
+			servicesWorkerVO.setImageUrl(eachWorker.getVendorAttrs().getVendorAuthCert());
+			servicesWorkerVO.setCountry(eachWorker.getBilling().getCountry().getName());*/
+			//fetching ratings from services rating
+			List<ServicesRating> servicesRatingList = servicesRatingService.getServicesReviews(eachWorker.getId());
+			if(servicesRatingList != null) {
+				totalReviews = servicesRatingList.size();
+				for(ServicesRating servicesRating:servicesRatingList){
+					totalRating= totalRating + servicesRating.getRating();
+				}
+				totalRate = totalRating;
+				avgRating = Double.valueOf(totalRate / totalReviews);
+				avgRating = Double.valueOf(Math.round(avgRating.doubleValue() * 10D) / 10D);
+			}
+			servicesWorkerVO.setAvgRating(avgRating);
+			//servicesWorkerVO.setTotalRating(totalRating);
+			servicesWorkerVO.setTotalRating(totalReviews);
+			servicesWorkerVOSet.add(servicesWorkerVO);
+			
+			serviceWorkersList = new ArrayList<ServicesWorkerVO>(servicesWorkerVOSet);
+			Collections.sort(serviceWorkersList, Collections.reverseOrder(new ServiceWorkersDescRatingComparator()));
+		}
+		LOGGER.debug("Ended findByServiceTypeAndRated");
+		return serviceWorkersList;
 	}
 
 

@@ -4319,6 +4319,324 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    	
 	    	
 	    }
+	    @RequestMapping(value="/searchRevenueVendors", method=RequestMethod.POST)
+		@ResponseBody
+		public VendorProductRevenueResponse searchRevenueVendors(@RequestBody VendorProductRevenueRequest vendorProductRevenueRequest) throws Exception {
+					
+	    	LOGGER.debug("Entered searchRevenueVendors");
+	    	
+	    	VendorProductRevenueResponse vendorProductRevenueResponse = new VendorProductRevenueResponse();
+	
+	    	String searchString = vendorProductRevenueRequest.getSearchString().toLowerCase();
+	    	
+	    	List<BigInteger> revenueVendorIds = orderService.searchRevenueVendors();
+	    	
+	    	LOGGER.debug("RevenueVendorIds size "+revenueVendorIds.size());
+	    	
+	    	List<RevenueVendors> revVendorsList = new ArrayList<RevenueVendors>();
+	    	for(BigInteger revenueVendorId : revenueVendorIds) {
+	    		
+	    		//revVendorIds.add(revenueVendor.longValue());
+	    		Customer vendor = customerService.getById(revenueVendorId.longValue());
+	    		
+	    		String vendorName = vendor.getVendorAttrs().getVendorName().toLowerCase();
+	    	
+	    		if(vendorName.contains(searchString)) {
+	    		
+	    		RevenueVendors revenueVendors = new RevenueVendors();
+	    		
+	    		revenueVendors.setVendorId(vendor.getId());
+	    		revenueVendors.setVendorName(vendor.getVendorAttrs().getVendorName());
+	    		
+	    		revVendorsList.add(revenueVendors);
+	    		}
+	    		
+	    	}
+	    	vendorProductRevenueResponse.setRevenueVendors(revVendorsList);
+	    	LOGGER.debug("Entered searchRevenueVendors");
+	    	return vendorProductRevenueResponse;
+	    	
+	    }
+	    
+	    // vendor revenues search by vendor name and id
+	    @RequestMapping(value="/getVendorRevenuesBySearch", method=RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
+				produces = MediaType.APPLICATION_JSON_VALUE)
+		@ResponseBody
+		public PaginatedRevenueResponse getVendorRevenuesBySearch(@RequestBody VendorRevenueSearchRequest vendorRevenueSearchRequest,
+				@RequestParam(value="pageNumber", defaultValue = "1") int page ,
+                @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+			
+	    	LOGGER.debug("Entered getVendorRevenuesBySearch");
+	    	
+	    	PaginatedRevenueResponse paginatedRevenueResponse = new PaginatedRevenueResponse();
+	    	
+	    	String searchString = vendorRevenueSearchRequest.getSearchString().toLowerCase().replaceAll(" ", "");
+	    	String searchBy     = vendorRevenueSearchRequest.getSearchBy();
+	    	
+	    	Date startDate      = vendorRevenueSearchRequest.getStartDate();
+	    	Date endDate        = vendorRevenueSearchRequest.getEndDate();
+	    	List<VendorRevenueVO> vendorRevenueList = new ArrayList<VendorRevenueVO>();
+	   
+	    	try {
+	   
+	    		List<BigInteger> revenueVendorIds = orderService.findRevenueVendors(startDate, endDate);
+		    	
+		    	LOGGER.debug("RevenueVendorIds size "+revenueVendorIds.size());
+		    	
+		    	List<RevenueVendors> revVendorsList = new ArrayList<RevenueVendors>();
+		    	for(BigInteger revenueVendorId : revenueVendorIds) {
+		    		
+		    		Customer vendor = customerService.getById(revenueVendorId.longValue());
+		    		
+		    		Long vendorId = null;
+		    		if(searchBy.equals(Constants.VENDOR_NAME)) {
+		    			
+		    		  String vendorName = vendor.getVendorAttrs().getVendorName().toLowerCase().replaceAll(" ", "");
+		    	
+		    		 if(vendorName.contains(searchString)) {
+		    		
+		    		    RevenueVendors revenueVendors = new RevenueVendors();
+		    		
+		    		    revenueVendors.setVendorId(vendor.getId());
+		    		    revenueVendors.setVendorName(vendor.getVendorAttrs().getVendorName());
+		    		
+		    		    revVendorsList.add(revenueVendors);
+		    		 }
+		    	   }else if(searchBy.equals(Constants.VENDOR_ID)){
+		    		
+		    		  vendorId = new Long(searchString);
+		    		
+		    		 if(vendor.getId()==vendorId.longValue()) {
+		    			
+		    			RevenueVendors revenueVendors = new RevenueVendors();
+			    		
+			    		revenueVendors.setVendorId(vendor.getId());
+			    		revenueVendors.setVendorName(vendor.getVendorAttrs().getVendorName());
+			    		
+			    		revVendorsList.add(revenueVendors);
+		    		}
+		    		
+		    	}
+		    	}
+	    		
+	    	
+	    	int vendorsTotalRevenue = 0;
+	    	for(RevenueVendors revVendor : revVendorsList){
+	    		
+	    		VendorRevenueVO vendorRevenueVO = new VendorRevenueVO();	
+	    		LOGGER.debug("Vendor Id: "+revVendor.getVendorId());
+	    		vendorRevenueVO.setVendorId(revVendor.getVendorId());
+	    		
+	    		Customer vendor = customerService.getById(revVendor.getVendorId());
+	    		
+	    		if(vendor==null) {
+	    			paginatedRevenueResponse.setErrorMsg("Vendor with vendor Id : "+revVendor.getVendorId()+" does not exist");
+	    			paginatedRevenueResponse.setStatus("false");
+	    			return paginatedRevenueResponse;
+	    		}
+	    		
+	    	vendorRevenueVO.setVendorName(vendor.getVendorAttrs().getVendorName());
+	    		
+	    	List<Order> vendorAssociatedOrders =  orderService.findOrdersByVendor(startDate, endDate, vendor.getId());
+	    	
+	    	int total = 0;
+	    	for(Order order : vendorAssociatedOrders) {
+	    		
+	    		Set<OrderProduct> orderProducts = order.getOrderProducts();
+	    		
+	    		for(OrderProduct orderProduct : orderProducts){
+	    		  
+	    			 BigDecimal  productTotal = orderProduct.getOneTimeCharge().multiply(new BigDecimal(orderProduct.getProductQuantity()));
+	    			 total = total+productTotal.intValue();
+	    	
+	    		}
+	    	}
+	    	
+	    	vendorsTotalRevenue = vendorsTotalRevenue+total;
+	    	vendorRevenueVO.setTotalRevenue(total);
+	    	vendorRevenueList.add(vendorRevenueVO);
+	    	
+	    }
+	    	if(vendorRevenueSearchRequest.getSortBy().equals("ASC"))
+		    	Collections.sort(vendorRevenueList, new TotalRevenueComparator());
+		    	
+		    if(vendorRevenueSearchRequest.getSortBy().equals("DESC"))
+		    	Collections.sort(vendorRevenueList, Collections.reverseOrder(new TotalRevenueDescComparator()));
+	    
+	    	PaginationData paginaionData=createPaginaionData(page,size);
+        	calculatePaginaionData(paginaionData,size, vendorRevenueList.size());
+        	paginatedRevenueResponse.setPaginationData(paginaionData);
+    		if(vendorRevenueList == null || vendorRevenueList.isEmpty() || vendorRevenueList.size() < paginaionData.getCountByPage()){
+    			paginatedRevenueResponse.setVendorRevenues(vendorRevenueList);
+    			return paginatedRevenueResponse;
+    		}
+    		
+        	List<VendorRevenueVO> paginatedResponses = vendorRevenueList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+        	paginatedRevenueResponse.setVendorRevenues(paginatedResponses);
+        	paginatedRevenueResponse.setTotal(vendorsTotalRevenue);
+	    	}catch(Exception e) {
+	    		e.printStackTrace();
+	    		LOGGER.error("Error while retrieving vendor revenues "+e.getMessage());
+	    		paginatedRevenueResponse.setErrorMsg("Error while retrieving vendor revenues");
+	    		paginatedRevenueResponse.setStatus("false");
+	    		return paginatedRevenueResponse;
+	    	}
+	    	LOGGER.debug("Ended getVendorRevenues");
+	    	return paginatedRevenueResponse;
+	 }
+	    // Product revenues search by product name and product id
+	    @RequestMapping(value="/getProductRevenuesBySearch", method=RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
+				produces = MediaType.APPLICATION_JSON_VALUE)
+		@ResponseBody
+		public PaginatedRevenueResponse getProductRevenuesBySearch(@RequestBody VendorRevenueSearchRequest vendorRevenueSearchRequest,
+				@RequestParam(value="pageNumber", defaultValue = "1") int page ,
+                @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+			
+	    	LOGGER.debug("Entered getProductRevenuesBySearch");
+	    	
+	    	PaginatedRevenueResponse paginatedRevenueResponse = new PaginatedRevenueResponse();
+	    	
+	    	String searchString = vendorRevenueSearchRequest.getSearchString().toLowerCase().replaceAll(" ", "");
+	    	String searchBy     = vendorRevenueSearchRequest.getSearchBy(); 
+	    	
+	    	Date startDate = vendorRevenueSearchRequest.getStartDate();
+	    	Date endDate = vendorRevenueSearchRequest.getEndDate();
+	    	
+	    	List<ProductRevenueVO> productRevenueList = new ArrayList<ProductRevenueVO>();
+	    	
+            List<RevenueProducts> revenueProductsList = new ArrayList<RevenueProducts>();
+            Long prodId = null;
+            
+	    	try {
+	    		
+	    	List<String> productSkus = orderService.findProductSkus(startDate,endDate);
+	    	//Long prodId = null;
+	    	for(String productSku : productSkus) {
+	    		
+	    		Language language = languageService.getById(1);
+	    		
+	    		Product product = productService.getByCode(productSku,language);
+	    		Long productId = product.getId();
+	    		//String productName = product.getProductDescription().getName().toLowerCase().replaceAll(" ", "");
+	    		
+	    		 // Long prodId = null;
+	    		  if(searchBy.equals(Constants.PRODUCT_NAME)) {
+	    			
+	    			String productName = product.getProductDescription().getName().toLowerCase().replaceAll(" ", "");
+	    			
+	    			if(productName.contains(searchString)) {
+	    				
+	    				RevenueProducts revenueProducts = new RevenueProducts();
+	    				revenueProducts.setProductId(productId);
+	    				revenueProducts.setProductName(productName);
+	    				revenueProducts.setProductSku(productSku);
+	    		
+	    				revenueProductsList.add(revenueProducts);
+	    		   }
+	    		
+	    		}else if(searchBy.equals(Constants.PRODUCT_ID)) {
+	    			
+	    			prodId = new Long(searchString);
+	    			
+	    			if(productId.longValue()==prodId) {
+	    				
+	    				RevenueProducts revenueProducts = new RevenueProducts();
+	    				revenueProducts.setProductId(productId);
+	    				revenueProducts.setProductName(product.getProductDescription().getName());
+	    				revenueProducts.setProductSku(productSku);
+	    		
+	    				revenueProductsList.add(revenueProducts);
+	    				break;
+	    			}
+	    			
+	    			
+	    		}
+	    		
+	    	}
+	    	
+	    	if(revenueProductsList.isEmpty()) {
+	    		
+	    		LOGGER.debug("No search result(s) found");
+	   
+	    		if(searchBy.equals(Constants.PRODUCT_NAME)) 
+	    			paginatedRevenueResponse.setErrorMsg("No result(s) found for "+searchString);
+				else if(searchBy.equals(Constants.PRODUCT_ID))
+					paginatedRevenueResponse.setErrorMsg("No result(s) found for "+prodId);
+				
+				return paginatedRevenueResponse;
+	    		
+	    	}
+	    	
+	    	int productsTotalRevenue = 0;
+	    	for(RevenueProducts revenueProduct : revenueProductsList){
+	    		
+	    		ProductRevenueVO productRevenueVO = new ProductRevenueVO();	
+	    		LOGGER.debug("Product Sku "+revenueProduct.getProductSku());
+	    		productRevenueVO.setProductSku(revenueProduct.getProductSku());
+	    		
+	    		Language language = languageService.getById(1);
+	    		
+	    		Product product = productService.getByCode(revenueProduct.getProductSku(),language);
+	    		
+	    		if(product==null) {
+	    			LOGGER.debug("Product with product sku : "+revenueProduct.getProductSku()+" does not exist");
+	    			paginatedRevenueResponse.setErrorMsg("Product with product sku : "+revenueProduct.getProductSku()+" does not exist");
+	    			paginatedRevenueResponse.setStatus("false");
+	    			return paginatedRevenueResponse;
+	    		}
+	    		productRevenueVO.setProductId(product.getId());
+	    		LOGGER.debug("Product Name "+product.getProductDescription().getName());
+	    		
+	    		productRevenueVO.setProductName(product.getProductDescription().getName());
+	    		
+	    		//List<Order> vendorAssociatedOrders =  orderService.findOrdersSearchByProduct(revenueProduct.getProductSku());
+	    		List<Order> vendorAssociatedOrders =  orderService.findOrdersByProduct(startDate,endDate,product.getSku());
+	    		int total = 0;
+	    		int productQuantity =0;
+	    		for(Order order : vendorAssociatedOrders) {
+	    		
+	    		Set<OrderProduct> orderProducts = order.getOrderProducts();
+	    		
+	    		for(OrderProduct orderProduct : orderProducts){
+	    		 
+	    			 BigDecimal  productTotal = orderProduct.getOneTimeCharge().multiply(new BigDecimal(orderProduct.getProductQuantity()));
+	    			 total = total+productTotal.intValue();
+	    			 productQuantity = productQuantity+orderProduct.getProductQuantity(); 
+	    
+	    		}
+	    	}
+	    	productsTotalRevenue = productsTotalRevenue+total;
+	    	productRevenueVO.setTotalRevenue(total);
+	    	productRevenueVO.setProductQuantity(productQuantity);
+	    	productRevenueList.add(productRevenueVO);
+	    }
+	    	if(vendorRevenueSearchRequest.getSortBy().equals("ASC"))
+		    	Collections.sort(productRevenueList, new TotalProductRevenueAscComparator());
+		    	
+		    if(vendorRevenueSearchRequest.getSortBy().equals("DESC"))
+		    	Collections.sort(productRevenueList, Collections.reverseOrder(new TotalProductRevenueDescComparator()));
+	    	PaginationData paginaionData=createPaginaionData(page,size);
+        	calculatePaginaionData(paginaionData,size, productRevenueList.size());
+        	paginatedRevenueResponse.setPaginationData(paginaionData);
+    		if(productRevenueList == null || productRevenueList.isEmpty() || productRevenueList.size() < paginaionData.getCountByPage()){
+    			paginatedRevenueResponse.setProductRevenues(productRevenueList);
+    			return paginatedRevenueResponse;
+    		}
+    		
+        	List<ProductRevenueVO> paginatedResponses = productRevenueList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+        	paginatedRevenueResponse.setProductRevenues(paginatedResponses);
+        	paginatedRevenueResponse.setTotal(productsTotalRevenue);
+	    	}catch(Exception e) {
+	    		e.printStackTrace();
+	    		LOGGER.error("Error while retrieving product revenues "+e.getMessage());
+	    		paginatedRevenueResponse.setErrorMsg("Error while retrieving product revenues");
+	    		paginatedRevenueResponse.setStatus("false");
+	    		return paginatedRevenueResponse;
+	    	}
+	    	
+	    	LOGGER.debug("Ended getProductRevenuesBySearch");
+	    	return paginatedRevenueResponse;
+	 }
 }
     
  

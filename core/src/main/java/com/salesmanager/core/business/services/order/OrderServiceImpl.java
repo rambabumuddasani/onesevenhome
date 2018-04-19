@@ -602,4 +602,41 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
 		return orderRepository.findRevenueVendors(startDate,endDate);
 	}
 
+	@Override
+	public List<BigInteger> searchRevenueVendors() {
+		return orderRepository.searchRevenueVendors();
+	}
+
+	@Override
+	public List<Order> findOrdersSearchyVendor(long vendorId) {
+		return orderRepository.findOrdersSearchyVendor(vendorId);
+	}
+
+	@Override
+	public List<String> searchRevenueProducts() {
+		return orderRepository.searchRevenueProducts();
+	}
+
+	@Override
+	public List<Order> findOrdersSearchByProduct(String productSku) {
+		return orderRepository.findOrdersSearchByProduct(productSku);
+	}
+
+	@Override
+	public Page<Order> adminSearchOrdersByDatePurchasedBetween(Date fromDate, Date toDate, Long orderId,
+			Pageable pageable) {
+		return orderRepository.adminSearchOrdersByDatePurchasedBetween(fromDate,toDate,orderId,pageable);
+	}
+
+	@Override
+	public Page<Order> adminSearchOrdersByDatePurchasedBetweenAndName(Date fromDate, Date toDate, String searchString,
+			Pageable pageable) {
+		return orderRepository.adminSearchOrdersByDatePurchasedBetweenAndName(fromDate, toDate, searchString, pageable);
+	}
+
+	@Override
+	public List<Order> searchOrdersByCustomerName(Date fromDate, Date toDate, String searchString) {
+		return orderRepository.searchOrdersByCustomerName(fromDate,toDate,searchString);
+	}
+
 }

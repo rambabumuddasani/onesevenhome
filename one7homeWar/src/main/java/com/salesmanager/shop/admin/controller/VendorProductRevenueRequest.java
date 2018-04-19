@@ -13,6 +13,7 @@ public class VendorProductRevenueRequest implements Serializable{
 	private Date endDate;
 	private Long vendorId;
 	private String productSku;
+	private String searchString;
 	public Date getStartDate() {
 		return startDate;
 	}
@@ -36,5 +37,11 @@ public class VendorProductRevenueRequest implements Serializable{
 	}
 	public void setProductSku(String productSku) {
 		this.productSku = productSku;
+	}
+	public String getSearchString() {
+		return searchString;
+	}
+	public void setSearchString(String searchString) {
+		this.searchString = searchString;
 	}
 }

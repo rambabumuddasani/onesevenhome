@@ -77,15 +77,6 @@ public interface CustomerService  extends SalesManagerEntityService<Long, Custom
 
 	public List<Customer> getAllPaidOrUnPaidVendors();
 
-	/*public List<Customer> getVendorsSearchByName(String searchString);
-
-	public List<Customer> getVendorsByCustomerType(String customerType, String searchString);
-
-	public List<Customer> getVendorsBasedOnStatus(String status, String searchString);
-
-	public List<Customer> getVendorsBasedOnStatusAndCustomerType(String status, String customerType,
-			String searchString);*/
-
 	public List<Customer> getVendorSearchByName(String searchString);
 
 	public List<Customer> getVendorSearchById(Long vendorId);
@@ -93,5 +84,7 @@ public interface CustomerService  extends SalesManagerEntityService<Long, Custom
 	public List<Customer> searchPaidOrUnPaidVendorsByName(String searchString);
 
 	public List<Customer> searchPaidOrUnPaidVendorsById(Long vendorId);
+	
+	List<ServicesWorkerVO> findByServiceTypeAndRated(String serviceType);
 
 }
