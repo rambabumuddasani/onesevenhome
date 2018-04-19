@@ -161,6 +161,12 @@ public class ServicesController extends AbstractController{
 		PaginationData paginaionData=createPaginaionData(page,size);
 		try {
 			List<ServicesWorkerVO> paginatedResponses = customerService.findByServiceType(type);
+			
+			if(paginatedResponses.isEmpty()) {
+				LOGGER.debug("No "+type+" found based on selected criteria" );
+				paginatedResponse.setErrorMsg("No "+type+" found based on selected criteria");
+				return paginatedResponse;
+			}
 	    	calculatePaginaionData(paginaionData,size, paginatedResponses.size());
 	    	paginatedResponse.setPaginationData(paginaionData);
 			if(paginatedResponses == null || paginatedResponses.isEmpty() || paginatedResponses.size() < paginaionData.getCountByPage()){
@@ -623,7 +629,14 @@ public class ServicesController extends AbstractController{
 		
 		List<ServicesWorkerVO> servicesWorkerVOList= new ArrayList<ServicesWorkerVO>();
 		
-		List<Customer> serviceProviders = customerService.getServiceProvidersByLocation(vendorSearchRequest.getCustomerType(),vendorSearchRequest.getSearchString());
+		List<Customer> serviceProviders = customerService.getServiceProvidersByLocation(vendorSearchRequest.getCustomerType(),vendorSearchRequest.getSearchString()); //here customerType is serviceType
+		
+		if(serviceProviders.isEmpty()){
+			
+			LOGGER.debug("No search results found for "+vendorSearchRequest.getSearchString());
+			paginatedResponse.setErrorMsg("No search results found for "+vendorSearchRequest.getSearchString());
+			return paginatedResponse;
+		}
 		
 		for(Customer serviceProvider : serviceProviders) {
 			
@@ -960,5 +973,31 @@ public class ServicesController extends AbstractController{
     	
     	LOGGER.debug("Ended searchServicesBooking");
 		return paginatedResponse;
+	}
+	@RequestMapping(value="/services/{type}/workers/toprated", method = RequestMethod.GET, 
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public PaginatedResponse getWorkerByServiceAndTopRated(@PathVariable String type, @RequestParam(value="pageNumber", defaultValue = "1") int page , @RequestParam(value="pageSize", defaultValue="15") int size) {
+		LOGGER.debug("Entered getWorkerByServiceAndTopRated");
+		PaginatedResponse paginatedResponse = new PaginatedResponse();
+		PaginationData paginaionData=createPaginaionData(page,size);
+		try {
+			List<ServicesWorkerVO> paginatedResponses = customerService.findByServiceTypeAndRated(type);
+	    	calculatePaginaionData(paginaionData,size, paginatedResponses.size());
+	    	paginatedResponse.setPaginationData(paginaionData);
+			if(paginatedResponses == null || paginatedResponses.isEmpty() || paginatedResponses.size() < paginaionData.getCountByPage()){
+				paginatedResponse.setResponseData(paginatedResponses);
+				return paginatedResponse;
+			}
+	    	paginatedResponses = paginatedResponses.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+	    	paginatedResponse.setResponseData(paginatedResponses);
+		} catch(Exception e) {
+			e.printStackTrace();
+			paginatedResponse.setErrorMsg("Error while retrieving getWorkerByService"+e.getMessage());
+			LOGGER.error("Error while retrieving getWorkerByService");
+			return paginatedResponse;
+		}
+    	return paginatedResponse;
+    	
 	}
 }
