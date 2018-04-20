@@ -118,7 +118,7 @@ public class MachineryController extends AbstractController {
 	    		machineryPortfolioService.save(machineryPortfolio);
 	    		
 	    		machineryResponse.setStatus(true);
-	    		machineryResponse.setSuccessMessage("New portfolio details uploaded successfully.");
+	    		machineryResponse.setSuccessMessage("New portfolio details uploaded successfully. Awaiting from admin approval");
 	    		
     		}catch(Exception se){
     			LOGGER.error("Failed while uploading portfolio for machinery=="+se.getMessage());
@@ -235,7 +235,7 @@ public class MachineryController extends AbstractController {
 	    		machineryPortfolioService.update(machineryPortfolio);
 	    		
 	    		machineryResponse.setStatus(true);
-	    		machineryResponse.setSuccessMessage("Portfolio details updated successfully.");
+	    		machineryResponse.setSuccessMessage("Portfolio details updated successfully. Awaiting from admin approval");
 	    		if(fileName != null) {
 					try {
 						//deleting image from the location

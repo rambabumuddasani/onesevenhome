@@ -124,7 +124,7 @@ public class WallPaperController extends AbstractController {
 	    		wallPaperPortfolioService.save(wallPaperPortfolio);
 	    		
 	    		wallPaperResponse.setStatus(true);
-	    		wallPaperResponse.setSuccessMessage("New portfolio details uploaded successfully.");
+	    		wallPaperResponse.setSuccessMessage("New portfolio details uploaded successfully. Awaiting from admin approval");
 	    		
     		}catch(Exception se){
     			LOGGER.error("Failed while uploading portfolio for wall paper=="+se.getMessage());
@@ -247,8 +247,8 @@ public class WallPaperController extends AbstractController {
 	    		wallPaperPortfolioService.update(wallPaperPortfolio);
 	    		
 	    		wallPaperResponse.setStatus(true);
-	    		wallPaperResponse.setSuccessMessage("Portfolio details updated successfully.");
-	    		if(fileName != null) {
+	    		wallPaperResponse.setSuccessMessage("Portfolio details updated successfully. Awaiting from admin approval");
+	    	/*	if(fileName != null) {
 					try {
 						//deleting image from the location
 						File imageFile = new File(wallPaperPortfolio.getImageURL());
@@ -259,7 +259,7 @@ public class WallPaperController extends AbstractController {
 					} catch(Exception e){
 						//ignore the error while deletion fails. which is not going to impact the flow.
 					}
-	    		}
+	    		}*/
 	    		
     		}catch(Exception se){
     			LOGGER.error("Failed while uploading portfolio for wall paper=="+se.getMessage());
