@@ -245,6 +245,7 @@ public class ArchitectsController extends AbstractController {
     	String fileName = "";
     		try{
     			ArchitectsPortfolio architectsPortfolio = architectsPortfolioService.getById(architectsRequest.getPortfolioId());
+    			String existingfile = architectsPortfolio.getImageURL();
     			if(uploadedImage.getSize() != 0) {
 	    			fileName = storageService.store(uploadedImage,"architect");
 	    			LOGGER.debug("architect portfolio fileName "+fileName);
@@ -269,10 +270,10 @@ public class ArchitectsController extends AbstractController {
 	    		architectsResponse.setStatus(true);
 	    		architectsResponse.setSuccessMessage("Portfolio updated successfully. Awaiting for Admin approval.");
 	    		
-	    		if(fileName != null) {
+	    		if(existingfile != null) {
 					try {
 						//deleting image from the location
-						File imageFile = new File(architectsPortfolio.getImageURL());
+						File imageFile = new File(existingfile);
 						if(imageFile.exists()){
 							imageFile.delete();
 						}

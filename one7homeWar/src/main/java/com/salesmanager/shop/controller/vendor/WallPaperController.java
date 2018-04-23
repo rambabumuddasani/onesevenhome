@@ -223,6 +223,7 @@ public class WallPaperController extends AbstractController {
     	String fileName = "";
     		try{
     			WallPaperPortfolio wallPaperPortfolio = wallPaperPortfolioService.getById(wallPaperRequest.getPortfolioId());
+    			String existingfile = wallPaperPortfolio.getImageURL();
     	    	if(uploadedImage.getSize() != 0) {
 	    			fileName = storageService.store(uploadedImage,"wallpaper");
 	    			LOGGER.debug("wall paper portfolio fileName "+fileName);
@@ -244,10 +245,23 @@ public class WallPaperController extends AbstractController {
 	    		wallPaperPortfolio.setPortfolioName(wallPaperRequest.getPortfolioName());
 	    		wallPaperPortfolio.setServiceCharges(wallPaperRequest.getServiceCharges());
 	    		wallPaperPortfolio.setStatus("N");
+	    		//String existingfile = wallPaperPortfolio.getImageURL();
 	    		wallPaperPortfolioService.update(wallPaperPortfolio);
 	    		
 	    		wallPaperResponse.setStatus(true);
 	    		wallPaperResponse.setSuccessMessage("Portfolio details updated successfully. Awaiting from admin approval");
+	    		if(existingfile != null) {
+					try {
+						//deleting image from the location
+						File imageFile = new File(existingfile);
+						if(imageFile.exists()){
+							imageFile.delete();
+						}
+
+					} catch(Exception e){
+						//ignore the error while deletion fails. which is not going to impact the flow.
+					}
+	    		}
 	    	/*	if(fileName != null) {
 					try {
 						//deleting image from the location

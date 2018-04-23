@@ -214,6 +214,7 @@ public class MachineryController extends AbstractController {
     	String fileName = "";
     		try{
     			MachineryPortfolio machineryPortfolio = machineryPortfolioService.getById(machineryRequest.getPortfolioId());
+    			String existingfile = machineryPortfolio.getImageURL();
     			if(uploadedImage.getSize() != 0) {
 	    			fileName = storageService.store(uploadedImage,"architect");
 	    			LOGGER.debug("machinery portfolio fileName "+fileName);
@@ -236,10 +237,10 @@ public class MachineryController extends AbstractController {
 	    		
 	    		machineryResponse.setStatus(true);
 	    		machineryResponse.setSuccessMessage("Portfolio details updated successfully. Awaiting from admin approval");
-	    		if(fileName != null) {
+	    		if(existingfile != null) {
 					try {
 						//deleting image from the location
-						File imageFile = new File(machineryPortfolio.getImageURL());
+						File imageFile = new File(existingfile);
 						if(imageFile.exists()){
 							imageFile.delete();
 						}
