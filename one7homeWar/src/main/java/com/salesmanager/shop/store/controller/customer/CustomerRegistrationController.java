@@ -1767,13 +1767,17 @@ public class CustomerRegistrationController extends AbstractController {
 			tempvendorFile3Path = new StringBuilder("vendor").append(File.separator).append("supporting_artifacts").toString();
 			
 		}
-		
+		String existingProfilePicFile = "";
+		String existingCertFile       = "";
+		String existingFile1          = "";
+		String existingFile2          = "";
+		String existingFile3          = "";
 		if (profilePicFile != null) {
 			
 			LOGGER.debug("Inside Profile File : " + profilePicFile.getOriginalFilename());
 		
 			userProfile = storeMultipartfile(profilePicFile, tempVendorProfilePicPath);
-			
+			existingProfilePicFile = customer.getUserProfile();
 			if(!StringUtils.isEmpty(userProfile)){
 				customer.setUserProfile(userProfile);
 			}
@@ -1785,7 +1789,7 @@ public class CustomerRegistrationController extends AbstractController {
     		LOGGER.debug("Inside Certificate File :" + vendorCertificateFile.getOriginalFilename());
 		
     		certFileName = storeMultipartfile(vendorCertificateFile, tempVendorCertificatePath);
-        
+    		existingCertFile = vendorAttrs.getVendorAuthCert();
     		if(!StringUtils.isEmpty(certFileName)){
     			vendorAttrs.setVendorAuthCert(certFileName);
     		}
@@ -1797,7 +1801,7 @@ public class CustomerRegistrationController extends AbstractController {
     		LOGGER.debug("Inside File 1 : " + uploadfile1.getOriginalFilename());
     	
     		file1 = storeMultipartfile(uploadfile1, tempvendorFile1Path);
-        
+    		existingFile1 = customer.getFile1();
     		if(!StringUtils.isEmpty(file1)){
     			customer.setFile1(file1);
     		}
@@ -1809,7 +1813,7 @@ public class CustomerRegistrationController extends AbstractController {
     		LOGGER.debug("Inside File 2 : " + uploadfile2.getOriginalFilename());
     		
     		file2 = storeMultipartfile(uploadfile2, tempvendorFile2Path);
-        
+    		existingFile2 = customer.getFile2();
     		if(!StringUtils.isEmpty(file2)){
     			customer.setFile2(file2);
     		}
@@ -1821,7 +1825,7 @@ public class CustomerRegistrationController extends AbstractController {
     		LOGGER.debug("Inside File 3 : " + uploadfile3.getOriginalFilename());
     		
     		file3 = storeMultipartfile(uploadfile3, tempvendorFile3Path);
-        
+    		existingFile3 = customer.getFile3();
     		if(!StringUtils.isEmpty(file3)){
     			customer.setFile3(file3);
     		}
@@ -1861,10 +1865,58 @@ public class CustomerRegistrationController extends AbstractController {
         	}
        	
 	        customerFacade.updateCustomer(customer);
+	        try {
+	        if(existingProfilePicFile != null) {
+				
+					//deleting existingProfilePicFile from the location
+					File imageFile = new File(existingProfilePicFile);
+					if(imageFile.exists()){
+						imageFile.delete();
+					}
+
+    		}
+	        if(existingCertFile != null) {
+				
+					//deleting existingCertFile from the location
+					File imageFile = new File(existingCertFile);
+					if(imageFile.exists()){
+						imageFile.delete();
+					}
+    		}
+	        if(existingFile1 != null) {
+				
+				//deleting existingFile from the location
+				File imageFile = new File(existingFile1);
+				if(imageFile.exists()){
+					imageFile.delete();
+				}
+		    }
+            if(existingFile2 != null) {
+				
+				//deleting existingFile from the location
+				File imageFile = new File(existingFile2);
+				if(imageFile.exists()){
+					imageFile.delete();
+				}
+		    }
+            if(existingFile3 != null) {
+				
+				//deleting existingFile from the location
+				File imageFile = new File(existingFile3);
+				if(imageFile.exists()){
+					imageFile.delete();
+				}
+		    }
+	        }catch(Exception e){
+				//ignore the error while deletion fails. which is not going to impact the flow.
+	        }
 	        LOGGER.debug("User Updated");
         }catch(Exception e) {
         	storageService.deleteFile(certFileName);
         	storageService.deleteFile(userProfile);
+        	storageService.deleteFile(file1);
+        	storageService.deleteFile(file2);
+        	storageService.deleteFile(file3);
             LOGGER.error( "Error while updating customer.. ", e);
             customerResponse.setErrorMessage(e.getMessage());
             return customerResponse;
