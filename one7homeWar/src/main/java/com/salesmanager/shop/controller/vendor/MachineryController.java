@@ -233,6 +233,7 @@ public class MachineryController extends AbstractController {
 	    		machineryPortfolio.setEquipmentName(machineryRequest.getEquipmentName());
 	    		machineryPortfolio.setEquipmentPrice(machineryRequest.getEquipmentPrice());
 	    		machineryPortfolio.setHiringType(machineryRequest.getHiringType());
+	    		machineryPortfolio.setStatus("N");
 	    		machineryPortfolioService.update(machineryPortfolio);
 	    		
 	    		machineryResponse.setStatus(true);
