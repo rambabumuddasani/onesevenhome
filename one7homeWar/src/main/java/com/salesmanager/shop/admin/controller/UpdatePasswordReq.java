@@ -10,6 +10,7 @@ public class UpdatePasswordReq implements Serializable {
 	//private String adminName;
 	private String emailAddress;
 	private String newPassword;
+	private String currentPassword;
 	
 	public String getId() {
 		return id;
@@ -34,6 +35,12 @@ public class UpdatePasswordReq implements Serializable {
 	}
 	public void setEmailAddress(String emailAddress) {
 		this.emailAddress = emailAddress;
+	}
+	public String getCurrentPassword() {
+		return currentPassword;
+	}
+	public void setCurrentPassword(String currentPassword) {
+		this.currentPassword = currentPassword;
 	}
 
 }

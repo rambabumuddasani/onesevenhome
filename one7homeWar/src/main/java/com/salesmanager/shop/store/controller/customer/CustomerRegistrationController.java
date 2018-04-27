@@ -71,6 +71,8 @@ import com.salesmanager.core.model.reference.zone.Zone;
 import com.salesmanager.core.model.services.Services;
 import com.salesmanager.core.model.shoppingcart.ShoppingCart;
 import com.salesmanager.shop.admin.controller.PostRequirementVO;
+import com.salesmanager.shop.admin.controller.UpdatePasswordReq;
+import com.salesmanager.shop.admin.controller.UpdatePasswordResp;
 import com.salesmanager.shop.admin.controller.products.PaginatedResponse;
 import com.salesmanager.shop.constants.ApplicationConstants;
 import com.salesmanager.shop.constants.Constants;
@@ -113,6 +115,7 @@ public class CustomerRegistrationController extends AbstractController {
 	private static final String SLASH = "/";
 	private static final String USER_PROFILE_PIC = "userProfilePic";
 	private static final String TRUE = "true";
+	private static final String FALSE = "false";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CustomerRegistrationController.class);
     
 	@Inject
@@ -2132,5 +2135,47 @@ public class CustomerRegistrationController extends AbstractController {
 		return paginatedResponse;
     	
     }
-	
+	 // Admin change user password
+    @RequestMapping(value="/changeUserpassword", method=RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public UpdatePasswordResp changeUserpassword(@RequestBody UpdatePasswordReq updatePasswordReq) throws Exception {
+		LOGGER.info("Entered changeUserpassword");
+		UpdatePasswordResp updatePasswordResp = new UpdatePasswordResp();
+		try {
+	    //Fetching customer by email address which is unique
+		MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT"); 
+        Customer customer = customerFacade.getCustomerByUserName(updatePasswordReq.getEmailAddress(), merchantStore );
+        
+		if(customer==null) {
+			LOGGER.debug("User not exist for this emailaddress: "+updatePasswordReq.getEmailAddress());
+			updatePasswordResp.setErrorMessage("User not exist for this emailaddress: "+updatePasswordReq.getEmailAddress());
+			updatePasswordResp.setStatus(FALSE);
+			return updatePasswordResp;
+		}
+		//encoding and updating password
+		String newPassword = passwordEncoder.encode(updatePasswordReq.getNewPassword());
+		String currentPassword = updatePasswordReq.getCurrentPassword();
+		// Checking current password matches or not. if matches current password updating with new password  
+		if (passwordEncoder.matches(currentPassword, customer.getPassword())){
+			customer.setPassword(newPassword);
+			customerFacade.updateCustomer(customer);
+			LOGGER.debug("Password updated");
+			updatePasswordResp.setSuccessMessage("Password updated successfully");
+			updatePasswordResp.setStatus(TRUE);
+		}else {
+			updatePasswordResp.setErrorMessage("Current password does not matched");
+			updatePasswordResp.setStatus(FALSE);
+			return updatePasswordResp;
+		}
+		}catch(Exception e) {
+			e.printStackTrace();
+			LOGGER.debug("Error while updating user password");
+			updatePasswordResp.setErrorMessage("Error while updating user password");
+			return updatePasswordResp;
+		}
+		
+		LOGGER.info("Ended changeUserpassword");
+		return updatePasswordResp;
+	}
 }
