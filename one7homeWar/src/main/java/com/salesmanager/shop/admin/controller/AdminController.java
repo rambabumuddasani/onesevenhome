@@ -100,6 +100,7 @@ import com.salesmanager.shop.controller.vendor.MachineryPortfolioVO;
 import com.salesmanager.shop.controller.vendor.WallPaperPortfolioVO;
 import com.salesmanager.shop.fileupload.services.StorageException;
 import com.salesmanager.shop.fileupload.services.StorageService;
+import com.salesmanager.shop.store.controller.customer.facade.CustomerFacade;
 import com.salesmanager.shop.store.model.paging.PaginationData;
 import com.salesmanager.shop.utils.DateUtil;
 import com.salesmanager.shop.utils.EmailUtils;
@@ -203,6 +204,9 @@ public class AdminController extends AbstractController {
 	
 	@Inject
 	WallPaperPortfolioService wallPaperPortfolioService;
+	
+	@Inject
+	private CustomerFacade customerFacade;
 	
     // Admin update store address
 	@RequestMapping(value="/admin/updatestore", method = RequestMethod.POST, 
@@ -1209,11 +1213,12 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     @RequestMapping(value="/getAllSubCatImages", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public AdminSubCatImgResponse getAllSubCatImages() throws Exception {
+	public AdminSubCatImgResponse getAllSubCatImages(@RequestParam(value="pageNumber", defaultValue = "1") int page ,
+            @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
 		LOGGER.debug("Entered getAllSubCatImages");
-    	AdminSubCatImgResponse adminSubCatImgResponse = new AdminSubCatImgResponse();    	
+    	AdminSubCatImgResponse adminSubCatImgResponse = new AdminSubCatImgResponse(); 
+    	PaginatedResponse paginatedResponse = new PaginatedResponse();
 		Map<String,List<SubCategoryImageVO>> parentMap = new HashMap<String, List<SubCategoryImageVO>>();
-
     	//Getting subCategoryImages
         List<SubCategoryImage> subCategoryImages = subCategoryService.getAllSubCategoryImage();
         for(SubCategoryImage subCategoryImage:subCategoryImages) {
@@ -1245,9 +1250,48 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 				parentMap.put(parentCatName, subCategoryImageVOList);	
         	}	
  	    }
-        // setting subcatimges to response
+        /*Set<Entry<String, List<SubCategoryImageVO>>> set = parentMap.entrySet(); 
+        List<Entry<String, List<SubCategoryImageVO>>> subCategoryImageList = new ArrayList<>(set);*/ 
+       /* Iterator<Entry<String, List<SubCategoryImageVO>>> it = subCategoryImageList.iterator();
+        while (it.hasNext()) {
+        	Entry<String, List<SubCategoryImageVO>> entry = it.next();
+        	System.out.println("Entry from converted list : " + entry);
+        }*/
         adminSubCatImgResponse.setSubCatagoryImgsObjByCatagory(parentMap);
-        LOGGER.debug("Entered getAllSubCatImages");
+        
+        //adminSubCatImgResponse.setSubCatagoryImgsObjByCatagory(subCategoryImageList);
+        //List<SubCategoryForCategory> subCategoryForCategoryList = new ArrayList<SubCategoryForCategory>();
+        /*for(Entry<String, List<SubCategoryImageVO>> subCategoryImage : subCategoryImageList){
+        	SubCategoryForCategory subcategoryForCategory = new SubCategoryForCategory();
+        	String categoryName = subCategoryImage.getKey();
+        	subcategoryForCategory.setCategoryName(categoryName);
+        	SubCategoryJson subCategoryJson = new SubCategoryJson();
+        	List<SubCategoryJson> subCategoryJsonList = new ArrayList<SubCategoryJson>();
+        	for(SubCategoryImageVO subcat : subCategoryImage.getValue()) {
+        		subCategoryJson.setSubCategoryId(subcat.getSubCategoryId());
+        		subCategoryJson.setSubCategoryName(subcat.getSubCategoryName());
+        		subCategoryJson.setSubCategoryImageURL(subcat.getSubCategoryImageURL());
+        		subCategoryJsonList.add(subCategoryJson);
+        	}
+        	subcategoryForCategory.setSubCategory(subCategoryJsonList);
+        	subCategoryForCategoryList.add(subcategoryForCategory);
+        }
+        PaginationData paginaionData=createPaginaionData(page,size);
+    	calculatePaginaionData(paginaionData,size, subCategoryForCategoryList.size());
+    	paginatedResponse.setPaginationData(paginaionData);
+		if(subCategoryForCategoryList == null || subCategoryForCategoryList.isEmpty() || subCategoryForCategoryList.size() < paginaionData.getCountByPage()){
+			paginatedResponse.setResponseData(subCategoryImageList);
+			return paginatedResponse;
+		}
+    	List<SubCategoryForCategory> paginatedResponses = subCategoryForCategoryList.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+    	paginatedResponse.setResponseData(paginatedResponses);
+	}catch(Exception e) {
+		e.printStackTrace();
+		LOGGER.error("error while retrieving subcategory images"+e.getMessage());
+		paginatedResponse.setErrorMsg("error while subcategory images");
+		return paginatedResponse;
+	}*/
+        LOGGER.debug("Ended getAllSubCatImages");
     	return adminSubCatImgResponse;
     }
    
@@ -2200,6 +2244,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 				e.printStackTrace();
 				LOGGER.error("error while retrieving vendors"+e.getMessage());
 				paginatedResponse.setErrorMsg("error while retrieving vendors");
+				return paginatedResponse;
 			}
 			LOGGER.debug("Ended getVendorForAdmin");
 			return paginatedResponse;
@@ -4638,6 +4683,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 	    	LOGGER.debug("Ended getProductRevenuesBySearch");
 	    	return paginatedRevenueResponse;
 	 }
+	 
 }
     
  

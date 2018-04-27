@@ -2,14 +2,17 @@ package com.salesmanager.shop.admin.controller.services;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -37,6 +40,7 @@ import com.salesmanager.core.model.customer.ServicesBooking;
 import com.salesmanager.core.model.customer.ServicesRating;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.services.Services;
+import com.salesmanager.core.modules.integration.shipping.model.ShippingQuotePrePostProcessModule;
 import com.salesmanager.shop.admin.controller.products.PaginatedResponse;
 import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.constants.EmailConstants;
@@ -88,6 +92,10 @@ public class ServicesController extends AbstractController{
     
     @Inject
 	private UserService userService;
+    
+    @Inject
+	@Qualifier("shippingDistancePreProcessor")
+	ShippingQuotePrePostProcessModule shippingQuotePrePostProcessModule;
 
 	private final static String SERVICE_BOOKING_TMPL = "email_template_service_booking.ftl";
 	//private final static String ADMIN_SERVICE_BOOKING_TMPL = "email_template_admin_service_booking.ftl";
@@ -999,5 +1007,128 @@ public class ServicesController extends AbstractController{
 		}
     	return paginatedResponse;
     	
+	}
+	@RequestMapping(value="/services/{type}/{userPinCode}/{distanceFrom}/{distanceTo}", method = RequestMethod.GET, 
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public PaginatedResponse getWorkerByDistance(@PathVariable String type, 
+			@RequestParam(value="pageNumber", defaultValue = "1") int page ,
+			@RequestParam(value="pageSize", defaultValue="15") int size,
+			@PathVariable("userPinCode") String userPinCode ,
+			@PathVariable("distanceFrom") String distanceFrom,
+			@PathVariable("distanceTo") String distanceTo,
+			HttpServletRequest request) throws Exception {
+		
+		LOGGER.debug("Entered getWorkerByDistance");
+		PaginatedResponse paginatedResponse = new PaginatedResponse();
+		
+		Long fromDistance = new Long(distanceFrom);
+		Long toDistance   = new Long(distanceTo);
+		try {
+		List<ServicesWorkerVO> servicesWorkers = customerService.findByServiceType(type);
+		List<String> serviceProviderPincodes   = new ArrayList<String>();
+		List<Long> serviceProviderIds		   = new ArrayList<Long>();
+		List<Long> vendorDistanceResults	   = new ArrayList<Long>(); 
+		
+		for(ServicesWorkerVO servicesWorker : servicesWorkers) {
+			serviceProviderIds.add(servicesWorker.getId().longValue());
+			Customer serviceProvider = customerService.getById(servicesWorker.getId().longValue());
+			serviceProviderPincodes.add(serviceProvider.getBilling().getPostalCode());
+		}
+		
+		Map<Long,Long> vendorDistanceMap = getVendorDistance(userPinCode, serviceProviderIds, serviceProviderPincodes);
+		
+		/*for(Map.Entry<Long, Long> entry : vendorDistanceMap.entrySet()){
+			Long vendorId = entry.getKey();
+			Long vendorDistanceFromCustomer = entry.getValue();
+			if(vendorDistanceFromCustomer >=0 && vendorDistanceFromCustomer<=250){
+				vendorDistanceFromCustomer = entry.getValue();
+				vendorDistanceResults.add(vendorId);
+			}
+		}*/
+		for(Map.Entry<Long, Long> entry : vendorDistanceMap.entrySet()){
+			Long vendorId = entry.getKey();
+			Long vendorDistanceFromCustomer = entry.getValue();
+			if(vendorDistanceFromCustomer >=fromDistance && vendorDistanceFromCustomer<=toDistance){
+				vendorDistanceFromCustomer = entry.getValue();
+				vendorDistanceResults.add(vendorId);
+			}
+		}
+		if(vendorDistanceResults.isEmpty()) {
+			LOGGER.debug("No service providers are available over selected range of distance");
+			paginatedResponse.setErrorMsg("No service providers are available over selected range range of distance");
+			return paginatedResponse;
+		}
+		List<ServicesWorkerVO> servicesWorkerVOSet= new ArrayList<ServicesWorkerVO>();
+		for(Long vendorId : vendorDistanceResults) {
+			
+			Customer customer = customerService.getById(vendorId);
+			
+				Double avgRating = new Double(0);
+				int totalRating= 0;
+				int totalReviews = 0;
+				double totalRate = 0;
+				
+				ServicesWorkerVO servicesWorkerVO = new ServicesWorkerVO();
+				
+				servicesWorkerVO.setId(new Integer(String.valueOf((customer.getId()))));
+				servicesWorkerVO.setCompanyName(customer.getVendorAttrs().getVendorName());
+				servicesWorkerVO.setImageUrl(customer.getUserProfile());
+				/*servicesWorkerVO.setHouseNumber(customer.getVendorAttrs().getVendorOfficeAddress());
+				servicesWorkerVO.setStreet(customer.getBilling().getAddress());
+				servicesWorkerVO.setArea(customer.getArea());
+				servicesWorkerVO.setCity(customer.getBilling().getCity());
+				servicesWorkerVO.setState(customer.getBilling().getState());
+				servicesWorkerVO.setPinCode(customer.getBilling().getPostalCode());
+				servicesWorkerVO.setContactNumber(customer.getBilling().getTelephone());
+				servicesWorkerVO.setImageUrl(customer.getVendorAttrs().getVendorAuthCert());
+				servicesWorkerVO.setCountry(customer.getBilling().getCountry().getName());*/
+				//fetching ratings from services rating
+				List<ServicesRating> servicesRatingList = servicesRatingService.getServicesReviews(customer.getId());
+				if(servicesRatingList != null) {
+					totalReviews = servicesRatingList.size();
+					for(ServicesRating servicesRating:servicesRatingList){
+						totalRating= totalRating + servicesRating.getRating();
+					}
+					totalRate = totalRating;
+					avgRating = Double.valueOf(totalRate / totalReviews);
+					avgRating = Double.valueOf(Math.round(avgRating.doubleValue() * 10D) / 10D);
+				}
+				servicesWorkerVO.setAvgRating(avgRating);
+				//servicesWorkerVO.setTotalRating(totalRating);
+				servicesWorkerVO.setTotalRating(totalReviews);
+				servicesWorkerVOSet.add(servicesWorkerVO);
+		}
+		
+		PaginationData paginaionData=createPaginaionData(page,size);
+    	calculatePaginaionData(paginaionData,size, servicesWorkerVOSet.size());
+    	paginatedResponse.setPaginationData(paginaionData);
+		if(servicesWorkerVOSet == null || servicesWorkerVOSet.isEmpty() || servicesWorkerVOSet.size() < paginaionData.getCountByPage()){
+			paginatedResponse.setResponseData(servicesWorkerVOSet);
+			LOGGER.debug("Ended getTestimonials");
+			return paginatedResponse;
+		}
+    	List<ServicesWorkerVO> paginatedResponses = servicesWorkerVOSet.subList(paginaionData.getOffset(), paginaionData.getCountByPage());
+    	paginatedResponse.setResponseData(paginatedResponses);
+		} catch(Exception e) {
+			e.printStackTrace();
+			paginatedResponse.setErrorMsg("Error while retrieving service providers by distance"+e.getMessage());
+			LOGGER.error("Error while retrieving service providers by distance");
+			return paginatedResponse;
+		}
+		LOGGER.debug("Ended getWorkerByDistance");
+		return paginatedResponse;
+		
+	}
+	private Map<Long,Long> getVendorDistance(String userPinCode, List<Long> vendorIds, List<String> vendorPostalCodes) {
+		 
+		 List<Long> distanceInMeters = shippingQuotePrePostProcessModule.getDistnaceBetweenVendorAndCustomer(vendorPostalCodes, userPinCode);
+		 Map<Long,Long> vendorDistanceFromCustomerLocation = new HashMap<Long,Long>();
+		 
+		 int vIndex = 0;
+		 for(Long vId : vendorIds){
+			 vendorDistanceFromCustomerLocation.put(vId, distanceInMeters.get(vIndex++));
+		 }
+		 return vendorDistanceFromCustomerLocation; 
 	}
 }
