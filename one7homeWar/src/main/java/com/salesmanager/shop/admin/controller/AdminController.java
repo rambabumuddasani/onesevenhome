@@ -1213,15 +1213,19 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
     @RequestMapping(value="/getAllSubCatImages", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public AdminSubCatImgResponse getAllSubCatImages(@RequestParam(value="pageNumber", defaultValue = "1") int page ,
+	public PaginatedResponse getAllSubCatImages(@RequestParam(value="pageNumber", defaultValue = "1") int page ,
             @RequestParam(value="pageSize", defaultValue="15") int size) throws Exception {
+    	
 		LOGGER.debug("Entered getAllSubCatImages");
-    	AdminSubCatImgResponse adminSubCatImgResponse = new AdminSubCatImgResponse(); 
+    	//AdminSubCatImgResponse adminSubCatImgResponse = new AdminSubCatImgResponse(); 
     	PaginatedResponse paginatedResponse = new PaginatedResponse();
 		Map<String,List<SubCategoryImageVO>> parentMap = new HashMap<String, List<SubCategoryImageVO>>();
+		
+		try {
     	//Getting subCategoryImages
         List<SubCategoryImage> subCategoryImages = subCategoryService.getAllSubCategoryImage();
         for(SubCategoryImage subCategoryImage:subCategoryImages) {
+        	
         	String name = subCategoryImage.getCategory().getDescription().getName();
         	List<SubCategoryImageVO> subCategoryImageVOList = null;
         	// Checking subcatimg contains parent, if it contains parent then adding  the parent name
@@ -1229,6 +1233,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
         	if(subCategoryImage.getCategory().getParent() != null) {
         		 Category parentCategoryFullObj = categoryService.getById(subCategoryImage.getCategory().getParent().getId());
         		 String parentCatName = parentCategoryFullObj.getDescription().getName();
+        		 
 				if(parentMap.containsKey(parentCatName)) {
 					subCategoryImageVOList = parentMap.get(parentCatName);
 	            	SubCategoryImageVO subcategoryImageVO = new SubCategoryImageVO();
@@ -1250,32 +1255,33 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 				parentMap.put(parentCatName, subCategoryImageVOList);	
         	}	
  	    }
-        /*Set<Entry<String, List<SubCategoryImageVO>>> set = parentMap.entrySet(); 
-        List<Entry<String, List<SubCategoryImageVO>>> subCategoryImageList = new ArrayList<>(set);*/ 
-       /* Iterator<Entry<String, List<SubCategoryImageVO>>> it = subCategoryImageList.iterator();
-        while (it.hasNext()) {
-        	Entry<String, List<SubCategoryImageVO>> entry = it.next();
-        	System.out.println("Entry from converted list : " + entry);
-        }*/
-        adminSubCatImgResponse.setSubCatagoryImgsObjByCatagory(parentMap);
         
+        Set<Entry<String, List<SubCategoryImageVO>>> set = parentMap.entrySet(); 
+        List<Entry<String, List<SubCategoryImageVO>>> subCategoryImageList = new ArrayList<>(set); 
+        //adminSubCatImgResponse.setSubCatagoryImgsObjByCatagory(parentMap);
         //adminSubCatImgResponse.setSubCatagoryImgsObjByCatagory(subCategoryImageList);
-        //List<SubCategoryForCategory> subCategoryForCategoryList = new ArrayList<SubCategoryForCategory>();
-        /*for(Entry<String, List<SubCategoryImageVO>> subCategoryImage : subCategoryImageList){
+        List<SubCategoryForCategory> subCategoryForCategoryList = new ArrayList<SubCategoryForCategory>();
+       
+        for(Entry<String, List<SubCategoryImageVO>> subCategoryImage : subCategoryImageList){
+        	
         	SubCategoryForCategory subcategoryForCategory = new SubCategoryForCategory();
         	String categoryName = subCategoryImage.getKey();
         	subcategoryForCategory.setCategoryName(categoryName);
-        	SubCategoryJson subCategoryJson = new SubCategoryJson();
+      
         	List<SubCategoryJson> subCategoryJsonList = new ArrayList<SubCategoryJson>();
+        	// Adding sub categories to a category
         	for(SubCategoryImageVO subcat : subCategoryImage.getValue()) {
+        		SubCategoryJson subCategoryJson = new SubCategoryJson();
         		subCategoryJson.setSubCategoryId(subcat.getSubCategoryId());
         		subCategoryJson.setSubCategoryName(subcat.getSubCategoryName());
         		subCategoryJson.setSubCategoryImageURL(subcat.getSubCategoryImageURL());
         		subCategoryJsonList.add(subCategoryJson);
         	}
+        	
         	subcategoryForCategory.setSubCategory(subCategoryJsonList);
         	subCategoryForCategoryList.add(subcategoryForCategory);
         }
+        
         PaginationData paginaionData=createPaginaionData(page,size);
     	calculatePaginaionData(paginaionData,size, subCategoryForCategoryList.size());
     	paginatedResponse.setPaginationData(paginaionData);
@@ -1290,9 +1296,9 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		LOGGER.error("error while retrieving subcategory images"+e.getMessage());
 		paginatedResponse.setErrorMsg("error while subcategory images");
 		return paginatedResponse;
-	}*/
+	}
         LOGGER.debug("Ended getAllSubCatImages");
-    	return adminSubCatImgResponse;
+    	return paginatedResponse;
     }
    
     // Remove sub category image
