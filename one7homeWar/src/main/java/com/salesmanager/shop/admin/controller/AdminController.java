@@ -1259,7 +1259,6 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
         Set<Entry<String, List<SubCategoryImageVO>>> set = parentMap.entrySet(); 
         List<Entry<String, List<SubCategoryImageVO>>> subCategoryImageList = new ArrayList<>(set); 
         //adminSubCatImgResponse.setSubCatagoryImgsObjByCatagory(parentMap);
-        //adminSubCatImgResponse.setSubCatagoryImgsObjByCatagory(subCategoryImageList);
         List<SubCategoryForCategory> subCategoryForCategoryList = new ArrayList<SubCategoryForCategory>();
        
         for(Entry<String, List<SubCategoryImageVO>> subCategoryImage : subCategoryImageList){
