@@ -185,6 +185,7 @@ public class CustomerRegistrationController extends AbstractController {
 	private final static String RESET_PASSWORD_TPL = "email_template_password_reset_user.ftl";	
 	private final static String NEW_USER_TMPL = "email_template_new_user.ftl";
 	private final static String FORGOT_PASSWORD_TPL = "email_template_user_password_link.ftl";
+	private final static String USER_CHANGE_PASSWORD_TPL = "email_template_user_change_password.ftl";
 	
 	
 	//private final static String NEW_USER_ACTIVATION_TMPL = "email_template_new_user_activate.ftl";
@@ -2142,10 +2143,11 @@ public class CustomerRegistrationController extends AbstractController {
 	public UpdatePasswordResp changeUserpassword(@RequestBody UpdatePasswordReq updatePasswordReq) throws Exception {
 		LOGGER.info("Entered changeUserpassword");
 		UpdatePasswordResp updatePasswordResp = new UpdatePasswordResp();
+		Customer customer = null;
 		try {
 	    //Fetching customer by email address which is unique
 		MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT"); 
-        Customer customer = customerFacade.getCustomerByUserName(updatePasswordReq.getEmailAddress(), merchantStore );
+        customer = customerFacade.getCustomerByUserName(updatePasswordReq.getEmailAddress(), merchantStore );
         
 		if(customer==null) {
 			LOGGER.debug("User not exist for this emailaddress: "+updatePasswordReq.getEmailAddress());
@@ -2161,8 +2163,6 @@ public class CustomerRegistrationController extends AbstractController {
 			customer.setPassword(newPassword);
 			customerFacade.updateCustomer(customer);
 			LOGGER.debug("Password updated");
-			updatePasswordResp.setSuccessMessage("Password updated successfully");
-			updatePasswordResp.setStatus(TRUE);
 		}else {
 			updatePasswordResp.setErrorMessage("Current password does not matched");
 			updatePasswordResp.setStatus(FALSE);
@@ -2175,6 +2175,38 @@ public class CustomerRegistrationController extends AbstractController {
 			return updatePasswordResp;
 		}
 		
+		MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT"); 
+		final Locale locale  = new Locale("en");
+		Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(merchantStore, messages, locale);
+        if(customer.getCustomerType().equals("0")) {
+            templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, customer.getBilling().getFirstName());
+            templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, customer.getBilling().getLastName());
+            } else {
+            	templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, customer.getVendorAttrs().getVendorName());
+            	templateTokens.put(EmailConstants.EMAIL_USER_LASTNAME, "");
+            }
+        templateTokens.put(EmailConstants.EMAIL_USER_NAME, customer.getEmailAddress());
+		templateTokens.put(EmailConstants.EMAIL_ADMIN_USERNAME_LABEL, messages.getMessage("label.generic.username",locale));
+		templateTokens.put(EmailConstants.EMAIL_ADMIN_PASSWORD_LABEL, messages.getMessage("label.generic.password",locale));
+		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
+		templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",locale));
+		templateTokens.put(EmailConstants.EMAIL_URL_LINK, messages.getMessage("email.url.link",locale));
+
+		
+		Email email = new Email();
+		email.setFrom(merchantStore.getStorename());
+		email.setFromEmail(merchantStore.getStoreEmailAddress());
+		email.setSubject(messages.getMessage("email.user.text.changepwd",locale));
+		email.setTo(updatePasswordReq.getEmailAddress());
+		email.setTemplateName(USER_CHANGE_PASSWORD_TPL);
+		email.setTemplateTokens(templateTokens);
+
+
+		
+		emailService.sendHtmlEmail(merchantStore, email);
+		LOGGER.debug("Change password email sent to the user");
+		updatePasswordResp.setSuccessMessage("Your password hanged successfully");
+		updatePasswordResp.setStatus(TRUE);
 		LOGGER.info("Ended changeUserpassword");
 		return updatePasswordResp;
 	}
