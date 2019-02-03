@@ -21,7 +21,7 @@ public interface VendorProductRepository extends JpaRepository<VendorProduct, Lo
 
 	@Query("select distinct vp from VendorProduct vp  left join fetch vp.product pd "
 			+ " join fetch pd.images img left join fetch pd.attributes pattr join fetch pd.availabilities av join fetch av.prices prices"
-			+ " join fetch pd.descriptions descriptions join fetch vp.customer customer where vp.vendorWishListed = TRUE  and vp.customer.id=?1 group by pd.id")
+			+ " join fetch pd.descriptions descriptions join fetch vp.customer customer where vp.vendorWishListed = TRUE  and vp.customer.id=?1")
 	public List<VendorProduct> findProductWishListByVendor(Long vendorId);
 
 	public List<VendorProduct> findVendorById(Long vendorId);

@@ -1271,7 +1271,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 		
 		qs.append("join fetch p.descriptions pd ");
 		qs.append("join fetch p.categories categs ");
-		qs.append("join fetch p.filters filters ");
+		qs.append("left join fetch p.filters filters ");
 		//qs.append("left join fetch p.productReview productReview ");
 		
 		
