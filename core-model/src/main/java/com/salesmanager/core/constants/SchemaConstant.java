@@ -6,8 +6,8 @@ import java.util.Locale;
 public class SchemaConstant {
 
 	//public final static String SALESMANAGER_SCHEMA = "rainiers_onesevenhome";
-	public final static String SALESMANAGER_SCHEMA = "rainiers_shoppizer";
-	//public final static String SALESMANAGER_SCHEMA = "oshdb"; // OSH Prod Value
+	//public final static String SALESMANAGER_SCHEMA = "rainiers_shoppizer";
+	public final static String SALESMANAGER_SCHEMA = "oshdb"; // OSH Prod Value
 	/**
 	 * Languages iso codes
 	 * 
