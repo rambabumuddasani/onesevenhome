@@ -100,26 +100,34 @@ public class VendorProductController extends AbstractController {
 
 		List<VendorProduct> vpList = new ArrayList<VendorProduct>();
 		List<ProductsInfo> vList = new ArrayList<ProductsInfo>();
-
+		Long lVendorId = Long.valueOf(vendorId);
 		StringBuilder sb = new StringBuilder();
 		String startLI = "<li>";
 		String endLI = "</li>";
 		List<Long> productInfoList = new ArrayList<Long>();
 		for(String productId : productIds){
+			Long lProdId = Long.valueOf(productId);
+			List<VendorProduct> vendorProducts = vendorProductService.getVendoProductsProductIdAndVendorId(lProdId, lVendorId);
+			ProductsInfo productsInfo = new ProductsInfo();
+			productsInfo.setProductId(lProdId);
+			vList.add(productsInfo);
+			if(vendorProducts != null && !vendorProducts.isEmpty()) {
+				// Vendor Product association already exist, don't add again. Just inform client that vendor already exist
+				productsInfo.setAlredyAdded(true);
+				continue;
+			}
 			Product dbProduct = productService.getById(Long.parseLong(productId));
 			VendorProduct vendorProduct = new VendorProduct();
-			ProductsInfo productsInfo = new ProductsInfo();
 			vendorProduct.setProduct(dbProduct);
 			vendorProduct.setCustomer(customer);
 			vendorProduct.setCreatedDate(new Date());
 			vendorProduct.setVendorWishListed(Boolean.FALSE);
-			productsInfo.setProductId(dbProduct.getId());
+			//productsInfo.setProductId(dbProduct.getId());
 			productsInfo.setProductName(dbProduct.getProductDescription().getName());
 			//<li>{EMAIL_VENDOR_ADDED_PRODUCTS}</li>
 			sb.append(startLI).append(dbProduct.getProductDescription().getName()).append(endLI);
 			productInfoList.add(dbProduct.getId());
 			vpList.add(vendorProduct);
-			vList.add(productsInfo);
 		}
 		String url ="http://rainiersoft.com/clients/onesevenhome/";
 		String productName = "";
@@ -209,7 +217,7 @@ public class VendorProductController extends AbstractController {
 		
 		try {
 		String vendorId = vendorProductRequest.getVendorId();
-		
+		Long lVendorId = Long.valueOf(vendorId);
 		Customer customer = customerService.getById(Long.parseLong(vendorId));
 
 		List<String> productIds = vendorProductRequest.getProductId(); 
@@ -218,9 +226,18 @@ public class VendorProductController extends AbstractController {
 		List<ProductsInfo> vList = new ArrayList<ProductsInfo>();
 
 		for(String productId : productIds){
+			Long lProdId = Long.valueOf(productId);
+			List<VendorProduct> vendorProducts = vendorProductService.getByProductIdAndVendorId(lProdId, lVendorId);
+			ProductsInfo productsInfo = new ProductsInfo();
+			productsInfo.setProductId(lProdId);
+			vList.add(productsInfo);
+			if(vendorProducts != null && !vendorProducts.isEmpty()) {
+				// Vendor Product association already exist, don't add again. Just inform client that vendor already exist
+				productsInfo.setAlredyAdded(true);
+				continue;
+			}
 			Product dbProduct = productService.getById(Long.parseLong(productId));
 			VendorProduct vendorProduct = new VendorProduct();
-			ProductsInfo productsInfo = new ProductsInfo();
 			vendorProduct.setProduct(dbProduct);
 			vendorProduct.setCustomer(customer);
 			vendorProduct.setCreatedDate(new Date());
@@ -228,7 +245,6 @@ public class VendorProductController extends AbstractController {
 			productsInfo.setProductId(dbProduct.getId());
 			productsInfo.setProductName(dbProduct.getProductDescription().getName());			
 			vpList.add(vendorProduct);
-			vList.add(productsInfo);
 		}
 
 		LOGGER.debug("product list size : "+vpList.size());

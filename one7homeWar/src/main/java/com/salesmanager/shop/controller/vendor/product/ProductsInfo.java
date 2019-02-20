@@ -4,7 +4,14 @@ public class ProductsInfo {
 	
 	private Long productId;
 	private String productName;
+	private boolean isAlredyAdded;
 	
+	public boolean isAlredyAdded() {
+		return isAlredyAdded;
+	}
+	public void setAlredyAdded(boolean isAlredyAdded) {
+		this.isAlredyAdded = isAlredyAdded;
+	}
 	public String getProductName() {
 		return productName;
 	}
