@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,8 +34,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
-
+import org.springframework.web.multipart.MultipartFile;import com.carrotsearch.hppc.ObjectObjectScatterMap;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.salesmanager.core.business.services.catalog.category.CategoryService;
 import com.salesmanager.core.business.services.catalog.product.ProductService;
@@ -481,7 +481,7 @@ public class ProductController extends AbstractController {
 	
 	public ProductResponse getProductDetails(Product dbProduct,boolean isSpecial) throws Exception {
 		LOGGER.debug("Entered getProductDetails ");
-		System.out.println("merchantStoreService =="+merchantStoreService);
+		//System.out.println("merchantStoreService =="+merchantStoreService);
 		
 		ProductResponse productResponse = new ProductResponse();
 		try {
@@ -489,41 +489,26 @@ public class ProductController extends AbstractController {
 		productResponse.setSku(dbProduct.getSku());
 		MerchantStore store=merchantStoreService.getMerchantStore(MerchantStore.DEFAULT_STORE);
 		//List<ProductType> productTypes = productTypeService.list();
-		
 		//List<TaxClass> taxClasses = taxClassService.listByStore(store);
-		
 		//List<Language> languages = store.getLanguages();
-		
-
-		
 		com.salesmanager.shop.admin.model.catalog.Product product = new com.salesmanager.shop.admin.model.catalog.Product();
 		List<ProductDescription> descriptions = new ArrayList<ProductDescription>();
-
-
 			//Product dbProduct = productService.getById(productId);
-			
 			product.setProduct(dbProduct);
 			//Set<ProductDescription> productDescriptions = dbProduct.getDescriptions();
-			
 			/*for(Language l : languages) {
-				
 				ProductDescription productDesc = null;
 				for(ProductDescription desc : productDescriptions) {
-					
 					Language lang = desc.getLanguage();
 					if(lang.getCode().equals(l.getCode())) {
 						productDesc = desc;
 					}
-
 				}
-				
 				if(productDesc==null) {
 					productDesc = new ProductDescription();
 					productDesc.setLanguage(l);
 				}
-
 				descriptions.add(productDesc);
-				
 			}*/
 			
 			for(ProductImage image : dbProduct.getImages()) {
@@ -574,19 +559,19 @@ public class ProductController extends AbstractController {
 			
 			product.setDateAvailable(DateUtil.formatDate(dbProduct.getDateAvailable()));
 			
-			System.out.println("product id =="+product);
+/*			System.out.println("product id =="+product);
 			System.out.println("product id =="+product.getProduct().getId());
 			
 			System.out.println("product id =="+dbProduct.getProductDescription().getName());
 			System.out.println("product id =="+product.getProduct().getProductDescription());
 			System.out.println("product id =="+product.getProduct().getProductDescription().getName());
-			
+*/			
 			if(product.getProductImage() != null)
 				productResponse.setImageURL(product.getProductImage().getProductImageUrl());
 			
 			if(productPrice.getProductPriceAmount() != null)
 				productResponse.setProductPrice(productPrice.getProductPriceAmount());
-			if(productPrice.getProductPriceSpecialAmount() != null) {
+			/* if(productPrice.getProductPriceSpecialAmount() != null) {
 				if(productPrice.getProductPriceSpecialStartDate() != null && productPrice.getProductPriceSpecialEndDate() != null) {
 					if(productPrice.getProductPriceSpecialEndDate().compareTo(productPrice.getProductPriceSpecialStartDate()) > 0){
 						productResponse.setProductPrice(productPrice.getProductPriceAmount());
@@ -596,6 +581,18 @@ public class ProductController extends AbstractController {
 						productResponse.setProductPriceSpecialStartDate(productPrice.getProductPriceSpecialStartDate());
 					}
 				}
+			} */
+			/**
+			 * Check whether the product has fallen discount range (Start Date and End Date)
+			 */
+			Date startDate = productPrice.getProductPriceSpecialStartDate();
+			Date endDate = productPrice.getProductPriceSpecialEndDate();
+			if(isProductFallUnderDiscount(startDate, endDate)){
+							productResponse.setProductPrice(productPrice.getProductPriceAmount());
+							productResponse.setProductDiscountPrice(productPrice.getProductPriceSpecialAmount());
+							productResponse.setDiscountPercentage(getDiscountPercentage(productPrice));
+							productResponse.setProductPriceSpecialEndDate(productPrice.getProductPriceSpecialEndDate());
+							productResponse.setProductPriceSpecialStartDate(productPrice.getProductPriceSpecialStartDate());
 			}
 		
 /*			if(isSpecial) {
@@ -630,6 +627,23 @@ public class ProductController extends AbstractController {
 		return productResponse;
 	}
 
+
+	/**
+	 * if curDate >= startDate and curDate <= endDate
+	 * 
+	 * @param productPrice
+	 * @param today
+	 * @return
+	 */
+	
+	private boolean isProductFallUnderDiscount(Date startDate,Date endDate) {
+		if(Objects.isNull(startDate) || Objects.isNull(endDate))	{
+			return false;
+		}
+		Date toDay = new Date();
+		return toDay.equals(startDate)	||  toDay.equals(endDate) || toDay.after(startDate) && toDay.before(endDate);
+	}
+	
 	/*@RequestMapping(value="/getTodaysDeals", method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -934,10 +948,10 @@ public class ProductController extends AbstractController {
 		}
 		for(Product product:dbProducts) {
 			if(todaysDealsMap.containsKey(product.getId())){
-				System.out.println("t1");
+				//System.out.println("t1");
 				productResponse = getProductDetails(product,true);
 			} else {
-				System.out.println("p1");
+				//System.out.println("p1");
 				productResponse = getProductDetails(product,false);
 			}
 			responses.add(productResponse);
