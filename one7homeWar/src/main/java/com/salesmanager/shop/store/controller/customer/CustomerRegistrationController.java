@@ -785,7 +785,7 @@ public class CustomerRegistrationController extends AbstractController {
 
 
 		
-		emailService.sendHtmlEmail(merchantStore, email);
+		emailService.sendHtmlEmail(EmailConstants.ADMIN_EMAIL_SENDER, email);
 		LOGGER.debug("Ended registerVendor");
 		return customerResponse;         
     }
@@ -881,7 +881,7 @@ public class CustomerRegistrationController extends AbstractController {
 
 
 		
-		emailService.sendHtmlEmail(merchantStore, email);
+		emailService.sendHtmlEmail(EmailConstants.ADMIN_EMAIL_SENDER, email);
 		LOGGER.debug("Reset password email sent to the user");
 		forgotPwdResponse.setSuccessMessage("Reset password email sent to the user");
    
@@ -958,7 +958,7 @@ public class CustomerRegistrationController extends AbstractController {
 
 
 		
-		emailService.sendHtmlEmail(merchantStore, email);
+		emailService.sendHtmlEmail(EmailConstants.ADMIN_EMAIL_SENDER, email);
 		LOGGER.debug("Password update success. Update password email sent to the user");
 		forgotPwdResponse.setSuccessMessage("Password update success. Update password email sent to the user");
 
@@ -1236,7 +1236,7 @@ public class CustomerRegistrationController extends AbstractController {
 
 
 		
-		emailService.sendHtmlEmail(merchantStore, email);
+		emailService.sendHtmlEmail(EmailConstants.ADMIN_EMAIL_SENDER, email);
         
         LOGGER.debug("Ended registerCustomer");
         return customerResponse;         
@@ -1534,7 +1534,7 @@ public class CustomerRegistrationController extends AbstractController {
 
 
 		
-		emailService.sendHtmlEmail(merchantStore, email);
+		emailService.sendHtmlEmail(EmailConstants.ADMIN_EMAIL_SENDER, email);
 		LOGGER.debug("Email sent successful");
 	
 		return customerResponse;         
@@ -1676,7 +1676,7 @@ public class CustomerRegistrationController extends AbstractController {
 
 
 		
-		emailService.sendHtmlEmail(merchantStore, email);
+		emailService.sendHtmlEmail(EmailConstants.ADMIN_EMAIL_SENDER, email);
 		LOGGER.debug("Email sent successful");
 	
 		return customerResponse;         
@@ -2203,7 +2203,7 @@ public class CustomerRegistrationController extends AbstractController {
 
 
 		
-		emailService.sendHtmlEmail(merchantStore, email);
+		emailService.sendHtmlEmail(EmailConstants.ADMIN_EMAIL_SENDER, email);
 		LOGGER.debug("Change password email sent to the user");
 		updatePasswordResp.setSuccessMessage("Your password hanged successfully");
 		updatePasswordResp.setStatus(TRUE);

@@ -100,7 +100,7 @@ public class UserUpdatesController {
 		email.setTemplateName(EXTERNAL_USER_UPDATES_TMPL);
 		email.setTemplateTokens(templateTokens);
 
-		emailService.sendHtmlEmail(merchantStore, email);
+		emailService.sendHtmlEmail(EmailConstants.ADMIN_EMAIL_SENDER, email);
 		
 		LOGGER.debug("Email sent to user");
 		

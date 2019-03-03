@@ -129,6 +129,17 @@ public class VendorProductController extends AbstractController {
 			productInfoList.add(dbProduct.getId());
 			vpList.add(vendorProduct);
 		}
+		
+		LOGGER.debug("vpList:"+vpList.size());
+		if(!vpList.isEmpty()) {
+			vendorProductService.save(vpList);
+		}
+		LOGGER.debug("Added products");
+		vendorProductResponse.setVenderId(vendorId);
+		vendorProductResponse.setVendorProducts(vList);
+		vendorProductResponse.setSuccessMessage("Successfully added products to ProductList");
+		vendorProductResponse.setStatus("true");
+		
 		String url ="http://rainiersoft.com/clients/onesevenhome/";
 		String productName = "";
 		String productDescription = "";
@@ -161,14 +172,10 @@ public class VendorProductController extends AbstractController {
 			productPrice = pPrice.getProductPriceAmount();
 			break;
 		}
-		LOGGER.debug("vpList:"+vpList.size());
-		vendorProductService.save(vpList);
-		LOGGER.debug("Added products");
-		vendorProductResponse.setVenderId(vendorId);
-		vendorProductResponse.setVendorProducts(vList);
-		vendorProductResponse.setSuccessMessage("Successfully added products to ProductList");
-		vendorProductResponse.setStatus("true");
-
+		
+		if(productInfoList.isEmpty()) {	// No need to send email , since no product added 
+			return vendorProductResponse;
+		}
 		//sending email
 		MerchantStore merchantStore = merchantStoreService.getByCode("DEFAULT");  
 		final Locale locale  = new Locale("en");
@@ -196,7 +203,7 @@ public class VendorProductController extends AbstractController {
 		email.setTemplateName(VENDOR_ADD_PRODUCTS_TPL);
 		email.setTemplateTokens(templateTokens);
 
-		emailService.sendHtmlEmail(merchantStore, email);
+		emailService.sendHtmlEmail(EmailConstants.INFORMATION_EMAIL_SENDER, email);
 
 		}catch(Exception e){
 			e.printStackTrace();

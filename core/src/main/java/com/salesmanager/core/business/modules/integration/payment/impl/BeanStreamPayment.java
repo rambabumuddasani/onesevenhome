@@ -50,8 +50,6 @@ public class BeanStreamPayment implements PaymentModule {
 	@Inject
 	private MerchantLogService merchantLogService;
 	
-
-	
 	private static final Logger LOGGER = LoggerFactory.getLogger(BeanStreamPayment.class);
 
 	@Override

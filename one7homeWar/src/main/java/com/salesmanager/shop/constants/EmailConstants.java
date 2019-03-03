@@ -106,4 +106,9 @@ public class EmailConstants {
 	public static final String EMAIL_VENDOR_ADDED_PRODUCTS = "EMAIL_VENDOR_ADDED_PRODUCTS";
 	public static final String EMAIL_VENDOR_PRODUCTS = "EMAIL_VENDOR_PRODUCTS";
 	public static final String EMAIL_URL_LINK = "EMAIL_URL_LINK";
+	
+	public static final Long INFORMATION_EMAIL_SENDER = 1l;
+	public static final Long SALES_EMAIL_SENDER = 2l;
+	public static final Long ADMIN_EMAIL_SENDER = 3l;
+	public static final Long ORDERS_EMAIL_SENDER = 4l;
 }

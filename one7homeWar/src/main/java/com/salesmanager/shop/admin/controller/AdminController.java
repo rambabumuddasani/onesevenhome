@@ -904,7 +904,7 @@ public AdminProductResponse getProductDetails(Product dbProduct,boolean isSpecia
 
 
 		
-		emailService.sendHtmlEmail(merchantStore, email);
+		emailService.sendHtmlEmail(EmailConstants.INFORMATION_EMAIL_SENDER, email);
 		//vendorProductService.delete(vendorProduct);
     	LOGGER.debug("Ended adminApproveProducts");
     	
@@ -1764,7 +1764,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		email.setTemplateName(ADIMIN_ADD_PRODUCT_TMPL);
 		email.setTemplateTokens(templateTokens);
 
-		emailService.sendHtmlEmail(merchantStore, email);
+		emailService.sendHtmlEmail(EmailConstants.INFORMATION_EMAIL_SENDER, email);
 		sendEmailToCustomer(customer,category);
     	postReqirementResponse.setSuccessMessage("Query sent successfully");
     	postReqirementResponse.setStatus(TRUE);
@@ -1804,7 +1804,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		email.setTemplateName(ADIMIN_ADD_PRODUCT_TMPL);
 		email.setTemplateTokens(templateTokens);
 		
-		emailService.sendHtmlEmail(merchantStore, email);
+		emailService.sendHtmlEmail(EmailConstants.ADMIN_EMAIL_SENDER, email);
 		LOGGER.debug("Email sent to customer");
 		
 	}
@@ -1889,7 +1889,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		email.setTemplateName(ADIMIN_ADD_PRODUCT_TMPL);
 		email.setTemplateTokens(templateTokens);
 
-		emailService.sendHtmlEmail(merchantStore, email);
+		emailService.sendHtmlEmail(EmailConstants.INFORMATION_EMAIL_SENDER, email);
 		sendEmailToAdmin(merchantStore);
 	    LOGGER.debug("Email sent successful");
 	    postRequirementResponse.setSuccessMessage("Email sent sucessful");
@@ -1922,7 +1922,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 		email.setTemplateName(ADIMIN_ADD_PRODUCT_TMPL);
 		email.setTemplateTokens(templateTokens);
 
-		emailService.sendHtmlEmail(merchantStore, email);
+		emailService.sendHtmlEmail(EmailConstants.INFORMATION_EMAIL_SENDER, email);
 		LOGGER.debug("Email sent to Admin");
 	}
 	// History management retrieval
@@ -2121,7 +2121,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 			email.setTemplateName(ADMIN_APPROVE_VENDOR_ADD_PRODUCTS_TPL);
 			email.setTemplateTokens(templateTokens);
 
-			emailService.sendHtmlEmail(merchantStore, email);
+			emailService.sendHtmlEmail(EmailConstants.ADMIN_EMAIL_SENDER, email);
 		
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -2401,7 +2401,7 @@ public AdminDealProductResponse getProductDetails(Product dbProduct,boolean isSp
 
 
 			
-			emailService.sendHtmlEmail(merchantStore, email);
+			emailService.sendHtmlEmail(EmailConstants.ADMIN_EMAIL_SENDER, email);
 			LOGGER.debug("Email sent successful");
 	    	
 			LOGGER.debug("Ended approveVendorByAdmin");

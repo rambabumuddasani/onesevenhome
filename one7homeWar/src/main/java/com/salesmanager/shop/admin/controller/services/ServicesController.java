@@ -297,7 +297,7 @@ public class ServicesController extends AbstractController{
 		email.setTemplateName(SERVICE_BOOKING_TMPL);
 		email.setTemplateTokens(templateTokens);
 
-		emailService.sendHtmlEmail(merchantStore, email);
+		emailService.sendHtmlEmail(EmailConstants.INFORMATION_EMAIL_SENDER, email);
 		LOGGER.debug("Email sent to customer");
 		sendEmailToServiceProvider(merchantStore,customer,services,service);
 		//sendEmailToAdmin(customer,services,merchantStore,service);
@@ -361,7 +361,7 @@ public class ServicesController extends AbstractController{
 		email.setTemplateName(SERVICEPROVIDER_SERVICE_BOOKING_TMPL);
 		email.setTemplateTokens(templateTokens);
 
-		emailService.sendHtmlEmail(merchantStore, email);
+		emailService.sendHtmlEmail(EmailConstants.SALES_EMAIL_SENDER, email);
 		
 		LOGGER.debug("Email sent to Service provider");
 		
@@ -589,7 +589,7 @@ public class ServicesController extends AbstractController{
 			email.setTemplateName(SERVICE_BOOKING_CLOSE_TMPL);
 			email.setTemplateTokens(templateTokens);
 
-			emailService.sendHtmlEmail(merchantStore, email);
+			emailService.sendHtmlEmail(EmailConstants.INFORMATION_EMAIL_SENDER, email);
 			LOGGER.debug("Email sent to customer");
 		}catch(Exception e) {
 			LOGGER.error("Error occured while closing services booking"+e.getMessage());

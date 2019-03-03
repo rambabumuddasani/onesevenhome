@@ -15,5 +15,9 @@ public interface EmailService {
 	public EmailConfig getEmailConfiguration(MerchantStore store) throws ServiceException;
 	
 	public void saveEmailConfiguration(EmailConfig emailConfig, MerchantStore store) throws ServiceException;
+
+	com.salesmanager.core.model.email.config.EmailConfig getEmailConfiguration(Long emailConfigId);
+
+	void sendHtmlEmail(Long emailConfigId, Email email) throws ServiceException, Exception;
 	
 }

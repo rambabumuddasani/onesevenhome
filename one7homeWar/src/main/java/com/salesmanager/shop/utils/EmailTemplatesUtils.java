@@ -250,7 +250,7 @@ public class EmailTemplatesUtils {
 		           email.setTemplateTokens(templateTokens);
 
 		           LOGGER.debug( "Sending email to {} for order id {} ",customer.getEmailAddress(), order.getId() );
-		           emailService.sendHtmlEmail(merchantStore, email);
+		           emailService.sendHtmlEmail(EmailConstants.ORDERS_EMAIL_SENDER, email);
 
 		       } catch (Exception e) {
 		           LOGGER.error("Error occured while sending order confirmation email ",e);
@@ -299,7 +299,7 @@ public class EmailTemplatesUtils {
 	           email.setTemplateTokens(templateTokens);
 
 	           LOGGER.debug( "Sending email to {} on their  registered email id {} ",customer.getBilling().getFirstName(),customer.getEmailAddress() );
-	           emailService.sendHtmlEmail(merchantStore, email);
+	           emailService.sendHtmlEmail(EmailConstants.ADMIN_EMAIL_SENDER, email);
 
 	       } catch (Exception e) {
 	           LOGGER.error("Error occured while sending welcome email ",e);
@@ -337,7 +337,7 @@ public class EmailTemplatesUtils {
 		           email.setTemplateTokens(templateTokens);
 
 		           LOGGER.debug( "Sending contact email");
-		           emailService.sendHtmlEmail(merchantStore, email);
+		           emailService.sendHtmlEmail(EmailConstants.INFORMATION_EMAIL_SENDER, email);
 
 		       } catch (Exception e) {
 		           LOGGER.error("Error occured while sending contact email ",e);
@@ -392,7 +392,7 @@ public class EmailTemplatesUtils {
 	
 	
 				
-				emailService.sendHtmlEmail(merchantStore, email);
+				emailService.sendHtmlEmail(EmailConstants.ORDERS_EMAIL_SENDER, email);
 
 	       } catch (Exception e) {
 	           LOGGER.error("Error occured while sending order download email ",e);
@@ -440,7 +440,7 @@ public class EmailTemplatesUtils {
 	           email.setTemplateTokens(templateTokens);
 
 	           LOGGER.debug( "Sending email to {} with download info",customer.getEmailAddress() );
-	           emailService.sendHtmlEmail(merchantStore, email);
+	           emailService.sendHtmlEmail(EmailConstants.ORDERS_EMAIL_SENDER, email);
 
 	       } catch (Exception e) {
 	           LOGGER.error("Error occured while sending order download email ",e);
@@ -484,7 +484,7 @@ public class EmailTemplatesUtils {
 	
 	
 				
-				emailService.sendHtmlEmail(merchantStore, email);
+				emailService.sendHtmlEmail(EmailConstants.ADMIN_EMAIL_SENDER, email);
 
 	       } catch (Exception e) {
 	           LOGGER.error("Error occured while sending change password email ",e);

@@ -168,7 +168,7 @@ public class VendorController extends AbstractController {
 		email.setTemplateName(VENDOR_BOOKING_TMPL);
 		email.setTemplateTokens(templateTokens);
 
-		emailService.sendHtmlEmail(merchantStore, email);
+		emailService.sendHtmlEmail(EmailConstants.ADMIN_EMAIL_SENDER, email);
 		LOGGER.debug("Email sent to customer");
 		//sendEmailToAdmin(customer,services,merchantStore);
 		LOGGER.debug("Email sent successful");
@@ -332,7 +332,7 @@ public class VendorController extends AbstractController {
 		email.setTemplateName(ADMIN_VENDOR_BOOKING_CLOSE_TMPL);
 		email.setTemplateTokens(templateTokens);
 	
-		emailService.sendHtmlEmail(merchantStore, email);
+		emailService.sendHtmlEmail(EmailConstants.ADMIN_EMAIL_SENDER, email);
 		LOGGER.debug("Email sent to customer");
 		sendEmailToVendor(vendorBooking,merchantStore);
 		LOGGER.debug("Email sent to vendor");
@@ -381,7 +381,7 @@ public class VendorController extends AbstractController {
 		email.setTemplateName(ADMIN_VENDOR_BOOKING_CLOSE_TMPL);
 		email.setTemplateTokens(templateTokens);
 
-		emailService.sendHtmlEmail(merchantStore, email);
+		emailService.sendHtmlEmail(EmailConstants.INFORMATION_EMAIL_SENDER, email);
 	}
 	
 	// Search vendors by location
