@@ -63,6 +63,8 @@ public class HtmlEmailSenderImpl implements HtmlEmailSender {
 					Properties prop = new Properties();
 					prop.put("mail.smtp.auth", emailConfig.isSmtpAuth());
 					prop.put("mail.smtp.starttls.enable", emailConfig.isStarttls());
+					prop.put("mail.smtp.localhost", emailConfig.getHost());
+					System.out.println("Prop "+prop);
 					impl.setJavaMailProperties(prop);
 				}
 				

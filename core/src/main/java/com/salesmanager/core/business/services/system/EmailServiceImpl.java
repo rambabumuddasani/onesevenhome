@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.salesmanager.core.business.constants.Constants;
-import com.salesmanager.core.business.email.config.EmailConfigServiceImpl;
+import com.salesmanager.core.business.email.config.EmailConfigService;
 import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.modules.email.Email;
 import com.salesmanager.core.business.modules.email.EmailConfig;
@@ -22,7 +22,7 @@ public class EmailServiceImpl implements EmailService {
 	private MerchantConfigurationService merchantConfigurationService;
 	
 	@Inject
-	EmailConfigServiceImpl emailConfigService;
+	EmailConfigService emailConfigService;
 	
 	@Inject
 	private HtmlEmailSender sender;
@@ -59,6 +59,7 @@ public class EmailServiceImpl implements EmailService {
 		emailConfig.setProtocol(dbEmailConfig.getProtocol());
 		emailConfig.setSmtpAuth(dbEmailConfig.isSmtpAuth());
 		emailConfig.setStarttls(dbEmailConfig.isStarttls());
+		emailConfig.setUsername(dbEmailConfig.getUsername());
 		emailConfig.setEmailTemplatesPath(dbEmailConfig.getEmailTemplatesPath());
 		return emailConfig;
 	}

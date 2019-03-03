@@ -110,4 +110,13 @@ public class EmailConfig implements JSONAware {
 		this.password = password;
 	}
 
+
+
+	@Override
+	public String toString() {
+		return "EmailConfig [host=" + host + ", port=" + port + ", protocol=" + protocol + ", username=" + username
+				+ ", password=" + password + ", smtpAuth=" + smtpAuth + ", starttls=" + starttls
+				+ ", emailTemplatesPath=" + emailTemplatesPath + "]";
+	}
+
 }
