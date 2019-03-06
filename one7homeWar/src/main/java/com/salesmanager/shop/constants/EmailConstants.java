@@ -111,4 +111,6 @@ public class EmailConstants {
 	public static final Long SALES_EMAIL_SENDER = 2l;
 	public static final Long ADMIN_EMAIL_SENDER = 3l;
 	public static final Long ORDERS_EMAIL_SENDER = 4l;
+	public static final Long DEMO_EMAIL_SENDER = 5l;
+
 }

@@ -42,6 +42,8 @@ public class HtmlEmailSenderImpl implements HtmlEmailSender {
 		
 		final String eml = email.getFrom();
 		final String from = email.getFromEmail();
+		System.out.println("To Address "+email.getTo());
+		//final String to = "rambabu0006@gmail.com";
 		final String to = email.getTo();
 		final String subject = email.getSubject();
 		final String tmpl = email.getTemplateName();
@@ -63,21 +65,19 @@ public class HtmlEmailSenderImpl implements HtmlEmailSender {
 					Properties prop = new Properties();
 					prop.put("mail.smtp.auth", emailConfig.isSmtpAuth());
 					prop.put("mail.smtp.starttls.enable", emailConfig.isStarttls());
-					prop.put("mail.smtp.localhost", emailConfig.getHost());
+					//prop.put("mail.smtp.localhost", emailConfig.getHost());
+					//prop.put("mail.debug", "true");
+					prop.put("mail.smtp.ssl.trust", emailConfig.getHost());
 					System.out.println("Prop "+prop);
 					impl.setJavaMailProperties(prop);
 				}
 				
 				mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(to));
-
 				InternetAddress inetAddress = new InternetAddress();
-
 				inetAddress.setPersonal(eml);
 				inetAddress.setAddress(from);
-
 				mimeMessage.setFrom(inetAddress);
 				mimeMessage.setSubject(subject);
-
 				Multipart mp = new MimeMultipart("alternative");
 
 				// Create a "text" Multipart message
@@ -193,5 +193,47 @@ public class HtmlEmailSenderImpl implements HtmlEmailSender {
 	public void setEmailConfig(EmailConfig emailConfig) {
 		this.emailConfig = emailConfig;
 	}
+
+/*	@Override
+	public void send(Email email) throws Exception {
+		sendMail("rambabu0006@gmail.com", "Test Subject", "TestMessage");
+	}
+    public JavaMailSender getJavaMailSender(){
+        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+        mailSender.setHost("mail.onesevenhome.com");
+        mailSender.setPort(Integer.valueOf("587"));
+        mailSender.setUsername("info@onesevenhome.com");
+        mailSender.setPassword("Info@osh");
+        mailSender.setJavaMailProperties(getMailSenderProperties());
+        return mailSender;
+    }
+
+    private Properties getMailSenderProperties(){
+        Properties props = new Properties();
+        props.put("mail.transport.protocol", "smtp");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.debug", "true");
+        return props;
+    }
+    
+    public void sendMailMultipart(String toEmail, String subject, String message, File file) throws MessagingException {
+    	JavaMailSender javaMailSender = getJavaMailSender();
+        MimeMessage mimeMessage = getJavaMailSender().createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+        helper.setFrom("info@onesevenhome.com");
+        helper.setTo(toEmail);
+        helper.setSubject(subject);
+        helper.setText(message);
+        javaMailSender.send(mimeMessage);
+    }
+
+    public void sendMail(String toEmail, String subject, String message) throws MessagingException {
+       sendMailMultipart(toEmail, subject, message, null);
+    }
+
+    public void sendMail(String toEmail, String subject, String message, File file) throws MessagingException {
+        sendMailMultipart(toEmail, subject, message, file);
+    } */
 
 }
